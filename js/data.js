@@ -248,4 +248,5 @@ const MV = [
   {n:'Danza',   key:'Q',      cd:10, en:20},
   {n:'Meteoro', key:'E',      cd:8,  en:40, dmg:42}
 ];
+const EN_REGEN = 12;                       // energía que recuperas por segundo (la barra azul). Ataque Q cuesta 20 y E cuesta 40: se ve cuánto falta en la barra de abajo
 const mvName = (f,i) => i === 0 ? 'Carrera' : (f.m.mv && f.m.mv[i-1]) || MV[i].n;

@@ -6,6 +6,8 @@ function text(t, x, y, size, col, align){
   ctx.font = `${size}px ${FONT}`; ctx.fillStyle = col || '#fff';
   ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(t, x, y);
 }
+const HUD_SCALE = .74;                                   // tamaño del HUD en combate (1 = como antes; más pequeño = molesta menos)
+function hudAt(ax, ay, fn){ ctx.save(); ctx.translate(ax, ay); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-ax, -ay); fn(); ctx.restore(); }   // dibuja fn() reducido desde la esquina (ax, ay)
 function bar(x, y, w, h, v, max, col){
   ctx.fillStyle = '#05070c'; ctx.fillRect(x, y, w, h);
   ctx.fillStyle = col; ctx.fillRect(x+1, y+1, Math.max(0, (w-2) * v/max), h-2);
@@ -116,26 +118,42 @@ function draw(){
   }
   g.pops.forEach(p => text(p.txt, p.x, p.y - (1-p.t)*20, p.s || 9, p.c || '#ffe066', 'center'));
 
-  hud(10, 10, g.p, g.pi, '#4a8cff');
-  hud(W-350, 10, g.e, g.ei, '#ff4a5a');
+  hudAt(0, 0, () => hud(10, 10, g.p, g.pi, '#4a8cff'));
+  hudAt(W, 0, () => hud(W-350, 10, g.e, g.ei, '#ff4a5a'));
 
   // Panel central: piso y temporizador
   const s = g.clock | 0;
+  hudAt(W/2, 0, () => {
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
   if(g.o.title) text('CAMPO', W/2, 29, 12, '#ffcc33', 'center'); else text('PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
   text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
   text(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
   const L = leaderImg(g.o.leader, g.o.portrait);                                             // retrato del líder
   if(L && L.ok){ const h = 54, w = L.width/L.height*h; ctx.imageSmoothingEnabled = false; ctx.drawImage(L, W/2 - w/2, 84, w, h); }
+  });
   text('ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
 
   // Barra de ataques, centrada abajo
+  ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
   const bw = 104, gap = 8, tw = 5*bw + 4*gap + 24, x0 = (W - tw)/2, y0 = H - 82;
+  // Barra de energía grande, siempre visible, con las marcas de Q (20) y E (40) y el tiempo que falta
+  { const ey = y0 - 38, bx = x0 + 78, bwid = tw - 78 - 12, bh = 10, by = ey + 16;
+    hudBox(x0, ey, tw, 34, '#4fb3ff');
+    text('ENERGÍA', x0 + 12, by + 8, 7, '#4fb3ff');
+    bar(bx, by, bwid, bh, P.en, 100, '#4fb3ff');
+    [[3, 'Q'], [4, 'E']].forEach(([i, k]) => {
+      const need = MV[i].en, mx = bx + 1 + (bwid - 2) * need / 100, ready = P.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
+      ctx.fillStyle = col; ctx.fillRect(Math.round(mx) - 1, by - 3, 2, bh + 6);
+      const wait = Math.max(0, (need - P.en) / EN_REGEN);
+      text(`${k} ${need}` + (ready ? ' ✔' : ` · ${wait.toFixed(1)}s`), mx, by - 5, 6, ready ? '#9be29b' : col, 'center');
+    });
+    text(String(Math.floor(P.en)), bx + bwid - 4, by + 8, 7, '#fff', 'right'); }
   hudBox(x0, y0, tw, 72, '#4a8cff');
   MV.forEach((m,i)=>{
     const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52;
-    const ok = P.cd[i] <= 0 && P.en >= m.en;
+    const enWait = Math.max(0, (m.en - P.en) / EN_REGEN), cdWait = Math.max(0, P.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
+    const ok = wait <= 0;
     const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(P, i)];
     ctx.fillStyle = '#161c2c'; ctx.fillRect(x, y, bw, h);
     ctx.strokeStyle = ok ? col : '#2c3550'; ctx.lineWidth = 2; ctx.strokeRect(x+1, y+1, bw-2, h-2);
@@ -143,12 +161,16 @@ function draw(){
     text(m.key, x+7, y+12, 6, '#10141e');
     const nm = mvName(P, i).toUpperCase();
     text(nm, x+bw/2, y+32, nm.length > 10 ? 7 : 8, ok ? '#fff' : '#6d7899', 'center');
-    if(m.en) text('EN ' + m.en, x+bw-5, y+47, 6, P.en >= m.en ? '#4fb3ff' : '#e8493a', 'right');
-    if(P.cd[i] > 0){
-      ctx.fillStyle = 'rgba(5,7,12,.72)'; ctx.fillRect(x+2, y+2, bw-4, (h-4) * (P.cd[i]/m.cd));
-      text(P.cd[i].toFixed(1), x+bw/2, y+47, 8, '#fff', 'center');
+    if(m.en) text('EN ' + m.en, x+bw-5, y+14, 6, P.en >= m.en ? '#4fb3ff' : '#e8493a', 'right');
+    if(m.en){ const fr = Math.min(1, P.en / m.en); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
+      ctx.fillStyle = fr >= 1 ? '#9be29b' : '#4fb3ff'; ctx.fillRect(x+4, y+h-6, (bw-8)*fr, 3); }
+    if(!ok){
+      const total = Math.max(m.cd, m.en / EN_REGEN, .01);
+      ctx.fillStyle = 'rgba(5,7,12,.72)'; ctx.fillRect(x+2, y+2, bw-4, (h-4) * Math.min(1, wait/total));
+      text(wait.toFixed(1) + 's', x+bw/2, y+47, 8, cdWait >= enWait ? '#fff' : '#4fb3ff', 'center');       // blanco = enfriamiento · azul = falta energía
     }
   });
+  ctx.restore();
 }
 
 let last = performance.now();

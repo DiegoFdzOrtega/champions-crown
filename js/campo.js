@@ -35,7 +35,7 @@ const CAMPO = [
   {id:'cafetero', file:'cafemaster.png', name:'Maestro Cafetero', cls:'Maestro Café', theme:'Dulces y lácteos de cafetería', tier:1, arena:'erika', team:[
     P(685, 'Modesta', 'Velo Dulce',     'gafaselec', {spa:252, spe:252, hp:4}, ['Carantoña',     'Voz Cautivadora', 'Campo Neblinoso', 'Fuerza Lunar']),    // Slurpuff: nata y caramelo
     P(584, 'Miedosa', 'Manto Níveo',    'gafasesp',  {spa:252, spe:252, hp:4}, ['Colmillo Hielo','Rayo Hielo',      'Neblina',         'Ventisca']),        // Vanilluxe: helado
-    P(242, 'Serena',  'Cura Natural',   'restos',    {hp:252, spd:252, def:4}, ['Golpe Cuerpo',  'Voz Cautivadora', 'Paz Mental',      'Fuerza Lunar'])     // Blissey: huevos y leche
+    P( 40, 'Modesta', 'Competitivo',    'restos',    {hp:252, spa:252, def:4}, ['Golpe Cuerpo',  'Voz Cautivadora', 'Paz Mental',      'Fuerza Lunar'])     // Wigglytuff: algodón de azúcar (antes Blissey, demasiado dura para el nivel fácil)
   ]},
   {id:'panadera', file:'panadero.png', name:'Panadera', cls:'Panadero', theme:'Horno, bollería y leche', tier:1, arena:'blaine', team:[
     P(869, 'Modesta', 'Velo Dulce',     'gafasesp',  {hp:252, spa:252, def:4}, ['Carantoña',     'Viento Feérico',  'Campo Neblinoso', 'Fuerza Lunar']),    // Alcremie: tarta de nata

@@ -114,7 +114,7 @@ function update(dt){
     if(f.item === 'restos' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max*.015*dt);            // Restos
     if(f.dash > 0 && !f.dead && (f.fxd = (f.fxd || 0) - dt) <= 0){ f.fxd = .045; fxDust(f); }          // polvo al correr
     if(f.stun > 0) f.stun -= dt;
-    f.en = Math.min(100, f.en + 12*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
+    f.en = Math.min(100, f.en + EN_REGEN*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
     if(!f.dead && f.lock <= 0){ const w = f.mv ? 'Walk' : 'Idle'; if(f.act !== w){ f.act = w; f.at = 0; } }
   }
   for(const s of g.shots){                       // proyectiles
