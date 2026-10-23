@@ -95,7 +95,8 @@ function fxShotStart(f, s, name, big){
 function fxShot(s){
   const fl = FXR.flight[s.mvn]; if(!fl) return false;
   const a = g.t - s.t0, ang = Math.atan2(s.vy, s.vx);
-  fl(s, a, ang, s.type); return true;
+  try{ fl(s, a, ang, s.type); }catch(e){ ctx.restore(); return false; }
+  return true;
 }
 // Impacto sobre el objetivo T. big = proyectil grande · close = cuerpo a cuerpo
 function fxHit(T, name, type, mult, big, close, A){
@@ -111,7 +112,9 @@ function fxHit(T, name, type, mult, big, close, A){
 function fxBuff(f, name, type){ const I = idleInfo(f.m.dex); fxAdd('buff', FXR.buff[name] ? name : '_', {x:f.x, y:f.y + I.foot * ESCALA - 6, fol:f, type, dur:.9}); f.auraName = FXR.aura[name] ? name : '_'; f.auraType = type; fx.shake = Math.max(fx.shake, 1.5); }
 // Aura mientras dura la mejora (5 s). Devuelve false si no hay receta (se usa el anillo sencillo)
 function fxAura(f, I){
-  const r = FXR.aura[f.auraName] || FXR.aura['_']; r(f, I, g.t, f.auraType || f.m.types[0], Math.min(1, f.buff)); return true;
+  const r = FXR.aura[f.auraName] || FXR.aura['_']; if(typeof r !== 'function') return false;
+  try{ r(f, I, g.t, f.auraType || f.m.types[0], Math.min(1, f.buff)); }catch(e){ ctx.restore(); }   // un fallo visual nunca debe parar el juego
+  return true;
 }
 // Desplazamiento visual del atacante al lanzarse (no cambia su posición real ni la mecánica)
 function fxLunge(f){
@@ -161,7 +164,7 @@ function fxDraw(){
     if(e.t < e.delay) continue; const a = e.t - e.delay;
     const r = e.kind === 'melee' ? FXR.melee[e.name] : e.kind === 'stream' ? FXR.stream[e.name] : e.kind === 'impact' ? (FXR.impact[e.name] || FXI[e.name]) : FXR.buff[e.name];
     const fn = r && (r.draw || r);
-    ctx.save(); if(typeof fn === 'function') fn(e, a, e.type); ctx.restore();
+    ctx.save(); try{ if(typeof fn === 'function') fn(e, a, e.type); }catch(err){ e.dead = true; } ctx.restore();
   }
   for(const p of fx.parts){ ctx.globalAlpha = Math.min(1, p.life / p.max * 1.6); ctx.fillStyle = p.col; ctx.fillRect(snap(p.x), snap(p.y), p.s, p.s); }
   ctx.globalAlpha = 1;

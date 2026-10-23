@@ -19,7 +19,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
 const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
-              profileFav:[], profileSh:[], ach:{}, shinyOff:[], avatar:'',
+              profileFav:[], profileSh:[], ach:{}, shinyOff:[], avatar:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
               iv:{}, ev:{}, abil:{}, mv:{}, mtBought:{day:0, n:{}}, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv/mtBought: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
@@ -45,7 +45,7 @@ try{
     save.champ = obj(s.champ); save.prog = obj(s.prog); save.campoWins = obj(s.campoWins); save.stats = obj(s.stats); if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
          // quien ya venció a Azul tiene el trofeo de Kanto
     save.mtBought = (s.mtBought && typeof s.mtBought === 'object' && s.mtBought.n) ? s.mtBought : {day:0, n:{}};
-    save.profileFav = Array.isArray(s.profileFav) ? s.profileFav : []; save.profileSh = Array.isArray(s.profileSh) ? s.profileSh : []; save.ach = (s.ach && typeof s.ach === 'object') ? s.ach : {};   // profileSh = 1 en cada favorito que enseñas en su versión shiny
+    save.profileFav = Array.isArray(s.profileFav) ? s.profileFav : []; save.profileSh = Array.isArray(s.profileSh) ? s.profileSh : []; save.ach = (s.ach && typeof s.ach === 'object') ? s.ach : {};   save.welcome = s.welcome === undefined ? 1 : s.welcome; save.login = (s.login && typeof s.login === 'object') ? {streak:+s.login.streak || 0, last:String(s.login.last || '')} : {streak:0, last:''}; save.firstWin = String(s.firstWin || '');   // profileSh = 1 en cada favorito que enseñas en su versión shiny
   }
 }catch(e){}
 // ¿Se usa la versión shiny de este Pokémon? Solo si lo tienes shiny y no lo has puesto en "normal" desde Equipo Pokémon
@@ -78,6 +78,7 @@ function startBattle(o){
   p.forEach(f=>{ f.x = W*.25; f.y = H/2 + 10; f.dir = 2; });
   e.forEach(f=>{ f.x = W*.75; f.y = H/2 + 10; f.dir = 6; f.lvl = o.lvl; });
   g = {o, p, e, pi:0, ei:0, shots:[], pops:[], t:0, clock:0, count:3, over:false};
+  [...p, ...e].forEach(f => preloadSheets(f.m.dex, f.shiny));                                  // precarga de todas las animaciones (evita el círculo con la inicial al atacar)
   Music.battle(o);                                                                           // música del combate (music.js): fundido desde la del menú
   fxClear();                                                                                 // sin efectos de combates anteriores
   show('none');

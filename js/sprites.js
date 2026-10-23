@@ -57,6 +57,11 @@ function idleInfo(dex){
   return im.ok ? im.info : {fw:32, fh:40, top:-16, foot:10};
 }
 
+// Descarga por adelantado TODAS las hojas de animación de un Pokémon (reposo, andar, ataques...), para que no haya "tirones" ni círculos la primera vez que ataca
+function preloadSheets(dex, shiny){
+  Object.keys(ANIMS).forEach(a => { sheet(dex, a, false); if(shiny) sheet(dex, a, true); });
+}
+
 // Dirección 0..7 (abajo, abajo-der, der, arriba-der, arriba, arriba-izq, izq, abajo-izq)
 function dirOf(ang){ return ((Math.round((Math.PI/2 - ang) / (Math.PI/4)) % 8) + 8) % 8; }
 
@@ -71,6 +76,10 @@ function drawFrame(c, dex, anim, t, dir, x, y, sc, fit, shiny){
   let sh = !!shiny, im = sheet(dex, anim, sh);
   if(sh && im.bad){ sh = false; im = sheet(dex, anim, false); }      // sin sprite shiny: usa el normal
   if(im.bad && anim !== 'Idle'){ anim = 'Idle'; im = sheet(dex, 'Idle', sh); if(sh && im.bad) im = sheet(dex, 'Idle', false); }
+  if(!im.ok && !im.bad && anim !== 'Idle'){                          // la hoja de este ataque aún se está descargando: mientras tanto se ve la de reposo (así nunca sale el círculo con la inicial)
+    let idle = sheet(dex, 'Idle', sh); if(sh && idle.bad) idle = sheet(dex, 'Idle', false);
+    if(idle.ok){ anim = 'Idle'; im = idle; }
+  }
   c.imageSmoothingEnabled = false;
   if(im.ok){
     const A = ANIMS[anim], I = im.info;

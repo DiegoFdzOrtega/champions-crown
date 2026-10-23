@@ -59,6 +59,7 @@ function pick(i){
 }
 function refreshHud(){
   $('pName').textContent = save.name; $('crumbs').innerHTML = crumbsHtml(''); refreshAvatars();     // nombre, migas de pan y avatar activo
+  if(typeof dailyRefresh === 'function') dailyRefresh();
   $('bp').textContent = save.bp; $('tk').textContent = save.tickets + (save.ticketsL ? ` +${save.ticketsL}★` : ''); pick(navIdx);
 }
 function buildMain(){

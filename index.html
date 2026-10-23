@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Champion's Crown</title>
+<title>Champions Crown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -25,7 +25,8 @@
       <div class="box chip tk"><canvas id="icTk"></canvas><span id="tk">0</span><small>TICKETS GACHAPON</small></div>
     </div>
   </header>
-  <div class="brand"><h1>CHAMPION'S<br>CROWN</h1><p>ROAD TO CHAMPION · ARENA 2D</p></div>
+  <button id="dailyBtn" class="hide dlbtn"></button>   <!-- login diario: aparece solo si tienes la recompensa del día sin reclamar (daily.js) -->
+  <div class="brand"><h1>CHAMPIONS<br>CROWN</h1><p>ROAD TO CHAMPION · ARENA 2D</p></div>
   <nav id="nav" class="nav"></nav>
   <aside id="info" class="box info"></aside>
   <div class="foot">↑ ↓ moverte · ENTER elegir · ESC volver</div>
@@ -125,6 +126,7 @@
 <script src="js/profile.js"></script>
 <script src="js/avatars.js"></script>
 <script src="js/achievements.js"></script>
+<script src="js/daily.js"></script>
 <script src="js/music.js"></script>
 <script src="js/ui.js"></script>
 </body>

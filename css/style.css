@@ -836,3 +836,18 @@ button.leg:disabled{box-shadow:none}
 .ach.ready h3{color:#fff}
 .aclaim{margin:.6rem 0 0;padding:.6rem 1.4rem}
 .bdg{display:inline-block;margin-left:.5em;padding:0 .5em;min-width:1.4em;font-style:normal;font-size:.8em;line-height:1.6;background:#e23b3b;color:#fff;border-radius:1em}
+
+/* Login diario: botón del menú y ventana con los 7 días (daily.js) */
+.dlbtn{position:absolute;right:29rem;top:2.4rem;z-index:5;margin:0;padding:.9rem 1.6rem;background:#ffcc33!important;color:#1b1500!important;border:3px solid #fff!important;
+  font-size:1.1rem;box-shadow:0 0 1.6rem rgba(255,204,51,.6);animation:dlpulse 1.2s ease-in-out infinite}
+@keyframes dlpulse{50%{transform:scale(1.06)}}
+.dlOv{position:fixed;inset:0;z-index:55;background:rgba(5,8,16,.84);display:flex;align-items:center;justify-content:center;padding:1rem}
+.dlBox{position:relative;max-width:96rem;width:100%;background:#10141e;border:3px solid #ffcc33;padding:2.4rem;text-align:center}
+.dlBox h2{margin:0 0 .6rem;color:#ffcc33;font-size:2rem}
+.dlx{position:absolute;right:1rem;top:1rem;margin:0;padding:.4rem .8rem}
+.dlg{display:grid;grid-template-columns:repeat(7,1fr);gap:.8rem;margin:1.6rem 0}
+.dlc{background:#161b2c;border:2px solid #2d3a5c;padding:1rem .4rem;min-height:11rem;display:flex;flex-direction:column;gap:.7rem;align-items:center;justify-content:center;font-size:.95rem}
+.dlc b{color:#9fb0d8}.dlc span{color:#fff;line-height:1.7}.dlc em{font-style:normal;color:#ffcc33;min-height:1.4em}
+.dlc.today{border-color:#ffcc33;box-shadow:0 0 1.2rem rgba(255,204,51,.55);background:#2a2410}.dlc.today b{color:#ffcc33}
+.dlc.done{opacity:.55;border-color:#4ccf6a}.dlc.done em{color:#4ccf6a}.dlc.big{border-color:#ff3ea5}.dlc.big.today{border-color:#ffcc33}
+@media(max-width:900px){.dlg{grid-template-columns:repeat(4,1fr)}}

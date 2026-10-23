@@ -2,7 +2,7 @@
 /* =====================================================================
    16b) CAMPO DE ENTRENAMIENTO: la zona para farmear Chapas Plateadas y Chapas Doradas
    Entrenadores normales (no líderes) con 3-4 Pokémon cada uno, repetibles todas las veces que quieras.
-   Cada victoria da una recompensa FIJA: 50 BP + 5 Chapas Plateadas + 5 Chapas Doradas (REWARD.campo en teams.js).
+   Cada victoria da una recompensa FIJA: 1 ticket + 50 BP + 5 Chapas Plateadas + 5 Chapas Doradas (REWARD.campo en teams.js).
    Se carga DESPUÉS de teams.js (usa P(), ITEMS, MOVES, enemyBoost...). Los sprites están en la carpeta entrenadores/ (80x80).
 
    Cada entrenador es una entrada de CAMPO:

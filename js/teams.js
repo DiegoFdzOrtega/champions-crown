@@ -178,7 +178,7 @@ const REWARD = {
   lider:   {chapa:5, chapaplata:5, tickets:10},    // Líderes de gimnasio: 10 tiradas de Gachapon (+ las chapas de siempre), sin BP
   alto:    {tickets:10},                           // Alto Mando: 10 tiradas de Gachapon
   campeon: {tickets:10},                           // Campeón: 10 tiradas de Gachapon
-  campo:   {bp:50, chapaplata:5, chapa:5}          // Campo de Entrenamiento (campo.js): 50 BP + 5 Plateadas + 5 Doradas por cada victoria, sin límite
+  campo:   {tickets:1, bp:50, chapaplata:5, chapa:5}   // Campo de Entrenamiento (campo.js): 1 tirada de Gachapon + 50 BP + 5 Plateadas + 5 Doradas por cada victoria, sin límite
 };
 // Recompensa propia de una región: sustituye a la de arriba para TODOS sus combates (líderes, Alto Mando y Campeón).
 // 'tickets' = tiradas del Gachapon (Ticket Normal). Johto: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por cada victoria.
@@ -189,9 +189,11 @@ const REWARD_REGION = {
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => REWARD_REGION[F.region] || REWARD[F.kind];
 function giveReward(F, firstTime){
-  const r = rewardOf(F); if(!r || (REWARD.once && !firstTime)) return '';
+  let r = rewardOf(F); if(!r || (REWARD.once && !firstTime)) return '';
+  const dbl = r.tickets && typeof firstWinToday === 'function' && firstWinToday();            // primera victoria del día: tickets x2 (daily.js)
+  if(dbl) r = Object.assign({}, r, {tickets:r.tickets * DAILY.firstWinMult});
   Object.entries(r).forEach(([id, n]) => { if(id === 'tickets') save.tickets += n; else if(id === 'bp') save.bp += n; else save.items[id] = held(id) + n; });
-  return Object.entries(r).map(([id, n]) => `+${n} ${REWARD_NAMES[id]}`).join(' · ');
+  return Object.entries(r).map(([id, n]) => `+${n} ${REWARD_NAMES[id]}`).join(' · ') + (dbl ? ` · ¡Primera victoria del día: tickets x${DAILY.firstWinMult}!` : '');
 }
 const rewardText = F => rewardOf(F) ? Object.entries(rewardOf(F)).map(([id, n]) => `${n} ${REWARD_NAMES[id]}`).join(' + ') : '';
 

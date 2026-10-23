@@ -137,7 +137,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - Código: `pauseBattle()` y `exitBattle()` en js/modes.js; `g.paused` en js/combat.js; tecla en js/ui.js; overlay `#pause` en index.html.
 
 ## Campo de Entrenamiento (js/campo.js, carpeta entrenadores/)
-Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **5 Chapas Plateadas + 5 Chapas Doradas** (`REWARD.campo` en teams.js). Perder no da nada. No cuenta para el progreso de la Historia, no da PB ni tickets y no toca `save.record`.
+Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **1 tirada de Gachapon + 50 BP + 5 Chapas Plateadas + 5 Chapas Doradas** (`REWARD.campo` en teams.js). Perder no da nada. No cuenta para el progreso de la Historia y no toca `save.record`.
 
 - **Entrenadores:** uno por cada imagen de `entrenadores/` (23). Cada uno tiene un equipo temático según su dibujo, por ejemplo: Montañero → Rhyperior, Steelix, Golem, Machamp · Marinero → Poliwrath, Tentacruel, Kingler, Sharpedo · Médium → Gardevoir, Reuniclus, Xatu, Meowstic · Entrenador Guay → Garchomp, Metagross, Salamence, Tyranitar · Pescador → Gyarados, Milotic, Seaking · Criador → Vaporeon, Umbreon, Leafeon, Sylveon. Están todos en el array `CAMPO` de campo.js, con el tema de cada uno.
 - **Dificultad (`CAMPO_TIER`):** 1 = fácil (nivel 110, 3 Pokémon), 2 = media (nivel 118, 4 Pokémon), 3 = difícil (nivel 125, 4 Pokémon: Entrenador Guay, Maestro Li y Maestro Magnus). Usa la misma fórmula que la Historia (`DIFF.dificil`): tier 1 ≈ Brock-Misty, tier 2 ≈ Erika-Koga, tier 3 ≈ Sabrina-Blaine, pero con menos Pokémon para poder repetirlo muchas veces. Para cambiarla, toca `CAMPO_TIER` (nivel `lvl` y posición equivalente `n`).
@@ -252,7 +252,7 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 **Recompensas por victoria** (`REWARD` y `REWARD_REGION` en `js/teams.js`; las claves son chapas, `tickets` = tiradas de Gachapon y `bp` = Puntos de Batalla):
 | Combate | Recompensa |
 |---|---|
-| Campo de Entrenamiento (cualquier entrenador) | **50 BP** + 5 Chapas Plateadas + 5 Chapas Doradas |
+| Campo de Entrenamiento (cualquier entrenador) | **1 tirada de Gachapon** + **50 BP** + 5 Chapas Plateadas + 5 Chapas Doradas |
 | Líder de gimnasio (Kanto y Johto) | **10 tiradas de Gachapon** + 5 Chapas Doradas + 5 Plateadas (como antes) |
 | Alto Mando y Campeón de Kanto | **10 tiradas de Gachapon** (sin chapas, como antes) |
 | Alto Mando y Campeón de Johto | **10 tiradas de Gachapon** + 5 Doradas + 5 Plateadas (como antes) |
@@ -282,6 +282,22 @@ Para añadir un logro: una línea nueva en `ACHIEVEMENT_DATA`. Para una condici�
 - **Audio**: **Volumen general**, **Música**, **Efectos de sonido** (0-100 cada uno) y **Silenciar todo** (tecla M). Música = general x música; efectos = general x efectos (`save.vol`, `save.volMusic`, `save.volSfx`, `save.mute`). Las partidas antiguas conservan su volumen: el que tenían pasa a "Música" y el general queda al 100.
 - El juego no tenía efectos de sonido, así que se añadió `Sfx` en `js/music.js`: pitidos generados por código (`click` en los botones, `win`, `lose` y `logro`). `Sfx.play('click')`.
 - El **nombre de entrenador** se cambia ahora en **Perfil**.
+
+## Ayudas del principio: bienvenida, login diario y primera victoria (js/daily.js)
+Para que el inicio sea menos lento hay tres ayudas con tickets (la tabla `DAILY` está al principio de `js/daily.js`):
+
+- **Regalo de bienvenida:** una sola vez, **10 tickets** al empezar una partida nueva (`save.welcome`). Las partidas ya guardadas **no** lo reciben (se marcan como ya entregado al cargar, `js/state.js`). Para probarlo: `localStorage.clear()` en la consola y recargar.
+- **Recompensa diaria (7 días):** en el menú principal aparece el botón amarillo **🎁 Recompensa diaria · Día N/7** si hoy no la has reclamado. Abre una ventana con los 7 días y el botón **Reclamar** (Esc o la X la cierran). Si entras al día siguiente, la racha continúa; si te saltas un día, vuelve al día 1. Después del día 7 se repite el ciclo. Se guarda en `save.login = {streak, last}`.
+
+| Día | Tickets | BP |
+|---|---|---|
+| 1 y 2 | 2 | 50 |
+| 3 y 4 | 3 | 50 |
+| 5 y 6 | 4 | 50 |
+| 7 | 10 + **1 ticket legendario** | 150 |
+
+- **Primera victoria del día = tickets x2:** la primera vez que ganas un combate de Historia o del Campo cada día, los tickets de la recompensa se duplican (Historia 20 en vez de 10; Campo 2 en vez de 1) y el aviso lo dice. Solo se duplican los tickets, no los BP ni las chapas. Se guarda la fecha en `save.firstWin`.
+- Aviso: usa la fecha del reloj del dispositivo, así que cambiando la hora del ordenador se podría hacer trampa. Cuando haya cuentas en servidor se comprobará allí.
 
 ## Créditos y avisos legales
 **Champions Crown es un proyecto de fans, sin ánimo de lucro y hecho para aprender (DAM).** Pokémon, los nombres de los Pokémon, líderes y regiones son marcas y propiedad de Nintendo, Game Freak y Creatures Inc. Este proyecto no está afiliado ni respaldado por ellas.
