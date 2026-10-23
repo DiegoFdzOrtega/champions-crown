@@ -1,0 +1,12 @@
+# Archivos que Windows / macOS crean solos y no aportan nada al proyecto
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Configuración personal del editor (VS Code)
+.vscode/
+
+# Archivos temporales o copias de seguridad
+*.tmp
+*.bak
+*~

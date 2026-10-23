@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Champion's Crown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- MENÚ PRINCIPAL -->
+<div id="main" class="screen ui scan">
+  <header class="hud">
+    <div class="box profile">
+      <img id="avatar" class="av" alt="Avatar">
+      <b id="pName"></b>
+      <div id="crumbs"></div>   <!-- migas de pan: Perfil › Logros › Amigos › Mochila (las pinta refreshHud) -->
+    </div>
+    <div class="res">
+      <div class="box chip gold"><canvas id="icCoin"></canvas><span id="bp">0</span><small>PUNTOS DE BATALLA</small></div>
+      <div class="box chip tk"><canvas id="icTk"></canvas><span id="tk">0</span><small>TICKETS GACHAPON</small></div>
+    </div>
+  </header>
+  <div class="brand"><h1>CHAMPION'S<br>CROWN</h1><p>ROAD TO CHAMPION · ARENA 2D</p></div>
+  <nav id="nav" class="nav"></nav>
+  <aside id="info" class="box info"></aside>
+  <div class="foot">↑ ↓ moverte · ENTER elegir · ESC volver</div>
+</div>
+
+<!-- SELECTOR DE REGIONES -->
+<div id="regions" class="screen ui">
+  <div class="inner wide">
+    <h1>Historia</h1>
+    <p>Elige región. Cada una tiene 8 líderes y un Alto Mando que se abre al vencerlos.</p>
+    <div id="rgrid" class="rgrid"></div>
+    <p id="rTower" class="help"></p>
+    <button id="btnBack2">← Menú</button>
+  </div>
+</div>
+
+<!-- HISTORIA: LÍDERES DE LA REGIÓN -->
+<div id="tower" class="screen ui">
+  <div class="inner wide">
+    <h1 id="stTitle">Historia</h1>
+    <p>Vence a los 8 líderes, al Alto Mando y al Campeón, en orden. Cada uno tiene 6 Pokémon.</p>
+    <h2>Tu equipo</h2>
+    <div id="teamBar" class="grid"></div>
+    <p id="teamWarn" class="warn"></p>
+    <button id="btnTeam">Editar equipo y objetos</button>
+    <h2>Líderes de gimnasio</h2>
+    <div id="floors" class="lgrid"></div>
+    <h2>Alto Mando</h2>
+    <div id="floors2" class="lgrid"></div>
+    <h2>Campeón de la Liga Pokémon</h2>
+    <div id="floors3" class="lgrid"></div>
+    <button id="btnBack1">← Regiones</button>
+  </div>
+</div>
+
+<!-- TIENDA, EQUIPO, RANKING, AMIGOS, AJUSTES -->
+<div id="panel" class="screen ui"><div class="inner" id="panelBody"></div></div>
+
+<!-- POKÉDEX AVANZADA (la rellena js/pokedex.js) -->
+<div id="dexv" class="screen ui hide"></div>
+
+<!-- GACHAPON MULTI-REGIÓN (lo rellena js/gachapon.js) + capa de animación -->
+<div id="gachav" class="screen ui hide"></div>
+
+<!-- EQUIPO POKÉMON (lo rellena js/team.js) -->
+<div id="teamv" class="screen ui hide"></div>
+<div id="gOv" class="hide"></div>
+
+<!-- PAUSA: Esc durante un combate (la lleva js/modes.js) -->
+<div id="pause" class="screen hide">
+  <div class="inner center">
+    <h1>Pausa</h1>
+    <p>El combate está detenido.</p>
+    <div id="pBtns"><button id="pGo" class="main">Continuar (Esc)</button><button id="pMus">Sonido: sí (M)</button><button id="pOut">Salir del combate</button></div>
+    <div id="pAsk" class="hide"><p class="warn">¿Salir del combate? No ganarás ninguna recompensa.</p><button id="pYes">Sí, salir</button><button id="pNo" class="main">No, seguir</button></div>
+  </div>
+</div>
+
+<div id="result" class="screen hide">
+  <div class="inner center">
+    <h1 id="rTitle"></h1>
+    <p id="rText"></p>
+    <div id="rBtns"></div>
+  </div>
+</div>
+
+<script src="js/pokedata.js"></script>
+<script src="js/data.js"></script>
+<script src="js/moves.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/state.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/background.js"></script>
+<script src="js/arenas.js"></script>
+<script src="js/arenasjohto.js"></script>
+<script src="js/arenascampo.js"></script>
+<script src="js/render.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/fxlib.js"></script>
+<script src="js/fxmelee.js"></script>
+<script src="js/fxshots.js"></script>
+<script src="js/fxextra.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/economy.js"></script>
+<script src="js/training.js"></script>
+<script src="js/teams.js"></script>
+<script src="js/johto.js"></script>
+<script src="js/campo.js"></script>
+<script src="js/room.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/pokedex.js"></script>
+<script src="js/gachapon.js"></script>
+<script src="js/team.js"></script>
+<script src="js/teamdata.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/bag.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/avatars.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/music.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+"use strict";
+/* =====================================================================
+   16) FICHA TÉCNICA ("Ver datos") Y PERSONALIZACIÓN de un Pokémon del equipo.
+   Es una ventana (#tmData) con 4 vistas:
+     main    → estadísticas (base, IV, EV, nivel 50), naturaleza, habilidad y ataques
+     nature  → elegir naturaleza nueva (gasta 1 Menta)
+     abil    → elegir la otra habilidad (gasta 1 Cápsula de Habilidad)
+     moves   → elegir un MT para un hueco de ataque (gasta ese MT)
+     reset   → confirmar «Restablecer IVs» o «Restablecer EVs» (devuelve las chapas gastadas)
+   Los IV se suben directamente con el botón +5 (gasta 1 Chapa Dorada) y los EV con el +10 (gasta 1 Chapa Plateada).
+   La lógica (qué se guarda, qué cuesta) está en training.js; aquí solo se dibuja y se pulsan botones.
+   ===================================================================== */
+const dt = {dex:0, view:'main', slot:1, pick:null, t0:0};
+const dtOpen = () => !$('tmData').classList.contains('hide');
+
+function openData(dex){ dt.dex = dex; dt.view = 'main'; dt.pick = null; dt.t0 = performance.now(); $('tmData').classList.remove('hide'); renderData(); }
+function closeData(quiet){ if(!tm.built) return; $('tmData').classList.add('hide'); if(!quiet) renderTeamSlots(); }
+function dataEsc(){ if(dt.view !== 'main'){ dt.view = 'main'; dt.pick = null; renderData(); } else closeData(); }   // Esc: vuelve a la ficha; otra vez, cierra
+
+const natText = n => n[1] ? `▲ ${STAT_NAMES[n[1]]} · ▼ ${STAT_NAMES[n[2]]}` : 'neutra';
+const typeChip = t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`;
+const mult = v => '×' + v.toFixed(2);
+const ownedChip = id => `<span class="own-chip"><img class="iimg" src="${imgOf(id)}" alt="">${CONS[id].n} <b>×${held(id)}</b></span>`;
+
+function renderData(){
+  const body = {main: dataMain, nature: dataNature, abil: dataAbil, moves: dataMoves, reset: dataReset}[dt.view]();
+  $('tmDataB').innerHTML = body;
+  const c = $('dtSpr'); if(c) paintSprite(c, dt.dex, {sc:5, fit:200, shiny: useShiny(dt.dex)});
+}
+// El sprite grande de la ficha se anima (solo cuando se ve)
+setInterval(() => {
+  const c = $('dtSpr'); if(!c || !c.isConnected || !dtOpen()) return;
+  const x = c.getContext('2d'); x.clearRect(0, 0, 224, 224); drawFrame(x, dt.dex, 'Idle', (performance.now() - dt.t0) / 1000, 0, 112, 114, 5, 200, useShiny(dt.dex));
+}, 120);
+
+// Cabecera común: nombre, tipos, cerrar y cambiar de Pokémon del equipo
+function dataHead(){
+  const m = mon(dt.dex), r = RAR[m.rar], i = team.indexOf(dt.dex);
+  return `<header class="dxh dth"><button data-act="prev" title="Pokémon anterior"${team.length < 2 ? ' disabled' : ''}>◀</button>
+    <h1>${esc(m.name)}</h1><span class="rb" style="--c:${r.col}">${r.ic} ${r.n}</span><span class="tbs">${typeBadges(m)}</span>
+    <button data-act="next" title="Pokémon siguiente"${team.length < 2 ? ' disabled' : ''}>▶</button>
+    <small class="dtn">Hueco ${i + 1}/${team.length}</small><button class="tmclose" data-act="close" title="Cerrar (Esc)">✕ Cerrar</button></header>`;
+}
+
+function dataMain(){
+  const d = dt.dex, m = mon(d), iv = ivOf(d), ev = evOf(d), nat = natureOf(d), ab = abilitiesOf(d), ai = abilIdx(d), cb = combatBoost(d), mv = movesOf(d);
+  const chapa = held('chapa'), plata = held('chapaplata'), cap = capOf(d);
+  // Izquierda: estadísticas normales (solo se miran). Total = Base + IV + EV (+ naturaleza), todo a nivel 50.
+  const pure = (k, i, e) => { const core = Math.floor((2 * m.base[k] + i + Math.floor(e / 4)) * .5); return k === 'hp' ? core + 60 : core + 5; };
+  const statRows = STAT_KEYS.map(k => {
+    const tag = nat[1] === k ? '<u class="up">▲ +10%</u>' : nat[2] === k ? '<u class="dn2">▼ −10%</u>' : '';
+    const b0 = pure(k, 0, 0), pi = pure(k, iv[k], 0) - b0, pe = pure(k, iv[k], ev[k]) - pure(k, iv[k], 0), tot = realStat(d, k), pn = tot - pure(k, iv[k], ev[k]);
+    const sg = v => v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0';
+    return `<tr><th title="Valor base de la especie: ${m.base[k]}">${STAT_NAMES[k]}${tag}</th><td>${b0}</td><td class="pl">${sg(pi)}</td><td class="pl ev">${sg(pe)}</td>
+      <td class="fin"><b>${tot}</b>${pn ? `<small class="${pn > 0 ? 'up' : 'dn2'}">${sg(pn)} nat.</small>` : ''}</td></tr>`;
+  }).join('');
+  // Derecha: entrenamiento (aquí se suben los IVs con Chapas Doradas y los EVs con Chapas Plateadas)
+  const ivRows = STAT_KEYS.map(k => `<tr><th>${STAT_NAMES[k]}</th><td class="bc"><div class="cw"><div class="bar iv"><i style="width:${iv[k] / TRAIN.ivMax * 100}%"></i></div><b>${iv[k]}</b>
+        <button class="mini" data-act="chapa" data-k="${k}" title="${chapa < 1 ? 'Necesitas Chapas Doradas (Tienda > Mejoras)' : iv[k] >= TRAIN.ivMax ? 'IV al máximo' : `Gasta 1 Chapa Dorada: +${TRAIN.chapaIV} IV`}"${chapa < 1 || iv[k] >= TRAIN.ivMax ? ' disabled' : ''}>+${TRAIN.chapaIV}</button></div></td></tr>`).join('');
+  const evRows = STAT_KEYS.map(k => `<tr><th>${STAT_NAMES[k]}</th><td class="bc"><div class="cw"><div class="bar ev"><i style="width:${ev[k] / TRAIN.evCap * 100}%"></i></div><b>${ev[k]}</b>
+        <button class="mini" data-act="chapap" data-k="${k}" title="${plata < 1 ? 'Necesitas Chapas Plateadas (Tienda > Mejoras)' : evRoom(d, k) <= 0 ? `EVs al máximo (${TRAIN.evCap} por stat, ${TRAIN.evTotal} en total)` : `Gasta 1 Chapa Plateada: +${TRAIN.chapaEV} EV`}"${plata < 1 || evRoom(d, k) <= 0 ? ' disabled' : ''}>+${TRAIN.chapaEV}</button></div></td></tr>`).join('');
+  const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], ch = (save.mv[d] || {})[s];
+    return `<div class="mvrow${ch ? ' chg' : ''}"><span class="sl">${SLOT_NAMES[s]}</span><b>${esc(n)}</b>${typeChip(t)}${ch ? '<em title="Enseñado con un MT">MT</em>' : ''}
+      <button data-act="mtview" data-s="${s}">Usar MT</button></div>`; }).join('');
+  return `${dataHead()}
+    <div class="dtc">
+      <aside class="dtl"><div class="viewer"><canvas id="dtSpr" width="224" height="224"></canvas></div>
+        <p class="meta">#${pad(m.dex)} · ${regionOf(m.dex)}</p>
+        <div class="owned"><b>Tus mejoras</b>${['chapa', 'chapaplata', 'menta', 'capsula'].map(ownedChip).join('')}
+          <button data-act="shop">Ir a la Tienda</button></div></aside>
+      <section class="dtr">
+        <div class="dtg">
+          <div class="dtbox"><h3>Estadísticas <small>(nivel 50)</small></h3>
+            <table class="dtt stt"><thead><tr><th></th><th>Base</th><th>+IV</th><th>+EV</th><th>Total</th></tr></thead><tbody>${statRows}</tbody></table>
+            <p class="note">Total = Base + IV + EV (y la naturaleza, que sube o baja un 10%). Para subirlas, entrena los IVs y EVs en el apartado de la derecha.</p></div>
+          <div class="dtbox"><h3>Entrenamiento</h3>
+            <div class="trn iv"><h4>IVs <small>(0-${TRAIN.ivMax} · total ${ivSum(d)}/${TRAIN.ivTotal})</small></h4>
+              <table class="dtt"><tbody>${ivRows}</tbody></table>
+              <button data-act="rsview" data-w="iv"${cap.gold < 1 ? ' disabled' : ''} title="Vuelve los IV a 0 (el valor inicial de todos los Pokémon) y devuelve las Chapas Doradas gastadas">↺ Restablecer IVs <small>(devuelve ${cap.gold})</small></button></div>
+            <div class="trn ev"><h4>EVs <small>(0-${TRAIN.evCap} · total ${evSum(d)}/${TRAIN.evTotal})</small></h4>
+              <table class="dtt"><tbody>${evRows}</tbody></table>
+              <button data-act="rsview" data-w="ev"${cap.silver < 1 ? ' disabled' : ''} title="Quita los EVs que dieron las Chapas Plateadas (los de combate se quedan) y las devuelve">↺ Restablecer EVs <small>(devuelve ${cap.silver})</small></button></div></div>
+        </div>
+        <p class="boost">En combate: PS <b>${mult(cb.hm)}</b> · Daño <b>${mult(cb.dm)}</b> · Velocidad <b>${mult(cb.spdm)}</b> · Resistencia <b>${mult(cb.defm)}</b></p>
+        <div class="dinfo dtinfo">
+          <p><span>Naturaleza</span> <img class="iimg mi" src="${mintImg(nat)}" alt=""><b>${nat[0]}</b> <small>(${natText(nat)})</small>
+            <button data-act="natview"${held('menta') < 1 ? ' disabled title="Necesitas Mentas (Tienda > Mejoras)"' : ''}>Cambiar con Menta</button></p>
+          <p><span>Habilidad</span> <b>${esc(ab[ai])}</b> <small>${esc(abilDesc(ab[ai]))}</small>
+            <button data-act="abview"${held('capsula') < 1 ? ' disabled title="Necesitas Cápsulas de Habilidad (Tienda > Mejoras)"' : ''}>Cambiar con Cápsula</button></p>
+        </div>
+        <h3>Ataques ${movesChanged(d) ? '<button class="mini wide" data-act="reset">Restaurar originales</button>' : ''}</h3>
+        <div class="dtmv">${moves}</div>
+      </section></div>`;
+}
+
+// ---- Vistas de elección (con barra de confirmación para no gastar un objeto sin querer) ----
+function cbar(text){
+  return `<div class="cbar">${dt.pick !== null ? `<span>${text}</span><button class="main" data-act="ok">Confirmar</button><button data-act="cancel">Cancelar</button>` : '<span>Elige una opción.</span>'}</div>`;
+}
+function subHead(title, item){
+  return `${dataHead()}<div class="dtsub"><button data-act="back">← Volver</button><h2>${title}</h2>${item ? ownedChip(item) : ''}</div>`;
+}
+function dataNature(){
+  const d = dt.dex, cur = natureOf(d), cards = NATURES.map((n, i) =>
+    `<button class="optb nat${n === cur ? ' cur' : ''}${dt.pick === String(i) ? ' pick' : ''}" data-act="pick" data-v="${i}"${n === cur ? ' disabled' : ''}><img class="iimg" src="${mintImg(n)}" alt=""><b>${n[0]}</b><small>${natText(n)}</small></button>`).join('');
+  return `${subHead(`Naturaleza de ${esc(mon(d).name)}: ahora es ${cur[0]}`, 'menta')}<div class="optgrid">${cards}</div>
+    ${cbar(dt.pick !== null ? `Gastar 1 Menta para que pase a ser <b>${NATURES[dt.pick][0]}</b> (${natText(NATURES[dt.pick])})` : '')}`;
+}
+function dataAbil(){
+  const d = dt.dex, ab = abilitiesOf(d), cur = abilIdx(d);
+  const cards = ab.map((n, i) => `<button class="optb big${i === cur ? ' cur' : ''}${dt.pick === String(i) ? ' pick' : ''}" data-act="pick" data-v="${i}"${i === cur ? ' disabled' : ''}>
+    <b>${esc(n)}</b><small>${esc(abilDesc(n))}</small><em>${i === cur ? 'Habilidad actual' : 'Disponible'}</em></button>`).join('');
+  return `${subHead(`Habilidad de ${esc(mon(d).name)}`, 'capsula')}<div class="optgrid two">${cards}</div>
+    <p class="note">Las habilidades todavía no cambian el combate: de momento se muestran y se guardan.</p>
+    ${cbar(dt.pick !== null ? `Gastar 1 Cápsula de Habilidad para usar <b>${esc(ab[dt.pick])}</b>` : '')}`;
+}
+function dataMoves(){
+  const d = dt.dex, s = dt.slot, list = myMTs(s), cur = movesOf(d)[s - 1];
+  const cards = list.map(id => { const n = mtMove(id), t = MOVES[n].t;
+    return `<button class="optb big mt${dt.pick === id ? ' pick' : ''}" data-act="pick" data-v="${id}"${n === cur ? ' disabled' : ''}>
+      <img class="iimg" src="${imgOf(id)}" alt=""><b>MT ${esc(n)}</b>${typeChip(t)}<small>Tienes ×${held(id)}${n === cur ? ' · ya lo conoce' : ''}</small></button>`; }).join('');
+  return `${subHead(`Hueco «${SLOT_NAMES[s]}»: ahora ${esc(cur)}`)}
+    ${list.length ? `<div class="optgrid two">${cards}</div>` : `<p class="note big">No tienes ningún MT para este hueco (${SLOT_SHORT[s]}). La Tienda renueva sus MTs cada 24 horas.</p><button data-act="shop">Ir a la Tienda</button>`}
+    ${cbar(dt.pick !== null ? `Gastar el MT para que ${esc(mon(d).name)} aprenda <b>${esc(mtMove(dt.pick))}</b> y olvide ${esc(cur)}` : '')}`;
+}
+
+function dataReset(){
+  const d = dt.dex, c = capOf(d), iv = dt.what === 'iv', n = iv ? c.gold : c.silver, name = iv ? 'Chapas Doradas' : 'Chapas Plateadas';
+  let detail;
+  if(iv){ const base = save.ivBase[d] || ivOf(d), cur = ivOf(d);
+    detail = STAT_KEYS.filter(k => cur[k] !== base[k]).map(k => `${STAT_NAMES[k]} ${cur[k]} → ${base[k]}`).join(' · ') || 'Los IV ya están en 0.'; }
+  else{ const cp = evCapOf(d); detail = STAT_KEYS.filter(k => cp[k]).map(k => `${STAT_NAMES[k]} −${cp[k]} EV`).join(' · '); }
+  return `${subHead(`Restablecer ${iv ? 'IVs' : 'EVs'} de ${esc(mon(d).name)}`, iv ? 'chapa' : 'chapaplata')}
+    <div class="dtinfo"><p><span>Se deshace</span> <small>${detail}</small></p>
+      <p><span>Recuperas</span> <b>${n} ${name}</b></p>
+      <p class="note">${iv ? 'Vuelven a 0, el valor inicial de todos los Pokémon.' : 'Solo se quitan los EVs que dieron las Chapas Plateadas: los que ganó en combate se quedan.'}</p></div>
+    <div class="cbar"><span>¿Restablecer y recuperar <b>${n} ${name}</b>?</span><button class="main" data-act="ok">Restablecer</button><button data-act="back">Cancelar</button></div>`;
+}
+// ---- Botones de la ficha (un solo controlador para toda la ventana) ----
+function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; }
+function confirmPick(){
+  const d = dt.dex; let err = '', ok = '';
+  if(dt.view === 'nature'){ err = useMenta(d, +dt.pick); ok = `Naturaleza nueva: ${NATURES[dt.pick][0]}.`; }
+  else if(dt.view === 'abil'){ const n = abilitiesOf(d)[dt.pick]; err = useCapsula(d, +dt.pick); ok = `Habilidad nueva: ${n}.`; }
+  else if(dt.view === 'reset'){ const iv = dt.what === 'iv', n = iv ? capOf(d).gold : capOf(d).silver; err = iv ? resetIVs(d) : resetEVs(d); ok = `${iv ? 'IVs' : 'EVs'} restablecidos: recuperas ${n} ${iv ? 'Chapas Doradas' : 'Chapas Plateadas'}.`; dt.view = 'main'; toast(err || ok); return; }
+  else if(dt.view === 'moves'){ const n = mtMove(dt.pick); err = useMT(d, dt.pick); ok = `${mon(d).name} aprendió ${n}.`; }
+  toast(err || ok); dt.pick = null; if(!err) dt.view = 'main';
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('#tmDataB [data-act]'); if(!b || b.disabled) return;
+  const a = b.dataset.act, d = dt.dex;
+  if(a === 'close') return closeData();
+  if(a === 'shop'){ closeData(true); closePick(); tm.from = ''; return openShop(); }
+  if(a === 'prev') dataStep(-1); else if(a === 'next') dataStep(1);
+  else if(a === 'back'){ dt.view = 'main'; dt.pick = null; }
+  else if(a === 'chapa'){ const err = useChapa(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: IV +${TRAIN.chapaIV} (ahora ${ivOf(d)[b.dataset.k]}).`); }
+  else if(a === 'chapap'){ const err = useChapaPlata(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: +${TRAIN.chapaEV} EV (ahora ${evOf(d)[b.dataset.k]}).`); }
+  else if(a === 'rsview'){ dt.view = 'reset'; dt.what = b.dataset.w; dt.pick = null; }
+  else if(a === 'natview'){ dt.view = 'nature'; dt.pick = null; }
+  else if(a === 'abview'){ dt.view = 'abil'; dt.pick = null; }
+  else if(a === 'mtview'){ dt.view = 'moves'; dt.slot = +b.dataset.s; dt.pick = null; }
+  else if(a === 'pick') dt.pick = b.dataset.v;
+  else if(a === 'cancel') dt.pick = null;
+  else if(a === 'ok') confirmPick();
+  else if(a === 'reset'){ resetMoves(d); toast('Ataques originales restaurados.'); }
+  renderData();
+});
