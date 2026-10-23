@@ -7,7 +7,7 @@ const rad = f => Math.max(26, idleInfo(f.m.dex).fw * ESCALA * .3);   // tamaño 
 function setAct(f, name, dur){ f.act = name; f.at = 0; f.lock = dur; }
 
 function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · close = golpe cuerpo a cuerpo · mvn = nombre del movimiento (solo para el efecto visual)
-  if(T.dead) return;
+  if(T.dead || T.ghost) return;                       // ghost: está entrando o saliendo con la animación de cambio (swap.js): no recibe golpes
   const mult = eff(type, T.m.types);
   const foeAtk = !!(A && g.e.includes(A));
   const scope = (A && A.item === 'periscopio') ? IFX.periscopio : 0;                                      // Periscopio: más probabilidad de crítico
@@ -38,7 +38,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
 }
 function melee(f, ang, dmg, type, mine, mvn){
   const T = foe(mine), dx = T.x-f.x, dy = T.y-f.y;
-  if(T.dead || Math.hypot(dx,dy) > 90 + rad(T)) return;
+  if(T.dead || T.ghost || Math.hypot(dx,dy) > 90 + rad(T)) return;
   let d = Math.abs(Math.atan2(dy,dx) - ang); d = Math.min(d, 2*Math.PI - d);
   if(d < 1) hit(T, dmg, type, f, true, false, mvn);
 }
@@ -86,7 +86,7 @@ function update(dt){
   g.clock += dt;
   const P = g.p[g.pi], E = g.e[g.ei];
 
-  if(!P.dead){
+  if(!P.dead && !P.ghost){                       // ghost = en pleno cambio de Pokémon: sin controles hasta que termine la animación
     const dx = (keys.KeyD||keys.ArrowRight?1:0) - (keys.KeyA||keys.ArrowLeft?1:0);
     const dy = (keys.KeyS||keys.ArrowDown?1:0) - (keys.KeyW||keys.ArrowUp?1:0);
     const aim = Math.atan2(mouse.y-P.y, mouse.x-P.x);
@@ -97,17 +97,19 @@ function update(dt){
     if(keys.KeyQ) use(P,3,aim,true);
     if(keys.KeyE) use(P,4,aim,true);
   }
-  if(!E.dead){                                   // IA del rival
+  if(!E.dead && !E.ghost){                       // IA del rival (no actúa mientras su Pokémon entra con la animación)
     const sk = g.o.skill, ang = Math.atan2(P.y-E.y, P.x-E.x), dist = Math.hypot(P.x-E.x, P.y-E.y);
     const want = dist > 240 ? 1 : dist < 140 ? -1 : 0, side = Math.sin(g.t*1.2 + g.ei*2);
     move(E, Math.cos(ang)*want + Math.cos(ang+1.57)*side, Math.sin(ang)*want + Math.sin(ang+1.57)*side, dt, .5 + .4*sk);
     E.dir = dirOf(ang);
     const err = (1-sk)*.6*(Math.random()-.5), r = Math.random;
-    if(dist < 120 && r() < dt*6) use(E,1,ang,false);
-    else if(r() < dt*(1+3*sk)) use(E,2,ang+err,false);
-    if(r() < dt*.5*sk) use(E,4,ang+err,false);
-    if(r() < dt*.25*sk) use(E,3,ang,false);
-    if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
+    if(!P.ghost){                                // si tu Pokémon está cambiando, el rival se mueve pero no ataca
+      if(dist < 120 && r() < dt*6) use(E,1,ang,false);
+      else if(r() < dt*(1+3*sk)) use(E,2,ang+err,false);
+      if(r() < dt*.5*sk) use(E,4,ang+err,false);
+      if(r() < dt*.25*sk) use(E,3,ang,false);
+      if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
+    }
   }
   for(const f of [P,E]){                         // tiempos de cada uno
     for(let i=0;i<5;i++) f.cd[i] = Math.max(0, f.cd[i]-dt);
@@ -120,20 +122,22 @@ function update(dt){
   for(const s of g.shots){                       // proyectiles
     s.x += s.vx*dt; s.y += s.vy*dt; s.life -= dt;
     const T = foe(s.mine);
-    if(!T.dead && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r){ hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
+    if(!T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r){ hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
     if(s.x<0 || s.x>W || s.y<0 || s.y>H) s.life = 0;
   }
   g.shots = g.shots.filter(s => s.life > 0);
   g.pops.forEach(p => p.t -= dt); g.pops = g.pops.filter(p => p.t > 0);
   fxUpdate(dt);
+  swapUpdate(dt);                                // animación de cambio de Pokémon (swap.js)
 
-  if(E.dead){ E.dt += dt; if(E.dt > 1){ const n = g.e.findIndex(f=>!f.dead); if(n<0) return endBattle(true);  g.e[n].x=E.x; g.e[n].y=E.y; g.ei=n; g.shots=[]; } }
-  if(P.dead){ P.dt += dt; if(P.dt > 1){ const n = g.p.findIndex(f=>!f.dead); if(n<0) return endBattle(false); g.p[n].x=P.x; g.p[n].y=P.y; g.pi=n; g.shots=[]; } }
+  if(E.dead){ E.dt += dt; if(E.dt > 1){ const n = g.e.findIndex(f=>!f.dead); if(n<0) return endBattle(true);  swapStart('e', n, true); } }
+  if(P.dead){ P.dt += dt; if(P.dt > 1){ const n = g.p.findIndex(f=>!f.dead); if(n<0) return endBattle(false); swapStart('p', n, true); } }
 }
 
 function switchMon(i){
   if(!g || g.over || g.paused || g.count > 0) return;
   if(i === undefined){ for(let k=1;k<=3;k++){ const j=(g.pi+k)%3; if(!g.p[j].dead){ i=j; break; } } }
   if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead) return;
-  const o = g.p[g.pi]; g.pi = i; g.p[i].x = o.x; g.p[i].y = o.y;
+  if(swapBusy()) return;                          // ya hay un cambio en marcha: no se empieza otro hasta que acabe la animación
+  swapStart('p', i, false);                       // la animación (swap.js) hace el cambio: retirada, lanzamiento y apertura
 }

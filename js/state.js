@@ -77,7 +77,7 @@ function startBattle(o){
          e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)
   p.forEach(f=>{ f.x = W*.25; f.y = H/2 + 10; f.dir = 2; });
   e.forEach(f=>{ f.x = W*.75; f.y = H/2 + 10; f.dir = 6; f.lvl = o.lvl; });
-  g = {o, p, e, pi:0, ei:0, shots:[], pops:[], t:0, clock:0, count:3, over:false};
+  g = {o, p, e, pi:0, ei:0, shots:[], pops:[], t:0, clock:0, count:3, over:false, sw:[]};     // sw = cambios de Pokémon en curso (js/swap.js)
   [...p, ...e].forEach(f => preloadSheets(f.m.dex, f.shiny));                                  // precarga de todas las animaciones (evita el círculo con la inicial al atacar)
   Music.battle(o);                                                                           // música del combate (music.js): fundido desde la del menú
   fxClear();                                                                                 // sin efectos de combates anteriores

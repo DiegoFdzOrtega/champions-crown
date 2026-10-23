@@ -47,6 +47,7 @@ function arenaFallback(){
 function arena(){ drawArena(g && g.o ? (g.o.arena || g.o.leader) : '', g ? g.t : 0); }
 
 function drawF(f, col){
+  if(f.ghost) return;                              // en pleno cambio: lo dibuja la animación (swap.js)
   const I = idleInfo(f.m.dex);
   const hid = f.hide > 0, lg = fxLunge(f);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
@@ -111,6 +112,7 @@ function draw(){
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.stroke();
   });
   fxDraw();                                        // impactos, golpes, polvo y partículas
+  swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
   ctx.restore();
   if(!P.dead){                                                               // cruz de puntería
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();

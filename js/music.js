@@ -233,6 +233,8 @@ const Music = (() => {
     click: [{f:880, at:0, d:.045, w:'square', v:.35}],
     logro: [{f:523, at:0, d:.12, w:'triangle', v:.8}, {f:659, at:.1, d:.12, w:'triangle', v:.8}, {f:784, at:.2, d:.12, w:'triangle', v:.8}, {f:1047, at:.3, d:.4, w:'triangle', v:.9}],
     win:   [{f:523, at:0, d:.14, w:'square', v:.5}, {f:659, at:.14, d:.14, w:'square', v:.5}, {f:784, at:.28, d:.14, w:'square', v:.5}, {f:1047, at:.42, d:.5, w:'square', v:.55}],
+    recall:[{f:1500, at:0, d:.38, w:'sawtooth', v:.28, to:260}, {f:900, at:.05, d:.3, w:'square', v:.12, to:200}],
+    sendout:[{f:500, at:0, d:.1, w:'triangle', v:.5, to:900}, {f:1200, at:.08, d:.25, w:'triangle', v:.5, to:1800}, {f:1800, at:.2, d:.3, w:'sine', v:.35}],
     lose:  [{f:392, at:0, d:.22, w:'sawtooth', v:.4}, {f:330, at:.22, d:.22, w:'sawtooth', v:.4}, {f:262, at:.44, d:.5, w:'sawtooth', v:.4, to:200}]
   };
   function sfx(name){
