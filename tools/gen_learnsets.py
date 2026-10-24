@@ -44,7 +44,10 @@ MOVES_ES = {
  'Garra Metal':'metal-claw','Bomba Imán':'magnet-bomb','Defensa Férrea':'iron-defense','Foco Resplandor':'flash-cannon',
  'Carantoña':'play-rough','Viento Feérico':'fairy-wind','Voz Cautivadora':'disarming-voice','Campo Neblinoso':'misty-terrain','Fuerza Lunar':'moonblast',
  'Cabezazo':'headbutt','Golpe Cuerpo':'body-slam','Doble Filo':'double-edge','Amnesia':'amnesia','Danza Espada':'swords-dance','Agilidad':'agility','Refugio':'withdraw',
+ 'Onda Trueno':'thunder-wave','Tóxico':'toxic','Fuego Fatuo':'will-o-wisp','Somnífero':'sleep-powder','Brecha Negra':'dark-void','Rayo Confuso':'confuse-ray',
 }
+# Movimientos exclusivos de un solo Pokémon (se fuerzan, da igual lo que digan los datos): Brecha Negra solo la usa Darkrai (nº 491)
+ONLY = {'Brecha Negra': [491]}
 METHODS = {'1','2','3','4'}      # 1 nivel (y evolución), 2 huevo, 3 tutor, 4 MT/MO
 # Juegos de referencia por orden de preferencia: (nombre corto, números de version_group)
 TIERS = [('SV', (25, 26, 27)), ('SwSh', (20, 21, 22)), ('LA', (24,)), ('BDSP', (23,)), ('USUM', (18,)), ('SM', (17,))]
@@ -80,6 +83,7 @@ def main(folder):
     for p, (name, groups) in ref.items():
         ids = set().union(*[got.get((p, v), set()) for v in groups])
         for i in ids: learn[want[i]].append(p)
+    for es, only in ONLY.items(): learn[es] = list(only)                 # exclusivos
     by_game = collections.defaultdict(list)
     for p, (name, _) in ref.items(): by_game[name].append(p)
     out = ['"use strict";',

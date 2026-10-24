@@ -54,24 +54,26 @@ function mtype(f, i){
 
 function use(f, i, ang, mine){
   const m = MV[i];
-  if(f.dead || f.stun > 0 || f.cd[i] > 0 || f.en < m.en) return;                // amedrentado (Roca del Rey): no puede atacar
+  if(f.dead || cant(f) || f.cd[i] > 0 || f.en < m.en) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
   f.cd[i] = m.cd; f.en -= m.en; f.dir = dirOf(ang);
-  const t = mtype(f, i), shotMv = (i === 2 || i === 4), it = f.item, boost = ITEMS[it] && ITEMS[it].type === t ? IFX.tipo : 1;   // objetos de tipo
+  if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede) o confuso (a veces se golpea a sí mismo): se pierde el ataque
+  const nm = mvName(f, i), sm = i === 3 && STATUS_MOVES[nm];                    // sm: ataque de estado (js/status.js)
+  const t = sm ? MOVES[nm].t : mtype(f, i), shotMv = (i === 2 || i === 4), it = f.item, boost = ITEMS[it] && ITEMS[it].type === t ? IFX.tipo : 1;   // objetos de tipo
   const d = f.dmg * (f.buff > 0 ? 1.3 : 1) * (it === 'vidasfera' ? 1.3 : 1) * boost
           * (it === 'cintaelec' && i === 1 ? IFX.cinta : 1) * (it === 'gafaselec' && shotMv ? IFX.gafaselec : 1) * (it === 'gafasesp' && shotMv ? IFX.gafasesp : 1);
   if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4)) f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
   if(i === 0){ f.dash = .25; f.da = ang; }
-  const nm = mvName(f, i);                                                  // nombre real del movimiento: decide la animación
-  if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d, t, mine, nm); }
+  if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
-  if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  f.buff = 5; }
+  if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed, STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
+  else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  f.buff = 5; }
   if(i === 4){ setAct(f,'Charge',.6);  fxShotStart(f, shot(f, ang, m.dmg*d, 380, 22, t, mine), nm, true); }
 }
 
 function move(f, dx, dy, dt, k){
-  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * (f.buff > 0 ? 1.25 : 1) * (f.item === 'panuelo' ? 1.35 : 1);
+  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * (f.buff > 0 ? 1.25 : 1) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1);
   let vx = 0, vy = 0;
-  if(f.stun > 0){ f.mv = false; return; }                                       // amedrentado: no se mueve
+  if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
   else if(l){ vx = dx/l*sp*k; vy = dy/l*sp*k; }
   f.mv = l > 0 || f.dash > 0;
@@ -118,11 +120,13 @@ function update(dt){
     if(f.stun > 0) f.stun -= dt;
     f.en = Math.min(100, f.en + EN_REGEN*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
     if(!f.dead && f.lock <= 0){ const w = f.mv ? 'Walk' : 'Idle'; if(f.act !== w){ f.act = w; f.at = 0; } }
+    statusTick(f, dt);                           // estados (js/status.js)
   }
+  statusBench();                                 // quien espera en el banquillo no conserva estados
   for(const s of g.shots){                       // proyectiles
     s.x += s.vx*dt; s.y += s.vy*dt; s.life -= dt;
     const T = foe(s.mine);
-    if(!T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r){ hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
+    if(!T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r){ if(s.status) statusShotHit(T, s); else hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
     if(s.x<0 || s.x>W || s.y<0 || s.y>H) s.life = 0;
   }
   g.shots = g.shots.filter(s => s.life > 0);

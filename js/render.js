@@ -56,7 +56,9 @@ function drawF(f, col){
     text(f.m.name[0], f.x + lg.x, f.y+8 + lg.y, 20, '#10141e', 'center');
   }
   if(f.buff > 0 && !hid) fxAura(f, I);                                         // aura de la mejora activa (5 s)
+  if(!hid && !f.dead && hasStatus(f)) fxStatusAura(f, I);                      // aura del estado (paralizado, veneno, quemadura, sueño, confusión)
   if(!f.dead) bar(f.x-30, f.y + I.top*ESCALA - 14, 60, 7, f.hp, f.max, col);
+  if(!f.dead && hasStatus(f)) statusChips(f, f.x-30, f.y + I.top*ESCALA - 26, 28, 10, 6);   // etiquetas PAR · TOX · QUE · DRM · CNF
 }
 
 // Cuadritos del equipo (debajo de tu tarjeta): posición en el mundo del juego. La usan hud() para dibujarlos y ui.js para saber si hiciste clic en uno.
@@ -72,6 +74,7 @@ function hud(x, y, list, idx, col){
   ctx.fillStyle = '#0a0d15'; ctx.fillRect(x+8, y+10, 56, 56);                // retrato
   ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
   drawFrame(ctx, f.m.dex, 'Idle', 0, 0, x+36, y+38, 2, 50, f.shiny);
+  if(hasStatus(f)) statusChips(f, x+8, y+55, 27, 11, 6);                    // estado en el retrato
   text(f.m.name.toUpperCase(), x+74, y+24, 10);
   f.m.types.forEach((t,j)=>{
     const tx = x + w - 8 - 64*(f.m.types.length - j);

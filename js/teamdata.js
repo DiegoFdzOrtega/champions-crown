@@ -120,7 +120,7 @@ const mvType = (d, n) => (MOVES[n] || {}).t || mon(d).types[0];
 function mvCard(d, sl, n, cls, tag){
   const q = MV[sl];
   return `<div class="mvc ${cls}"><span class="sl">${SLOT_SHORT[sl]}</span><b>${esc(n)}</b>${typeChip(mvType(d, n))}
-    <small>${SLOT_DESC[sl]} · Energía ${q.en} · Recarga ${String(q.cd).replace('.', ',')} s</small>${tag ? `<em>${tag}</em>` : ''}</div>`;
+    <small>${slotDesc(sl, n)} · Energía ${q.en} · Recarga ${String(q.cd).replace('.', ',')} s</small>${tag ? `<em>${tag}</em>` : ''}</div>`;
 }
 // «Cambiar ataque»: un hueco concreto. Aquí solo se elige y se muestra; quien decide si se puede aprender es teachCheck() (training.js).
 function dataMoves(){

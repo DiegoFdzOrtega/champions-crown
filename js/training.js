@@ -26,6 +26,9 @@ const TRAIN = {
   evCap: 252, evTotal: 510, evPerFoe: 0,         // EVs: tope por stat, tope total y EVs que da cada rival vencido (0 = los EVs solo se consiguen con Chapas Plateadas)
   power: .6,                                     // fracción del efecto "oficial" de IVs/EVs/naturaleza que se nota en combate (1 = igual que los juegos)
   mtStockEach: 3, mtPerSlot: 2,                  // cada MT del día tiene 3 unidades; salen 2 MTs por cada hueco de ataque (8 al día)
+  // MTs SIEMPRE a la venta (para probarlos): no entran en el sorteo diario y tienen mtFixedEach unidades al día.
+  // Para devolverlos a la rotación normal, vacía la lista:  mtFixed: []
+  mtFixed: ['Onda Trueno', 'Tóxico', 'Fuego Fatuo', 'Somnífero', 'Brecha Negra', 'Rayo Confuso'], mtFixedEach: 10,
   price: {chapa: 60, plata: 40, menta: 120, capsula: 150, mt: {1: 80, 2: 90, 3: 70, 4: 130}}      // precios en Puntos de Batalla
 };
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -150,14 +153,14 @@ function mulberry(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Mat
 function mtStock(day = dayNumber()){
   const r = mulberry(day * 7919 + 20241), out = [];
   for(let s = 1; s <= 4; s++){
-    const pool = MT_LIST.filter(n => MOVES[n].s === s && learnersOf(n) > 0);          // nunca salen MTs que ningún Pokémon puede aprender
+    const pool = MT_LIST.filter(n => MOVES[n].s === s && learnersOf(n) > 0 && !TRAIN.mtFixed.includes(n));          // nunca salen MTs que ningún Pokémon puede aprender (ni los fijos: esos van aparte)
     for(let i = pool.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     out.push(...pool.slice(0, TRAIN.mtPerSlot));
   }
-  return out;
+  return out.concat(TRAIN.mtFixed.filter(n => MOVES[n] && learnersOf(n) > 0));         // + los que están siempre a la venta
 }
 function mtBoughtToday(){ const d = dayNumber(); if(!save.mtBought || save.mtBought.day !== d) save.mtBought = {day: d, n: {}}; return save.mtBought.n; }
-const mtLeft = id => TRAIN.mtStockEach - (mtBoughtToday()[id] || 0);
+const mtLeft = id => (TRAIN.mtFixed.includes(MT_ID[id]) ? TRAIN.mtFixedEach : TRAIN.mtStockEach) - (mtBoughtToday()[id] || 0);
 
 // ---------------------------------------------------------------------
 // Objetos de mejora e iconos (dibujados en píxeles, sin imágenes externas)
@@ -212,7 +215,7 @@ function refreshMtShop(){
   for(let i = SHOP.length - 1; i >= 0; i--) if(SHOP[i].cat === 'mt') SHOP.splice(i, 1);
   mtStock().forEach(n => { const mv = MOVES[n];
     SHOP.push({id:mtId(n), n:'MT ' + n, p:TRAIN.price.mt[mv.s], cat:'mt', mv:n, icon:trainIcon(mtId(n)),
-      d:`Enseña «${n}» (${TYPE_ES[mv.t]}) en el hueco de ${SLOT_NAMES[mv.s]}. Se gasta al usarla.`}); });
+      d:`Enseña «${n}» (${TYPE_ES[mv.t]}) en el hueco de ${SLOT_NAMES[mv.s]}. Se gasta al usarla.` + (TRAIN.mtFixed.includes(n) ? ' ¡Nuevo! Siempre a la venta.' : '')}); });
 }
 function buyError(id, n){                                             // por qué ha fallado una compra
   const it = SHOP.find(s => s.id === id);

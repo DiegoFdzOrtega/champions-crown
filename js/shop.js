@@ -39,7 +39,7 @@ function drawShop(){
   let list = SHOP.filter(it => shopSt.cat === 'todo' || it.cat === shopSt.cat);
   if(shopSt.sort === 'pa') list.sort((a,b) => a.p - b.p); else if(shopSt.sort === 'pd') list.sort((a,b) => b.p - a.p);
   else if(shopSt.sort === 'nom') list.sort((a,b) => a.n.localeCompare(b.n, 'es'));
-  $('shNote').innerHTML = shopSt.cat === 'mt' ? 'Los MTs cambian solos cada 24 horas (a medianoche): <b>8 al día</b>, con pocas unidades de cada uno. Se renuevan en <b id="shClock"></b>. Se usan en Equipo Pokémon > Ver datos.' :
+  $('shNote').innerHTML = shopSt.cat === 'mt' ? 'Los MTs cambian solos cada 24 horas (a medianoche): <b>8 al día</b>, con pocas unidades de cada uno. Los ataques de estado nuevos están <b>siempre a la venta</b> (hasta ' + TRAIN.mtFixedEach + ' al día de cada uno). Se renuevan en <b id="shClock"></b>. Se usan en Equipo Pokémon > Ver datos.' :
     shopSt.cat === 'mejora' ? 'Las mejoras se gastan en Equipo Pokémon > Ver datos: Chapa Dorada = más IV, Menta = otra naturaleza, Cápsula = otra habilidad.' :
     shopSt.cat === 'tipo' ? 'Los objetos de tipo potencian un 20% los ataques de ese tipo. Mira el tipo de tus ataques en el combate.' :
     shopSt.cat === 'ticket' ? 'Los tickets se gastan en el Gachapon.' : 'Cada Pokémon lleva un objeto. Puedes comprar varios del mismo para equipárselos a más de un Pokémon.';

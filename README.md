@@ -19,6 +19,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/sprites.js: carga las hojas y detecta solo el tamaño de cada cuadro; retratos de líderes
 - js/state.js: tamaño del lienzo, partida guardada (save) y creación de combates
 - js/combat.js: movimiento, ataques, daño, efectos de los objetos, IA y cambio de Pokémon
+- js/status.js: estados (paralizado, envenenado, quemado, dormido, confuso) y los 6 ataques que los ponen; los números están en `STX`
 - js/background.js: fondo pixel art del menú
 - js/teams.js: equipos competitivos de los 8 líderes, el Alto Mando y el Campeón (naturaleza, habilidad, objeto, IVs, EVs y movimientos) + la recompensa por vencer
 - js/johto.js: la **Historia de Johto** (8 líderes, Alto Mando de 4 y Campeón, con sus equipos y recompensas)
@@ -39,6 +40,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/fxmelee.js: animaciones de los ataques cuerpo a cuerpo (Placaje, Arañazo, Mordisco, Excavar, Golpe Roca...)
 - js/fxshots.js: chorros, rayos y proyectiles en vuelo (Lanzallamas, Rayo, Hoja Afilada...) y sus estelas
 - js/fxextra.js: impactos de cada movimiento y animaciones de las mejoras (Danza Espada, Día Soleado...)
+- js/fxstatus.js: dibujos provisionales de los ataques de estado (proyectil, estela, impacto, aura y etiquetas PAR/TOX/QUE/DRM/CNF)
   Los efectos se dibujan por código sobre el lienzo (no usan imágenes). Para añadir un movimiento nuevo: ponlo en MOVESET (moves.js) y crea su receta en FXR.melee / FXR.flight (+ FXR.stream) / FXR.buff+FXR.aura; FXR.impact es opcional (si no, usa el impacto de su tipo).
 - js/victoria.js: la **pantalla de victoria** con las recompensas en tarjetas con icono (ver la sección «Pantalla de victoria»)
 - js/swap.js: la **animación de cambio de Pokémon** estilo anime (rayo rojo de retirada, Poké Ball que vuela y se abre, salida con destello); ver la sección «Animación de cambio de Pokémon»
@@ -77,6 +79,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - **Chapa Dorada** (60 PB, `objetos/ivs/chapa-dorada.png`): +5 a un IV. **Chapa Plateada** (40 PB, `objetos/ivs/Chapa-plateada.png`): +10 EV a un stat. Los límites son los reales de los juegos: IV 0-31 por stat (186 en total) y EV 252 por stat útiles (el máximo teórico es 255) y 510 en total.
 - **Restablecer** (en Ver datos): «↺ Restablecer IVs» vuelve los IV a 0 y devuelve las Chapas Doradas gastadas en ese Pokémon; «↺ Restablecer EVs» quita los EVs que dieron las Chapas Plateadas (los ganados en combate se quedan) y las devuelve. Pide confirmación. Datos: `save.ivBase`, `save.evCap`, `save.capUsed`.
 - **Todos los Pokémon empiezan con IV 0 y EV 0 en todo** (da igual cuál sea o cómo lo consigas). La única forma de subirlos es gastar Chapas Doradas (IV) y Plateadas (EV) en la ficha. Las chapas se consiguen en la tienda y como recompensa al vencer a los líderes (5 + 5). Así cada chapa tiene sentido. **Menta** (120 PB): cambia la naturaleza a la que elijas. **Cápsula de Habilidad** (150 PB): cambia a la otra habilidad. **MT**: enseña un movimiento y sustituye al que haya en ese hueco (golpe, disparo, mejora o fuerte).
+- **MTs siempre a la venta (provisional, para probar):** los 6 ataques de estado (Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra y Rayo Confuso) están siempre en la tienda, además de los 8 del día, con 10 unidades al día de cada uno. Están en `TRAIN.mtFixed` (`js/training.js`): para devolverlos a la rotación normal, deja esa lista vacía (`mtFixed: []`).
 - **MTs del día** (Tienda > MTs del día): 8 MTs (2 por hueco), 3 unidades de cada uno, precio según el hueco (70-130 PB). Cambian solos a medianoche (hora del ordenador); salen del número de día, así que no hace falta guardar nada.
 - Los IV y EV ya **no se sortean ni se ganan en combate** (`TRAIN.evPerFoe = 0`; si quieres que los rivales vuelvan a dar EVs, ponlo en 4). Para que el juego siga siendo justo, la referencia de las estadísticas es ahora «IV 0, EV 0, naturaleza neutra» (multiplicador ×1,00 en `refStat`), así que los rivales (que sí llevan IV 31 y EV) resultan relativamente más difíciles hasta que entrenes con chapas. Si te pasas de difícil, baja `ENEMY_POWER`.
 - **Partidas antiguas:** al cargar un guardado anterior (`trainV` menor que 2) se ponen a 0 todos los IV y EV y se **devuelven las chapas** que habías gastado, para que las vuelvas a gastar como quieras.
@@ -410,7 +413,7 @@ En el combate, la caja de datos del rival **ya no muestra «NV 120»** (en `hud(
 - **Tienda:** los MTs del día nunca incluyen un movimiento que ningún Pokémon pueda aprender.
 
 ## Lista de ataques del juego (los que se pueden enseñar con MT)
-Son **93 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
+Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
 
 **Golpe (clic izquierdo): 23 ataques**
 
@@ -474,7 +477,7 @@ Son **93 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 | Tajo Aéreo | Volador | 139 |
 | Tornado | Volador | 47 |
 
-**Mejora (Q): 22 ataques**
+**Mejora (Q): 28 ataques**
 
 | Ataque | Tipo | Aprenden |
 |---|---|---|
@@ -500,6 +503,12 @@ Son **93 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 | Tormenta de Arena | Tierra | 244 |
 | Armadura Ácida | Veneno | 33 |
 | Viento Afín | Volador | 110 |
+| Onda Trueno | Eléctrico | 266 |
+| Tóxico | Veneno | 115 |
+| Fuego Fatuo | Fuego | 129 |
+| Somnífero | Planta | 28 |
+| Brecha Negra | Siniestro | 1 (solo Darkrai) |
+| Rayo Confuso | Fantasma | 159 |
 
 **Ataque fuerte (E): 19 ataques**
 
@@ -527,6 +536,36 @@ Son **93 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 
 ## Restos (rebalanceo)
 Los **Restos** curaban un 1,5% de la vida máxima **cada segundo** (≈90% por minuto), demasiado para un juego en tiempo real: los tanques rivales casi no se podían matar. Ahora curan un **0,4% por segundo** (≈24% por minuto; en los juegos es 1/16 por turno). Vale igual para ti y para los rivales. El número es `IFX.restos` en `js/data.js` (`.004`); súbelo o bájalo si quieres otro equilibrio.
+
+## Ataques de estado: Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra y Rayo Confuso (js/status.js, js/fxstatus.js)
+Son 6 ataques nuevos del **hueco 3 (tecla Q)**. Compiten con las mejoras (Afilar, Danza Espada...): en ese hueco solo cabe un movimiento. Se consiguen con **MT** (tienda, MTs del día) y se enseñan igual que los demás. Nadie los lleva de serie.
+
+Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el rival recibe un **estado**. Cuestan lo mismo que cualquier Q (energía 20, recarga 10 s).
+
+| Ataque | Tipo | Estado | Qué hace en este juego | Quién lo aprende |
+|---|---|---|---|---|
+| Onda Trueno | Eléctrico | Paralizado, 5 s | Se mueve a la mitad de velocidad y el 25 % de sus ataques fallan (gasta energía y recarga). | 266 |
+| Tóxico | Veneno | Envenenado grave, 6 s | Pierde un 0,3 % de la vida máxima por segundo y **sube 0,3 % cada segundo** (≈6 % en total). | 115 |
+| Fuego Fatuo | Fuego | Quemado, 8 s | Pierde un 0,5 % de la vida máxima por segundo (≈4 %) y su golpe cuerpo a cuerpo hace la mitad. | 129 |
+| Somnífero | Planta | Dormido, 2 s | No se mueve ni ataca. Es un polvo: los tipo Planta no se ven afectados. | 28 |
+| Brecha Negra | Siniestro | Dormido, 2,5 s | Igual que Somnífero, pero afecta a todos los tipos. **Solo la puede aprender Darkrai.** | 1 |
+| Rayo Confuso | Fantasma | Confuso, 4 s | El 33 % de sus ataques se los hace a sí mismo (con la mitad de la fuerza de su golpe). | 159 |
+
+**Reglas:**
+- Solo un estado entre paralizado, envenenado, quemado y dormido. Si ya tiene uno, el ataque no hace nada (sale «Ya tiene un estado»). La **confusión** se puede sumar a otro estado.
+- **Inmunidades** (las de los juegos): los Eléctricos no se paralizan, los Veneno y Acero no se envenenan, los Fuego no se queman. Además, el tipo del ataque también cuenta: Onda Trueno no afecta a Tierra, Rayo Confuso no afecta a Normal, Tóxico no afecta a Acero y Somnífero no afecta a Planta.
+- Al despertar, un Pokémon no se puede volver a dormir durante 5 s.
+- Los estados desaparecen al debilitarse el Pokémon o al salir del combate (cambio de Pokémon). Veneno y quemadura sí pueden debilitar.
+- Se ve en la tarjeta (etiqueta PAR, TOX, QUE, DRM o CNF bajo el retrato), sobre la barra de vida del Pokémon, y con una aura en pixel art.
+
+**Dónde cambiar los números:** `STX` al principio de `js/status.js` (duraciones, daño por segundo, velocidad del proyectil...). `STATUS_MOVES` dice qué estado pone cada ataque y a qué tipos no afecta.
+
+**Cómo está hecho:**
+- `js/status.js`: los estados (`statusInflict`, `statusTick`, `statusBlock`...). `js/combat.js` solo llama a esas funciones: `use()` (dormido, paralizado, confuso, quemado y el proyectil de estado), `move()` (velocidad) y `update()` (el paso del tiempo y el impacto del proyectil).
+- `js/moves.js`: los 6 ataques están en `EXTRA_MOVES` (hueco 3), así que no los lleva ningún Pokémon por defecto.
+- `tools/gen_learnsets.py`: tienen su nombre de PokéAPI en `MOVES_ES` y Brecha Negra está forzada a Darkrai en `ONLY`.
+- **Sprites:** los dibujos actuales son **provisionales** y están hechos por código en `js/fxstatus.js` (proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`). Cuando tengas los sprites definitivos solo hay que cambiar esas funciones.
+- Los rivales **todavía no usan** estos ataques (de momento solo el jugador).
 
 ## Barra de energía y tiempos de los ataques (js/render.js)
 Encima de la barra de ataques hay una **barra de ENERGÍA** siempre visible, con una marca morada en **20** (ataque **Q**) y una amarilla en **40** (ataque **E**, el fuerte). Sobre cada marca pone cuántos segundos faltan para poder usarlo (o ✔ si ya puedes). La energía sube **12 por segundo** (`EN_REGEN` en `js/data.js`). Cada tarjeta de ataque muestra además el tiempo que falta hasta poder usarlo, que es el mayor de dos: el **enfriamiento** (número blanco) o la **energía que falta** (número azul), y una mini barra azul de energía que se pone verde cuando ya llega.
