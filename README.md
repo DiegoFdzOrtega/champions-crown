@@ -40,7 +40,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/fxmelee.js: animaciones de los ataques cuerpo a cuerpo (Placaje, Arañazo, Mordisco, Excavar, Golpe Roca...)
 - js/fxshots.js: chorros, rayos y proyectiles en vuelo (Lanzallamas, Rayo, Hoja Afilada...) y sus estelas
 - js/fxextra.js: impactos de cada movimiento y animaciones de las mejoras (Danza Espada, Día Soleado...)
-- js/fxstatus.js: dibujos provisionales de los ataques de estado (proyectil, estela, impacto, aura y etiquetas PAR/TOX/QUE/DRM/CNF)
+- js/fxstatus.js: dibujos de los ataques de estado, al estilo del anime (proyectil, estela, impacto, aura y etiquetas PAR/TOX/QUE/DRM/CNF)
   Los efectos se dibujan por código sobre el lienzo (no usan imágenes). Para añadir un movimiento nuevo: ponlo en MOVESET (moves.js) y crea su receta en FXR.melee / FXR.flight (+ FXR.stream) / FXR.buff+FXR.aura; FXR.impact es opcional (si no, usa el impacto de su tipo).
 - js/victoria.js: la **pantalla de victoria** con las recompensas en tarjetas con icono (ver la sección «Pantalla de victoria»)
 - js/swap.js: la **animación de cambio de Pokémon** estilo anime (rayo rojo de retirada, Poké Ball que vuela y se abre, salida con destello); ver la sección «Animación de cambio de Pokémon»
@@ -565,7 +565,7 @@ Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el ri
 - `js/status.js`: los estados (`statusInflict`, `statusTick`, `statusBlock`...). `js/combat.js` solo llama a esas funciones: `use()` (dormido, paralizado, confuso, quemado y el proyectil de estado), `move()` (velocidad) y `update()` (el paso del tiempo y el impacto del proyectil).
 - `js/moves.js`: los 6 ataques están en `EXTRA_MOVES` (hueco 3), así que no los lleva ningún Pokémon por defecto.
 - `tools/gen_learnsets.py`: tienen su nombre de PokéAPI en `MOVES_ES` y Brecha Negra está forzada a Darkrai en `ONLY`.
-- **Sprites:** los dibujos actuales son **provisionales** y están hechos por código en `js/fxstatus.js` (proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`). Cuando tengas los sprites definitivos solo hay que cambiar esas funciones.
+- **Sprites:** los dibujos están hechos por código en `js/fxstatus.js` y copian el aspecto del anime: Onda Trueno = anillos eléctricos amarillos que se expanden y chispas que recorren el cuerpo; Tóxico = gota de veneno morado con burbujas que chorrea; Fuego Fatuo = llamitas azul-violeta que giran y luego se alzan alrededor del rival; Somnífero = polvo brillante verde-amarillo que cae sobre el rival; Brecha Negra = esfera de vacío con remolino que se abre bajo el rival; Rayo Confuso = orbe espectral con cinta ondulante y espirales de luz. Proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`. Si algún día tienes sprites propios, solo hay que sustituir esas funciones.
 - Los rivales **todavía no usan** estos ataques (de momento solo el jugador).
 
 ## Barra de energía y tiempos de los ataques (js/render.js)
