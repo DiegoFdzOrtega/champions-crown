@@ -30,6 +30,7 @@ function buildTeamShell(){
   $('teamv').innerHTML = `<canvas id="tmRoom" class="room" aria-hidden="true"></canvas>
     <div class="dx tmx">
     <header class="dxh tmhd"><h1>Equipo Pokémon</h1><div class="tmhr"><span id="tmTotal"></span><button id="tmBack" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></div></header>
+    <p class="tmhint">⠿ Arrastra las cajas para cambiar el orden · el nº 1 sale primero al combate</p>
     <section class="tmtop"><div id="tmSlots" class="tmslots"></div></section></div>
     <div id="tmPick" class="tmm hide"><div class="dx tmmb">
       <header class="dxh"><h1 id="tmPickT">Añadir Pokémon</h1><span id="tmPickS"></span><button id="tmPickX" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></header>
@@ -39,7 +40,8 @@ function buildTeamShell(){
       <div id="tmNav" class="tabs"></div>
       <div id="tmList" class="tmlist"></div></div></div>
     <div id="tmData" class="tmm hide"><div class="dx tmmb tmdb" id="tmDataB"></div></div>`;
-  $('tmSlots').addEventListener('click', ddClick); $('tmSlots').addEventListener('keydown', ddKey);   // desplegable de objetos (se reparte por eventos: las tarjetas se redibujan)
+  $('tmSlots').addEventListener('click', ddClick); $('tmSlots').addEventListener('keydown', ddKey);
+  ['pointerdown','pointermove','pointerup','pointercancel'].forEach(t => $('tmSlots').addEventListener(t, slotDrag));   // arrastrar las cajas para ordenar el equipo   // desplegable de objetos (se reparte por eventos: las tarjetas se redibujan)
   document.addEventListener('click', e => { if(!e.target.closest('.idd')) closeDd(); });
   $('tmBack').onclick = closeTeam; $('tmPickX').onclick = closePick;
   $('tmPick').onclick = e => { if(e.target === $('tmPick')) closePick(); };                  // clic fuera de la ventana = cerrar
@@ -95,6 +97,7 @@ function closeTeam(){ closePick(); closeData(true); closeDd(); roomStop(); tm.fr
 addEventListener('keydown', e => {
   if(e.code !== 'Escape' || !tm.built || $('teamv').classList.contains('hide')) return;
   e.stopImmediatePropagation();
+  if(tmDrag.on){ slotDragEnd(true); return; }                                                 // si estás arrastrando una caja, Esc la devuelve a su sitio
   if(document.querySelector('.iddl:not([hidden])')){ closeDd(); return; }                    // primero se cierra el desplegable de objetos
   if(!$('tmData').classList.contains('hide')) dataEsc(); else if(!$('tmPick').classList.contains('hide')) closePick(); else closeTeam();
 }, true);
@@ -147,6 +150,57 @@ function ddKey(e){                                                              
     const n = e.key === 'ArrowDown' ? Math.min(items.length - 1, i + 1) : Math.max(0, i < 0 ? 0 : i - 1); items[n].focus();
   }else if((e.key === 'Enter' || e.key === ' ') && i >= 0){ e.preventDefault(); items[i].click(); }
 }
+
+// ---- Arrastrar para ordenar el equipo ----
+// Se agarra una caja (en cualquier sitio menos botones y el desplegable de objetos), se arrastra hasta otro hueco y se suelta.
+// Mientras se arrastra, las otras cajas se apartan para dejar sitio. Al soltar se reordena `team` (el nº 1 sale primero al combate) y se guarda.
+const tmDrag = {ready:false, on:false};
+function slotDrag(e){
+  const D = tmDrag, box = $('tmSlots');
+  if(e.type === 'pointerdown'){
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    const card = e.target.closest('.tslot[data-d]'); if(!card || team.length < 2) return;
+    if(e.target.closest('button, .idd, input, select, textarea, a')) return;                         // los botones y el desplegable funcionan como siempre
+    const cards = [...box.querySelectorAll('.tslot')];
+    Object.assign(D, {ready:true, on:false, id:e.pointerId, card, cards, x0:e.clientX, y0:e.clientY, from:+card.dataset.i, to:+card.dataset.i, n:team.length, rects:cards.map(c => c.getBoundingClientRect())});
+    return;
+  }
+  if(!D.ready || e.pointerId !== D.id) return;
+  const dx = e.clientX - D.x0, dy = e.clientY - D.y0;
+  if(e.type === 'pointermove'){
+    if(!D.on){
+      if(Math.hypot(dx, dy) < 8) return;                                                             // un clic normal no es un arrastre
+      D.on = true; closeDd(); try{ D.card.setPointerCapture(D.id); }catch(_){ }
+      D.card.classList.add('dragging'); box.classList.add('sorting');
+    }
+    D.card.style.transform = `translate(${dx}px, ${dy}px) scale(1.03)`;
+    let best = D.from, bd = Infinity;                                                                // hueco (ocupado) cuyo centro está más cerca del puntero
+    for(let i = 0; i < D.n; i++){ const r = D.rects[i], d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)); if(d < bd){ bd = d; best = i; } }
+    D.to = best;
+    D.cards.forEach((c, j) => {                                                                      // las demás cajas se apartan
+      if(j === D.from || j >= D.n) return;
+      const k = D.from < D.to && j > D.from && j <= D.to ? j - 1 : D.from > D.to && j >= D.to && j < D.from ? j + 1 : j;
+      c.style.transform = k === j ? '' : `translate(${D.rects[k].left - D.rects[j].left}px, ${D.rects[k].top - D.rects[j].top}px)`;
+    });
+    return;
+  }
+  slotDragEnd(e.type === 'pointercancel');                                                           // pointerup / pointercancel
+}
+function slotDragEnd(cancel){
+  const D = tmDrag; if(!D.ready) return; D.ready = false;
+  if(!D.on) return;
+  D.on = false; const box = $('tmSlots'), {from, to} = D;
+  box.addEventListener('click', stopOnce, true); setTimeout(() => box.removeEventListener('click', stopOnce, true), 80);   // el clic que llega al soltar no debe abrir nada
+  box.classList.remove('sorting'); D.card.classList.remove('dragging');
+  if(cancel || from === to){                                                                          // sin cambios: todo vuelve a su sitio
+    D.cards.forEach(c => { c.style.transform = ''; }); return;
+  }
+  const [d] = team.splice(from, 1); team.splice(to, 0, d); persist();
+  renderTeamSlots();
+  const land = box.querySelector(`.tslot[data-i="${to}"]`); if(land) land.classList.add('landed');
+  toast(`${mon(d).name} ahora es el nº ${to + 1} del equipo.`);
+}
+const stopOnce = ev => ev.stopPropagation();
 
 // ---- Tu equipo (3 tarjetas grandes) ----
 function renderTeamSlots(){

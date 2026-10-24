@@ -33,8 +33,10 @@ addEventListener('keydown', e=>{
 addEventListener('keyup', e=> keys[e.code] = false);
 addEventListener('blur', ()=>{ for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; });
 function setMouse(e){ const r = cv.getBoundingClientRect(); mouse.x = (e.clientX-r.left)*W/r.width; mouse.y = (e.clientY-r.top)*H/r.height; }
-cv.addEventListener('mousemove', setMouse);
-cv.addEventListener('mousedown', e=>{ setMouse(e); if(e.button===0) mouse.l = true; if(e.button===2) mouse.r = true; });
+cv.addEventListener('mousemove', e=>{ setMouse(e); const k = g && !g.paused ? hudIconAt(mouse.x, mouse.y) : -1; cv.style.cursor = k >= 0 && !g.p[k].dead && k !== g.pi ? 'pointer' : ''; });   // manita sobre los cuadritos del equipo
+cv.addEventListener('mousedown', e=>{ setMouse(e);
+  if(e.button===0 && g && !g.over && !g.paused){ const k = hudIconAt(mouse.x, mouse.y); if(k >= 0){ switchMon(k); return; } }     // clic en un cuadrito del equipo = cambiar de Pokémon (no dispara)
+  if(e.button===0) mouse.l = true; if(e.button===2) mouse.r = true; });
 addEventListener('mouseup', e=>{ if(e.button===0) mouse.l = false; if(e.button===2) mouse.r = false; });
 cv.addEventListener('contextmenu', e=>e.preventDefault());
 addEventListener('resize', resize);

@@ -33,20 +33,20 @@ function endBattle(won){
   g.over = true;
   const o = g.o, F = FLOORS[o.n], b = document.getElementById('rBtns'); b.innerHTML = '';
   const add = (t,fn,main)=>{ const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
-  const set = (t,p)=>{ document.getElementById('rTitle').textContent = t; document.getElementById('rText').textContent = p; };
+  const set = (t,p)=>{ resultClear(); document.getElementById('rTitle').textContent = t; document.getElementById('rText').textContent = p; };
   if(won){
-    const R = F.region, parts = [];
+    const R = F.region, chips = [];
     gainEVs(g.e.map(f => f.m.dex));                                                    // EVs para tu equipo
     const first = o.floor > progOf(R);
     if(first) setProg(R, o.floor);                                                     // progreso de la región (solo avanza la primera vez)
     if(F.kind === 'campeon') save.champ[R] = 1;                                        // trofeo del Equipo Pokémon (room.js) y progreso hacia la Torre Batalla
-    const rw = giveReward(F, first); if(rw) parts.push(rw);                            // recompensa fija: 10 tiradas de Gachapon (+ chapas), SIN BP (REWARD y REWARD_REGION en teams.js)
-    if(TRAIN.evPerFoe > 0) parts.push('+EVs para tu equipo');
-    if(F.kind === 'campeon') parts.push('Trofeo de la Liga en tu habitación');
+    giveReward(F, first);                                                              // recompensa fija: 10 tiradas de Gachapon (+ chapas), SIN BP (REWARD y REWARD_REGION en teams.js) · la pantalla de victoria (victoria.js) la enseña con iconos
+    if(TRAIN.evPerFoe > 0) chips.push({t:'+EVs para tu equipo', c:'#3ea6ff'});
+    if(F.kind === 'campeon') chips.push({t:'Trofeo de la Liga en tu habitación', c:'#ffcc33'});
     persist(); achSync();                                                              // logros: comprueba si esta victoria desbloquea alguno (achievements.js)
     const nx = FLOORS[o.n+1], next = nx && nx.region === R ? nx : null;               // el siguiente de la MISMA región (tras el Campeón no hay más)
-    if(next) parts.push(`Siguiente: ${next.leader}`);
-    set(F.kind === 'campeon' ? `¡Has vencido a ${F.leader}! ¡Eres el Campeón de ${R}!` : `¡Has vencido a ${F.leader}!`, parts.join(' · '));
+    if(next) chips.push({t:`Siguiente: ${next.leader}`, c:'#4ccf6a'});
+    victoryScreen({title:`¡Has vencido a ${F.leader}!`, sub: F.kind === 'campeon' ? `¡Eres el Campeón de ${R}!` : '', rewards:lastReward, chips, leader:o.leader, path:o.portrait});
     if(next) add(next.kind === 'lider' ? 'Siguiente líder' : next.kind === 'alto' ? 'Siguiente: Alto Mando' : 'Combate final: Campeón', ()=>floorFight(o.n+1), true);
   }else{
     set(`${F.leader} ha ganado esta vez`, 'Cambia el equipo o los objetos e inténtalo otra vez.');

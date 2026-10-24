@@ -189,11 +189,14 @@ const REWARD_REGION = {
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => REWARD_REGION[F.region] || REWARD[F.kind];
+let lastReward = null;                                              // lo que ha dado la última victoria {list:[[id, cantidad]...], dbl} (lo enseña la pantalla de victoria, victoria.js)
 function giveReward(F, firstTime){
+  lastReward = null;
   let r = rewardOf(F); if(!r || (REWARD.once && !firstTime)) return '';
   const dbl = r.tickets && typeof firstWinToday === 'function' && firstWinToday();            // primera victoria del día: tickets x2 (daily.js)
   if(dbl) r = Object.assign({}, r, {tickets:r.tickets * DAILY.firstWinMult});
   Object.entries(r).forEach(([id, n]) => { if(id === 'tickets') save.tickets += n; else if(id === 'bp') save.bp += n; else save.items[id] = held(id) + n; });
+  lastReward = {list:Object.entries(r), dbl:!!dbl};
   return Object.entries(r).map(([id, n]) => `+${n} ${REWARD_NAMES[id]}`).join(' · ') + (dbl ? ` · ¡Primera victoria del día: tickets x${DAILY.firstWinMult}!` : '');
 }
 const rewardText = F => rewardOf(F) ? Object.entries(rewardOf(F)).map(([id, n]) => `${n} ${REWARD_NAMES[id]}`).join(' + ') : '';

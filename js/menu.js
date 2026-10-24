@@ -49,7 +49,7 @@ const NAV = [
 ];
 let navIdx = 0;
 const thumbs = [], dexThumbs = [];                // miniaturas que se dibujan cuando cargan los sprites
-const BACK = '<button id="btnBack3">← Menú</button>';
+const BACK = '<button id="btnBack3">← Menú</button>';       // se pone ARRIBA de cada panel (los botones de Menú/Volver van siempre arriba)
 
 function pick(i){
   navIdx = i; const it = NAV[i];
@@ -94,7 +94,7 @@ function toast(msg){
 }
 // Abre el panel genérico con un título y un contenido
 function panel(html){
-  dexThumbs.length = 0; $('panelBody').classList.remove('wide'); $('panelBody').innerHTML = html + BACK; $('btnBack3').onclick = goMain; show('panel'); refreshAvatars();
+  dexThumbs.length = 0; $('panelBody').classList.remove('wide'); $('panelBody').innerHTML = BACK + html; $('btnBack3').onclick = goMain; show('panel'); refreshAvatars();
 }
 function card(m, extra){                           // tarjeta de Pokémon con miniatura
   const d = document.createElement('div'); d.className = 'card';

@@ -196,17 +196,17 @@ function campoEnd(won){                                    // lo llama endBattle
   const add = (t, fn, main) => { const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
   if(won){
     const before = campoCleared(T.tier); save.campoWins[T.id] = 1;
-    const rw = giveReward({kind:'campo'}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 50 BP + 5 Chapas Plateadas + 5 Doradas, siempre; cuenta para los logros
-    let extra = '';
+    giveReward({kind:'campo'}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 50 BP + 5 Chapas Plateadas + 5 Doradas, siempre; cuenta para los logros · la pantalla de victoria (victoria.js) las enseña con iconos
+    const chips = [];
     if(!T.opt){
       const nd = campoNeeded(T.tier).length;
-      if(!before && campoCleared(T.tier)) extra = T.tier < 3 ? ` · ¡Has superado la dificultad ${CAMPO_TIER[T.tier].nombre}! Se desbloquea la ${CAMPO_TIER[T.tier + 1].nombre}.` : ` · ¡Has superado la dificultad ${CAMPO_TIER[T.tier].nombre}: el Campo completo!`;
-      else if(!CAMPO_BASTA_UNO && !campoCleared(T.tier)) extra = ` · ${CAMPO_TIER[T.tier].nombre}: ${campoDone(T.tier)} de ${nd} entrenadores vencidos`;
+      if(!before && campoCleared(T.tier)) chips.push({t: T.tier < 3 ? `¡Has superado la dificultad ${CAMPO_TIER[T.tier].nombre}! Se desbloquea la ${CAMPO_TIER[T.tier + 1].nombre}.` : `¡Has superado la dificultad ${CAMPO_TIER[T.tier].nombre}: el Campo completo!`, c:'#ffcc33'});
+      else if(!CAMPO_BASTA_UNO && !campoCleared(T.tier)) chips.push({t:`${CAMPO_TIER[T.tier].nombre}: ${campoDone(T.tier)} de ${nd} entrenadores vencidos`, c:'#4ccf6a'});
     }
-    $('rTitle').textContent = `¡Has vencido a ${T.name}!`; $('rText').textContent = rw + ` · Ahora tienes ${save.bp} BP, ${held('chapaplata')} plateadas y ${held('chapa')} doradas` + extra;
+    victoryScreen({title:`¡Has vencido a ${T.name}!`, sub:'', rewards:lastReward, chips, leader:o.leader, path:o.portrait});
     add('Otra vez', () => campoFight(T.id), true);
   }else{
-    $('rTitle').textContent = `${T.name} ha ganado esta vez`; $('rText').textContent = 'Cambia el equipo o los objetos e inténtalo otra vez.';
+    resultClear(); $('rTitle').textContent = `${T.name} ha ganado esta vez`; $('rText').textContent = 'Cambia el equipo o los objetos e inténtalo otra vez.';
     add('Reintentar', () => campoFight(T.id), true);
   }
   add('Campo de Entrenamiento', () => { g = null; openCampo(); });

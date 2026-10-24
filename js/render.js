@@ -59,6 +59,13 @@ function drawF(f, col){
   if(!f.dead) bar(f.x-30, f.y + I.top*ESCALA - 14, 60, 7, f.hp, f.max, col);
 }
 
+// Cuadritos del equipo (debajo de tu tarjeta): posición en el mundo del juego. La usan hud() para dibujarlos y ui.js para saber si hiciste clic en uno.
+function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52) * k, y:(10 + 84) * k, w:46 * k, h:46 * k}; }
+function hudIconAt(mx, my){                      // nº del cuadrito que hay en (mx, my), o -1
+  if(!g || g.over) return -1;
+  for(let i = 0; i < g.p.length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
+  return -1;
+}
 function hud(x, y, list, idx, col){
   const f = list[idx], w = 340, r = f.hp / f.max;
   hudBox(x, y, w, 76, col);
@@ -93,7 +100,23 @@ function hud(x, y, list, idx, col){
     ctx.globalAlpha = u.dead ? .35 : 1;
     drawFrame(ctx, u.m.dex, 'Idle', 0, 0, px+23, py+20, 1, 34, u.shiny);
     bar(px+4, py+37, 38, 5, u.hp, u.max, '#4ccf6a'); ctx.globalAlpha = 1;
+    if(list === g.p){                                                        // solo tus cuadritos: se pueden pulsar para cambiar de Pokémon
+      const can = !u.dead && i !== idx, wait = can && g.swCd > 0, hov = hudIconAt(mouse.x, mouse.y) === i;
+      if(wait){                                                              // en espera: se oscurece y muestra los segundos que faltan
+        ctx.fillStyle = 'rgba(5,7,12,.62)'; ctx.fillRect(px+1, py+1, 44, 44);
+        ctx.fillStyle = '#ffcc33'; ctx.fillRect(px+1, py+43, 44 * Math.min(1, g.swCd / SWITCH_CD), 2);          // barrita que se vacía
+        text(String(Math.ceil(g.swCd)), px+23, py+30, 16, '#ffcc33', 'center');
+      }
+      if(hov && can){ ctx.strokeStyle = wait ? '#ff9a3a' : '#7dffa0'; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, 44, 44); }
+      text(String(i + 1), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
+    }
   });
+  if(list === g.p){                                                          // mensajes bajo los cuadritos
+    const hv = hudIconAt(mouse.x, mouse.y), ty = y + 84 + 46 + 12;
+    if(g.swNote > 0) text(`ESPERA ${Math.ceil(g.swCd)} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
+    else if(hv >= 0 && hv !== idx && !list[hv].dead) text(g.swCd > 0 ? `ESPERA ${Math.ceil(g.swCd)} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
+    else if(g.clock < 8 && g.count <= 0 && !g.over) text('CLIC EN UN CUADRO O TECLAS 1 · 2 · 3 PARA CAMBIAR', x, ty, 6, 'rgba(201,214,245,.75)');
+  }
 }
 
 function draw(){

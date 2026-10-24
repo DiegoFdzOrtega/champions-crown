@@ -129,15 +129,19 @@ function update(dt){
   g.pops.forEach(p => p.t -= dt); g.pops = g.pops.filter(p => p.t > 0);
   fxUpdate(dt);
   swapUpdate(dt);                                // animación de cambio de Pokémon (swap.js)
+  if(g.swCd > 0) g.swCd = Math.max(0, g.swCd - dt);                  // espera entre cambios (SWITCH_CD)
+  if(g.swNote > 0) g.swNote -= dt;
 
   if(E.dead){ E.dt += dt; if(E.dt > 1){ const n = g.e.findIndex(f=>!f.dead); if(n<0) return endBattle(true);  swapStart('e', n, true); } }
   if(P.dead){ P.dt += dt; if(P.dt > 1){ const n = g.p.findIndex(f=>!f.dead); if(n<0) return endBattle(false); swapStart('p', n, true); } }
 }
 
-function switchMon(i){
+const SWITCH_CD = 5;                              // segundos de espera entre un cambio tuyo y el siguiente (empieza a contar cuando el nuevo Pokémon ya ha salido)
+function switchMon(i){                            // cambio VOLUNTARIO (teclas 1 2 3 · R · clic en los cuadritos del HUD). El cambio por debilitamiento no pasa por aquí.
   if(!g || g.over || g.paused || g.count > 0) return;
   if(i === undefined){ for(let k=1;k<=3;k++){ const j=(g.pi+k)%3; if(!g.p[j].dead){ i=j; break; } } }
   if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead) return;
   if(swapBusy()) return;                          // ya hay un cambio en marcha: no se empieza otro hasta que acabe la animación
-  swapStart('p', i, false);                       // la animación (swap.js) hace el cambio: retirada, lanzamiento y apertura
+  if(g.swCd > 0){ g.swNote = 1.6; return; }       // aún en espera: se avisa en el HUD ("ESPERA 3 s") y no se cambia
+  swapStart('p', i, false).vol = true;            // la animación (swap.js) hace el cambio: retirada, lanzamiento y apertura · vol = voluntario: al acabar empieza la espera de SWITCH_CD
 }

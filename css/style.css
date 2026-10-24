@@ -861,3 +861,41 @@ button.leg:disabled{box-shadow:none}
 .dlc.today{border-color:#ffcc33;box-shadow:0 0 1.2rem rgba(255,204,51,.55);background:#2a2410}.dlc.today b{color:#ffcc33}
 .dlc.done{opacity:.55;border-color:#4ccf6a}.dlc.done em{color:#4ccf6a}.dlc.big{border-color:#ff3ea5}.dlc.big.today{border-color:#ffcc33}
 @media(max-width:900px){.dlg{grid-template-columns:repeat(4,1fr)}}
+
+
+/* ===== Arrastrar las cajas del Equipo Pokémon para cambiar el orden (js/team.js) ===== */
+.tmhint{margin:.2em auto 1em;width:fit-content;max-width:100%;padding:.55em 1.1em;font-size:.82em;color:#cfe0ff;text-align:center;background:rgba(10,16,32,.82);border:1px solid #2d4a7c;border-radius:.7em}
+.tslot[data-d]{cursor:grab;user-select:none;-webkit-user-select:none}
+.tslot[data-d] button,.tslot[data-d] .idd{cursor:pointer}
+.tslot .tshead,.tslot .tsn{touch-action:none}
+.tmslots.sorting{cursor:grabbing}
+.tmslots.sorting .tslot{transition:transform .24s cubic-bezier(.2,.8,.3,1),box-shadow .2s}
+.tmslots.sorting .tslot:hover{transform:none}
+.tmslots.sorting .tslot[data-d]{cursor:grabbing}
+.tslot.dragging{z-index:60;transition:none!important;border-color:#ffcc33;box-shadow:0 2em 4em #000c,0 0 2.2em #ffcc3388;opacity:.97}
+.tslot.landed{animation:tslLand .6s ease-out}
+@keyframes tslLand{0%{box-shadow:0 0 0 #ffcc3300}35%{box-shadow:0 0 2.4em #ffcc33bb;border-color:#ffcc33}100%{box-shadow:0 0 1em #3ea6ff33}}
+@media (prefers-reduced-motion:reduce){.tmslots.sorting .tslot,.tslot.landed{transition:none;animation:none}}
+
+/* ===== Pantalla de victoria con recompensas (js/victoria.js) ===== */
+#result .inner.win{max-width:96rem}
+.vic-banner{display:inline-block;margin-bottom:1.2rem;padding:.55em 1.6em;font-size:1.3rem;letter-spacing:.35em;color:#1b1500;background:linear-gradient(90deg,#ffcc33,#fff0a8 50%,#ffcc33);background-size:200% 100%;border-radius:2rem;box-shadow:0 0 1.8rem #ffcc3388;animation:vicShine 2.6s linear infinite}
+@keyframes vicShine{to{background-position:-200% 0}}
+.vic-portrait{display:block;margin:0 auto 1rem;width:9rem;height:9rem;object-fit:contain;image-rendering:pixelated;background:radial-gradient(circle,#1a2a52,#0b1224);border:2px solid #ffcc33;border-radius:50%;box-shadow:0 0 2rem #ffcc3355;padding:.6rem;animation:rwPop .5s cubic-bezier(.2,1.4,.4,1) both}
+#result .inner.win h1{margin:.2em 0 .1em}
+.vic-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:1.6rem;margin:2.2rem 0 1.6rem}
+.rwc{position:relative;width:19rem;padding:1.6rem 1rem 1.3rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;background:linear-gradient(180deg,#16254a,#0b1224);border:2px solid var(--c);border-bottom-width:.5rem;border-radius:1.1rem;box-shadow:0 0 1.6rem color-mix(in srgb,var(--c) 32%,transparent),inset 0 1px 0 #ffffff18;opacity:0;animation:rwPop .55s cubic-bezier(.2,1.4,.4,1) forwards;animation-delay:calc(var(--i) * .14s + .25s)}
+.rwc .ico{width:7rem;height:7rem;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,color-mix(in srgb,var(--c) 28%,#0b1224),#0b1224 70%);border-radius:50%;border:2px solid color-mix(in srgb,var(--c) 55%,transparent)}
+.rwc .ico img,.rwc .ico canvas{width:4.6rem;height:4.6rem;object-fit:contain;image-rendering:pixelated}
+.rwc .num{font-weight:normal;font-size:2.8rem;color:var(--c);text-shadow:0 0 1rem color-mix(in srgb,var(--c) 60%,transparent)}
+.rwc .lab{font-size:1.05rem;color:#e6eeff}
+.rwc .own{font-size:.85rem;color:#8fb3e8}
+.rwc .x2{position:absolute;top:-1rem;right:-.8rem;font-style:normal;font-size:.8rem;padding:.45em .8em;background:#ffcc33;color:#1b1500;border-radius:.7rem;transform:rotate(6deg);box-shadow:0 .2rem 0 #8a6a00}
+@keyframes rwPop{0%{opacity:0;transform:translateY(1.6rem) scale(.8)}100%{opacity:1;transform:none}}
+.rchips{display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;margin-bottom:1.4rem}
+.rchip{padding:.7em 1.2em;font-size:1rem;color:#e6eeff;background:rgba(10,16,32,.85);border:1px solid color-mix(in srgb,var(--c) 70%,transparent);border-left:.45rem solid var(--c);border-radius:.6rem}
+@media (max-width:700px){.rwc{width:100%}}
+@media (prefers-reduced-motion:reduce){.rwc,.vic-portrait{animation:none;opacity:1}.vic-banner{animation:none}}
+
+/* ===== Botones de Menú / Volver siempre arriba de la pantalla ===== */
+#btnBack1,#btnBack2,#btnBack3{display:block;margin:0 0 1.4rem}
