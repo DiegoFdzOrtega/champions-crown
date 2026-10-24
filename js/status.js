@@ -10,10 +10,13 @@ const STX = {
   speed: 440, r: 11,                                  // velocidad (px/s) y tamaño del proyectil de estado
   par: {dur: 5, spd: .5, fail: .25},                  // paralizado: se mueve a la mitad y el 25 % de los ataques fallan
   psn: {dur: 6, base: .003},                          // envenenado grave: pierde (base × (segundos + 1)) de la vida máxima por segundo → sube cada segundo (~6 % en total)
-  brn: {dur: 8, tick: .005, melee: .5},               // quemado: pierde 0,5 % de la vida máxima por segundo (~4 %) y su golpe cuerpo a cuerpo hace la mitad
+  brn: {dur: 8, tick: 0, melee: .5},                  // quemado: su golpe cuerpo a cuerpo hace la mitad. Daño por segundo: ver «tick» justo debajo (se calcula para que sea el MISMO daño total que el veneno)
   slp: {dur: 2, imm: 5},                              // dormido: no se mueve ni ataca · imm = segundos que no se puede volver a dormir al despertar
   cnf: {dur: 4, self: .33, hit: .5}                   // confuso: el 33 % de los ataques se los hace a sí mismo (con la mitad de fuerza que su golpe normal)
 };
+// La quemadura hace el mismo daño TOTAL que el veneno grave (≈ 6 % de la vida máxima), repartido a ritmo constante durante sus segundos.
+// Si cambias psn.base o psn.dur, la quemadura se ajusta sola. (Para darle otro valor: pon aquí un número fijo, p. ej. STX.brn.tick = .005)
+STX.brn.tick = STX.psn.base * (STX.psn.dur * (STX.psn.dur + 1) / 2) / STX.brn.dur;
 // Ataques de estado. k = estado · dur = segundos (si no, el de STX) · immune = tipos a los que no afecta (polvos)
 const STATUS_MOVES = {
   'Onda Trueno':  {k: 'par', desc: 'Lanza una onda eléctrica que paraliza al rival.'},

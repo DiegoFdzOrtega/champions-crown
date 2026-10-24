@@ -932,3 +932,20 @@ button.leg:disabled{box-shadow:none}
 .bag-who.hide{display:none}
 .bag-pk.no{opacity:.6;border-color:#7a2e2e}
 .cbar{flex-shrink:0}
+
+/* ===== Tienda: tarjetas alineadas =====
+   Cada tarjeta es una cuadrícula de 3 filas: [imagen + texto] [cantidad] [botón comprar].
+   La primera fila ocupa todo el espacio sobrante, así «Cantidad» y «Comprar» quedan siempre a la misma altura en todas las tarjetas de la fila,
+   aunque unas descripciones sean más largas que otras. */
+.scard{display:grid!important;grid-template-columns:7.6rem minmax(0,1fr);grid-template-rows:1fr auto auto;column-gap:1rem;row-gap:1rem;align-items:start}
+.scard .sc-img{grid-column:1;grid-row:1}
+.scard .sc-info{grid-column:2;grid-row:1;align-self:stretch;min-width:0}
+.scard .qty{grid-column:1 / -1;grid-row:2}
+.scard .buy{grid-column:1 / -1;grid-row:3}
+
+/* ===== Campo de Entrenamiento: tarjetas alineadas (igual que la tienda) =====
+   Imagen + texto arriba (ocupan el espacio sobrante) y el botón «Combatir» siempre abajo, a la misma altura en cada fila. */
+.cmp-card{display:grid;grid-template-columns:9rem minmax(0,1fr);grid-template-rows:1fr auto;column-gap:1.1rem;row-gap:1.1rem;align-items:start}
+.cmp-card>img{grid-column:1;grid-row:1}
+.cmp-card>.cmp-info{grid-column:2;grid-row:1;min-width:0}
+.cmp-card>button{grid-column:1 / -1;grid-row:2}

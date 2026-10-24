@@ -130,6 +130,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - Cada artículo tiene un cuadro **Cantidad**: escribe el número (solo cifras, hasta 9999) o usa **−**, **+** y **Máx** (todo lo que puedas pagar). El botón muestra el total («Comprar × 12 · 720 PB»); también vale pulsar **Enter** dentro del cuadro. Tras comprar la cantidad vuelve a 1.
 - Si pides más de lo que puedes pagar, el botón se desactiva y dice cuántos PB te faltan; en los MTs el tope es el stock que queda hoy.
 - Código: `buyMany(id, n)` y `maxBuy(id)` en economy.js (`buy(id)` sigue existiendo y compra 1); la cantidad escrita está en `shopSt.qty` (shop.js).
+- **Tarjetas alineadas (Tienda y Campo de Entrenamiento):** cada tarjeta de la tienda es una cuadrícula de 3 filas (imagen y texto · cantidad · botón «Comprar»). La primera fila ocupa el espacio sobrante, así la cantidad y el botón quedan siempre a la misma altura en todas las tarjetas de una fila, aunque unas descripciones sean más largas (final de `css/style.css`, secciones «Tienda: tarjetas alineadas» y «Campo de Entrenamiento: tarjetas alineadas»). En el Campo, la imagen y el texto van arriba y el botón «Combatir» siempre abajo, a la misma altura en cada fila.
 
 ## Mochila (js/bag.js)
 - Se abre desde la barra de arriba: **Perfil › Logros › Amigos › Mochila** (`CRUMBS` en avatars.js; también sale en la cabecera del menú). Se mira, y los MTs se pueden enseñar desde aquí con «Enseñar a un Pokémon»: muestra por secciones los tickets, las mejoras (chapas, mentas, cápsulas), los MTs y los objetos de combate que tienes, con su cantidad y, en los objetos, cuántos están equipados y cuántos libres. Tiene buscador por nombre y atajos a la Tienda y al Equipo.
@@ -546,7 +547,7 @@ Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el ri
 |---|---|---|---|---|
 | Onda Trueno | Eléctrico | Paralizado, 5 s | Se mueve a la mitad de velocidad y el 25 % de sus ataques fallan (gasta energía y recarga). | 266 |
 | Tóxico | Veneno | Envenenado grave, 6 s | Pierde un 0,3 % de la vida máxima por segundo y **sube 0,3 % cada segundo** (≈6 % en total). | 115 |
-| Fuego Fatuo | Fuego | Quemado, 8 s | Pierde un 0,5 % de la vida máxima por segundo (≈4 %) y su golpe cuerpo a cuerpo hace la mitad. | 129 |
+| Fuego Fatuo | Fuego | Quemado, 8 s | Hace **el mismo daño total que Tóxico** (≈6 % de la vida máxima, a ritmo constante: ≈0,8 % por segundo) y su golpe cuerpo a cuerpo hace la mitad. | 129 |
 | Somnífero | Planta | Dormido, 2 s | No se mueve ni ataca. Es un polvo: los tipo Planta no se ven afectados. | 28 |
 | Brecha Negra | Siniestro | Dormido, 2,5 s | Igual que Somnífero, pero afecta a todos los tipos. **Solo la puede aprender Darkrai.** | 1 |
 | Rayo Confuso | Fantasma | Confuso, 4 s | El 33 % de sus ataques se los hace a sí mismo (con la mitad de la fuerza de su golpe). | 159 |
