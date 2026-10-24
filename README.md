@@ -23,6 +23,8 @@ Carpetas de imágenes (junto a `index.html`):
 - js/teams.js: equipos competitivos de los 8 líderes, el Alto Mando y el Campeón (naturaleza, habilidad, objeto, IVs, EVs y movimientos) + la recompensa por vencer
 - js/johto.js: la **Historia de Johto** (8 líderes, Alto Mando de 4 y Campeón, con sus equipos y recompensas)
 - js/arenasjohto.js: los 13 fondos de combate de Johto
+- js/hoenn.js: la **Historia de Hoenn** (8 líderes, Alto Mando de 4 y Campeón Plubio, con sus equipos de Pokémon Esmeralda y recompensas)
+- js/arenashoenn.js: los 13 fondos de combate de Hoenn
 - js/campo.js: el **Campo de Entrenamiento** (23 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
 - js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate)
 - js/room.js: la habitación del Equipo Pokémon (chimenea con fuego animado, vitrina, estanterías, ventana de noche y la estantería de trofeos de las Ligas)
@@ -155,7 +157,7 @@ Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón).
 La Historia ahora tiene **varias regiones**. Cada combate (`FLOORS` en data.js) lleva `region`, `idx` (posición dentro de su región), `dn` (índice de dificultad) y `place` (ciudad).
 Ayudantes en data.js: `floorsOf(region)`, `progOf(region)` y `setProg(region, n)`. El progreso de Kanto sigue en `save.record` (así no se pierde ninguna partida) y el de las demás regiones en `save.prog`.
 
-**Cómo se desbloquea:** Johto se abre al ser **Campeón de Kanto** (vencer a Azul). Hoenn y el resto aparecen como "Próximamente". (Antes se podía saltar Kanto con un botón de prueba de Ajustes, ya eliminado: usa la consola con `setProg('Kanto', 13); save.champ.Kanto = 1; persist()`.) Texto antiguo: "Modo prueba: dar por terminado Kanto (abre Johto)" (quítalo al final).
+**Cómo se desbloquea:** Johto se abre al ser **Campeón de Kanto** (vencer a Azul). Hoenn se abre al ser **Campeón de Johto** (ver más abajo) y el resto aparecen como "Próximamente". (Antes se podía saltar Kanto con un botón de prueba de Ajustes, ya eliminado: usa la consola con `setProg('Kanto', 13); save.champ.Kanto = 1; persist()`.) Texto antiguo: "Modo prueba: dar por terminado Kanto (abre Johto)" (quítalo al final).
 Cada combate se desbloquea al vencer al anterior, igual que en Kanto. Al vencer a Lance recibes el **trofeo de Johto** en tu habitación y cuenta para la Torre Batalla.
 
 **Los 13 combates (en orden) y sus equipos** (6 Pokémon cada uno, sin repetir especie, IV 31, EV 252 máx. por estadística y 510 en total; el último es el As):
@@ -199,6 +201,56 @@ Mento, Koga, Bruno y Karen llevan sus 5 Pokémon de la Liga de Oro/Plata/HGSS + 
 - Karen: sala de mármol negro con ventanales a una noche estrellada y velas.
 - Lance: sala del trono con alfombra roja, trono, estatuas de dragón y antorchas.
 
+## Historia de Hoenn (js/hoenn.js, js/arenashoenn.js)
+Hoenn usa **el mismo sistema que Johto** (`FLOORS` con `region:'Hoenn'`, `floorsOf('Hoenn')`, `save.prog.Hoenn`, `save.champ.Hoenn`), así que no se ha tocado nada de Kanto ni de Johto. Se abre al ser **Campeón de Johto** (vencer a Lance). Los 13 combates se desbloquean uno a uno y, como en el resto de regiones, los rivales que aún no has vencido salen como "misteriosos".
+
+**Versión de referencia: Pokémon Esmeralda** (por eso el 8.º líder es **Galano/Juan** y el Campeón es **Plubio/Wallace**). Fuentes: pokemondb.net/emerald, Bulbapedia y Serebii (Match Call de Esmeralda).
+
+| # | Entrenador | Tipo | Lugar | Equipo (en su orden oficial; el último es el As) |
+|---|---|---|---|---|
+| 1 | Petra (Roxanne) | Roca | Ciudad Férrica | Aerodactyl, Golem, Omastar, Kabutops, Steelix, Nosepass |
+| 2 | Marcial (Brawly) | Lucha | Pueblo Azuliza | Hitmonlee, Hitmonchan, Machamp, Medicham, Hitmontop, Hariyama |
+| 3 | Erico (Wattson) | Eléctrico | Ciudad Malvalona | Electabuzz, Raichu, Ampharos, Electrode, Magneton, Manectric |
+| 4 | Candela (Flannery) | Fuego | Pueblo Lavacalda | Arcanine, Magcargo, Houndoom, Rapidash, Camerupt, Torkoal |
+| 5 | Norman | Normal | Ciudad Petalia | Slaking, Blissey, Kangaskhan, Tauros, Spinda, Slaking |
+| 6 | Alana (Winona) | Volador | Ciudad Arborada | Noctowl, Tropius, Pelipper, Dragonite, Skarmory, Altaria |
+| 7 | Vito y Leti (Tate y Liza) | Psíquico | Ciudad Algaria | Hypno, Claydol, Slowking, Xatu, Lunatone, Solrock |
+| 8 | Galano (Juan) | Agua | Arrecípolis | Lapras, Whiscash, Politoed, Walrein, Crawdaunt, Kingdra |
+| 9 | Sixto (Sidney) | Siniestro | Liga | Mightyena, Cacturne, Shiftry, Crawdaunt, **Sharpedo**, Absol |
+| 10 | Fátima (Phoebe) | Fantasma | Liga | Dusclops, Banette, Banette, Sableye, Dusclops, **Dusknoir** |
+| 11 | Nívea (Glacia) | Hielo | Liga | Glalie, Sealeo, Glalie, Sealeo, **Froslass**, Walrein |
+| 12 | Dracón (Drake) | Dragón | Liga | **Dragonair**, Shelgon, Altaria, Kingdra, Flygon, Salamence |
+| 13 | Plubio (Campeón) | Agua | Liga | Wailord, Tentacruel, Whiscash, Ludicolo, Gyarados, Milotic |
+
+**Cómo se han adaptado los equipos al motor** (el motor pide exactamente 6 Pokémon por entrenador):
+- Los 8 **líderes** llevan su equipo de **revancha final de Esmeralda** (el del gimnasio normal solo tiene 2-4 Pokémon). Se respeta el orden oficial.
+- **Alto Mando**: en Esmeralda llevan 5, así que se añade **1 Pokémon más de su temática** (en negrita). Sixto: Sharpedo (el de Rubí/Zafiro); Fátima: Dusknoir (la evolución de su As); Nívea: Froslass; Dracón: Dragonair. El **Campeón** Plubio lleva sus 6 oficiales.
+- **Especies repetidas**: Norman (2 Slaking), Fátima (2 Dusclops y 2 Banette) y Nívea (2 Glalie y 2 Sealeo) las repiten en el juego original. Esos equipos tienen la marca `dupOk` (TEAMS[id].dupOk = true en hoenn.js) y `validateTeams()` (teams.js) no se queja por ello. En el resto de equipos sigue prohibido repetir especie.
+- **Combate doble**: el motor solo tiene un rival, así que Vito y Leti son un único combate con sus 6 Pokémon de la revancha (retrato `Vito_y_Leti.png`).
+- **Movimientos**: cada Pokémon tiene los 4 huecos del motor (golpe / disparo / mejora / ataque fuerte). Se usan los movimientos oficiales más parecidos que existen en `MOVESET` (moves.js); los que el motor no tiene (Focus Punch, Explosion, Protect...) se sustituyen por uno del mismo tipo. Habilidades y objetos: los de la generación 3 o equivalentes; las habilidades nuevas tienen su descripción en `ABIL_DESC`.
+
+**Dificultad:** `lvl` y `dn` en hoenn.js. Líderes: nivel 127-134 y dn 4-11. Alto Mando: nivel 135-138 y dn 11-14. Plubio: nivel 145 y dn 16 (el más duro de las tres Ligas; Azul es 135/12 y Lance 140/14).
+**Recompensa:** `REWARD_REGION.Hoenn` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por cada victoria, igual que Johto.
+**Logros nuevos:** Líderes de Hoenn (500 BP + 5 tickets), Alto Mando de Hoenn (400 BP + 3), Campeón de Hoenn (1000 BP + 10) y **Maestro de tres Ligas** (3000 BP + 20 tickets).
+**Música:** pistas `lider_hoenn`, `alto_hoenn` (usa `alto.ogg`) y `campeon_plubio` (usa `jefe.ogg`). Si no existe `musica/lider_hoenn.ogg` suena la música generada; para poner una canción real, copia el archivo con ese nombre.
+
+**Retratos:** `lideres/Hoenn/<Nombre>.png` con los nombres que ya tienes: Petra, Marcial, Erico, Candela, Norman, Alana, Vito_y_Leti, Galano, Sixto, Fátima, Nívea, Dracón, Plubio. (`Máximo.png` y `Leti.png` no se usan: Máximo es el Campeón de Rubí/Zafiro y Leti ya sale en el retrato de Vito_y_Leti.) El juego prueba primero el nombre sin tilde y después el que tiene tilde (LEADER_FILE en data.js). Los nombres distinguen mayúsculas y minúsculas en GitHub Pages.
+
+**Fondos de combate (js/arenashoenn.js)**, dibujados con código como los de Kanto y Johto; el centro del suelo siempre queda libre para ver a los dos Pokémon:
+- Petra (Férrica): cueva-taller de roca con suelo de tierra, vetas de cristal, lámparas colgantes que parpadean y peñascos.
+- Marcial (Azuliza): gimnasio oscuro con ring de cuerdas, tablas de surf, sacos de boxeo y focos que se balancean.
+- Erico (Malvalona): acero con franjas de peligro, barreras eléctricas que parpadean y bobinas Tesla con rayos.
+- Candela (Lavacalda): roca volcánica cálida con boca de volcán, aguas termales con vapor, plataformas de teletransporte y chispas.
+- Norman (Petalia): sala luminosa de parqué con las puertas de pruebas, friso verde, plantas y el círculo central.
+- Alana (Arborada): casa en las copas de los árboles: cielo, dosel de hojas, plataforma de madera con barandilla de cuerda y viento con hojas.
+- Vito y Leti (Algaria): espacio con el Sol y la Luna, planeta con anillo, suelo de cristal con cuadrícula luminosa y estrellas fugaces.
+- Galano (Arrecípolis): losas de hielo sobre el agua, templo claro con arcos y cortinas de agua, reflejos que se mueven.
+- Sixto: escenario negro y rojo con cortinas, luna, murciélagos y focos que barren la sala.
+- Fátima: sala fría de piedra con ventanales a la luna, fuegos fatuos morados, círculo de invocación y niebla.
+- Nívea: salón de cristal helado con columnas, aurora, copos grabados en el mármol y nieve.
+- Dracón: sala marina de escamas azules con estatuas de dragón de ojos brillantes, emblema dorado y braseros turquesa.
+- Plubio: salón de mármol con columnas de cristal llenas de agua y burbujas, vetas doradas y la puerta del Salón de la Fama.
+
 ## Música dinámica (js/music.js, carpeta musica/)
 El juego cambia la música solo según el entrenador al que te enfrentas. La música oficial de Pokémon **no se incluye** (tiene derechos de autor): tú pones tus propios archivos en `musica/`. Si falta un archivo, suena una música **generada por el propio juego** (original), así que nunca hay silencio.
 
@@ -210,8 +262,11 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 | `lider_johto` | Pegaso, Antón, Blanca, Moti, Aníbal, Yasmina, Fredo, Débora |
 | `alto_kanto` | Lorelei, Bruno, Agatha, Lance (Alto Mando de Kanto) |
 | `alto_johto` | Mento, Koga, Bruno, Karen (Alto Mando de Johto) |
+| `lider_hoenn` | Petra, Marcial, Erico, Candela, Norman, Alana, Vito y Leti, Galano (música generada hasta que añadas `musica/lider_hoenn.ogg`) |
+| `alto_hoenn` | Sixto, Fátima, Nívea, Dracón (usa `alto.ogg`) |
 | `campeon_azul` | Campeón Azul (Kanto) |
 | `campeon_lance` | Campeón Lance (Johto) |
+| `campeon_plubio` | Campeón Plubio (Hoenn, usa `jefe.ogg`) |
 | `campo` | Campo de Entrenamiento |
 
 **Cómo funciona**
@@ -272,6 +327,8 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | Alto Mando de Kanto / Johto | Los 4 del Alto Mando | 400 BP + 3 tickets (cada uno) |
 | Campeón de Kanto / Johto | Vencer a Azul / Lance | 1000 BP + 10 tickets (cada uno) |
 | Maestro de dos Ligas | Campeón de Kanto y Johto | 2000 BP + 15 tickets |
+| Líderes / Alto Mando / Campeón de Hoenn | Los 8 líderes · los 4 del Alto Mando · vencer a Plubio | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
+| Maestro de tres Ligas | Campeón de Kanto, Johto y Hoenn | 3000 BP + 20 tickets |
 | Campo: 1 / 10 / 25 / 50 / 100 victorias | Vencer entrenadores del Campo | 50 · 200 · 300 + 2 · 500 + 5 · 1000 + 10 (BP + tickets) |
 | Campo: Fácil / Media / Difícil superada | Vencer a todos los de esa dificultad | 300 · 500 + 3 · 800 + 6 (BP + tickets) |
 | Colección: 10 / 25 / 50 / 100 / 250 Pokémon | Pokémon diferentes | 100 · 200 + 1 · 300 + 3 · 600 + 5 · 1500 + 15 (BP + tickets) |
@@ -283,6 +340,12 @@ Para añadir un logro: una línea nueva en `ACHIEVEMENT_DATA`. Para una condici�
 - **Audio**: **Volumen general**, **Música**, **Efectos de sonido** (0-100 cada uno) y **Silenciar todo** (tecla M). Música = general x música; efectos = general x efectos (`save.vol`, `save.volMusic`, `save.volSfx`, `save.mute`). Las partidas antiguas conservan su volumen: el que tenían pasa a "Música" y el general queda al 100.
 - El juego no tenía efectos de sonido, así que se añadió `Sfx` en `js/music.js`: pitidos generados por código (`click` en los botones, `win`, `lose` y `logro`). `Sfx.play('click')`.
 - El **nombre de entrenador** se cambia ahora en **Perfil**.
+
+## Rivales misteriosos en la Historia (js/menu.js, buildStory)
+En la pantalla de cada región solo ves a los rivales que ya has vencido y **al siguiente**. Los que aún no te tocan salen ocultos: retrato en silueta gris, nombre «???», sin tipo ni lugar y con el botón «Bloqueado» (`.lcard.mystery` en `css/style.css`). Se descubren de uno en uno al vencer al anterior, así no sabes qué tipos vienen y hay más misterio. Vale igual para líderes, Alto Mando y Campeón, y para todas las regiones (usa `progOf(región)`, lo que ya llevas vencido). Si quieres ver el tipo del siguiente rival para poder prepararte, o ver también un rival más, cambia `locked` en `buildStory()` (ahora `i > rec`).
+
+## Imágenes de las regiones (carpeta region/)
+Cada tarjeta de la pantalla **Historia** muestra el mapa de su región de fondo, con un degradado oscuro para que se lean los textos. Las imágenes originales están en `region/` (`Kanto.webp`, `Johto.webp`...) y las que usa el juego son versiones **recortadas en panorámico (16:9) y más ligeras** en `region/tarjetas/` (50-90 KB cada una). Para cambiar una, sustituye su archivo de `region/tarjetas/` (mismo nombre, mejor proporción 16:9). Se cargan con la variable `--map` que pone `buildRegions()` en `js/menu.js` (`REGION_IMG` solo hace falta si el archivo se llama distinto a la región, como `Unova` para «Unova / Teselia»). Los estilos están en `.rcard` de `css/style.css`: bloqueadas en gris, abiertas a todo color y con un pequeño zoom al pasar el ratón.
 
 ## Animación de cambio de Pokémon (js/swap.js)
 Al cambiar de Pokémon con **1, 2 o 3** (o **R**, que pasa al siguiente) se ve la animación del anime. Las teclas no han cambiado: `switchMon()` en `js/combat.js` sigue decidiendo qué Pokémon entra y ahora llama a `swapStart()`.

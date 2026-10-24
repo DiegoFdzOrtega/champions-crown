@@ -184,7 +184,8 @@ const REWARD = {
 // 'tickets' = tiradas del Gachapon (Ticket Normal). Johto: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por cada victoria.
 // Para que se den solo la primera vez, pon REWARD.once = true (vale para todas las recompensas).
 const REWARD_REGION = {
-  Johto: {chapa:5, chapaplata:5, tickets:10}
+  Johto: {chapa:5, chapaplata:5, tickets:10},
+  Hoenn: {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => REWARD_REGION[F.region] || REWARD[F.kind];
@@ -206,7 +207,7 @@ function validateTeams(){
   lists.forEach(([id, t, sizes]) => {
     if(!t){ bad.push(`${id}: sin plantilla`); return; }
     if(!sizes.includes(t.length)) bad.push(`${id}: tiene ${t.length} Pokémon (deben ser ${sizes.join(' o ')})`);
-    if(new Set(t.map(s => s.dex)).size !== t.length) bad.push(`${id}: especie repetida`);
+    if(!t.dupOk && new Set(t.map(s => s.dex)).size !== t.length) bad.push(`${id}: especie repetida`);      // dupOk: equipos que repiten especie en el juego original (Hoenn: Norman, Fátima, Nívea)
     t.forEach(s => {
       const n = `${id}/${mon(s.dex).name}`, ev = keys.map(k => s.ev[k] || 0), tot = ev.reduce((a, b) => a + b, 0);
       if(keys.some(k => s.iv[k] !== 31)) bad.push(`${n}: los IVs deben ser 31`);

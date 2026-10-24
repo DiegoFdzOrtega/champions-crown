@@ -173,7 +173,9 @@ const LEADER_PATHS = ['lideres/{Region}/{Id2}.png', 'lideres/{Region}/{Id}.png',
                       'lideres/Kanto/{Id2}.png'];            // último recurso: el retrato de Kanto (sirve para Koga, Bruno y Lance, que también están en Johto)
 // Nombre de archivo del retrato cuando no coincide con el id (Koga, Bruno y Lance de Johto tienen id propio para no chocar con los de Kanto).
 // Se prueban todos los nombres de la lista: lideres/Johto/Pegaso.png, lideres/Johto/Morti.png (o Moti.png)...
-const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], morti:['morti', 'moti'], anton:['anton', 'antón'], anibal:['anibal', 'aníbal'], debora:['debora', 'débora']};
+const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], morti:['morti', 'moti'], anton:['anton', 'antón'], anibal:['anibal', 'aníbal'], debora:['debora', 'débora'],
+                     // Hoenn: los archivos llevan tilde y el de Vito y Leti es un solo retrato (lideres/Hoenn/Vito_y_Leti.png)
+                     fatima:['fátima'], nivea:['nívea'], dracon:['dracón'], vitoleti:['Vito_y_Leti']};
 
 // Gachapon: cada región tiene su banner. Los Pokémon que salen son los de su rango de Pokédex.
 const BANNERS = Object.fromEntries(Object.keys(REGION_DEX).map(r => [r, r]));   // el banner solo lleva el nombre de la región

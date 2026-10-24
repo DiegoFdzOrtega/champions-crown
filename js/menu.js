@@ -106,6 +106,7 @@ function card(m, extra){                           // tarjeta de Pokémon con mi
 
 // ---- HISTORIA: regiones ----
 const REGIONS = ['Kanto','Johto','Hoenn','Sinnoh','Unova / Teselia','Kalos','Alola','Galar','Paldea'];
+const REGION_IMG = {'Unova / Teselia':'Unova'};                        // mapa de cada región: region/tarjetas/<nombre>.webp (recortado para la tarjeta). Solo hace falta si el archivo se llama distinto
 const leaguesWon = () => REGIONS.filter(r => save.champ[r]).length;      // Ligas superadas (save.champ). Con las 9 se desbloquea la Torre Batalla
 function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
@@ -115,6 +116,7 @@ function buildRegions(){
     const open = playable && (i === 0 || !!save.champ[prev]);                      // se abre al ser Campeón de la región anterior
     const rec = progOf(n), done = open ? Math.min(8, rec) : 0, elite = open && rec >= 8;
     const d = document.createElement('div'); d.className = 'rcard' + (open ? ' open' : ' lock');
+    d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
     let pips = ''; for(let k=0;k<8;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
     d.innerHTML = `<small>${i+1}</small><h3>${n}</h3><div class="pips">${pips}</div>` +
       `<div class="elite${elite ? ' ready' : ''}">ALTO MANDO · ${elite ? 'LISTO' : 'BLOQUEADO'}</div>` +
@@ -148,10 +150,13 @@ function buildStory(){
   FLOORS.forEach((F,gi)=>{                                          // gi = posición global (la que usa floorFight)
     if(F.region !== save.region) return;
     const i = F.idx, locked = i > rec, done = i < rec;
-    const d = document.createElement('div'); d.className = 'lcard' + (done ? ' done' : '') + (locked ? ' locked' : '');
+    const d = document.createElement('div'); d.className = 'lcard' + (done ? ' done' : '') + (locked ? ' locked mystery' : '');      // mystery: los rivales que aún no te toca ver salen ocultos (silueta y «???»)
     const im = new Image(); im.alt = F.leader; loadLeaderInto(im, F.id, ()=>{ im.style.visibility = 'hidden'; });
     const t = document.createElement('div');
-    t.innerHTML = `<h3>${done ? '★ ' : ''}${i+1}. ${F.leader}</h3><p>${F.kind === 'lider' ? 'Líder ' + F.tag : F.kind === 'alto' ? 'Alto Mando · ' + F.tag : 'Campeón de la Liga Pokémon'}${F.place ? ' · ' + F.place : ''} · 6 Pokémon${rewardText(F) ? '<br>Recompensa: ' + rewardText(F) : ''}</p>`;
+    if(locked) im.alt = '???';
+    t.innerHTML = locked
+      ? `<h3>${i+1}. ???</h3><p>${F.kind === 'lider' ? 'Líder de gimnasio' : F.kind === 'alto' ? 'Alto Mando' : 'Campeón de la Liga Pokémon'} · ??? · 6 Pokémon<br>Vence al anterior para descubrir quién es.</p>`      // no se ve nombre, tipo ni lugar hasta que le toque
+      : `<h3>${done ? '★ ' : ''}${i+1}. ${F.leader}</h3><p>${F.kind === 'lider' ? 'Líder ' + F.tag : F.kind === 'alto' ? 'Alto Mando · ' + F.tag : 'Campeón de la Liga Pokémon'}${F.place ? ' · ' + F.place : ''} · 6 Pokémon${rewardText(F) ? '<br>Recompensa: ' + rewardText(F) : ''}</p>`;
     const b = document.createElement('button'); b.textContent = locked ? 'Bloqueado' : done ? 'Repetir' : 'Retar';
     b.disabled = locked || !ready; b.onclick = ()=>floorFight(gi);
     d.append(im, t, b); (F.kind === 'lider' ? fl : F.kind === 'alto' ? fl2 : fl3).appendChild(d);

@@ -53,6 +53,12 @@ const MUSIC_TRACKS = {
                  synth:{seed:41, bpm:172, root:55, scale:'minor',    prog:[0,5,2,6],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.85}},
   campeon_lance:{name:'Campeón Lance (Johto)', file:'jefe',     ref:'"Battle! Champion" de Lance (Oro/Plata/Cristal o Corazón de Oro/Alma de Plata)',
                  synth:{seed:42, bpm:176, root:58, scale:'harmonic', prog:[0,5,3,6],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.9}},
+  lider_hoenn:  {name:'Líderes de Hoenn',          ref:'"Battle! Gym Leader" de Hoenn (Rubí/Zafiro/Esmeralda)',
+                 synth:{seed:23, bpm:156, root:60, scale:'major',    prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.78}},
+  alto_hoenn:   {name:'Alto Mando de Hoenn', file:'alto',       ref:'"Battle! Elite Four" de Hoenn (Rubí/Zafiro/Esmeralda)',
+                 synth:{seed:33, bpm:166, root:53, scale:'harmonic', prog:[0,6,5,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
+  campeon_plubio:{name:'Campeón Plubio (Hoenn)', file:'jefe',  ref:'"Battle! Champion" de Hoenn (Esmeralda)',
+                 synth:{seed:43, bpm:174, root:57, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.9}},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -69,7 +75,11 @@ const MUSIC_BY_TRAINER = {
   // Johto: 8 líderes, Alto Mando (4) y Campeón
   pegaso:'lider_johto', anton:'lider_johto', blanca:'lider_johto', morti:'lider_johto', anibal:'lider_johto', yasmina:'lider_johto', fredo:'lider_johto', debora:'lider_johto',
   mento:'alto_johto', j_koga:'alto_johto', j_bruno:'alto_johto', karen:'alto_johto',
-  j_lance:'campeon_lance'
+  j_lance:'campeon_lance',
+  // Hoenn: 8 líderes, Alto Mando (4) y Campeón
+  petra:'lider_hoenn', marcial:'lider_hoenn', erico:'lider_hoenn', candela:'lider_hoenn', norman:'lider_hoenn', alana:'lider_hoenn', vitoleti:'lider_hoenn', galano:'lider_hoenn',
+  sixto:'alto_hoenn', fatima:'alto_hoenn', nivea:'alto_hoenn', dracon:'alto_hoenn',
+  plubio:'campeon_plubio'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){

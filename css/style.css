@@ -76,12 +76,19 @@ button.main{background:var(--acc);color:#1b1500;border-color:var(--acc)}
 .foot{position:absolute;left:0;right:0;bottom:1.2rem;text-align:center;font-size:.8rem;color:#6d7899}
 
 .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin:2rem 0}
-.rcard{padding:1.6rem;background:rgba(22,27,34,.92);border:2px solid #2d3748;position:relative}
-.rcard small{position:absolute;right:1.2rem;top:1rem;font-size:1.6rem;color:#2d3748}
+.rcard{padding:1.6rem;background:#0d1117;border:2px solid #2d3748;position:relative;overflow:hidden;isolation:isolate}
+.rcard::before{content:'';position:absolute;inset:0;z-index:-2;background:var(--map) center/cover no-repeat;transition:transform .5s,filter .3s;filter:saturate(1.1) brightness(1)}   /* mapa de la región */
+.rcard::after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,11,18,.7) 0%,rgba(8,11,18,.12) 42%,rgba(8,11,18,.18) 62%,rgba(8,11,18,.8) 100%)}                    /* degradado oscuro: se leen los textos */
+.rcard.open:hover::before{transform:scale(1.07);filter:saturate(1.25) brightness(1.12)}
+.rcard.lock::before{filter:grayscale(.75) brightness(.7)}
+.rcard h3,.rcard p,.rcard small{text-shadow:0 2px 4px #000,0 0 8px rgba(0,0,0,.9)}
+.rcard .pips i{background:rgba(8,11,18,.8)}
+.rcard .elite{background:rgba(8,11,18,.78)}
+.rcard small{position:absolute;right:1.2rem;top:1rem;font-size:1.6rem;color:rgba(255,255,255,.55)}
 .rcard h3{margin:0 0 1.2rem;font-size:1.5rem;font-weight:normal}
 .rcard.open{border-color:#ffcc33;box-shadow:0 0 1.4rem rgba(255,204,51,.25);cursor:pointer}
 .rcard.open:hover{box-shadow:0 0 2rem rgba(255,204,51,.5)}
-.rcard.lock{opacity:.55}
+.rcard.lock{opacity:.8}
 .pips{display:flex;gap:.5rem;margin-bottom:1.2rem}
 .pips i{width:1.6rem;height:1.6rem;border:2px solid #2d3748;background:#0d1117}
 .pips i.on{background:#ffcc33;border-color:#ffcc33;box-shadow:0 0 .6rem #ffcc33}
@@ -123,6 +130,9 @@ input[type=text],input:not([type]){font:inherit;font-size:1.2rem;background:#0d1
 .lcard p{margin:0;font-size:.8rem}
 .lcard.done{border-color:#4ccf6a}
 .lcard.locked{opacity:.5}
+.lcard.mystery{opacity:.8}                                                  /* rival oculto: silueta gris y «???» hasta que le toque */
+.lcard.mystery img{filter:brightness(0) invert(.22)}
+.lcard.mystery h3{color:#8b98ad;letter-spacing:.2rem}
 .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:1.2rem}
 .slot{padding:1.2rem;background:rgba(22,27,34,.92);border:2px solid #3ea6ff}
 .slot h3{margin:0 0 1rem;font-size:1.2rem;font-weight:normal}
