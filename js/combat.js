@@ -99,20 +99,7 @@ function update(dt){
     if(keys.KeyQ) use(P,3,aim,true);
     if(keys.KeyE) use(P,4,aim,true);
   }
-  if(!E.dead && !E.ghost){                       // IA del rival (no actúa mientras su Pokémon entra con la animación)
-    const sk = g.o.skill, ang = Math.atan2(P.y-E.y, P.x-E.x), dist = Math.hypot(P.x-E.x, P.y-E.y);
-    const want = dist > 240 ? 1 : dist < 140 ? -1 : 0, side = Math.sin(g.t*1.2 + g.ei*2);
-    move(E, Math.cos(ang)*want + Math.cos(ang+1.57)*side, Math.sin(ang)*want + Math.sin(ang+1.57)*side, dt, .5 + .4*sk);
-    E.dir = dirOf(ang);
-    const err = (1-sk)*.6*(Math.random()-.5), r = Math.random;
-    if(!P.ghost){                                // si tu Pokémon está cambiando, el rival se mueve pero no ataca
-      if(dist < 120 && r() < dt*6) use(E,1,ang,false);
-      else if(r() < dt*(1+3*sk)) use(E,2,ang+err,false);
-      if(r() < dt*.5*sk) use(E,4,ang+err,false);
-      if(r() < dt*.25*sk) use(E,3,ang,false);
-      if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
-    }
-  }
+  if(!E.dead && !E.ghost){ if(aiSmart()) enemyAI(E, P, dt); else enemyBasic(E, P, dt); }       // IA del rival (js/ai.js): estilo de combate, distancias, esquiva y uso inteligente de Q/E (no actúa mientras su Pokémon entra con la animación de cambio)
   for(const f of [P,E]){                         // tiempos de cada uno
     for(let i=0;i<5;i++) f.cd[i] = Math.max(0, f.cd[i]-dt);
     if(f.item === 'restos' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max*IFX.restos*dt);   // Restos (IFX.restos en data.js)

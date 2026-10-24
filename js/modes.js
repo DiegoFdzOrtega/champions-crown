@@ -5,7 +5,7 @@
 function floorFight(n){                          // n = 0 es el primer líder
   const F = FLOORS[n], S = floorStats(n);
   startBattle({
-    floor:F.idx+1, n, leader:F.id,                      // floor = nº de combate dentro de su región · n = posición en FLOORS
+    floor:F.idx+1, n, leader:F.id, boss:F.kind,                      // floor = nº de combate dentro de su región · n = posición en FLOORS
     sub: `${F.leader.toUpperCase()} · ${F.tag.toUpperCase()}`,
     enemies: F.teams,                                  // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
     hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl

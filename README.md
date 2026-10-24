@@ -18,8 +18,9 @@ Carpetas de imágenes (junto a `index.html`):
 - js/data.js: tipos, rareza, naturalezas, equipos de los líderes, objetos, tienda y reglas del Gachapon (lo que más vas a editar). Aquí puedes rellenar LORE[nº] y ABILITIES[nº] para la Pokédex
 - js/sprites.js: carga las hojas y detecta solo el tamaño de cada cuadro; retratos de líderes
 - js/state.js: tamaño del lienzo, partida guardada (save) y creación de combates
-- js/combat.js: movimiento, ataques, daño, efectos de los objetos, IA y cambio de Pokémon
+- js/combat.js: movimiento, ataques, daño, efectos de los objetos y cambio de Pokémon (la IA del rival se llama desde aquí)
 - js/status.js: estados (paralizado, envenenado, quemado, dormido, confuso) y los 6 ataques que los ponen; los números están en `STX`
+- js/ai.js: la **IA del rival** (estilo melee / a distancia / mixto, esquiva, apunta con ventaja, gasta la energía con cabeza)
 - js/background.js: fondo pixel art del menú
 - js/teams.js: equipos competitivos de los 8 líderes, el Alto Mando y el Campeón (naturaleza, habilidad, objeto, IVs, EVs y movimientos) + la recompensa por vencer
 - js/johto.js: la **Historia de Johto** (8 líderes, Alto Mando de 4 y Campeón, con sus equipos y recompensas)
@@ -362,6 +363,19 @@ Al cambiar de Pokémon con **1, 2 o 3** (o **R**, que pasa al siguiente) o hacie
 3. **Apertura:** la bola se abre con un destello, una columna de luz, ondas y chispas, y el Pokémon sale como una silueta blanca que recupera su color.
 
 Reglas: mientras dura (unos 2 segundos, `SWAP` al principio de `js/swap.js`) el Pokémon que entra está «fantasma» (`ghost`): no se ve como siempre, no recibe golpes, no se mueve ni ataca, y no se puede empezar otro cambio (después hay que esperar 5 s, ver «Cambiar de Pokémon en combate»). El rival se mueve pero no ataca a un Pokémon que está cambiando. Se conservan PS, mejoras, energía y objetos de cada Pokémon. La pausa (Esc) congela la animación. Si un Pokémon se debilita, el siguiente (tuyo o del rival) entra con el lanzamiento y la apertura (sin retirada, porque ya se había ido). Los dos sonidos nuevos (`recall` y `sendout`) están en `SFX` de `js/music.js`.
+
+## IA del rival (js/ai.js)
+**Solo la usan los jefes de la Historia: líderes, Alto Mando y Campeón** (`g.o.boss`, que viene de `kind` en `FLOORS`). Los demás rivales (Campo de Entrenamiento…) usan `enemyBasic`, la IA sencilla de siempre (se acerca o se aleja y ataca al azar). `update()` de `js/combat.js` decide con `aiSmart()` y llama a `enemyAI(E, P, dt)` en cada fotograma; cada jefe juega según su Pokémon:
+
+- **Estilo:** `melee` (pegador), `range` (tirador) o `hybrid` (mixto). Se decide con las estadísticas base (Ataque contra Ataque Esp.) y el objeto que lleva (Cinta Elección empuja a melee; Gafas Elección/Especiales, a distancia). Un rival puede forzarlo con `E.style`.
+- **Melee:** se acerca (con la carrera si está lejos) y encadena golpes **solo cuando estás a su alcance real** (el mismo `90 + radio` que usa `melee()`), así nunca golpea al aire.
+- **A distancia:** mantiene la distancia, dispara hacia donde vas a estar (no hacia donde estás) y no gasta el golpe si estás fuera de su alcance.
+- **Esquiva:** si un proyectil tuyo va a darle, hace una carrera lateral. No se queda atascado en las esquinas.
+- **Energía y habilidades Q/E:** respeta la energía y los enfriamientos igual que el jugador; usa la mejora (**Q**) al entrar y guarda el ataque fuerte (**E**) para cuando va a dar.
+- **Dificultad:** la habilidad del combate (`g.o.skill`, `DIFF` en data.js) controla cuánto tarda en reaccionar, cuánto esquiva y cuánto falla al apuntar. `AI_TUNE.agg` (js/ai.js; un número por tipo de jefe: líder .8 · Alto Mando 1.2 · Campeón 1.8) sube o baja la agresividad de todos.
+- No hay trampas: el rival usa las mismas funciones `use()`, `melee()` y `shot()` que el jugador, con su propia energía y sus propios enfriamientos.
+- **Interruptor:** `AI_TUNE.on = false` (js/ai.js) hace que TODOS los rivales vuelvan a la IA sencilla de siempre.
+- Nota de equilibrio: contra un jugador que se mueve, la IA lista hace aproximadamente el doble de daño por segundo que la sencilla; subir o bajar `agg` cambia poco, porque el límite lo ponen la energía y los enfriamientos.
 
 ## Cambiar de Pokémon en combate: clic y espera de 5 s (js/combat.js, js/render.js, js/ui.js)
 - Además de las teclas **1, 2, 3** y **R**, ahora puedes **hacer clic en los cuadritos pequeños** de tu equipo (debajo de tu tarjeta, arriba a la izquierda). El clic en un cuadrito **no dispara**. Al pasar el ratón por encima el cuadrito se marca en verde, el cursor se convierte en una manita y debajo sale «CAMBIAR A …».
