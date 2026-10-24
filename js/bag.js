@@ -14,7 +14,7 @@ function bagSections(){
   const up = Object.keys(CONS).filter(id => held(id) > 0 && has(CONS[id].n)).map(id => ({id, n:CONS[id].n, c:held(id), d:CONS[id].d, img:CONS[id].icon}));
   if(up.length) out.push({t:'Mejoras', list:up, note:'Se usan en Equipo Pokémon › Ver datos.'});
   const mt = Object.keys(MT_ID).filter(id => held(id) > 0 && has(itemName(id))).sort((a, b) => itemName(a).localeCompare(itemName(b), 'es'))
-    .map(id => { const mv = MOVES[MT_ID[id]]; return {id, n:itemName(id), c:held(id), d:`Enseña «${MT_ID[id]}» a un Pokémon. Se usa en Equipo Pokémon › Ver datos.`, img:trainIcon(id), tags:[[TYPE_ES[mv.t], TC[mv.t]], [SLOT_SHORT[mv.s]]]}; });
+    .map(id => { const mv = MOVES[MT_ID[id]]; return {id, mt:true, n:itemName(id), c:held(id), d:`Enseña «${MT_ID[id]}» a un Pokémon. Se usa en Equipo Pokémon › Ver datos.`, img:trainIcon(id), tags:[[TYPE_ES[mv.t], TC[mv.t]], [SLOT_SHORT[mv.s]]]}; });
   if(mt.length) out.push({t:'MTs', list:mt});
   for(const cat of Object.keys(ITEM_CATS)){
     const l = Object.keys(ITEMS).filter(id => ITEMS[id].cat === cat && held(id) > 0 && has(ITEMS[id].n)).map(id => ({id, n:ITEMS[id].n, c:held(id), eq:used(id), d:ITEMS[id].d, og:ITEMS[id].og, img:imgOf(id)}));
@@ -23,6 +23,21 @@ function bagSections(){
   return out;
 }
 
+// MT de la mochila: «Enseñar a un Pokémon» enseña la lista de tu equipo con ✓ (compatible) o ✕. Usa la misma comprobación (teachCheck) y la misma pantalla de confirmación que Ver datos.
+function teachRow(id){
+  const n = mtMove(id), w = document.createElement('div'); w.className = 'bag-teach';
+  const open = document.createElement('button'); open.textContent = 'Enseñar a un Pokémon'; w.appendChild(open);
+  const row = document.createElement('div'); row.className = 'bag-who hide'; w.appendChild(row);
+  open.onclick = () => row.classList.toggle('hide');
+  team.forEach(d => {
+    const err = teachCheck(d, n), b = document.createElement('button');
+    b.className = 'bag-pk' + (err ? ' no' : ''); b.textContent = `${mon(d).name} ${err ? (err === NO_LEARN ? '✕' : '·') : '✓'}`;
+    b.title = err || `Abrir «Cambiar ataque» de ${mon(d).name}`;
+    b.onclick = () => err ? toast(err) : (openTeam(), openDataMoves(d, MOVES[n].s, 'mt:' + id));
+    row.appendChild(b);
+  });
+  return w;
+}
 function drawBag(){
   const secs = bagSections(), box = $('bagList'); box.innerHTML = '';
   if(!secs.length){ box.innerHTML = `<p class="help">${bagSt.q.trim() ? 'No hay nada con ese nombre.' : 'Tu mochila está vacía. Compra objetos en la Tienda o consigue chapas venciendo a los líderes.'}</p>`; return; }
@@ -41,6 +56,7 @@ function drawBag(){
       if(it.tags){ const t = document.createElement('div'); t.className = 'sc-tags'; it.tags.forEach(([x, col]) => { const sp = document.createElement('span'); sp.className = 'sc-tag' + (col ? ' ty' : ''); if(col) sp.style.background = col; sp.textContent = x; t.appendChild(sp); }); info.appendChild(t); }
       const p = document.createElement('p'); p.textContent = it.d; info.appendChild(p);
       if(it.eq !== undefined){ const e = document.createElement('p'); e.className = 'bag-eq'; e.innerHTML = `Equipados <b>${it.eq}</b> · Libres <b>${it.c - it.eq}</b>`; info.appendChild(e); }
+      if(it.mt) info.appendChild(teachRow(it.id));
       d.append(pic, info); g.appendChild(d);
     });
   });

@@ -612,7 +612,7 @@ button.leg:disabled{box-shadow:none}
 .optb.cur{border-color:#4ccf6a!important;opacity:.75}
 .optb.pick{border-color:#ffcc33!important;background:#2a2610!important;box-shadow:0 0 1em #ffcc3355}
 .cbar{position:sticky;bottom:0;display:flex;align-items:center;gap:.8em;flex-wrap:wrap;margin-top:1em;padding:.8em 1em;background:#101a33;border:2px solid #ffcc33;border-radius:.8em}
-.cbar span{flex:1;min-width:14em}.cbar b{color:#ffcc33;font-weight:normal}
+.cbar>span{flex:1;min-width:14em}.cbar b{color:#ffcc33;font-weight:normal}
 .dx button.main{background:#ffcc33;color:#1b1500;border-color:#ffcc33}
 .note{color:#8fb3e8;font-size:.85em!important}.note.big{padding:1.2em;font-size:1em!important}
 @media (max-width:1100px){.dtc{grid-template-columns:1fr}.dtl{flex-direction:row;flex-wrap:wrap;justify-content:center}.dtl .viewer{width:16em}}
@@ -899,3 +899,36 @@ button.leg:disabled{box-shadow:none}
 
 /* ===== Botones de Menú / Volver siempre arriba de la pantalla ===== */
 #btnBack1,#btnBack2,#btnBack3{display:block;margin:0 0 1.4rem}
+
+/* Pokédex: lista de ataques y total de estadísticas en la ficha */
+.dxmv{display:flex;flex-direction:column;gap:.35em}
+.dxmv .mvrow .sl{min-width:5.5em}
+.ddet h3 .dxtot{float:right;color:#ffcc33;font-weight:normal}
+
+/* ---- Cambiar ataque (MT, ataques anteriores, resumen) ---- */
+.dtr h3.mvh,.dx h3.mvh{margin:1em 0 .5em;font-size:1em;color:#ffcc33}
+.mvh small{color:#6d7899;font-weight:normal}
+.mvcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:.6em}
+.mvc{display:flex;flex-direction:column;align-items:flex-start;gap:.25em;padding:.6em .9em;background:#0e1830;border:2px solid #1b2c52;border-radius:.8em;position:relative}
+.mvc .sl{color:#8fb3e8;font-size:.8em}
+.mvc b{font-weight:normal;color:#fff}
+.mvc small{color:#8fb3e8;font-size:.75em}
+.mvc em{font-style:normal;font-size:.75em;color:#9aa6b8}
+.mvc.keep{opacity:.7}
+.mvc.tgt{border-color:#ff7a7a;background:#2a1418;box-shadow:0 0 .8em #ff7a7a44}
+.mvc.tgt em{color:#ff9d9d}
+.dx button.optb.bad{border-color:#7a2e2e!important;background:#1a1016;opacity:.75}
+.optb em.no{color:#ff7a7a}.optb em.yes{color:#4ccf6a}
+.dx button.optb.pick em.yes{color:#ffcc33}
+.cbar.mtsumbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:.8em;height:auto}
+@media (max-width:760px){.cbar.mtsumbar{grid-template-columns:1fr 1fr}.cbar.mtsumbar .mtsum{grid-column:1 / -1}}
+.mtsum{min-width:0}
+.mtsum>div{margin:.2em 0;line-height:2}
+.mtsum em{display:inline-block;font-style:normal;min-width:6.5em;color:#4ccf6a;font-size:.85em}.mtsum .tb{margin-left:.5em}.mtsum em.o{color:#ff7a7a}
+.mtsum b{color:#fff;font-weight:normal}
+.mtsum small{color:#8fb3e8;font-size:.8em}
+.bag-teach{margin-top:.5em}
+.bag-who{display:flex;gap:.4em;flex-wrap:wrap;margin-top:.4em}
+.bag-who.hide{display:none}
+.bag-pk.no{opacity:.6;border-color:#7a2e2e}
+.cbar{flex-shrink:0}

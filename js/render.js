@@ -81,8 +81,8 @@ function hud(x, y, list, idx, col){
   bar(x+74, y+32, 254, 12, f.hp, f.max, r > .5 ? '#4ccf6a' : r > .2 ? '#e8c33a' : '#e8493a');
   bar(x+74, y+48, 254, 5, f.en, 100, '#4fb3ff');
   text(`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`, x+328, y+69, 8, '#fff', 'right');
-  if(f.lvl){                                                                                               // rival: nivel, objeto y habilidad
-    text('NV ' + f.lvl, x+74, y+69, 7, '#ffcc33'); let tx = x+112;
+  if(f.lvl){                                                                                               // rival: objeto y habilidad (el nivel no se muestra)
+    let tx = x+74;
     const im = f.item && itemImg(f.item);
     if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, tx, y+57, 16, 16); tx += 19; }
     if(f.item){ text(ITEMS[f.item].n.toUpperCase(), tx, y+69, 6, '#c9d6f5'); tx += ctx.measureText(ITEMS[f.item].n.toUpperCase()).width + 8; }

@@ -13,6 +13,8 @@
      save.abil[dex]= 0 | 1                      cuál de sus 2 habilidades usa (las Cápsulas lo alternan)
      save.mv[dex]  = {1:'Nombre', 3:'Nombre'}   solo los huecos que has cambiado con MTs (el resto sigue como en data.js/moves.js)
      save.mtBought = {day, n:{idMT: comprados}} stock diario de MTs ya comprado hoy
+     save.mvHist[dex] = {hueco:['Nombre', ...]}  ataques que olvidó en cada hueco (se pueden recuperar gratis desde «Cambiar ataque»)
+     save.mtV = 2                               versión de la partida en cuanto a MTs (2 = ya se comprobó que los ataques enseñados son compatibles)
    Los objetos consumibles (Chapa, Menta, Cápsula, MTs) se guardan en save.items como el resto de objetos.
 
    Efecto en combate (solo tus Pokémon): ver combatBoost(). Los números se cambian en TRAIN, justo debajo.
@@ -118,6 +120,12 @@ const abilDesc = n => ABIL_DESC[n] || 'Sin descripción todavía.';
 // ---------------------------------------------------------------------
 // ATAQUES (MTs). Cada MT enseña un movimiento de MOVES y sustituye al que el Pokémon tenga en ese hueco.
 // ---------------------------------------------------------------------
+// ---- COMPATIBILIDAD: qué Pokémon puede aprender cada movimiento. Los datos están en js/learnsets.js (se generan con tools/gen_learnsets.py) ----
+const NO_LEARN = 'Este Pokémon no puede aprender este movimiento.';
+const LEARN_SET = {};
+Object.entries(LEARN).forEach(([n, txt]) => { const set = new Set(); txt.split(',').filter(Boolean).forEach(r => { const [a, b] = r.split('-').map(Number); for(let i = a; i <= (b || a); i++) set.add(i); }); LEARN_SET[n] = set; });
+const canLearn = (d, n) => !!(LEARN_SET[n] && LEARN_SET[n].has(d));           // ¿su especie puede aprender ese movimiento? (nada de «parece que sí»: si no está en los datos, no puede)
+const learnersOf = n => LEARN_SET[n] ? LEARN_SET[n].size : 0;                  // cuántas especies pueden aprenderlo
 const movesOf = d => { const l = mon(d).mv.slice(); Object.entries(save.mv[d] || {}).forEach(([s, n]) => l[s - 1] = n); return l; };
 const movesChanged = d => Object.keys(save.mv[d] || {}).length > 0;
 // El Pokémon tal como entra en combate: con sus ataques cambiados (y el tipo de cada ataque, que sale del propio movimiento)
@@ -142,7 +150,7 @@ function mulberry(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Mat
 function mtStock(day = dayNumber()){
   const r = mulberry(day * 7919 + 20241), out = [];
   for(let s = 1; s <= 4; s++){
-    const pool = MT_LIST.filter(n => MOVES[n].s === s);
+    const pool = MT_LIST.filter(n => MOVES[n].s === s && learnersOf(n) > 0);          // nunca salen MTs que ningún Pokémon puede aprender
     for(let i = pool.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
     out.push(...pool.slice(0, TRAIN.mtPerSlot));
   }
@@ -255,12 +263,57 @@ function useCapsula(d, i){
   if(i === abilIdx(d) || !abilitiesOf(d)[i]) return 'Ya tiene esa habilidad.';
   save.abil[d] = i; spend('capsula'); persist(); return '';
 }
+// Ataque original del hueco (el de data.js/moves.js) y ataques que olvidó en ese hueco (el original siempre se puede recuperar)
+const origMove = (d, s) => mon(d).mv[s - 1];
+function forgotten(d, s){
+  const cur = movesOf(d)[s - 1], l = ((save.mvHist[d] || {})[s] || []).filter(n => n !== cur);
+  if(origMove(d, s) !== cur && !l.includes(origMove(d, s))) l.push(origMove(d, s));
+  return l;
+}
+// Pone el ataque n en el hueco s. El que había se guarda en el historial (salvo el original, que siempre está disponible).
+function putMove(d, s, n){
+  const old = movesOf(d)[s - 1]; if(old === n) return;
+  const h = save.mvHist[d] = save.mvHist[d] || {}, l = (h[s] || []).filter(x => x !== n && x !== old);
+  if(old !== origMove(d, s)) l.unshift(old);
+  if(l.length) h[s] = l; else delete h[s];
+  if(!Object.keys(h).length) delete save.mvHist[d];
+  save.mv[d] = save.mv[d] || {}; save.mv[d][s] = n;
+  if(origMove(d, s) === n) delete save.mv[d][s];                             // si vuelve a ser el original, no hace falta guardarlo
+  if(!Object.keys(save.mv[d]).length) delete save.mv[d];
+}
+// ¿Puede ese Pokémon aprender ese movimiento ahora mismo? Devuelve '' si sí, o el motivo. Es la ÚNICA comprobación: la pantalla y useMT la usan las dos.
+function teachCheck(d, n){
+  if(!MOVES[n]) return 'Ese movimiento no existe.';
+  if(!save.box.includes(d)) return 'No tienes ese Pokémon.';
+  if(!canLearn(d, n)) return NO_LEARN;
+  if(movesOf(d).includes(n)) return 'Ya conoce ese movimiento.';
+  return '';
+}
+// Enseña un MT. Primero se comprueba TODO; solo si todo está bien se cambia el ataque y se gasta el MT (si algo falla, no se toca nada).
 function useMT(d, id){
   const n = mtMove(id); if(!n || held(id) < 1) return 'No tienes ese MT.';
-  const s = MOVES[n].s; if(movesOf(d)[s - 1] === n) return 'Ya conoce ese movimiento.';
-  save.mv[d] = save.mv[d] || {}; save.mv[d][s] = n;
-  if(mon(d).mv[s - 1] === n) delete save.mv[d][s];                  // si vuelve a ser el original, no hace falta guardarlo
-  if(!Object.keys(save.mv[d]).length) delete save.mv[d];
-  spend(id); persist(); return '';
+  const err = teachCheck(d, n); if(err) return err;
+  putMove(d, MOVES[n].s, n); spend(id); persist(); return '';
 }
-function resetMoves(d){ delete save.mv[d]; persist(); }             // volver a los ataques originales (gratis, el MT usado no se devuelve)
+// Recupera un ataque que olvidó en ese hueco. No gasta MT: el ataque actual pasa a la lista de anteriores (así ningún ataque se pierde ni se duplica).
+function recallMove(d, s, n){
+  if(!save.box.includes(d)) return 'No tienes ese Pokémon.';
+  if(!forgotten(d, s).includes(n)) return 'Ese ataque no está entre los que olvidó.';
+  if(movesOf(d)[s - 1] === n) return 'Ya conoce ese movimiento.';
+  if(n !== origMove(d, s)){ const err = teachCheck(d, n); if(err) return err; }
+  putMove(d, s, n); persist(); return '';
+}
+function resetMoves(d){ Object.keys(save.mv[d] || {}).forEach(s => putMove(d, +s, origMove(d, +s))); persist(); }   // volver a los originales (gratis; los que tenía quedan en «anteriores»)
+// Partidas antiguas: los MT enseñados antes de existir la compatibilidad que no sean válidos se quitan y el MT se devuelve a la mochila
+function migrateMoves(){
+  if((save.mtV || 1) >= 2) return [];
+  const out = [];
+  Object.keys(save.mv).forEach(d => Object.entries(save.mv[d]).forEach(([s, n]) => {
+    if(canLearn(+d, n) || !MOVES[n]) return;
+    delete save.mv[d][s]; save.items[mtId(n)] = (save.items[mtId(n)] || 0) + 1; out.push(`${mon(+d).name}: ${n}`);
+  }));
+  Object.keys(save.mv).forEach(d => { if(!Object.keys(save.mv[d]).length) delete save.mv[d]; });
+  save.mtV = 2; persist(); return out;
+}
+const MT_REFUNDS = migrateMoves();
+if(MT_REFUNDS.length) setTimeout(() => toast(`Estos Pokémon no podían aprender su MT, así que se ha devuelto a la mochila: ${MT_REFUNDS.join(', ')}.`), 2500);

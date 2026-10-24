@@ -127,6 +127,11 @@ function renderDetail(){
     const col = v < 50 ? '#e8493a' : v < 80 ? '#f0903a' : v < 100 ? '#e8c33a' : v < 130 ? '#4ccf6a' : '#3ea6ff';
     return `<div class="st"><span>${STAT_NAMES[k]}</span><div class="bar"><i style="width:${o ? Math.min(100, v / 1.8) : 0}%;background:${col}"></i></div><b>${o ? v : '???'}</b>${tag}</div>`;
   }).join('');
+  const total = STAT_KEYS.reduce((a, k) => a + m.base[k], 0);
+  const mv = o ? movesOf(m.dex) : m.mv;                                                  // los que tiene tu Pokémon ahora (con MT incluidos)
+  const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0];
+    return o ? `<div class="mvrow"><span class="sl">${SLOT_SHORT[s]}</span><b>${esc(n)}</b><span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span></div>`
+             : `<div class="mvrow"><span class="sl">${SLOT_SHORT[s]}</span><b>???</b></div>`; }).join('');
   $('dxDet').style.setProperty('--c', r.col);
   $('dxDet').innerHTML = `
     <div class="viewer${shiny && o ? ' shiny' : ''}"><canvas id="dxSpr" width="224" height="224"></canvas>${shiny && o ? '<s></s><s></s><s></s><s></s><s></s><s></s>' : ''}</div>
@@ -136,7 +141,8 @@ function renderDetail(){
     <h2>${o ? esc(m.name) : '???'}</h2>
     <button class="favb${save.fav.includes(m.dex) ? ' on' : ''}" data-act="fav" ${o ? '' : 'disabled'}>${save.fav.includes(m.dex) ? '★ En favoritos' : '⭐ Marcar como favorito'}</button>
     <div class="badges"><span class="rb" style="--c:${r.col}">${r.ic} ${r.n}</span>${o ? m.types.map(t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`).join('') : '<span class="tb unk">???</span>'}</div>
-    <h3>Estadísticas base</h3><div class="stats">${stats}</div>
+    <h3>Estadísticas base ${o ? `<small class="dxtot">Total ${total}</small>` : ''}</h3><div class="stats">${stats}</div>
+    <h3>Ataques</h3><div class="dxmv">${moves}</div>
     <div class="dinfo"><p><span>Naturaleza</span> ${o ? `${nat[0]}${nat[1] ? ` <small>(▲ ${STAT_NAMES[nat[1]]} · ▼ ${STAT_NAMES[nat[2]]})</small>` : ' <small>(neutra)</small>'}` : '???'}</p>
       <p><span>Habilidad</span> ${o ? `<em class="soft">${esc(abilityOf(m.dex))}</em>` : '???'}</p>
       <p class="lore">${o ? esc(LORE[m.dex] || 'Sin descripción todavía. Puedes añadirla en LORE (data.js).') : 'Consíguelo en el Gachapon para ver sus datos.'}</p></div>`;

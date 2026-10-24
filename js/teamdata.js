@@ -5,15 +5,16 @@
      main    → estadísticas (base, IV, EV, nivel 50), naturaleza, habilidad y ataques
      nature  → elegir naturaleza nueva (gasta 1 Menta)
      abil    → elegir la otra habilidad (gasta 1 Cápsula de Habilidad)
-     moves   → elegir un MT para un hueco de ataque (gasta ese MT)
+     moves   → «Cambiar ataque»: ataques actuales, MT compatibles, ataques anteriores que se pueden recuperar, resumen y confirmación
      reset   → confirmar «Restablecer IVs» o «Restablecer EVs» (devuelve las chapas gastadas)
    Los IV se suben directamente con el botón +5 (gasta 1 Chapa Dorada) y los EV con el +10 (gasta 1 Chapa Plateada).
    La lógica (qué se guarda, qué cuesta) está en training.js; aquí solo se dibuja y se pulsan botones.
    ===================================================================== */
-const dt = {dex:0, view:'main', slot:1, pick:null, t0:0};
+const dt = {dex:0, view:'main', slot:1, pick:null, t0:0, lock:0};
 const dtOpen = () => !$('tmData').classList.contains('hide');
 
 function openData(dex){ dt.dex = dex; dt.view = 'main'; dt.pick = null; dt.t0 = performance.now(); $('tmData').classList.remove('hide'); renderData(); }
+function openDataMoves(dex, slot, pick){ openData(dex); dt.view = 'moves'; dt.slot = slot; dt.pick = pick || null; renderData(); }   // ficha abierta directamente en «Cambiar ataque»
 function closeData(quiet){ if(!tm.built) return; $('tmData').classList.add('hide'); if(!quiet) renderTeamSlots(); }
 function dataEsc(){ if(dt.view !== 'main'){ dt.view = 'main'; dt.pick = null; renderData(); } else closeData(); }   // Esc: vuelve a la ficha; otra vez, cierra
 
@@ -61,7 +62,7 @@ function dataMain(){
         <button class="mini" data-act="chapap" data-k="${k}" title="${plata < 1 ? 'Necesitas Chapas Plateadas (Tienda > Mejoras)' : evRoom(d, k) <= 0 ? `EVs al máximo (${TRAIN.evCap} por stat, ${TRAIN.evTotal} en total)` : `Gasta 1 Chapa Plateada: +${TRAIN.chapaEV} EV`}"${plata < 1 || evRoom(d, k) <= 0 ? ' disabled' : ''}>+${TRAIN.chapaEV}</button></div></td></tr>`).join('');
   const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], ch = (save.mv[d] || {})[s];
     return `<div class="mvrow${ch ? ' chg' : ''}"><span class="sl">${SLOT_NAMES[s]}</span><b>${esc(n)}</b>${typeChip(t)}${ch ? '<em title="Enseñado con un MT">MT</em>' : ''}
-      <button data-act="mtview" data-s="${s}">Usar MT</button></div>`; }).join('');
+      <button data-act="mtview" data-s="${s}" title="Aprender un MT o recuperar un ataque anterior">Cambiar ataque</button></div>`; }).join('');
   return `${dataHead()}
     <div class="dtc">
       <aside class="dtl"><div class="viewer"><canvas id="dtSpr" width="224" height="224"></canvas></div>
@@ -98,7 +99,7 @@ function cbar(text){
   return `<div class="cbar">${dt.pick !== null ? `<span>${text}</span><button class="main" data-act="ok">Confirmar</button><button data-act="cancel">Cancelar</button>` : '<span>Elige una opción.</span>'}</div>`;
 }
 function subHead(title, item){
-  return `${dataHead()}<div class="dtsub"><button data-act="back">← Volver</button><h2>${title}</h2>${item ? ownedChip(item) : ''}</div>`;
+  return `${dataHead()}<div class="dtsub"><button data-act="back">${dt.view === 'moves' ? '← Cancelar y volver' : '← Volver'}</button><h2>${title}</h2>${item ? ownedChip(item) : ''}</div>`;
 }
 function dataNature(){
   const d = dt.dex, cur = natureOf(d), cards = NATURES.map((n, i) =>
@@ -114,14 +115,40 @@ function dataAbil(){
     <p class="note">Las habilidades todavía no cambian el combate: de momento se muestran y se guardan.</p>
     ${cbar(dt.pick !== null ? `Gastar 1 Cápsula de Habilidad para usar <b>${esc(ab[dt.pick])}</b>` : '')}`;
 }
+const SLOT_DESC = {1:'Golpe cuerpo a cuerpo', 2:'Disparo a distancia', 3:'Mejora para ti', 4:'Ataque fuerte a distancia'};
+const mvType = (d, n) => (MOVES[n] || {}).t || mon(d).types[0];
+function mvCard(d, sl, n, cls, tag){
+  const q = MV[sl];
+  return `<div class="mvc ${cls}"><span class="sl">${SLOT_SHORT[sl]}</span><b>${esc(n)}</b>${typeChip(mvType(d, n))}
+    <small>${SLOT_DESC[sl]} · Energía ${q.en} · Recarga ${String(q.cd).replace('.', ',')} s</small>${tag ? `<em>${tag}</em>` : ''}</div>`;
+}
+// «Cambiar ataque»: un hueco concreto. Aquí solo se elige y se muestra; quien decide si se puede aprender es teachCheck() (training.js).
 function dataMoves(){
-  const d = dt.dex, s = dt.slot, list = myMTs(s), cur = movesOf(d)[s - 1];
-  const cards = list.map(id => { const n = mtMove(id), t = MOVES[n].t;
-    return `<button class="optb big mt${dt.pick === id ? ' pick' : ''}" data-act="pick" data-v="${id}"${n === cur ? ' disabled' : ''}>
-      <img class="iimg" src="${imgOf(id)}" alt=""><b>MT ${esc(n)}</b>${typeChip(t)}<small>Tienes ×${held(id)}${n === cur ? ' · ya lo conoce' : ''}</small></button>`; }).join('');
-  return `${subHead(`Hueco «${SLOT_NAMES[s]}»: ahora ${esc(cur)}`)}
-    ${list.length ? `<div class="optgrid two">${cards}</div>` : `<p class="note big">No tienes ningún MT para este hueco (${SLOT_SHORT[s]}). La Tienda renueva sus MTs cada 24 horas.</p><button data-act="shop">Ir a la Tienda</button>`}
-    ${cbar(dt.pick !== null ? `Gastar el MT para que ${esc(mon(d).name)} aprenda <b>${esc(mtMove(dt.pick))}</b> y olvide ${esc(cur)}` : '')}`;
+  const d = dt.dex, s = dt.slot, cur = movesOf(d)[s - 1], nm = esc(mon(d).name);
+  const now = [1, 2, 3, 4].map(sl => mvCard(d, sl, movesOf(d)[sl - 1], sl === s ? 'tgt' : 'keep', sl === s ? 'Se cambia este' : 'Se queda')).join('');
+  const mts = myMTs(s).sort((a, b) => mtMove(a).localeCompare(mtMove(b), 'es'));
+  const mtCards = mts.map(id => { const n = mtMove(id), err = teachCheck(dt.dex, n), bad = err === NO_LEARN, known = err === 'Ya conoce ese movimiento.', key = 'mt:' + id;
+    return `<button class="optb big mt${bad ? ' bad' : ''}${dt.pick === key ? ' pick' : ''}" data-act="${bad ? 'nolearn' : 'pick'}" data-v="${key}"${known ? ' disabled' : ''}>
+      <img class="iimg" src="${imgOf(id)}" alt=""><b>MT ${esc(n)}</b>${typeChip(MOVES[n].t)}<small>Tienes ×${held(id)}</small>
+      <em class="${bad ? 'no' : 'yes'}">${bad ? '✕ No compatible' : known ? 'Ya lo conoce' : '✓ Compatible'}</em></button>`; }).join('');
+  const rcCards = forgotten(d, s).map(n => { const key = 'rc:' + n, orig = n === origMove(d, s), bad = !orig && !canLearn(d, n);
+    return `<button class="optb big rc${bad ? ' bad' : ''}${dt.pick === key ? ' pick' : ''}" data-act="${bad ? 'nolearn' : 'pick'}" data-v="${key}">
+      <b>${esc(n)}</b>${typeChip(mvType(d, n))}<small>${orig ? 'Ataque original' : 'Ataque anterior'} · gratis, no gasta MT</small>
+      <em class="${bad ? 'no' : 'yes'}">${bad ? '✕ No compatible' : '↺ Recuperar'}</em></button>`; }).join('');
+  let bar = `<div class="cbar"><span>Elige un movimiento. No se cambia nada hasta que pulses Confirmar.</span><button data-act="back">Cancelar y volver</button></div>`;
+  if(dt.pick){
+    const k = dt.pick.slice(0, 2), v = dt.pick.slice(3), nn = k === 'mt' ? mtMove(v) : v;
+    bar = `<div class="cbar mtsumbar"><div class="mtsum"><div><em>Aprende</em><b>${esc(nn)}</b>${typeChip(mvType(d, nn))}</div><div><em class="o">Olvida</em><b>${esc(cur)}</b>${typeChip(mvType(d, cur))}</div>
+      <small>${k === 'mt' ? `Gasta 1 MT (te quedarán ${held(v) - 1}). ` : 'Es gratis. '}«${esc(cur)}» quedará en «Ataques anteriores» por si quieres recuperarlo.</small></div>
+      <button class="main" data-act="ok">Confirmar el cambio</button><button data-act="cancel">Cancelar</button></div>`;
+  }
+  return `${subHead(`Cambiar ataque de ${nm}: hueco «${SLOT_NAMES[s]}»`)}
+    <h3 class="mvh">Ataques de ${nm} ahora</h3><div class="mvcs">${now}</div>
+    <h3 class="mvh">Aprender un MT <small>(los de este hueco que tienes)</small></h3>
+    ${mts.length ? `<div class="optgrid two">${mtCards}</div>` : `<p class="note big">No tienes ningún MT para este hueco (${SLOT_SHORT[s]}). La Tienda renueva sus MTs cada 24 horas.</p><button data-act="shop">Ir a la Tienda</button>`}
+    <h3 class="mvh">Ataques anteriores <small>(recuperarlos es gratis)</small></h3>
+    ${rcCards ? `<div class="optgrid two">${rcCards}</div>` : `<p class="note">Todavía no ha olvidado ningún ataque en este hueco.</p>`}
+    ${bar}`;
 }
 
 function dataReset(){
@@ -139,17 +166,24 @@ function dataReset(){
 // ---- Botones de la ficha (un solo controlador para toda la ventana) ----
 function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; }
 function confirmPick(){
+  if(dt.pick === null) return;
   const d = dt.dex; let err = '', ok = '';
   if(dt.view === 'nature'){ err = useMenta(d, +dt.pick); ok = `Naturaleza nueva: ${NATURES[dt.pick][0]}.`; }
   else if(dt.view === 'abil'){ const n = abilitiesOf(d)[dt.pick]; err = useCapsula(d, +dt.pick); ok = `Habilidad nueva: ${n}.`; }
   else if(dt.view === 'reset'){ const iv = dt.what === 'iv', n = iv ? capOf(d).gold : capOf(d).silver; err = iv ? resetIVs(d) : resetEVs(d); ok = `${iv ? 'IVs' : 'EVs'} restablecidos: recuperas ${n} ${iv ? 'Chapas Doradas' : 'Chapas Plateadas'}.`; dt.view = 'main'; toast(err || ok); return; }
-  else if(dt.view === 'moves'){ const n = mtMove(dt.pick); err = useMT(d, dt.pick); ok = `${mon(d).name} aprendió ${n}.`; }
+  else if(dt.view === 'moves'){
+    const k = dt.pick.slice(0, 2), v = dt.pick.slice(3);
+    if(k === 'mt'){ const n = mtMove(v); err = useMT(d, v); ok = `${mon(d).name} aprendió ${n}.`; }
+    else { err = recallMove(d, dt.slot, v); ok = `${mon(d).name} recuperó ${v}.`; }
+  }
   toast(err || ok); dt.pick = null; if(!err) dt.view = 'main';
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('#tmDataB [data-act]'); if(!b || b.disabled) return;
-  const a = b.dataset.act, d = dt.dex;
+  const a = b.dataset.act, d = dt.dex, t = performance.now();
   if(a === 'close') return closeData();
+  if(t < dt.lock) return;                                            // justo después de confirmar se ignoran los clics (por si se pulsa dos veces)
+  if(a === 'nolearn'){ toast(NO_LEARN); return; }
   if(a === 'shop'){ closeData(true); closePick(); tm.from = ''; return openShop(); }
   if(a === 'prev') dataStep(-1); else if(a === 'next') dataStep(1);
   else if(a === 'back'){ dt.view = 'main'; dt.pick = null; }
@@ -161,7 +195,7 @@ document.addEventListener('click', e => {
   else if(a === 'mtview'){ dt.view = 'moves'; dt.slot = +b.dataset.s; dt.pick = null; }
   else if(a === 'pick') dt.pick = b.dataset.v;
   else if(a === 'cancel') dt.pick = null;
-  else if(a === 'ok') confirmPick();
+  else if(a === 'ok'){ dt.lock = t + 500; confirmPick(); }
   else if(a === 'reset'){ resetMoves(d); toast('Ataques originales restaurados.'); }
   renderData();
 });

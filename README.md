@@ -26,7 +26,9 @@ Carpetas de imágenes (junto a `index.html`):
 - js/hoenn.js: la **Historia de Hoenn** (8 líderes, Alto Mando de 4 y Campeón Plubio, con sus equipos de Pokémon Esmeralda y recompensas)
 - js/arenashoenn.js: los 13 fondos de combate de Hoenn
 - js/campo.js: el **Campo de Entrenamiento** (23 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
-- js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate)
+- js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate); cada MT tiene «Enseñar a un Pokémon» (mismas reglas que Ver datos)
+- js/learnsets.js: qué Pokémon puede aprender cada movimiento (archivo generado por tools/gen_learnsets.py; ver «MTs y compatibilidad real de movimientos»)
+- tools/gen_learnsets.py: genera js/learnsets.js a partir de los CSV de PokéAPI
 - js/room.js: la habitación del Equipo Pokémon (chimenea con fuego animado, vitrina, estanterías, ventana de noche y la estantería de trofeos de las Ligas)
 - js/arenas.js: los 13 estadios de combate de Kanto (un fondo pixel art por líder / Alto Mando / Campeón)
 - js/render.js: arena (llama a drawArena), sombras, Pokémon y HUD del combate
@@ -127,7 +129,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - Código: `buyMany(id, n)` y `maxBuy(id)` en economy.js (`buy(id)` sigue existiendo y compra 1); la cantidad escrita está en `shopSt.qty` (shop.js).
 
 ## Mochila (js/bag.js)
-- Se abre desde la barra de arriba: **Perfil › Logros › Amigos › Mochila** (`CRUMBS` en avatars.js; también sale en la cabecera del menú). Solo se mira: muestra por secciones los tickets, las mejoras (chapas, mentas, cápsulas), los MTs y los objetos de combate que tienes, con su cantidad y, en los objetos, cuántos están equipados y cuántos libres. Tiene buscador por nombre y atajos a la Tienda y al Equipo.
+- Se abre desde la barra de arriba: **Perfil › Logros › Amigos › Mochila** (`CRUMBS` en avatars.js; también sale en la cabecera del menú). Se mira, y los MTs se pueden enseñar desde aquí con «Enseñar a un Pokémon»: muestra por secciones los tickets, las mejoras (chapas, mentas, cápsulas), los MTs y los objetos de combate que tienes, con su cantidad y, en los objetos, cuántos están equipados y cuántos libres. Tiene buscador por nombre y atajos a la Tienda y al Equipo.
 
 ## Menú principal
 - Los botones van en **una columna** hacia abajo. Solo en pantallas muy bajas (menos de 680 px de alto) pasan a 2 columnas para que quepan (`@media (max-height:680px)` en style.css).
@@ -372,6 +374,40 @@ Al ganar un combate de la Historia o del Campo de Entrenamiento, la pantalla de 
 
 ## Botones de Menú y Volver: siempre arriba
 En todas las pantallas el botón para salir (**← Menú** o **← Regiones**) está **arriba del todo**, encima del título: Historia, lista de líderes, Tienda, Campo de Entrenamiento, Logros, Perfil, Mochila, Ajustes y Amigos. La Pokédex, el Gachapon y el Equipo Pokémon ya lo tenían en su cabecera. En los paneles lo pone `panel()` (js/menu.js, constante `BACK`); en Historia y en la lista de líderes están al principio de `#regions` y `#tower` en index.html. Los botones de después de un combate (Otra vez, Siguiente líder, Menú...) siguen abajo porque son las opciones de esa pantalla.
+
+## Pokédex: datos y ataques de cada Pokémon, y el nivel del rival no se muestra
+Al pulsar un Pokémon en la **Pokédex** (`js/pokedex.js`, función `renderDetail()`), el panel de la derecha enseña sus **estadísticas base** (con el **Total**), la naturaleza, la habilidad y sus **4 ataques** (Golpe, Disparo, Mejora y Fuerte) con el tipo de cada uno. Los ataques salen con `movesOf(dex)`, así que si has enseñado un MT a ese Pokémon, aparece el nuevo. Si todavía no lo tienes, los ataques salen como `???`, igual que el resto de sus datos. El estilo de la lista está al final de `css/style.css` (`.dxmv`).
+
+En el combate, la caja de datos del rival **ya no muestra «NV 120»** (en `hud()` de `js/render.js`). Solo se ven su objeto y su habilidad. El nivel sigue existiendo por dentro (`FLOORS`, `DIFF`) para calcular la dificultad, pero el jugador no lo ve; si más adelante se añaden niveles, solo hay que volver a dibujarlo ahí.
+
+## MTs y compatibilidad real de movimientos
+**Idea:** no todos los Pokémon pueden aprender todos los MT. Cada Pokémon solo puede aprender los movimientos que de verdad aprende en los juegos oficiales. Por ejemplo, Venusaur **no** puede aprender Ventisca ni Llamarada aunque tengas esos MT, pero sí Rayo Solar o Terremoto.
+
+**De dónde salen los datos:** de PokéAPI (https://github.com/PokeAPI/pokeapi, carpeta `data/v2/csv`), que recoge los datos de los juegos oficiales. Se usan los archivos `pokemon_moves.csv`, `moves.csv` y `version_groups.csv`. Además se comprobó contra otra fuente (pokemondb.net): para Ventisca, los 733 Pokémon de Escarlata/Púrpura coinciden con su lista.
+
+**Reglas que sigue (juego de referencia):**
+- Un Pokémon puede aprender un movimiento si en su juego de referencia lo aprende **por nivel (incluida la evolución), por MT/MO, por huevo o por tutor**. Como en este juego el MT sirve para «enseñar», todas esas formas legales cuentan.
+- **Juego de referencia = Escarlata/Púrpura (Gen 9, con sus DLC)** para los 733 Pokémon que salen ahí. Los otros 292 no salen en ningún juego de la Gen 9, así que se miden con su juego más reciente: Espada/Escudo (244), Leyendas Arceus (17), Diamante/Perla Brillante (22) o Ultrasol/Ultraluna (9). Cada Pokémon se mide con **un solo juego**: no se mezclan generaciones dentro de un mismo Pokémon.
+- Solo cuentan las formas normales. Que una forma regional (Alola, Galar, Hisui, Paldea) aprenda algo **no** se lo da a la forma normal.
+- Si la fuente no confirma una compatibilidad, **no se da por buena**. Nada se supone por el tipo del Pokémon ni por su aspecto.
+- **Afilar y Bomba Imán** no los aprende ningún Pokémon en los juegos de referencia, así que no se pueden enseñar y la Tienda nunca los ofrece. Siguen existiendo como ataque inicial de algunos Pokémon.
+- Los ataques con los que **empieza** cada Pokémon (los de `moves.js` y `CUSTOM` de `data.js`) no se comprueban: son los del juego. La compatibilidad se aplica al enseñar MTs.
+
+**Dónde está el código (una sola fuente para la pantalla y la lógica):**
+- `js/learnsets.js`: los datos (**archivo generado, no se edita a mano**). `LEARN['Terremoto']` es una lista de números de Pokédex en rangos (`'4-6,37'`). `LEARN_REF` dice qué Pokémon se miden con qué juego.
+- `tools/gen_learnsets.py`: el programa que genera `learnsets.js` a partir de los CSV. Para regenerarlo: `python3 tools/gen_learnsets.py RUTA_A_LOS_CSV`. Las reglas están explicadas en la cabecera del propio archivo. **Los CSV no hace falta subirlos a GitHub**, solo se necesitan para volver a generar el archivo.
+- `js/training.js`: la lógica. `canLearn(dex, movimiento)` dice si su especie puede. `teachCheck(dex, movimiento)` es **la única comprobación** y devuelve el motivo si no se puede (no es compatible, ya lo conoce, no tienes ese Pokémon). `useMT()` y `recallMove()` la llaman **antes de cambiar nada**; si algo falla, no se toca el Pokémon ni se gasta el MT. Mensaje de incompatible: «Este Pokémon no puede aprender este movimiento.»
+
+**Cómo se usa (Equipo Pokémon › Ver datos):**
+- Cada ataque tiene un botón **Cambiar ataque**. Abre una pantalla con: los 4 ataques actuales (con tipo, energía y recarga; el que se va a cambiar sale marcado), los MT de ese hueco que tienes (**✓ Compatible**, **✕ No compatible** con el mensaje al pulsarlo, o «Ya lo conoce») y los **ataques anteriores** que puedes recuperar.
+- Al elegir uno sale un **resumen**: «Aprende X · Olvida Y · Gasta 1 MT» y los botones **Confirmar el cambio** y **Cancelar**. No se cambia nada hasta confirmar. **Cancelar y volver**, Esc o cerrar la ventana tampoco tocan nada.
+- **Los huecos son fijos** (Golpe, Disparo, Mejora y Fuerte, cada uno con su tecla), como siempre: un MT solo sustituye al ataque de su mismo hueco. Cada tecla hace una cosa distinta en combate, por eso un MT no puede ir a cualquier hueco.
+- **Recuperar un ataque anterior:** el ataque que se olvida **no se pierde**: pasa a «Ataques anteriores» de ese hueco. Recuperarlo es **gratis** y no devuelve ni gasta ningún MT: simplemente se intercambia con el actual, así ningún ataque se duplica ni se crea de la nada. El ataque original del Pokémon siempre se puede recuperar. «Restaurar originales» también deja los ataques que tenía en «anteriores».
+- **Desde la Mochila:** cada MT tiene el botón **Enseñar a un Pokémon**. Enseña tu equipo con ✓ o ✕ según compatibilidad y, al elegir uno compatible, abre la misma pantalla de resumen y confirmación (mismas reglas, mismo código).
+- **Pulsar Confirmar dos veces:** solo cuenta una (hay un bloqueo de medio segundo y además `useMT` vuelve a comprobar que quede el MT y que no lo conozca ya).
+- **Se guarda en la partida:** `save.mv` (ataques cambiados), `save.mvHist` (ataques anteriores de cada hueco) y `save.mtV`. Al reiniciar el juego siguen igual.
+- **Partidas antiguas:** si un Pokémon ya había aprendido un MT que no podía (por ejemplo, Venusaur con Ventisca), al cargar se **quita ese ataque, vuelve el original y el MT se devuelve a la mochila** (sale un aviso). Solo ocurre una vez (`save.mtV`).
+- **Tienda:** los MTs del día nunca incluyen un movimiento que ningún Pokémon pueda aprender.
 
 ## Barra de energía y tiempos de los ataques (js/render.js)
 Encima de la barra de ataques hay una **barra de ENERGÍA** siempre visible, con una marca morada en **20** (ataque **Q**) y una amarilla en **40** (ataque **E**, el fuerte). Sobre cada marca pone cuántos segundos faltan para poder usarlo (o ✔ si ya puedes). La energía sube **12 por segundo** (`EN_REGEN` en `js/data.js`). Cada tarjeta de ataque muestra además el tiempo que falta hasta poder usarlo, que es el mayor de dos: el **enfriamiento** (número blanco) o la **energía que falta** (número azul), y una mini barra azul de energía que se pone verde cuando ya llega.
