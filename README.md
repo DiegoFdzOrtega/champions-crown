@@ -409,6 +409,125 @@ En el combate, la caja de datos del rival **ya no muestra «NV 120»** (en `hud(
 - **Partidas antiguas:** si un Pokémon ya había aprendido un MT que no podía (por ejemplo, Venusaur con Ventisca), al cargar se **quita ese ataque, vuelve el original y el MT se devuelve a la mochila** (sale un aviso). Solo ocurre una vez (`save.mtV`).
 - **Tienda:** los MTs del día nunca incluyen un movimiento que ningún Pokémon pueda aprender.
 
+## Lista de ataques del juego (los que se pueden enseñar con MT)
+Son **93 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
+
+**Golpe (clic izquierdo): 23 ataques**
+
+| Ataque | Tipo | Aprenden |
+|---|---|---|
+| Garra Metal | Acero | 95 |
+| Acua Cola | Agua | 58 |
+| Tijera X | Bicho | 117 |
+| Garra Dragón | Dragón | 81 |
+| Colmillo Rayo | Eléctrico | 99 |
+| Garra Umbría | Fantasma | 192 |
+| Lengüetazo | Fantasma | 43 |
+| Colmillo Ígneo | Fuego | 109 |
+| Carantoña | Hada | 162 |
+| Colmillo Hielo | Hielo | 96 |
+| Golpe Roca | Lucha | 44 |
+| Arañazo | Normal | 93 |
+| Ataque Rápido | Normal | 142 |
+| Cabezazo | Normal | 111 |
+| Golpe Cuerpo | Normal | 544 |
+| Placaje | Normal | 335 |
+| Látigo Cepa | Planta | 25 |
+| Cabezazo Zen | Psíquico | 307 |
+| Tumba Rocas | Roca | 374 |
+| Mordisco | Siniestro | 210 |
+| Excavar | Tierra | 363 |
+| Puya Nociva | Veneno | 187 |
+| Ataque Ala | Volador | 44 |
+
+**Disparo (clic derecho): 29 ataques**
+
+| Ataque | Tipo | Aprenden |
+|---|---|---|
+| Bomba Imán | Acero | nadie |
+| Hidropulso | Agua | 198 |
+| Pistola Agua | Agua | 137 |
+| Pin Misil | Bicho | 36 |
+| Zumbido | Bicho | 71 |
+| Dragoaliento | Dragón | 60 |
+| Pulso Dragón | Dragón | 120 |
+| Impactrueno | Eléctrico | 54 |
+| Rayo | Eléctrico | 250 |
+| Tinieblas | Fantasma | 94 |
+| Ascuas | Fuego | 73 |
+| Lanzallamas | Fuego | 202 |
+| Viento Feérico | Hada | 23 |
+| Voz Cautivadora | Hada | 82 |
+| Nieve Polvo | Hielo | 30 |
+| Rayo Hielo | Hielo | 273 |
+| Esfera Aural | Lucha | 43 |
+| Doble Filo | Normal | 435 |
+| Triataque | Normal | 25 |
+| Hoja Afilada | Planta | 60 |
+| Confusión | Psíquico | 91 |
+| Psicorrayo | Psíquico | 116 |
+| Lanzarrocas | Roca | 41 |
+| Pulso Umbrío | Siniestro | 173 |
+| Disparo Lodo | Tierra | 238 |
+| Bomba Lodo | Veneno | 156 |
+| Picotazo Veneno | Veneno | 43 |
+| Tajo Aéreo | Volador | 139 |
+| Tornado | Volador | 47 |
+
+**Mejora (Q): 22 ataques**
+
+| Ataque | Tipo | Aprenden |
+|---|---|---|
+| Defensa Férrea | Acero | 234 |
+| Danza Lluvia | Agua | 682 |
+| Refugio | Agua | 34 |
+| Danza Aleteo | Bicho | 12 |
+| Danza Dragón | Dragón | 68 |
+| Carga | Eléctrico | 75 |
+| Maldición | Fantasma | 275 |
+| Día Soleado | Fuego | 664 |
+| Campo Neblinoso | Hada | 58 |
+| Neblina | Hielo | 63 |
+| Corpulencia | Lucha | 126 |
+| Afilar | Normal | nadie |
+| Danza Espada | Normal | 270 |
+| Desarrollo | Planta | 72 |
+| Agilidad | Psíquico | 269 |
+| Amnesia | Psíquico | 137 |
+| Paz Mental | Psíquico | 221 |
+| Pulimento | Roca | 30 |
+| Maquinación | Siniestro | 164 |
+| Tormenta de Arena | Tierra | 244 |
+| Armadura Ácida | Veneno | 33 |
+| Viento Afín | Volador | 110 |
+
+**Ataque fuerte (E): 19 ataques**
+
+| Ataque | Tipo | Aprenden |
+|---|---|---|
+| Foco Resplandor | Acero | 134 |
+| Hidrobomba | Agua | 177 |
+| Megacuerno | Bicho | 28 |
+| Cometa Draco | Dragón | 72 |
+| Trueno | Eléctrico | 218 |
+| Bola Sombra | Fantasma | 301 |
+| Envite Ígneo | Fuego | 82 |
+| Llamarada | Fuego | 182 |
+| Fuerza Lunar | Hada | 42 |
+| Ventisca | Hielo | 252 |
+| Onda Certera | Lucha | 222 |
+| Hiperrayo | Normal | 555 |
+| Rayo Solar | Planta | 305 |
+| Psíquico | Psíquico | 235 |
+| Roca Afilada | Roca | 226 |
+| Pulso Noche | Siniestro | 3 |
+| Terremoto | Tierra | 288 |
+| Lanzamugre | Veneno | 118 |
+| Pájaro Osado | Volador | 62 |
+
+## Restos (rebalanceo)
+Los **Restos** curaban un 1,5% de la vida máxima **cada segundo** (≈90% por minuto), demasiado para un juego en tiempo real: los tanques rivales casi no se podían matar. Ahora curan un **0,4% por segundo** (≈24% por minuto; en los juegos es 1/16 por turno). Vale igual para ti y para los rivales. El número es `IFX.restos` en `js/data.js` (`.004`); súbelo o bájalo si quieres otro equilibrio.
+
 ## Barra de energía y tiempos de los ataques (js/render.js)
 Encima de la barra de ataques hay una **barra de ENERGÍA** siempre visible, con una marca morada en **20** (ataque **Q**) y una amarilla en **40** (ataque **E**, el fuerte). Sobre cada marca pone cuántos segundos faltan para poder usarlo (o ✔ si ya puedes). La energía sube **12 por segundo** (`EN_REGEN` en `js/data.js`). Cada tarjeta de ataque muestra además el tiempo que falta hasta poder usarlo, que es el mayor de dos: el **enfriamiento** (número blanco) o la **energía que falta** (número azul), y una mini barra azul de energía que se pone verde cuando ya llega.
 

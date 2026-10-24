@@ -211,13 +211,13 @@ const ITEMS = {
   flecha:    {n:'Flecha Venenosa',    img:'poison_barb.png',   cat:'tipo',    p:50,  type:'veneno',    d:'+20% de daño en tus ataques de tipo Veneno.',                          og:'En los juegos: +20% de potencia en movimientos Veneno.'},
   cuchara:   {n:'Cuchara Torcida',    img:'twisted_spoon.png', cat:'tipo',    p:50,  type:'psiquico',  d:'+20% de daño en tus ataques de tipo Psíquico.',                        og:'En los juegos: +20% de potencia en movimientos Psíquico.'},
   // --- Utilidad
-  restos:    {n:'Restos',             img:'leftovers.png',     cat:'util',    p:80,  d:'Recuperas un 1,5% de tu salud máxima cada segundo.',                                og:'En los juegos: recupera 1/16 de los PS cada turno.'},
+  restos:    {n:'Restos',             img:'leftovers.png',     cat:'util',    p:80,  d:'Recuperas un 0,4% de tu salud máxima cada segundo.',                                og:'En los juegos: recupera 1/16 de los PS cada turno.'},
   cascabel:  {n:'Cascabel Concha',    img:'Cascabel_concha.png',cat:'util',   p:80,  d:'Recuperas un 15% del daño que infliges.',                                           og:'En los juegos: cura 1/8 del daño que causas.'},
   panuelo:   {n:'Pañuelo Elección',   img:'choice_scarf.png',  cat:'util',    p:80,  d:'+35% de velocidad.',                                                                og:'En los juegos: +50% de Velocidad, pero solo puedes usar un movimiento.'},
   roca:      {n:'Roca del Rey',       img:'kings_rock.png',    cat:'util',    p:100, d:'Cada golpe tiene un 10% de amedrentar al rival: no puede moverse ni atacar durante 0,6 s.', og:'En los juegos: 10% de probabilidad de amedrentar al rival.'}
 };
 // Números de los efectos (los usa combat.js). Cámbialos aquí para equilibrar.
-const IFX = {tipo:1.2, cinta:1.4, gafaselec:1.4, gafasesp:1.15, cinturon:1.2, rocaProb:.10, rocaStun:.6, periscopio:.07};
+const IFX = {tipo:1.2, cinta:1.4, gafaselec:1.4, gafasesp:1.15, cinturon:1.2, rocaProb:.10, rocaStun:.6, periscopio:.07, restos:.004};    // restos = fracción de la vida máxima que se recupera cada segundo (.004 = 0,4%)
 const imgOf = id => ITEMS[id] ? 'objetos/' + ITEMS[id].img : (typeof trainIcon === 'function' ? trainIcon(id) : '');   // consumibles y MTs: iconos de training.js                // ruta de la imagen de un objeto
 
 const SHOP = [

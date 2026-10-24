@@ -113,7 +113,7 @@ function update(dt){
   }
   for(const f of [P,E]){                         // tiempos de cada uno
     for(let i=0;i<5;i++) f.cd[i] = Math.max(0, f.cd[i]-dt);
-    if(f.item === 'restos' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max*.015*dt);            // Restos
+    if(f.item === 'restos' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max*IFX.restos*dt);   // Restos (IFX.restos en data.js)
     if(f.dash > 0 && !f.dead && (f.fxd = (f.fxd || 0) - dt) <= 0){ f.fxd = .045; fxDust(f); }          // polvo al correr
     if(f.stun > 0) f.stun -= dt;
     f.en = Math.min(100, f.en + EN_REGEN*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
