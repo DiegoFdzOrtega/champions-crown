@@ -17,7 +17,7 @@ setInterval(()=>{                                 // dibuja las miniaturas cuand
     });
   });
 }, 400);
-$('btnBack1').onclick = goRegions; $('btnBack2').onclick = goMain; $('btnTeam').onclick = openTeam;
+$('btnBack1').onclick = goRegions; $('btnBack2').onclick = goMain; $('btnTeam').onclick = () => openTeam('story');           // desde la Historia: al cerrar el equipo se vuelve a la Historia
 
 addEventListener('click', e => { const b = e.target.closest && e.target.closest('button'); if(b && !b.disabled) Sfx.play('click'); }, true);   // efecto de clic en todos los botones
 

@@ -92,7 +92,7 @@ function openPick(target){                                                      
   $('tmPick').classList.remove('hide'); renderRarPills(); renderTeamNav(); renderTeamList();
 }
 function closePick(){ $('tmPick').classList.add('hide'); tm.target = null; }
-function closeTeam(){ closePick(); closeData(true); closeDd(); roomStop(); tm.from === 'shop' ? openShop() : goMain(); }
+function closeTeam(){ closePick(); closeData(true); closeDd(); roomStop(); tm.from === 'shop' ? openShop() : tm.from === 'story' ? goStory() : tm.from === 'campo' ? openCampo() : goMain(); }
 // Esc cierra primero la ventana de arriba (ficha o selector) y por último el panel del equipo
 addEventListener('keydown', e => {
   if(e.code !== 'Escape' || !tm.built || $('teamv').classList.contains('hide')) return;
@@ -284,9 +284,9 @@ function syncOpen(){
   $('tmList').querySelectorAll('.treg').forEach(s => s.classList.toggle('open', tm.open.has(s.dataset.r) && !s.classList.contains('none')));
 }
 
-function openTeam(from){                                                                          // from = 'shop' si se abre desde la Tienda (al cerrar se vuelve a ella)
+function openTeam(from){                                                                          // from = 'shop' (Tienda), 'story' (Historia) o 'campo' (Campo de Entrenamiento): al cerrar se vuelve a esa pantalla
   if(!tm.built) buildTeamShell();
-  tm.from = from === 'shop' ? 'shop' : '';
+  tm.from = from === 'shop' || from === 'story' || from === 'campo' ? from : '';
   if(!tm.open) tm.open = new Set(team.map(d => (TEAM_REGIONS.find(r => inRegion(r, d)) || {}).n).filter(Boolean));   // el selector empieza con las regiones de tu equipo abiertas
   if(!tm.open.size) tm.open.add('Kanto');
   closePick(); $('tmData').classList.add('hide');

@@ -71,8 +71,8 @@ function enemyMon(e){
   return m;
 }
 
-function startBattle(o){
-  team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist();                 // para ordenar por "más usados"
+function startBattle(o, again){                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
+  if(!again){ team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist(); }                 // para ordenar por "más usados"
   const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; return f; }),   // IVs, EVs, naturaleza y ataques de MT
          e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)
   p.forEach(f=>{ f.x = W*.25; f.y = H/2 + 10; f.dir = 2; });

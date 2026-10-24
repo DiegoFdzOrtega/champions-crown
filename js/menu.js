@@ -113,8 +113,8 @@ function buildRegions(){
   $('rTower').textContent = leaguesWon() < REGIONS.length ? `Torre Batalla: se desbloquea al derrotar a los Campeones de todas las Ligas (${leaguesWon()}/${REGIONS.length} superadas).` : 'Torre Batalla: ¡has superado todas las Ligas!';
   REGIONS.forEach((n,i)=>{
     const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
-    const open = playable && (i === 0 || !!save.champ[prev]);                      // se abre al ser Campeón de la región anterior
-    const rec = progOf(n), done = open ? Math.min(8, rec) : 0, elite = open && rec >= 8;
+    const open = playable && (i === 0 || !!save.champ[prev] || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
+    const rec = PREVIEW[n] ? 12 : progOf(n), done = open ? Math.min(8, rec) : 0, elite = open && rec >= 8;
     const d = document.createElement('div'); d.className = 'rcard' + (open ? ' open' : ' lock');
     d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
     let pips = ''; for(let k=0;k<8;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
@@ -136,30 +136,62 @@ function buildRegions(){
 }
 
 // ---- HISTORIA: líderes de la región ----
+const TYPE_OF_TAG = Object.fromEntries(Object.entries(TYPE_ES).map(([k, v]) => [v, k]));            // 'Roca' → 'roca' (color del líder: TC)
+const tagColor = F => F.kind === 'campeon' ? '#ffcc33' : (TC[TYPE_OF_TAG[F.tag]] || '#8fb3e8');
 function buildStory(){
-  $('stTitle').textContent = 'Historia · ' + save.region;
+  const R = save.region, fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === R);
+  const rec = PREVIEW[R] ? 12 : progOf(R);                                // modo ver (data.js): todos los combates abiertos
+  const cnt = k => fls.filter(x => x.F.kind === k).length, doneK = k => fls.filter(x => x.F.kind === k && x.F.idx < rec).length;
+  const champDone = !!save.champ[R];
+  // ---- banner de la región: imagen de fondo, título y contadores ----
+  $('stTitle').textContent = 'Historia · ' + R;
+  $('stBanner').style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[R] || R}.webp")`);
+  $('stChips').innerHTML =
+    `<span class="stc"><b>★ ${doneK('lider')}/${cnt('lider')}</b> líderes</span><span class="stc"><b>${doneK('alto')}/${cnt('alto')}</b> Alto Mando</span><span class="stc${champDone ? ' gold' : ''}"><b>${champDone ? '🏆' : '0/1'}</b> Campeón</span>`;
+  // ---- camino: un punto por combate (✓ hecho · dorado = el siguiente · candado = bloqueado) ----
+  const nextI = fls.findIndex(x => x.F.idx >= rec), nextF = nextI >= 0 ? fls[nextI].F : null;
+  $('stPath').innerHTML = '<div class="stp-line">' + fls.map(({F}, k) => {
+      const st = F.idx < rec ? 'done' : F.idx === rec ? 'cur' : 'lock', col = st === 'lock' ? '' : `style="--c:${tagColor(F)}"`;
+      const lab = F.kind === 'campeon' ? '♛' : F.kind === 'alto' ? 'AM' : F.idx + 1;
+      return `<i class="stp ${st} ${F.kind}" ${col} title="${st === 'lock' ? '???' : esc(F.leader)}">${st === 'done' ? '✓' : st === 'lock' ? '🔒' : lab}</i>`;
+    }).join('') + '</div>' +
+    `<p class="stp-next">${nextF ? `Siguiente: <b>${esc(nextF.leader)}</b>${nextF.kind === 'lider' ? ' · Líder ' + esc(nextF.tag) : nextF.kind === 'alto' ? ' · Alto Mando' : ' · Campeón'}${nextF.place ? ' · ' + esc(nextF.place) : ''}` : '¡Has vencido a todos en esta región!'}</p>`;
+  // ---- tu equipo (compacto) ----
   const bar = $('teamBar'); bar.innerHTML = ''; thumbs.length = 0;
   team.forEach(id=>{
-    const m = mon(id), {d,c} = card(m, save.equip[id] ? ITEMS[save.equip[id]].n : 'Sin objeto');
-    thumbs.push({c,m,s:useShiny(id)}); bar.appendChild(d);
+    const m = mon(id), d = document.createElement('div'); d.className = 'card';           // carta compacta: miniatura + nombre + tipos + objeto
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const nm = document.createElement('b'); nm.textContent = m.name;
+    const ty = document.createElement('span'); ty.className = 'tt'; ty.textContent = m.types.join(' / ').toUpperCase();
+    const it = document.createElement('span'); it.className = 'ti'; it.textContent = save.equip[id] ? ITEMS[save.equip[id]].n : 'Sin objeto';
+    d.append(c, nm, ty, it); thumbs.push({c,m,s:useShiny(id)}); bar.appendChild(d);
   });
   const ready = team.length === 3;
   $('teamWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
   const fl = $('floors'), fl2 = $('floors2'), fl3 = $('floors3'); fl.innerHTML = ''; fl2.innerHTML = ''; fl3.innerHTML = '';   // líderes arriba, Alto Mando (con el Campeón) debajo
-  const rec = progOf(save.region);
-  FLOORS.forEach((F,gi)=>{                                          // gi = posición global (la que usa floorFight)
-    if(F.region !== save.region) return;
-    const i = F.idx, locked = i > rec, done = i < rec;
-    const d = document.createElement('div'); d.className = 'lcard' + (done ? ' done' : '') + (locked ? ' locked mystery' : '');      // mystery: los rivales que aún no te toca ver salen ocultos (silueta y «???»)
-    const im = new Image(); im.alt = F.leader; loadLeaderInto(im, F.id, ()=>{ im.style.visibility = 'hidden'; });
-    const t = document.createElement('div');
-    if(locked) im.alt = '???';
-    t.innerHTML = locked
-      ? `<h3>${i+1}. ???</h3><p>${F.kind === 'lider' ? 'Líder de gimnasio' : F.kind === 'alto' ? 'Alto Mando' : 'Campeón de la Liga Pokémon'} · ??? · 6 Pokémon<br>Vence al anterior para descubrir quién es.</p>`      // no se ve nombre, tipo ni lugar hasta que le toque
-      : `<h3>${done ? '★ ' : ''}${i+1}. ${F.leader}</h3><p>${F.kind === 'lider' ? 'Líder ' + F.tag : F.kind === 'alto' ? 'Alto Mando · ' + F.tag : 'Campeón de la Liga Pokémon'}${F.place ? ' · ' + F.place : ''} · 6 Pokémon${rewardText(F) ? '<br>Recompensa: ' + rewardText(F) : ''}</p>`;
-    const b = document.createElement('button'); b.textContent = locked ? 'Bloqueado' : done ? 'Repetir' : 'Retar';
+  fls.forEach(({F, gi}) => {                                         // gi = posición global (la que usa floorFight)
+    const i = F.idx, locked = i > rec, done = i < rec, cur = i === rec;
+    const d = document.createElement('div'); d.className = 'lcard ' + F.kind + (done ? ' done' : '') + (cur ? ' cur' : '') + (locked ? ' locked mystery' : '');      // mystery: los rivales que aún no te toca ver salen ocultos (silueta y «???»)
+    d.style.setProperty('--tc', locked ? '#556080' : tagColor(F));
+    const fr = document.createElement('div'); fr.className = 'lc-img';
+    const im = new Image(); im.alt = locked ? '???' : F.leader; loadLeaderInto(im, F.id, ()=>{ im.style.visibility = 'hidden'; });
+    fr.appendChild(im); if(locked){ const lk = document.createElement('span'); lk.className = 'lc-lock'; lk.textContent = '🔒'; fr.appendChild(lk); } else if(done){ const md = document.createElement('span'); md.className = 'lc-medal'; md.textContent = F.kind === 'campeon' ? '♛' : '★'; fr.appendChild(md); }
+    const t = document.createElement('div'); t.className = 'lc-body';
+    if(locked) t.innerHTML = `<h3><em>${i+1}.</em> ???</h3><p class="lc-sub">${F.kind === 'lider' ? 'Líder de gimnasio' : F.kind === 'alto' ? 'Alto Mando' : 'Campeón de la Liga Pokémon'} · ??? · 6 Pokémon</p><p class="lc-hint">Vence al anterior para descubrir quién es.</p>`;      // no se ve nombre, tipo ni lugar hasta que le toque
+    else{
+      const ty = TYPE_OF_TAG[F.tag], badge = F.kind === 'campeon' ? '<span class="tb" style="background:#b8860b">Campeón</span>' : ty ? `<span class="tb" style="background:${TC[ty]}">${esc(F.tag)}</span>` : '';
+      t.innerHTML = `<h3><em>${i+1}.</em> ${esc(F.leader)}</h3><p class="lc-sub">${badge}<span>${F.kind === 'lider' ? 'Líder de gimnasio' : F.kind === 'alto' ? 'Alto Mando' : 'Liga Pokémon'}${F.place ? ' · ' + esc(F.place) : ''}</span></p>`;
+      const mini = document.createElement('div'); mini.className = 'lc-mini'; mini.title = 'Los 6 Pokémon del rival';       // los 6 Pokémon del rival en miniatura (se dibujan con el resto de miniaturas, ui.js)
+      (F.teams || []).slice(0, 6).forEach(e => { const dx = typeof e === 'number' ? e : e.dex, c = document.createElement('canvas'); c.width = c.height = 64; mini.appendChild(c); thumbs.push({c, m: mon(dx), s: false}); });
+      t.appendChild(mini);
+      const rw = typeof rewardOf === 'function' ? rewardOf(F) : null;
+      if(rw){ const row = document.createElement('div'); row.className = 'lc-rw'; row.title = 'Recompensa: ' + rewardText(F);
+        Object.entries(rw).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); row.appendChild(c); });
+        t.appendChild(row); }
+    }
+    const b = document.createElement('button'); b.className = 'lc-btn ' + (locked ? 'lock' : done ? 'rep' : 'go'); b.textContent = locked ? '🔒 Bloqueado' : done ? 'Repetir' : 'Retar';
     b.disabled = locked || !ready; b.onclick = ()=>floorFight(gi);
-    d.append(im, t, b); (F.kind === 'lider' ? fl : F.kind === 'alto' ? fl2 : fl3).appendChild(d);
+    d.append(fr, t, b); (F.kind === 'lider' ? fl : F.kind === 'alto' ? fl2 : fl3).appendChild(d);
   });
 }
 

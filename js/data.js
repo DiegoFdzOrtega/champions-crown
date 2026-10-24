@@ -161,6 +161,9 @@ const FLOORS = [
 // dn (índice de dificultad: sube el vida/daño del rival, ver DIFF) y place (ciudad, solo para mostrar). Kanto: dn = idx.
 FLOORS.forEach((F, i) => { F.region = 'Kanto'; F.idx = i; F.dn = i; });
 const floorsOf = region => FLOORS.filter(F => F.region === region);                    // combates de una región, en orden
+/* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
+   Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
+const PREVIEW = {Sinnoh: false};
 const progOf = region => region === 'Kanto' ? save.record : ((save.prog && save.prog[region]) || 0);      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
 const setProg = (region, n) => { if(region === 'Kanto') save.record = n; else save.prog[region] = n; };
 const progTotal = () => REGIONS_PLAYED().reduce((a, r) => a + progOf(r), 0);

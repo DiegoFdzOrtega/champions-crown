@@ -217,39 +217,74 @@ function campoEnd(won){                                    // lo llama endBattle
 // ---------------------------------------------------------------------
 // PANTALLA
 // ---------------------------------------------------------------------
+let campoTab = 0;                                                                     // dificultad que se está viendo (1, 2 o 3)
+const campoColor = T => TC[mon(T.team[0].dex).types[0]] || '#8fb3e8';                  // color de la tarjeta = tipo del primer Pokémon del entrenador
+const campoNext = () => { for(const t of [1, 2, 3]) if(campoOpen(t)){ const T = campoNeeded(t).find(x => !save.campoWins[x.id]); if(T) return T; } return null; };   // primer entrenador sin vencer
 function openCampo(){
   const ready = team.length === 3;
-  panel(`<h1>Campo de Entrenamiento</h1>
-    <p>Aquí farmeas <b class="gold">Chapas</b>: cada vez que vences a un entrenador ganas <b>${rewardText({kind:'campo'})}</b> (siempre, sin límite). Gástalas en Equipo Pokémon › Ver datos para subir los IV y EV de tus Pokémon.</p>
-    <div class="cmp-bal"><span>Chapas Plateadas: <b id="cmpS"></b></span><span>Chapas Doradas: <b id="cmpG"></b></span><button id="cmpTeam">Equipo Pokémon →</button></div>
-    <p id="cmpWarn" class="warn"></p><div id="cmpList"></div>`);
+  if(!(campoTab && campoOpen(campoTab) && !campoCleared(campoTab))){                  // al entrar se abre la primera dificultad que aún no has superado
+    campoTab = [1, 2, 3].find(t => campoOpen(t) && !campoCleared(t)) || 3;
+  }
+  panel(`<div class="stbanner cpbanner"><h1>Campo de Entrenamiento</h1>
+      <p>Combate todas las veces que quieras: perder no cuesta nada y cada victoria da siempre la misma recompensa. Gasta las Chapas en Equipo Pokémon › Ver datos para subir los IV y EV de tus Pokémon.</p>
+      <div class="cp-rw"><span class="cp-lab">Cada victoria:</span><span id="cpRw" class="lc-rw"></span></div>
+      <div class="stchips"><span class="stc"><i id="cpIcoS"></i><b id="cmpS"></b> Chapas Plateadas</span><span class="stc gold"><i id="cpIcoG"></i><b id="cmpG"></b> Chapas Doradas</span>
+        <button id="cmpTeam" class="cp-team">Equipo Pokémon →</button></div></div>
+    <p id="cmpWarn" class="warn"></p>
+    <div id="cpTabs" class="cptabs"></div><div id="cpNote" class="cp-note"></div><div id="cmpList"></div>`);
   $('panelBody').classList.add('wide');
-  $('cmpS').textContent = held('chapaplata'); $('cmpG').textContent = held('chapa'); $('cmpTeam').onclick = () => openTeam();
+  $('cmpS').textContent = held('chapaplata'); $('cmpG').textContent = held('chapa'); $('cmpTeam').onclick = () => openTeam('campo');
+  $('cpIcoS').appendChild(rwIcon('chapaplata', '#c9d6f5')); $('cpIcoG').appendChild(rwIcon('chapa', '#ffcc33'));
+  Object.entries(rewardOf({kind:'campo'})).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id]; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('cpRw').appendChild(c); });
   $('cmpWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
-  const list = $('cmpList');
-  [1, 2, 3].forEach(tier => {
-    const items = CAMPO.filter(T => T.tier === tier); if(!items.length) return;
-    const open = campoOpen(tier), nd = campoNeeded(tier).length;
-    const h = document.createElement('h2'); h.textContent = `${open ? '' : '🔒 '}Dificultad ${'★'.repeat(tier)} · ${CAMPO_TIER[tier].nombre} (nivel ${CAMPO_TIER[tier].lvl})`; list.appendChild(h);
-    const note = document.createElement('p'); note.className = open ? 'cmp-prog' : 'cmp-lock';
-    const prev = tier > 1 ? CAMPO_TIER[tier - 1].nombre : '';
-    note.textContent = !open ? `Bloqueada: ${CAMPO_BASTA_UNO ? 'vence a un entrenador' : 'vence a los ' + campoNeeded(tier - 1).length + ' entrenadores'} de la dificultad ${prev} para desbloquearla (${campoDone(tier - 1)} de ${campoNeeded(tier - 1).length}).`
-      : campoCleared(tier) ? '✓ Dificultad superada' : CAMPO_BASTA_UNO ? '' : `Entrenadores vencidos: ${campoDone(tier)} de ${nd}`;
-    if(note.textContent) list.appendChild(note);
-    const grid = document.createElement('div'); grid.className = 'cmp-grid' + (open ? '' : ' locked'); list.appendChild(grid);
-    items.forEach(T => {
-      const d = document.createElement('div'); d.className = 'cmp-card'; d.dataset.id = T.id;
-      const im = new Image(); im.alt = T.name; im.src = 'entrenadores/' + T.file;
-      if(T.opt){ d.classList.add('hide'); im.onload = () => d.classList.remove('hide'); }                      // opcional: solo se ve si existe su imagen
-      else im.onerror = () => { im.style.visibility = 'hidden'; };
-      const info = document.createElement('div'); info.className = 'cmp-info';
-      info.innerHTML = `<h3></h3><p class="cmp-th"></p><div class="cmp-team"></div>`;
-      info.querySelector('h3').textContent = (save.campoWins[T.id] ? '✓ ' : '') + T.name; info.querySelector('.cmp-th').textContent = `${T.theme} · ${T.team.length} Pokémon`;
-      const tm = info.querySelector('.cmp-team');
-      T.team.forEach(s => { const m = mon(s.dex), c = document.createElement('canvas'); c.width = c.height = 48; c.title = `${m.name} · ${ITEMS[s.item].n}`; tm.appendChild(c); dexThumbs.push({c, m}); });
-      const bt = document.createElement('button'); bt.className = 'main'; bt.textContent = open ? 'Combatir' : '🔒 Bloqueado'; bt.disabled = !ready || !open; bt.onclick = () => campoFight(T.id);
-      d.append(im, info, bt); grid.appendChild(d);
-    });
+  renderCampo();
+}
+function renderCampo(){
+  const ready = team.length === 3, tier = campoTab, open = campoOpen(tier), nd = campoNeeded(tier).length;
+  dexThumbs.length = 0;
+  // ---- pestañas de dificultad ----
+  const tabs = $('cpTabs'); tabs.innerHTML = '';
+  [1, 2, 3].forEach(t => {
+    const o = campoOpen(t), n = campoNeeded(t).length, dn = campoDone(t), b = document.createElement('button');
+    b.className = 'cptab' + (t === tier ? ' on' : '') + (o ? '' : ' lock') + (campoCleared(t) ? ' ok' : '');
+    b.innerHTML = `<span class="cpt-n">${o ? '' : '🔒 '}${CAMPO_TIER[t].nombre}</span><span class="cpt-s">${'★'.repeat(t)} · nivel ${CAMPO_TIER[t].lvl}</span>` +
+      `<span class="cpt-bar"><i style="width:${n ? Math.round(dn / n * 100) : 0}%"></i></span><span class="cpt-c">${campoCleared(t) ? '✓ Superada' : dn + ' de ' + n + ' vencidos'}</span>`;
+    b.onclick = () => { campoTab = t; renderCampo(); };
+    tabs.appendChild(b);
+  });
+  // ---- aviso + botón «ir al siguiente» ----
+  const note = $('cpNote'); note.innerHTML = '';
+  const prev = tier > 1 ? CAMPO_TIER[tier - 1].nombre : '', msg = document.createElement('span');
+  msg.className = open ? 'cp-prog' : 'cp-lock';
+  msg.textContent = !open ? `🔒 Bloqueada: vence a los ${campoNeeded(tier - 1).length} entrenadores de la dificultad ${prev} para desbloquearla (${campoDone(tier - 1)} de ${campoNeeded(tier - 1).length}).`
+    : campoCleared(tier) ? '✓ Dificultad superada: puedes repetir los combates cuando quieras.' : `Entrenadores vencidos: ${campoDone(tier)} de ${nd}`;
+  note.appendChild(msg);
+  const nx = campoNext();
+  if(nx){ const nb = document.createElement('button'); nb.className = 'cp-next'; nb.textContent = `Ir al siguiente sin vencer: ${nx.name} →`;
+    nb.onclick = () => { campoTab = nx.tier; renderCampo(); const c = document.querySelector('#cmpList .lcard.cur'); if(c) c.scrollIntoView({behavior:'smooth', block:'center'}); };
+    note.appendChild(nb); }
+  // ---- tarjetas ----
+  const list = $('cmpList'); list.innerHTML = '';
+  const grid = document.createElement('div'); grid.className = 'lgrid cp'; list.appendChild(grid);
+  const first = open ? campoNeeded(tier).find(x => !save.campoWins[x.id]) : null;
+  CAMPO.filter(T => T.tier === tier).forEach(T => {
+    const won = !!save.campoWins[T.id], col = campoColor(T);
+    const d = document.createElement('div'); d.className = 'lcard campoc' + (won ? ' done' : '') + (first && first.id === T.id ? ' cur' : '') + (open ? '' : ' locked'); d.dataset.id = T.id; d.style.setProperty('--tc', col);
+    const fr = document.createElement('div'); fr.className = 'lc-img';
+    const im = new Image(); im.alt = T.name; im.src = 'entrenadores/' + T.file; fr.appendChild(im);
+    if(T.opt){ d.classList.add('hide'); im.onload = () => d.classList.remove('hide'); }                      // opcional: solo se ve si existe su imagen
+    else im.onerror = () => { im.style.visibility = 'hidden'; };
+    if(won){ const md = document.createElement('span'); md.className = 'lc-medal'; md.textContent = '✓'; fr.appendChild(md); }
+    const t = document.createElement('div'); t.className = 'lc-body';
+    t.innerHTML = `<h3></h3><p class="lc-sub"><span class="tb"></span><span class="cp-th"></span></p>`;
+    t.querySelector('h3').textContent = T.name; const tb = t.querySelector('.tb'); tb.textContent = T.cls; tb.style.background = col;
+    t.querySelector('.cp-th').textContent = `${T.theme} · ${T.team.length} Pokémon`;
+    const mini = document.createElement('div'); mini.className = 'lc-mini'; mini.title = 'Los Pokémon del entrenador (al pasar el ratón, su objeto)';
+    T.team.forEach(sl => { const m = mon(sl.dex), c = document.createElement('canvas'); c.width = c.height = 64; c.title = `${m.name} · ${ITEMS[sl.item].n}`; mini.appendChild(c); dexThumbs.push({c, m}); });
+    t.appendChild(mini);
+    const bt = document.createElement('button'); bt.className = 'lc-btn ' + (!open ? 'lock' : won ? 'rep' : 'go'); bt.textContent = !open ? '🔒 Bloqueado' : won ? 'Repetir' : 'Combatir';
+    bt.disabled = !ready || !open; bt.onclick = () => campoFight(T.id);
+    d.append(fr, t, bt); grid.appendChild(d);
   });
 }
 

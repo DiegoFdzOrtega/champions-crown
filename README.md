@@ -142,12 +142,13 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - Los botones van en **una columna** hacia abajo. Solo en pantallas muy bajas (menos de 680 px de alto) pasan a 2 columnas para que quepan (`@media (max-height:680px)` en style.css).
 
 
-## Pausa y salir del combate (tecla Esc)
-- En cualquier combate (Historia, Campo de Entrenamiento...) pulsa **Esc** para **pausar**. Sale una ventana con dos botones: **Continuar (Esc)** y **Salir del combate**.
+## Pausa, reiniciar y salir del combate (tecla Esc)
+- En cualquier combate (Historia, Campo de Entrenamiento...) pulsa **Esc** para **pausar**. Sale un cuadro con el nombre del combate (por ejemplo «Piso 1 · Brock · Roca»), tres datos (**Tiempo** del combate, **Tu equipo** y **Rival** con cuántos Pokémon siguen en pie) y cuatro botones: **Continuar (Esc)**, **Reiniciar combate**, **Sonido: sí/no (M)** y **Salir del combate** (en rojo).
 - Mientras está en pausa el combate se para del todo: no corre el reloj, ni te mueves, ni cambias de Pokémon (también vale durante la cuenta atrás).
-- **Salir del combate** pide confirmación ("Sí, salir" / "No, seguir"). Si sales **no ganas ninguna recompensa** ni avanzas de piso. Vuelves a la pantalla de la Historia o, si estabas en el Campo, a la lista del Campo.
+- **Reiniciar combate** pide confirmación («Sí, reiniciar» / «No, volver») y empieza el mismo combate desde cero: vida y energía completas para los dos equipos, reloj a 0 y cuenta atrás otra vez. No da ni quita recompensas y no vuelve a contar el uso de tus Pokémon para «más usados» (`startBattle(o, true)`). Sirve igual en la Historia y en el Campo.
+- **Salir del combate** también pide confirmación («Sí, salir» / «No, volver»). Si sales **no ganas ninguna recompensa** ni avanzas de piso. Vuelves a la pantalla de la Historia o, si estabas en el Campo, a la lista del Campo. «No, volver» te devuelve al menú de pausa; Esc cierra la pausa y sigues luchando.
 - Con el combate ya terminado (pantalla de resultado) Esc no abre la pausa. Fuera de un combate, Esc sigue sirviendo para volver atrás.
-- Código: `pauseBattle()` y `exitBattle()` en js/modes.js; `g.paused` en js/combat.js; tecla en js/ui.js; overlay `#pause` en index.html.
+- Código: `pauseBattle()`, `restartBattle()` y `exitBattle()` en js/modes.js; `g.paused` en js/combat.js; tecla en js/ui.js; overlay `#pause` en index.html; estilos `.pz-*` al final de css/style.css.
 
 ## Campo de Entrenamiento (js/campo.js, carpeta entrenadores/)
 Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **1 tirada de Gachapon + 50 BP + 5 Chapas Plateadas + 5 Chapas Doradas** (`REWARD.campo` en teams.js). Perder no da nada. No cuenta para el progreso de la Historia y no toca `save.record`.
@@ -157,6 +158,14 @@ Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón).
 - **Equipos competitivos:** todos con IV 31 (los pone `P()`), EVs coherentes con el papel (atacante físico = Ataque + Velocidad, especial = At. Esp. + Velocidad, tanque = PS + Defensa; máx 252 por stat y 510 en total), naturaleza que sube lo que usan y objeto que encaja (Restos, Vidasfera, Cinta/Gafas Elección, Banda Aguante, Cinturón de Experto...). Se comprueba al cargar (`validateTeams()` ahora revisa también el Campo; 6 Pokémon en los líderes y 3-4 en el Campo). El «Mineral Evolutivo» no existe en este juego, así que no se usa (el juego solo tiene los 16 objetos de ITEMS).
 - **Fondo:** cada entrenador usa el estadio de su tema (`arena`: Montañero → Brock, Marinero/Surfista/Pescador → Misty, Médium/Jugador/Li → Sabrina...). Su retrato sale en el marcador del combate (`portrait`).
 - **Añadir un entrenador:** copia una entrada de `CAMPO`, cambia sus datos y pon su imagen en `entrenadores/`. Ya hay una entrada para el **Cazabichos** (`bugcatcher.png`, marcada `opt:true`): solo aparece cuando existe esa imagen.
+
+## Campo de Entrenamiento rediseñado (js/campo.js `openCampo`/`renderCampo`, final de css/style.css)
+- **Banner verde** (césped) con el título, la recompensa de cada victoria en iconos (`REWARD.campo`: ×1 tirada, ×50 BP, ×5 Plateadas, ×5 Doradas), tus Chapas Plateadas y Doradas con icono y el botón «Equipo Pokémon →».
+- **Pestañas de dificultad** (Fácil · Media · Difícil): cada una con estrellas, nivel, barra de progreso y «N de M vencidos» (✓ Superada cuando la completas). Las bloqueadas llevan 🔒 y se pueden mirar, pero sus botones están desactivados y un aviso rojo dice cuántos entrenadores faltan para abrirlas. Al entrar se abre sola la primera dificultad que aún no has superado (`campoTab`).
+- **Tarjetas** con el mismo estilo que los líderes de la Historia (clases `.lcard`, `.lc-*`): en dos columnas (una en pantallas estrechas), teñidas con el color del tipo del primer Pokémon del entrenador (`campoColor`), retrato grande, insignia con su clase, tema, miniaturas de sus Pokémon (al pasar el ratón: nombre y objeto), ✓ en los vencidos y botón **Combatir** (dorado en el siguiente sin vencer) / **Repetir** / **Bloqueado**.
+- **«Ir al siguiente sin vencer»:** botón que salta a la dificultad del primer entrenador pendiente y lo centra en pantalla (`campoNext`).
+- **Volver al Campo:** «Equipo Pokémon →» abre el equipo con `openTeam('campo')`; al cerrarlo (o con Esc) vuelves al Campo (`closeTeam` en js/team.js).
+- La lógica de combates, recompensas y desbloqueos no cambia. Se han quitado las reglas CSS antiguas `.cmp-*`.
 
 ## Menú: Clasificatoria "Próximamente"
 - El botón **CLASIFICATORIA** está ahora justo debajo de **AJUSTES** y aparece cerrado, con la etiqueta "PRÓXIMAMENTE". Al pulsarlo sale un aviso.
@@ -408,6 +417,15 @@ Para añadir un logro: una línea nueva en `ACHIEVEMENT_DATA`. Para una condici�
 ## Rivales misteriosos en la Historia (js/menu.js, buildStory)
 En la pantalla de cada región solo ves a los rivales que ya has vencido y **al siguiente**. Los que aún no te tocan salen ocultos: retrato en silueta gris, nombre «???», sin tipo ni lugar y con el botón «Bloqueado» (`.lcard.mystery` en `css/style.css`). Se descubren de uno en uno al vencer al anterior, así no sabes qué tipos vienen y hay más misterio. Vale igual para líderes, Alto Mando y Campeón, y para todas las regiones (usa `progOf(región)`, lo que ya llevas vencido). Si quieres ver el tipo del siguiente rival para poder prepararte, o ver también un rival más, cambia `locked` en `buildStory()` (ahora `i > rec`).
 
+## Pantalla de Historia rediseñada (index.html `#tower`, js/menu.js `buildStory`, final de css/style.css)
+- **Banner de la región** con el mapa de fondo (`region/tarjetas/<Región>.webp`), el título y tres contadores: líderes, Alto Mando y Campeón (se dora al vencerlo).
+- **Camino de progreso:** un punto por combate (8 líderes, Alto Mando y Campeón). ✓ = hecho, dorado y con número = el siguiente, candado = bloqueado. Debajo pone «Siguiente: …».
+- **Tu equipo** en barra compacta (miniatura, nombre, tipos y objeto) con el botón **Editar equipo y objetos** al lado.
+- **Tarjetas de líder** teñidas con el color de su tipo (`TYPE_OF_TAG` + `TC`): retrato grande, insignia de tipo, lugar, **los 6 Pokémon del rival en miniatura**, iconos de recompensa (`rewardOf` + `rwIcon`) y botón **Retar** (dorado si es el siguiente) / **Repetir** (verde) / **Bloqueado**. Los rivales que aún no te tocan siguen ocultos: candado, silueta y «???».
+- Una columna en todas las pantallas. La lógica de combates y recompensas no se ha tocado: el botón sigue llamando a `floorFight`.
+- **Volver al editar el equipo:** el botón «Editar equipo y objetos» abre el panel con `openTeam('story')`; al pulsar «✕ Cerrar» (o Esc) vuelves a la Historia, ya con el equipo y los objetos nuevos. Igual que desde la Tienda (`'shop'`). Si abres el equipo desde el menú, sigue volviendo al menú (`closeTeam` en js/team.js).
+- Las recompensas de las tarjetas usan la clase `.rwm` (no `.rwc`, que es la de la pantalla de victoria).
+
 ## Imágenes de las regiones (carpeta region/)
 Cada tarjeta de la pantalla **Historia** muestra el mapa de su región de fondo, con un degradado oscuro para que se lean los textos. Las imágenes originales están en `region/` (`Kanto.webp`, `Johto.webp`...) y las que usa el juego son versiones **recortadas en panorámico (16:9) y más ligeras** en `region/tarjetas/` (50-90 KB cada una). Para cambiar una, sustituye su archivo de `region/tarjetas/` (mismo nombre, mejor proporción 16:9). Se cargan con la variable `--map` que pone `buildRegions()` en `js/menu.js` (`REGION_IMG` solo hace falta si el archivo se llama distinto a la región, como `Unova` para «Unova / Teselia»). Los estilos están en `.rcard` de `css/style.css`: bloqueadas en gris, abiertas a todo color y con un pequeño zoom al pasar el ratón.
 
@@ -453,6 +471,10 @@ Los 12 que se van a añadir y **siguen dentro** (hay que poner sus carpetas `pok
 **Para volver a poner un Pokémon:** copia su carpeta `pokemon/<nº>/` (con Idle, Walk, Attack, Shoot, Charge, Hurt, Faint y `s/`) y borra su número de `NO_SPRITE`.
 
 Ocultos ahora mismo: 514, 516, 520, 522, 523, 538, 558, 564, 565, 591, 592, 593, 616, 626, 668, 732, 735, 756, 765, 837, 838, 839, 866, 870, 878, 893, 931, 942, 943, 944, 947, 948, 949, 950, 954, 956, 962, 973, 986, 993, 999, 1001, 1002, 1008, 1014, 1022 y 1023.
+
+## Modo ver (temporal): abrir una región entera sin tocar tu progreso — `PREVIEW` en js/data.js
+
+`const PREVIEW = {Sinnoh: true};` (ahora está **apagado**: `Sinnoh: false`) abre la región de Sinnoh en el menú de Historia y deja ver/combatir **los 13 combates** (8 líderes, 4 del Alto Mando y el Campeón) como si ya los hubieras superado. **No toca tu partida:** no cambia `save.prog`, `save.champ` ni nada guardado, y al ganar en una región en modo ver no se guardan progreso, EVs, trofeo ni recompensas (sale la etiqueta «MODO VER»). Para quitarlo: `Sinnoh: false` (y la región vuelve a abrirse solo cuando seas Campeón de Hoenn). Se puede poner otra región, p. ej. `{Sinnoh: true, Galar: true}`. Código: `buildRegions()`/`buildStory()` (js/menu.js) y `endBattle()` (js/modes.js). Ojo: al entrar en una región el juego guarda `save.region` (la región del Gachapon); si luego apagas el modo ver y la partida se queda en esa región, vuelve al menú y elige otra.
 
 ## Pantalla de victoria (js/victoria.js, final de css/style.css)
 Al ganar un combate de la Historia o del Campo de Entrenamiento, la pantalla de resultado enseña: el **retrato del rival vencido**, el cartel «★ VICTORIA ★», el título y **una tarjeta por cada recompensa** (Tiradas de Gachapon, Puntos de Batalla, Chapas Doradas, Chapas Plateadas) con su icono pequeño, la cantidad que sube contando («+10») y lo que tienes ahora. Si es la primera victoria del día, la tarjeta de tiradas lleva la etiqueta «¡PRIMERA DEL DÍA! ×2». Debajo salen etiquetas con lo demás: EVs, trofeo de la Liga, siguiente rival, dificultad del Campo superada... Las recompensas son exactamente las de siempre (`REWARD` y `REWARD_REGION` en js/teams.js): `giveReward()` las concede y las deja en `lastReward`, y `victoryScreen()` las dibuja. En la derrota se ve la pantalla sencilla de antes. Para un tipo de recompensa nuevo: nómbralo en `REWARD_NAMES` (teams.js) y dale color e icono en `RW_LOOK` (victoria.js).
