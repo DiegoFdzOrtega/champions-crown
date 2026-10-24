@@ -166,7 +166,7 @@ function dataReset(){
 // ---- Botones de la ficha (un solo controlador para toda la ventana) ----
 function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; }
 function confirmPick(){
-  if(dt.pick === null) return;
+  if(dt.pick === null && dt.view !== 'reset') return;                    // (Restablecer no elige nada: solo se confirma)
   const d = dt.dex; let err = '', ok = '';
   if(dt.view === 'nature'){ err = useMenta(d, +dt.pick); ok = `Naturaleza nueva: ${NATURES[dt.pick][0]}.`; }
   else if(dt.view === 'abil'){ const n = abilitiesOf(d)[dt.pick]; err = useCapsula(d, +dt.pick); ok = `Habilidad nueva: ${n}.`; }

@@ -16,7 +16,7 @@ Carpetas de imágenes (junto a `index.html`):
 - css/style.css: el aspecto
 - js/pokedata.js: los 1025 Pokémon (nombre, tipos y estadísticas base), una línea por Pokémon y región. Se carga ANTES que data.js
 - js/data.js: tipos, rareza, naturalezas, equipos de los líderes, objetos, tienda y reglas del Gachapon (lo que más vas a editar). Aquí puedes rellenar LORE[nº] y ABILITIES[nº] para la Pokédex
-- js/sprites.js: carga las hojas y detecta solo el tamaño de cada cuadro; retratos de líderes
+- js/sprites.js: carga las hojas y detecta solo el tamaño de cada cuadro; retratos de líderes (si dos cuadros seguidos se leen como uno y el Pokémon sale duplicado, como Dreepy o Dugtrio, `analyze()` lo corrige solo comparando las dos mitades de cada cuadro; afectaba a 19 Pokémon)
 - js/state.js: tamaño del lienzo, partida guardada (save) y creación de combates
 - js/combat.js: movimiento, ataques, daño, efectos de los objetos y cambio de Pokémon (la IA del rival se llama desde aquí)
 - js/status.js: estados (paralizado, envenenado, quemado, dormido, confuso) y los 6 ataques que los ponen; los números están en `STX`
@@ -27,6 +27,8 @@ Carpetas de imágenes (junto a `index.html`):
 - js/arenasjohto.js: los 13 fondos de combate de Johto
 - js/hoenn.js: la **Historia de Hoenn** (8 líderes, Alto Mando de 4 y Campeón Plubio, con sus equipos de Pokémon Esmeralda y recompensas)
 - js/arenashoenn.js: los 13 fondos de combate de Hoenn
+- js/sinnoh.js: la **Historia de Sinnoh** (8 líderes, Alto Mando de 4 y Campeona Cintia, con sus equipos de Pokémon Platino y recompensas)
+- js/arenassinnoh.js: los 13 fondos de combate de Sinnoh
 - js/campo.js: el **Campo de Entrenamiento** (23 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
 - js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate); cada MT tiene «Enseñar a un Pokémon» (mismas reglas que Ver datos)
 - js/learnsets.js: qué Pokémon puede aprender cada movimiento (archivo generado por tools/gen_learnsets.py; ver «MTs y compatibilidad real de movimientos»)
@@ -50,7 +52,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/team.js: Equipo Pokémon (tu equipo de 3 con objetos + colección por regiones plegables, buscador y filtro de tipo)
 - js/pokedex.js: Pokédex avanzada (pestañas por región, filtros, orden, rejilla y panel de detalle)
 - js/avatars.js: avatares (carpeta avatares/, save.avatar) y la barra de usuario con las migas Perfil › Logros › Amigos. Un avatar con nombre de Pokémon se desbloquea al conseguir ese Pokémon. Para añadir uno: copia la imagen a avatares/ (si abres el juego con un servidor que muestre el listado de carpetas sale sola; si no, añade el nombre a AVATAR_FILES). El juego ya no tiene nivel de jugador
-- js/gachapon.js: pantalla del Gachapon multi-región y la animación de la tirada. La máquina tiene Poké Balls por rareza dentro de la cúpula (BALLS: Común=Poké Ball, Poco común=Superball, Rara=Ultra Ball, Épica=Honor Ball, Legendaria=Master Ball, Shiny=bola dorada). En cada tirada una bola del tipo del premio real baja por el desagüe, sale por la ranura, cae con gravedad, rebota con sombra y se abre (startEngine). Los efectos por rareza están en impactFx(); los tiempos, en T_SHAKE/T_PICK/T_SINK/T_CHUTE/T_EXIT. Las probabilidades NO se tocan aquí (están en economy.js/data.js)
+- js/gachapon.js: pantalla del Gachapon multi-región y la animación de la tirada. La máquina tiene Poké Balls por rareza dentro de la cúpula (BALLS: Común=Poké Ball, Poco común=Superball, Rara=Ultra Ball, Épica=Honor Ball, Legendaria=Master Ball, Shiny=bola dorada). En cada tirada una bola del tipo del premio real baja por el desagüe, sale por la ranura, cae con gravedad, rebota con sombra y se abre (startEngine). Los efectos por rareza están en impactFx(); los tiempos, en T_SHAKE/T_PICK/T_SINK/T_CHUTE/T_EXIT. Las probabilidades NO se tocan aquí (están en economy.js/data.js). **Pantalla de entrada (rediseño):** a la izquierda hay una máquina de pixel-art animada (flota, brilla y las bolas del interior se mueven; si la tocas, se agita y no gasta tickets). El fondo (`#gcBg`, un canvas) tiene partículas y se tiñe con el color de cada región (`--c` en `#gachav`, `.banner`). Los 6 destacados son tarjetas grandes que flotan, con brillo propio por rareza y un ✔ si ya los tienes. Los botones de tirada llevan icono de ticket y se apagan si no hay tickets. La barra de garantía de legendaria se llena con degradado y, al llegar a 69/70, avisa «¡La próxima tirada es legendaria!». Los chips de arriba (tickets, especiales, PB) se actualizan solos. Con `prefers-reduced-motion` se quitan las animaciones. Los estilos están en la zona `/* Gachapon */` de css/style.css
 - js/ui.js: teclado y ratón; arranca el juego
 
 Los archivos se cargan en ese orden (está en index.html) y comparten sus variables.
@@ -165,7 +167,7 @@ Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón).
 La Historia ahora tiene **varias regiones**. Cada combate (`FLOORS` en data.js) lleva `region`, `idx` (posición dentro de su región), `dn` (índice de dificultad) y `place` (ciudad).
 Ayudantes en data.js: `floorsOf(region)`, `progOf(region)` y `setProg(region, n)`. El progreso de Kanto sigue en `save.record` (así no se pierde ninguna partida) y el de las demás regiones en `save.prog`.
 
-**Cómo se desbloquea:** Johto se abre al ser **Campeón de Kanto** (vencer a Azul). Hoenn se abre al ser **Campeón de Johto** (ver más abajo) y el resto aparecen como "Próximamente". (Antes se podía saltar Kanto con un botón de prueba de Ajustes, ya eliminado: usa la consola con `setProg('Kanto', 13); save.champ.Kanto = 1; persist()`.) Texto antiguo: "Modo prueba: dar por terminado Kanto (abre Johto)" (quítalo al final).
+**Cómo se desbloquea:** Johto se abre al ser **Campeón de Kanto** (vencer a Azul). Hoenn se abre al ser **Campeón de Johto** (ver más abajo), Sinnoh al ser **Campeón de Hoenn** y el resto aparecen como "Próximamente". (Antes se podía saltar Kanto con un botón de prueba de Ajustes, ya eliminado: usa la consola con `setProg('Kanto', 13); save.champ.Kanto = 1; persist()`.) Texto antiguo: "Modo prueba: dar por terminado Kanto (abre Johto)" (quítalo al final).
 Cada combate se desbloquea al vencer al anterior, igual que en Kanto. Al vencer a Lance recibes el **trofeo de Johto** en tu habitación y cuenta para la Torre Batalla.
 
 **Los 13 combates (en orden) y sus equipos** (6 Pokémon cada uno, sin repetir especie, IV 31, EV 252 máx. por estadística y 510 en total; el último es el As):
@@ -259,6 +261,55 @@ Hoenn usa **el mismo sistema que Johto** (`FLOORS` con `region:'Hoenn'`, `floors
 - Dracón: sala marina de escamas azules con estatuas de dragón de ojos brillantes, emblema dorado y braseros turquesa.
 - Plubio: salón de mármol con columnas de cristal llenas de agua y burbujas, vetas doradas y la puerta del Salón de la Fama.
 
+## Historia de Sinnoh (js/sinnoh.js, js/arenassinnoh.js)
+Sinnoh usa **el mismo sistema que Johto y Hoenn** (`FLOORS` con `region:'Sinnoh'`, `floorsOf('Sinnoh')`, `save.prog.Sinnoh`, `save.champ.Sinnoh`), así que no se ha tocado nada de Kanto, Johto ni Hoenn. Se abre al ser **Campeón de Hoenn** (vencer a Plubio). Los 13 combates se desbloquean uno a uno y los rivales que aún no has vencido salen como "misteriosos".
+
+**Versión de referencia: Pokémon Platino** (orden de gimnasios: Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro; Campeona Cintia). Fuentes: Bulbapedia, Serebii y WikiDex.
+
+| # | Entrenador | Tipo | Lugar | Equipo (en su orden; el último es el As) |
+|---|---|---|---|---|
+| 1 | Roco (Roark) | Roca | Ciudad Pirita | Aerodactyl, Probopass, Rampardos, Golem, **Rhyperior**, Tyranitar |
+| 2 | Gardenia | Planta | Ciudad Vetusta | Jumpluff, Cherrim, Bellossom, **Leafeon**, Torterra, Roserade |
+| 3 | Fantina | Fantasma | Ciudad Corazón | Banette, Mismagius, Drifblim, Dusknoir, **Rotom**, Gengar |
+| 4 | Brega (Maylene) | Lucha | Ciudad Rocavelo | Hitmontop, Breloom, Medicham, **Toxicroak**, Machamp, Lucario |
+| 5 | Mananti (Crasher Wake) | Agua | Ciudad Pradera | Sharpedo, Quagsire, **Gastrodon**, Floatzel, Gyarados, Ludicolo |
+| 6 | Acerón (Byron) | Acero | Ciudad Canal | Skarmory, Magnezone, **Bronzong**, Steelix, Bastiodon, Aggron |
+| 7 | Inverna (Candice) | Hielo | Ciudad Puntaneva | **Medicham**, Weavile, Mamoswine, Abomasnow, Froslass, Glaceon |
+| 8 | Lectro (Volkner) | Eléctrico | Ciudad Marina | **Ambipom**, Jolteon, Raichu, Lanturn, Luxray, Electivire |
+| 9 | Alecrán (Aaron) | Bicho | Liga | **Beautifly**, Yanmega, Scizor, Vespiquen, Heracross, Drapion |
+| 10 | Gaia (Bertha) | Tierra | Liga | **Quagsire**, Whiscash, Gliscor, Golem, Hippowdon, Rhyperior |
+| 11 | Fausto (Flint) | Fuego | Liga | **Lopunny**, Houndoom, Flareon, Rapidash, Infernape, Magmortar |
+| 12 | Delos (Lucian) | Psíquico | Liga | **Mr. Mime**, Girafarig, Espeon, Bronzong, Alakazam, Gallade |
+| 13 | Cintia (Campeona) | Dragón | Liga | Spiritomb, Roserade, Togekiss, Lucario, Milotic, Garchomp |
+
+**Cómo se han adaptado los equipos al motor** (6 Pokémon por entrenador, en negrita los añadidos):
+- Los 8 **líderes** llevan su equipo de **revancha de Platino** (Zona de Batalla, 5 Pokémon) y se añade 1 Pokémon más que usan en Diamante/Perla/Platino.
+- **Alto Mando**: en Platino llevan 5, así que se añade 1 más de su equipo de Diamante/Perla. **Cintia** lleva sus 6 oficiales.
+- ⚠️ **Lectro** es el equipo menos seguro: Jolteon y Raichu están confirmados y Lanturn sale en sus revanchas, pero Luxray y Electivire (su As) son los de su equipo normal. Si no coincide con tu juego, cámbialos en `TEAMS.lectro` (sinnoh.js).
+- Ningún equipo repite especie (no hace falta `dupOk`). Los movimientos son los más parecidos que permite el motor (4 huecos: golpe / disparo / mejora / ataque fuerte).
+- Todos llevan IVs 31, EVs (máx. 252 por stat y 510 en total), naturaleza, habilidad, objeto y 4 movimientos; las habilidades nuevas tienen su descripción en `ABIL_DESC` (sinnoh.js).
+
+**Dificultad:** `lvl` y `dn` en sinnoh.js. Líderes: nivel 135-142 y dn 6-13. Alto Mando: nivel 143-146 y dn 13-16. Cintia: nivel 153 y dn 18 (la más dura de las cuatro Ligas; Plubio es 145/16).
+**Recompensa:** `REWARD_REGION.Sinnoh` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por cada victoria, igual que Johto y Hoenn.
+**Logros nuevos:** Líderes de Sinnoh (500 BP + 5 tickets), Alto Mando de Sinnoh (400 BP + 3), Campeona de Sinnoh (1000 BP + 10) y **Maestro de cuatro Ligas** (4000 BP + 25 tickets).
+**Música:** pistas `lider_sinnoh`, `alto_sinnoh` (usa `alto.ogg`) y `campeon_cintia` (usa `jefe.ogg`). Si no existe `musica/lider_sinnoh.ogg` suena la música generada.
+**Retratos:** `lideres/Sinnoh/<Nombre>.png`: Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro, Alecrán, Gaia, Fausto, Delos, Cintia (las tildes se resuelven con LEADER_FILE en data.js; las mayúsculas importan en GitHub Pages).
+
+**Fondos de combate (js/arenassinnoh.js)**, dibujados con código (sin imágenes) y rediseñados con mucho más detalle. Cada uno dibuja sus propios laterales y tiene luces y partículas animadas. El centro del suelo siempre queda libre para ver a los dos Pokémon. Ayudantes nuevos al principio del archivo (`arEll`, `arPool`, `arBeam`, `arStrata`, `arPlank`, `arCrystal`, `arGear`, `arBolt`, `arMote`...):
+- Roco (Pirita): mina subterránea con paredes de roca por capas, túnel con marco de madera, raíles con traviesas, vagonetas (una con cristales), pilares rocosos, cristales de colores que brillan y lámparas mineras que iluminan el suelo.
+- Gardenia (Vetusta): jardín botánico bajo una cúpula de cristal, con árboles enormes, raíces sobre el suelo, enredaderas, columnas con musgo, flores, macetas y rayos de sol con polen y pétalos.
+- Brega (Rocavelo): dojo de madera con tatami, círculo de combate, paneles shoji, estandartes rojos con el puño, vigas, sacos de entrenamiento que se balancean, muñeco de madera y soporte de bokken.
+- Fantina (Corazón): teatro encantado con escenario oscuro, focos violetas, telón con luna, cortinas de terciopelo, palcos con espectadores fantasma y candelabros flotantes con llamas violetas.
+- Acerón (Canal): fábrica con suelo de chapa y franjas de peligro, tuberías, pasarela, engranajes giratorios, cadenas, horno encendido, calderas con manómetros y vapor.
+- Mananti (Pradera; tú le llamas Mencía): pabellón de mármol blanco con arcos de cristal azul, estanque con cascadas y puente, canales de agua a los lados con puentecillos y fuentes, y agua que se mueve.
+- Inverna (Puntaneva): caverna glacial con suelo de hielo brillante y grietas, pared de hielo translúcido, cristal gigante, carámbanos, columnas congeladas, acantilados con cristales y nieve cayendo.
+- Lectro (Marina): central eléctrica futurista con suelo oscuro y circuitos luminosos, monitores, neones, generadores, reactor central, bobinas Tesla con cables y rayos decorativos.
+- Alecrán: bosque primitivo y oscuro con troncos gigantes, raíces, telarañas con capullos, plantas exóticas, setas, luciérnagas y rayos de luz.
+- Gaia: caverna geológica con acantilados escalonados de capas de roca de colores, pilares naturales, estalactitas, geodas y cristales, y una abertura de luz cálida.
+- Fausto (tú le llamas Faiano): cámara volcánica de basalto negro con grietas incandescentes, ríos de lava a los lados con puentes de basalto, pinchos de obsidiana, el volcán al fondo, brasas y ceniza.
+- Delos: dimensión misteriosa con fondo espacial violeta y azul, plataforma de cristal con dibujo simétrico, plataformas flotantes, anillos luminosos que giran y esferas que flotan.
+- Cintia: templo antiguo de la Liga con columnas colosales acanaladas con capiteles dorados, escalinata, portal de luz, friso con relieves, ventanales con haces de luz dorada, suelo de mármol negro con juntas de oro, emblema ancestral, símbolos tallados y braseros.
+
 ## Música dinámica (js/music.js, carpeta musica/)
 El juego cambia la música solo según el entrenador al que te enfrentas. La música oficial de Pokémon **no se incluye** (tiene derechos de autor): tú pones tus propios archivos en `musica/`. Si falta un archivo, suena una música **generada por el propio juego** (original), así que nunca hay silencio.
 
@@ -272,9 +323,12 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 | `alto_johto` | Mento, Koga, Bruno, Karen (Alto Mando de Johto) |
 | `lider_hoenn` | Petra, Marcial, Erico, Candela, Norman, Alana, Vito y Leti, Galano (música generada hasta que añadas `musica/lider_hoenn.ogg`) |
 | `alto_hoenn` | Sixto, Fátima, Nívea, Dracón (usa `alto.ogg`) |
+| `lider_sinnoh` | Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro (música generada hasta que añadas `musica/lider_sinnoh.ogg`) |
+| `alto_sinnoh` | Alecrán, Gaia, Fausto, Delos (usa `alto.ogg`) |
 | `campeon_azul` | Campeón Azul (Kanto) |
 | `campeon_lance` | Campeón Lance (Johto) |
 | `campeon_plubio` | Campeón Plubio (Hoenn, usa `jefe.ogg`) |
+| `campeon_cintia` | Campeona Cintia (Sinnoh, usa `jefe.ogg`) |
 | `campo` | Campo de Entrenamiento |
 
 **Cómo funciona**
@@ -336,7 +390,9 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | Campeón de Kanto / Johto | Vencer a Azul / Lance | 1000 BP + 10 tickets (cada uno) |
 | Maestro de dos Ligas | Campeón de Kanto y Johto | 2000 BP + 15 tickets |
 | Líderes / Alto Mando / Campeón de Hoenn | Los 8 líderes · los 4 del Alto Mando · vencer a Plubio | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
+| Líderes / Alto Mando / Campeona de Sinnoh | Los 8 líderes · los 4 del Alto Mando · vencer a Cintia | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
 | Maestro de tres Ligas | Campeón de Kanto, Johto y Hoenn | 3000 BP + 20 tickets |
+| Maestro de cuatro Ligas | Campeón de Kanto, Johto, Hoenn y Sinnoh | 4000 BP + 25 tickets |
 | Campo: 1 / 10 / 25 / 50 / 100 victorias | Vencer entrenadores del Campo | 50 · 200 · 300 + 2 · 500 + 5 · 1000 + 10 (BP + tickets) |
 | Campo: Fácil / Media / Difícil superada | Vencer a todos los de esa dificultad | 300 · 500 + 3 · 800 + 6 (BP + tickets) |
 | Colección: 10 / 25 / 50 / 100 / 250 Pokémon | Pokémon diferentes | 100 · 200 + 1 · 300 + 3 · 600 + 5 · 1500 + 15 (BP + tickets) |
@@ -375,6 +431,7 @@ Reglas: mientras dura (unos 2 segundos, `SWAP` al principio de `js/swap.js`) el 
 - **Dificultad:** la habilidad del combate (`g.o.skill`, `DIFF` en data.js) controla cuánto tarda en reaccionar, cuánto esquiva y cuánto falla al apuntar. `AI_TUNE.agg` (js/ai.js; un número por tipo de jefe: líder .8 · Alto Mando 1.2 · Campeón 1.8) sube o baja la agresividad de todos.
 - No hay trampas: el rival usa las mismas funciones `use()`, `melee()` y `shot()` que el jugador, con su propia energía y sus propios enfriamientos.
 - **Interruptor:** `AI_TUNE.on = false` (js/ai.js) hace que TODOS los rivales vuelvan a la IA sencilla de siempre.
+- **Cuando tú cambias de Pokémon:** el rival (todos, no solo los jefes) **se aleja** mientras dura la animación de cambio (`aiRetreat()` en js/ai.js; se aparta hasta `AI_SWAP.back` ≈ 430 px, o rodea hacia el centro si está en una esquina) y **no ataca**. Cuando tu nuevo Pokémon ya ha salido, espera `AI_SWAP.grace` ≈ 0,7 s antes de volver a atacar (`g.swGrace`, que descuenta `update()` en combat.js y pone `swapUpdate()` en swap.js). Para que ataque nada más salir: `AI_SWAP.grace = 0`. Vale también cuando tu Pokémon se debilita y entra el siguiente.
 - Nota de equilibrio: contra un jugador que se mueve, la IA lista hace aproximadamente el doble de daño por segundo que la sencilla; subir o bajar `agg` cambia poco, porque el límite lo ponen la energía y los enfriamientos.
 
 ## Cambiar de Pokémon en combate: clic y espera de 5 s (js/combat.js, js/render.js, js/ui.js)
@@ -386,6 +443,16 @@ Reglas: mientras dura (unos 2 segundos, `SWAP` al principio de `js/swap.js`) el 
 
 ## Ordenar el equipo arrastrando (js/team.js, final de css/style.css)
 En **Equipo Pokémon** puedes **agarrar una caja y arrastrarla** hacia otro hueco: las demás se apartan para hacerle sitio y, al soltar, el orden se guarda. El Pokémon del hueco **1** es el primero en salir al combate y el que se activa con la tecla 1 (2 y 3 igual). Los botones («Ver datos», «Cambiar», ✕, el desplegable de objetos) siguen funcionando como siempre: solo arrastra si empiezas a mover el ratón fuera de ellos. **Esc** durante el arrastre devuelve la caja a su sitio. Los objetos equipados van con cada Pokémon, no con el hueco. Funciona con ratón y con el dedo (si empiezas desde la cabecera de la caja). Código: `slotDrag()` y `slotDragEnd()` en js/team.js.
+
+## Pokémon sin sprites (de momento ocultos) — `NO_SPRITE` en js/data.js
+
+Hay **47 Pokémon** de Teselia, Kalos, Alola, Galar y Paldea que todavía no tienen sprites en `pokemon/`. Están en la lista `NO_SPRITE` (js/data.js) y **no salen** en el Gachapon (`pool()` en economy.js), la Pokédex, el equipo (js/team.js), el perfil ni los contadores (`7 / 978`, etc.). Los datos siguen en el juego y, si alguien ya los tenía, se quedan guardados en su partida (no se pierde nada; solo se ven cuando se quitan de la lista). Ayudas: `hidden(dex)`, `regionSize(a, b)`, `boxCount()` y `DEX_SHOWN` (data.js).
+
+Los 12 que se van a añadir y **siguen dentro** (hay que poner sus carpetas `pokemon/<nº>/`): 618 Stunfisk, 683 Aromatisse, 733 Toucannon, 865 Sirfetch'd, 879 Copperajah, 929 Dolliv, 945 Grafaiai, 990 Iron Treads, 1003 Ting-Lu, 1020 Gouging Fire, 1021 Raging Bolt y 1025 Pecharunt. Los sprites que da SpriteCollab para ellos vienen **incompletos**: casi todos solo tienen `Idle` (y algunos `Walk`, `Charge`, `Hurt`); 1003 Ting-Lu usa la versión «Temp» de SpriteCollab (casi completa, sin Faint ni shiny). Cuando falta una animación, el juego usa `Idle` (`drawFrame` en js/sprites.js). **Ojo con los nombres:** SpriteCollab llama a los archivos `Idle-Anim.png` y guarda el shiny en `0000/0001/`; el juego necesita `Idle.png` y `s/Idle.png` (hay que renombrarlos y copiar solo las 7 animaciones).
+
+**Para volver a poner un Pokémon:** copia su carpeta `pokemon/<nº>/` (con Idle, Walk, Attack, Shoot, Charge, Hurt, Faint y `s/`) y borra su número de `NO_SPRITE`.
+
+Ocultos ahora mismo: 514, 516, 520, 522, 523, 538, 558, 564, 565, 591, 592, 593, 616, 626, 668, 732, 735, 756, 765, 837, 838, 839, 866, 870, 878, 893, 931, 942, 943, 944, 947, 948, 949, 950, 954, 956, 962, 973, 986, 993, 999, 1001, 1002, 1008, 1014, 1022 y 1023.
 
 ## Pantalla de victoria (js/victoria.js, final de css/style.css)
 Al ganar un combate de la Historia o del Campo de Entrenamiento, la pantalla de resultado enseña: el **retrato del rival vencido**, el cartel «★ VICTORIA ★», el título y **una tarjeta por cada recompensa** (Tiradas de Gachapon, Puntos de Batalla, Chapas Doradas, Chapas Plateadas) con su icono pequeño, la cantidad que sube contando («+10») y lo que tienes ahora. Si es la primera victoria del día, la tarjeta de tiradas lleva la etiqueta «¡PRIMERA DEL DÍA! ×2». Debajo salen etiquetas con lo demás: EVs, trofeo de la Liga, siguiente rival, dificultad del Campo superada... Las recompensas son exactamente las de siempre (`REWARD` y `REWARD_REGION` en js/teams.js): `giveReward()` las concede y las deja en `lastReward`, y `victoryScreen()` las dibuja. En la derrota se ve la pantalla sencilla de antes. Para un tipo de recompensa nuevo: nómbralo en `REWARD_NAMES` (teams.js) y dale color e icono en `RW_LOOK` (victoria.js).

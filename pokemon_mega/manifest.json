@@ -1,0 +1,475 @@
+[
+ {
+  "dex": 6,
+  "pokemon": "Charizard",
+  "form": "Mega_X",
+  "folder": "6-mega-x",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 65,
+  "pokemon": "Alakazam",
+  "form": "Mega",
+  "folder": "65-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 80,
+  "pokemon": "Slowbro",
+  "form": "Mega",
+  "folder": "80-mega",
+  "falta": [
+   "Shoot",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 94,
+  "pokemon": "Gengar",
+  "form": "Mega",
+  "folder": "94-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 115,
+  "pokemon": "Kangaskhan",
+  "form": "Mega",
+  "folder": "115-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 142,
+  "pokemon": "Aerodactyl",
+  "form": "Mega",
+  "folder": "142-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 150,
+  "pokemon": "Mewtwo",
+  "form": "Mega_Y",
+  "folder": "150-mega-y",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 208,
+  "pokemon": "Steelix",
+  "form": "Mega",
+  "folder": "208-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 227,
+  "pokemon": "Skarmory",
+  "form": "Mega",
+  "folder": "227-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": false
+ },
+ {
+  "dex": 229,
+  "pokemon": "Houndoom",
+  "form": "Mega",
+  "folder": "229-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 248,
+  "pokemon": "Tyranitar",
+  "form": "Mega",
+  "folder": "248-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": false
+ },
+ {
+  "dex": 254,
+  "pokemon": "Sceptile",
+  "form": "Mega",
+  "folder": "254-mega",
+  "falta": [
+   "Attack",
+   "Shoot",
+   "Charge",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 282,
+  "pokemon": "Gardevoir",
+  "form": "Mega",
+  "folder": "282-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 302,
+  "pokemon": "Sableye",
+  "form": "Mega",
+  "folder": "302-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 303,
+  "pokemon": "Mawile",
+  "form": "Mega",
+  "folder": "303-mega",
+  "falta": [],
+  "shiny": true
+ },
+ {
+  "dex": 308,
+  "pokemon": "Medicham",
+  "form": "Mega",
+  "folder": "308-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": false
+ },
+ {
+  "dex": 310,
+  "pokemon": "Manectric",
+  "form": "Mega",
+  "folder": "310-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 319,
+  "pokemon": "Sharpedo",
+  "form": "Mega",
+  "folder": "319-mega",
+  "falta": [
+   "Shoot",
+   "Charge",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 323,
+  "pokemon": "Camerupt",
+  "form": "Mega",
+  "folder": "323-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 334,
+  "pokemon": "Altaria",
+  "form": "Mega",
+  "folder": "334-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 354,
+  "pokemon": "Banette",
+  "form": "Mega",
+  "folder": "354-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 358,
+  "pokemon": "Chimecho",
+  "form": "Mega",
+  "folder": "358-mega",
+  "falta": [
+   "Walk",
+   "Attack",
+   "Shoot",
+   "Charge",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 359,
+  "pokemon": "Absol",
+  "form": "Mega",
+  "folder": "359-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 362,
+  "pokemon": "Glalie",
+  "form": "Mega",
+  "folder": "362-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 380,
+  "pokemon": "Latias",
+  "form": "Mega",
+  "folder": "380-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 381,
+  "pokemon": "Latios",
+  "form": "Mega",
+  "folder": "381-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 382,
+  "pokemon": "Kyogre",
+  "form": "Primal",
+  "folder": "382-primal",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 383,
+  "pokemon": "Groudon",
+  "form": "Primal",
+  "folder": "383-primal",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 384,
+  "pokemon": "Rayquaza",
+  "form": "Mega",
+  "folder": "384-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 428,
+  "pokemon": "Lopunny",
+  "form": "Mega",
+  "folder": "428-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 448,
+  "pokemon": "Lucario",
+  "form": "Mega",
+  "folder": "448-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 475,
+  "pokemon": "Gallade",
+  "form": "Mega",
+  "folder": "475-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 483,
+  "pokemon": "Dialga",
+  "form": "Primal",
+  "folder": "483-primal",
+  "falta": [],
+  "shiny": false
+ },
+ {
+  "dex": 491,
+  "pokemon": "Darkrai",
+  "form": "Mega",
+  "folder": "491-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": false
+ },
+ {
+  "dex": 530,
+  "pokemon": "Excadrill",
+  "form": "Mega",
+  "folder": "530-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 560,
+  "pokemon": "Scrafty",
+  "form": "Mega",
+  "folder": "560-mega",
+  "falta": [
+   "Shoot",
+   "Charge",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 604,
+  "pokemon": "Eelektross",
+  "form": "Mega",
+  "folder": "604-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 670,
+  "pokemon": "Floette",
+  "form": "Mega",
+  "folder": "670-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 691,
+  "pokemon": "Dragalge",
+  "form": "Mega",
+  "folder": "691-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 701,
+  "pokemon": "Hawlucha",
+  "form": "Mega",
+  "folder": "701-mega",
+  "falta": [
+   "Attack",
+   "Shoot",
+   "Charge",
+   "Hurt",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 718,
+  "pokemon": "Zygarde",
+  "form": "Mega",
+  "folder": "718-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 719,
+  "pokemon": "Diancie",
+  "form": "Mega",
+  "folder": "719-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 780,
+  "pokemon": "Drampa",
+  "form": "Mega",
+  "folder": "780-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 807,
+  "pokemon": "Zeraora",
+  "form": "Mega",
+  "folder": "807-mega",
+  "falta": [
+   "Shoot",
+   "Faint"
+  ],
+  "shiny": true
+ },
+ {
+  "dex": 978,
+  "pokemon": "Tatsugiri",
+  "form": "Mega",
+  "folder": "978-mega",
+  "falta": [
+   "Faint"
+  ],
+  "shiny": true
+ }
+]

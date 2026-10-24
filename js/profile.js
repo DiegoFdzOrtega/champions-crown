@@ -20,7 +20,7 @@ function renderProfile(){
   const savedS = favShinySaved(), dirty = pfDraft.some((d,i) => d !== saved[i] || pfDraftS[i] !== savedS[i]);
   panel(userBar('profile') + `<h1>Perfil</h1>
     <div class="pf-top"><img id="pfAv" alt="Vista previa del avatar">
-      <div><b id="pfName"></b><p>Pokémon en tu colección: ${save.box.length}</p></div></div>
+      <div><b id="pfName"></b><p>Pokémon en tu colección: ${boxCount()}</p></div></div>
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
     <h2>Avatar</h2>
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
@@ -60,7 +60,7 @@ function renderProfile(){
 function openFavPicker(slot){
   let sel = pfDraft[slot], selS = pfDraftS[slot] ? 1 : 0;          // selS = 1: se enseña en versión shiny
   const hasSh = d => save.shiny.includes(d);
-  const owned = (PROFILE_ONLY_OWNED ? save.box.slice() : Array.from({length:DEX_TOTAL}, (_,i) => i+1)).filter(d => mon(d)).sort((a,b) => a-b);
+  const owned = (PROFILE_ONLY_OWNED ? save.box.slice() : Array.from({length:DEX_TOTAL}, (_,i) => i+1)).filter(d => mon(d) && !hidden(d)).sort((a,b) => a-b);
   panel(`<h1>Favorito ${slot+1}</h1>
     <p class="help">${PROFILE_ONLY_OWNED ? 'Pokémon que ya tienes.' : 'Cualquier Pokémon.'} Los que ya están en otro espacio aparecen apagados.</p>
     <label>Buscar por nombre o número<br><input id="pfSearch" type="text" autocomplete="off"></label>

@@ -59,6 +59,12 @@ const MUSIC_TRACKS = {
                  synth:{seed:33, bpm:166, root:53, scale:'harmonic', prog:[0,6,5,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
   campeon_plubio:{name:'Campeón Plubio (Hoenn)', file:'jefe',  ref:'"Battle! Champion" de Hoenn (Esmeralda)',
                  synth:{seed:43, bpm:174, root:57, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.9}},
+  lider_sinnoh: {name:'Líderes de Sinnoh',          ref:'"Battle! Gym Leader" de Sinnoh (Diamante/Perla/Platino)',
+                 synth:{seed:24, bpm:150, root:59, scale:'dorian',   prog:[0,5,4,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.78}},
+  alto_sinnoh:  {name:'Alto Mando de Sinnoh', file:'alto',      ref:'"Battle! Elite Four" de Sinnoh (Diamante/Perla/Platino)',
+                 synth:{seed:34, bpm:168, root:55, scale:'minor',    prog:[0,3,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
+  campeon_cintia:{name:'Campeona Cintia (Sinnoh)', file:'jefe', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
+                 synth:{seed:44, bpm:178, root:56, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -79,7 +85,11 @@ const MUSIC_BY_TRAINER = {
   // Hoenn: 8 líderes, Alto Mando (4) y Campeón
   petra:'lider_hoenn', marcial:'lider_hoenn', erico:'lider_hoenn', candela:'lider_hoenn', norman:'lider_hoenn', alana:'lider_hoenn', vitoleti:'lider_hoenn', galano:'lider_hoenn',
   sixto:'alto_hoenn', fatima:'alto_hoenn', nivea:'alto_hoenn', dracon:'alto_hoenn',
-  plubio:'campeon_plubio'
+  plubio:'campeon_plubio',
+  // Sinnoh: 8 líderes, Alto Mando (4) y Campeona
+  roco:'lider_sinnoh', gardenia:'lider_sinnoh', fantina:'lider_sinnoh', brega:'lider_sinnoh', mananti:'lider_sinnoh', aceron:'lider_sinnoh', inverna:'lider_sinnoh', lectro:'lider_sinnoh',
+  alecran:'alto_sinnoh', gaia:'alto_sinnoh', fausto:'alto_sinnoh', delos:'alto_sinnoh',
+  cintia:'campeon_cintia'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){

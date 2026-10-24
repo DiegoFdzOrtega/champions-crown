@@ -16,7 +16,7 @@ const TEAM_REGIONS = [
 ];
 const tm = {region:'Todas', q:'', type:'', rar:new Set(), fav:false, open:null, built:false, from:'', target:null};   // target = hueco que se sustituye (null = añadir)     // open = regiones desplegadas (Set)
 const inRegion = (r, d) => d >= r.a && d <= r.b;
-const ownedInTeamRegion = r => save.box.filter(d => inRegion(r, d));
+const ownedInTeamRegion = r => save.box.filter(d => inRegion(r, d) && !hidden(d));
 
 // Pokémon que pasan el buscador y el tipo, dentro de una región
 function teamVisible(r){
@@ -88,7 +88,7 @@ function removeMon(dex){                                                        
 }
 function openPick(target){                                                                        // abre el selector (target = nº de hueco a sustituir, o null para añadir)
   tm.target = target; $('tmPickT').textContent = target !== null && target < team.length ? `Cambiar a ${mon(team[target]).name}` : 'Añadir Pokémon';
-  $('tmPickS').textContent = `${save.box.length} Pokémon en tu colección`;
+  $('tmPickS').textContent = `${boxCount()} Pokémon en tu colección`;
   $('tmPick').classList.remove('hide'); renderRarPills(); renderTeamNav(); renderTeamList();
 }
 function closePick(){ $('tmPick').classList.add('hide'); tm.target = null; }
@@ -204,7 +204,7 @@ const stopOnce = ev => ev.stopPropagation();
 
 // ---- Tu equipo (3 tarjetas grandes) ----
 function renderTeamSlots(){
-  $('tmTotal').textContent = `Equipo ${team.length}/3 • ${save.box.length} Pokémon`;
+  $('tmTotal').textContent = `Equipo ${team.length}/3 • ${boxCount()} Pokémon`;
   $('tmSlots').innerHTML = [0, 1, 2].map(i => {
     const dex = team[i];
     if(!dex) return `<article class="tslot empty" data-i="${i}"><i class="tsn">${i + 1}</i><button class="addbtn">＋ Añadir Pokémon</button><p>Hueco libre. Elige uno de tu colección.</p></article>`;
@@ -238,7 +238,7 @@ function renderRarPills(){
 // ---- Navegación rápida por regiones (con contador) ----
 function renderTeamNav(){
   $('tmNav').innerHTML = [{n:'Todas', a:1, b:1025}, ...TEAM_REGIONS].map(r => {
-    const keep = d => (!tm.rar.size || tm.rar.has(mon(d).rar)) && (!tm.fav || save.fav.includes(d)), n = r.n === 'Todas' ? save.box.filter(keep).length : ownedInTeamRegion(r).filter(keep).length;
+    const keep = d => (!tm.rar.size || tm.rar.has(mon(d).rar)) && (!tm.fav || save.fav.includes(d)), n = r.n === 'Todas' ? save.box.filter(d => !hidden(d) && keep(d)).length : ownedInTeamRegion(r).filter(keep).length;
     return `<button class="tab${tm.region === r.n ? ' on' : ''}${n ? '' : ' dim'}" data-r="${r.n}">${r.n} <small>${n}</small></button>`; }).join('');
 }
 
@@ -248,7 +248,7 @@ function renderTeamList(){
   const searching = tm.q.trim() || tm.type || tm.rar.size || tm.fav;
   const regs = TEAM_REGIONS.filter(r => tm.region === 'Todas' || tm.region === r.n);
   const html = regs.map(r => {
-    const list = teamVisible(r), total = ownedInTeamRegion(r).length, size = r.b - r.a + 1;
+    const list = teamVisible(r), total = ownedInTeamRegion(r).length, size = regionSize(r.a, r.b);
     if(searching && !list.length) return '';                                   // con búsqueda, se ocultan las regiones sin resultados
     const open = tm.open.has(r.n) && list.length;
     return `<section class="treg${open ? ' open' : ''}${list.length ? '' : ' none'}" data-r="${r.n}" style="--c:${r.c}">

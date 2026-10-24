@@ -30,10 +30,10 @@ function buy(id){ return buyMany(id, 1) === 1; }
 // GACHAPON
 // ---------------------------------------------------------------------
 const pityOf = reg => save.pity[reg] || 0;
-const ownedIn = reg => { const [a,b] = REGION_DEX[reg]; return save.box.filter(d => d >= a && d <= b).length; };
-const shinyIn = reg => { const [a,b] = REGION_DEX[reg]; return save.shiny.filter(d => d >= a && d <= b).length; };
+const ownedIn = reg => { const [a,b] = REGION_DEX[reg]; return save.box.filter(d => d >= a && d <= b && !hidden(d)).length; };
+const shinyIn = reg => { const [a,b] = REGION_DEX[reg]; return save.shiny.filter(d => d >= a && d <= b && !hidden(d)).length; };
 // Pokémon de una región con una rareza concreta (los usa el banner y las tiradas)
-const pool = (reg, rar) => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(DEX[d-1].rar === rar) out.push(d); return out; };
+const pool = (reg, rar) => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(DEX[d-1].rar === rar && !hidden(d)) out.push(d); return out; };
 
 // Elige una rareza al azar según GACHA_RATES
 function rollRarity(){

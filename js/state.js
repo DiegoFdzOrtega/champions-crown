@@ -25,7 +25,7 @@ try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){
     if(Array.isArray(s.box) && s.box.every(id => mon(id))) save.box = s.box;
-    if(Array.isArray(s.team) && s.team.length === 3 && s.team.every(id => save.box.includes(id))) team = s.team;
+    if(Array.isArray(s.team) && s.team.length === 3 && s.team.every(id => save.box.includes(id) && !hidden(id))) team = s.team;
     save.ticketsL = s.ticketsL || 0; save.region = s.region || 'Kanto'; save.items = s.items || {};
     save.equip = s.equip || {}; save.shiny = s.shiny || []; save.fav = s.fav || []; save.nat = s.nat || {};
     save.pity = s.pity || {}; save.used = s.used || {}; save.gachaRegion = s.gachaRegion || 'Kanto';

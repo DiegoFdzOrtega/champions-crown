@@ -35,7 +35,7 @@ function dexList(){
   const R = dx.region === 'Todas' ? [1, DEX_TOTAL] : REGION_DEX[dx.region];
   const q = dx.q.trim().toLowerCase().replace(/^#/, ''), num = /^\d+$/.test(q);
   let l = DEX.filter(m =>
-    m.dex >= R[0] && m.dex <= R[1] &&
+    m.dex >= R[0] && m.dex <= R[1] && !hidden(m.dex) &&
     (!q || (num ? String(m.dex).startsWith(String(+q)) : m.name.toLowerCase().includes(q))) &&
     (!dx.type || m.types.includes(dx.type)) &&
     (dx.status === 'all' || (dx.status === 'have' ? own(m.dex) : dx.status === 'miss' ? !own(m.dex) :
@@ -99,15 +99,15 @@ function renderPills(){
 function renderTabs(){
   const tabs = [['Todas', 1, DEX_TOTAL], ...REGIONS_DEX.map(r => [r.n, r.a, r.b])];
   $('dxTabs').innerHTML = tabs.map(([n, a, b]) => {
-    const have = save.box.filter(d => d >= a && d <= b).length;
-    return `<button class="tab${dx.region === n ? ' on' : ''}" data-r="${n}">${n} <small>${have}/${b - a + 1}</small></button>`;
+    const have = save.box.filter(d => d >= a && d <= b && !hidden(d)).length;
+    return `<button class="tab${dx.region === n ? ' on' : ''}" data-r="${n}">${n} <small>${have}/${regionSize(a, b)}</small></button>`;
   }).join('');
   $('dxTabs').onclick = e => { const b = e.target.closest('.tab'); if(b){ dx.region = b.dataset.r; renderTabs(); renderGrid(); } };
 }
 function renderGrid(){
   const l = dexList();
   $('dxCount').textContent = `${l.length} Pokémon`;
-  $('dxTotal').textContent = `Tienes ${save.box.length} de ${DEX_TOTAL} · ${save.shiny.length} shiny`;
+  $('dxTotal').textContent = `Tienes ${boxCount()} de ${DEX_SHOWN} · ${save.shiny.filter(d => !hidden(d)).length} shiny`;
   dx.io.disconnect();
   const g = $('dxGrid');
   g.innerHTML = l.map(m => {

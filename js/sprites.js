@@ -46,6 +46,19 @@ function analyze(im, a){
       }
       if(!found) fw = w % fh === 0 ? fh : (w >= fh ? w : fw);   // último recurso: cuadro cuadrado
     }
+    // Corrección: a veces dos cuadros seguidos de la animación se leen como si fueran uno solo y el Pokémon sale duplicado (Dreepy, Dugtrio...).
+    // Si las dos mitades de cada cuadro son casi iguales (se tapan una a otra), el cuadro real mide la mitad.
+    while(fw % 2 === 0 && fw / 2 >= 12){
+      const hw = fw / 2; let sum = 0, cnt = 0;
+      for(let r = 0; r < 8; r++) for(let f = 0; f < Math.floor(w / fw); f++){
+        let u = 0, inter = 0;
+        for(let yy = r * fh; yy < (r + 1) * fh; yy++) for(let xx = 0; xx < hw; xx++){
+          const L = d[(yy * w + f * fw + xx) * 4 + 3] > 0, R = d[(yy * w + f * fw + hw + xx) * 4 + 3] > 0;
+          if(L || R) u++; if(L && R) inter++; }
+        if(u){ sum += inter / u; cnt++; }
+      }
+      if(cnt && sum / cnt >= .62) fw = hw; else break;
+    }
     let y0 = -1, y1 = -1;                         // cabeza y pies del primer cuadro (mirando abajo)
     for(let y = 0; y < fh; y++) for(let xx = 0; xx < fw; xx++) if(d[(y*w+xx)*4+3]){ if(y0 < 0) y0 = y; y1 = y; break; }
     if(y0 >= 0){ top = y0 - fh/2; foot = y1 - fh/2; }

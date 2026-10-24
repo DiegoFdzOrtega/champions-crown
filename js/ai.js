@@ -18,15 +18,32 @@ const AI_TUNE = {
   agg: {lider: .8, alto: 1.2, campeon: 1.8}               // [AJUSTE] agresividad por tipo de rival: más alto = ataca antes y más seguido (1 = valor base)
 };
 // La IA con cabeza (enemyAI) solo la usan los jefes de la Historia: líderes, Alto Mando y Campeón (g.o.boss). Los demás rivales (Campo de Entrenamiento…) usan enemyBasic.
+// Cuando CAMBIAS de Pokémon (js/swap.js), el rival no se te echa encima: se aleja mientras dura la animación y, cuando el cambio ya está completo, espera un momento antes de volver a atacar.
+const AI_SWAP = {
+  back: 430,                                               // [AJUSTE] distancia a la que se aparta mientras cambias (más alto = se aleja más)
+  grace: .7                                                // [AJUSTE] segundos que tarda en poder atacar DESPUÉS de que tu nuevo Pokémon ya ha salido (0 = ataca en cuanto sale)
+};
+function aiRetreat(E, P, dt){                              // aléjate del jugador (o rodea hacia el centro si estás en una esquina)
+  const ang = Math.atan2(P.y - E.y, P.x - E.x), dist = Math.hypot(P.x - E.x, P.y - E.y);
+  let ax = -Math.cos(ang), ay = -Math.sin(ang), k = .9;
+  if(E.x < 110 || E.x > W - 110 || E.y < 190 || E.y > H - 140){
+    const px = Math.cos(ang + 1.57), py = Math.sin(ang + 1.57), sg = (px*(W/2 - E.x) + py*(H/2 - E.y)) >= 0 ? 1 : -1; ax = px*sg; ay = py*sg;
+  }
+  else if(dist >= AI_SWAP.back){ ax = Math.cos(ang + 1.57) * Math.sign(Math.sin(g.t*.8) || 1); ay = Math.sin(ang + 1.57) * Math.sign(Math.sin(g.t*.8) || 1); k = .25; }   // ya está lejos: solo da vueltas despacio
+  move(E, ax, ay, dt, k);
+  E.dir = dirOf(ang);
+}
+const aiNoAtk = P => !!(P.ghost || (g.swGrace > 0));        // no ataca mientras cambias ni justo después
 const aiSmart = () => !!(AI_TUNE.on && g.o.boss && AI_TUNE.agg[g.o.boss]);
 // La IA sencilla de siempre: se acerca o se aleja, dispara y golpea al azar
 function enemyBasic(E, P, dt){
+  if(P.ghost) return aiRetreat(E, P, dt);                    // estás cambiando de Pokémon: se aparta y no ataca
   const sk = g.o.skill, ang = Math.atan2(P.y-E.y, P.x-E.x), dist = Math.hypot(P.x-E.x, P.y-E.y);
   const want = dist > 240 ? 1 : dist < 140 ? -1 : 0, side = Math.sin(g.t*1.2 + g.ei*2);
   move(E, Math.cos(ang)*want + Math.cos(ang+1.57)*side, Math.sin(ang)*want + Math.sin(ang+1.57)*side, dt, .5 + .4*sk);
   E.dir = dirOf(ang);
   const err = (1-sk)*.6*(Math.random()-.5), r = Math.random;
-  if(!P.ghost){                                // si tu Pokémon está cambiando, el rival se mueve pero no ataca
+  if(!aiNoAtk(P)){                             // tras el cambio espera un momento (AI_SWAP.grace) antes de atacar
     if(dist < 120 && r() < dt*6) use(E,1,ang,false);
     else if(r() < dt*(1+3*sk)) use(E,2,ang+err,false);
     if(r() < dt*.5*sk) use(E,4,ang+err,false);
@@ -70,6 +87,8 @@ function enemyAI(E, P, dt){
   pv.x = P.x; pv.y = P.y;
   const aimAt = spd => { const lead = dist / spd * (.55 + .4*sk); return Math.atan2(P.y + pv.vy*lead - E.y, P.x + pv.vx*lead - E.x) + (1 - sk) * .5 * (r() - .5); };
 
+  if(P.ghost) return aiRetreat(E, P, dt);                  // estás cambiando de Pokémon: se aparta y no ataca
+
   // ---- Movimiento: cada estilo mantiene su distancia y da vueltas alrededor (cambia de sentido de vez en cuando) ----
   E.orbT = (E.orbT === undefined ? 0 : E.orbT) - dt; if(E.orbT <= 0){ E.orbT = .9 + r()*1.6; E.orb = r() < .5 ? 1 : -1; }
   let want, mag;
@@ -86,7 +105,7 @@ function enemyAI(E, P, dt){
   E.dir = dirOf(ang);
 
   // ---- Ataques ----
-  if(P.ghost) return;                                      // si tu Pokémon está cambiando, el rival se mueve pero no ataca
+  if(aiNoAtk(P)) return;                                   // no ataca justo después de tu cambio (AI_SWAP.grace)
   const can = i => E.cd[i] <= 0 && E.en >= MV[i].en && !cant(E), rate = k => dt * k * (.6 + .6*sk) * AI_TUNE.agg[g.o.boss];   // rate(k): probabilidad por fotograma (k veces por segundo)
   if(th !== null && can(0) && r() < rate(5)) return use(E, 0, th, false);                 // …y con una carrera si hace falta (cuesta 2 s volver a poder)
   if(dist <= reach - 6 && can(1) && r() < rate(7)) return use(E, 1, ang, false);         // golpe: solo si estás de verdad a su alcance

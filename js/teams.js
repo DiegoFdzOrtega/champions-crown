@@ -185,7 +185,8 @@ const REWARD = {
 // Para que se den solo la primera vez, pon REWARD.once = true (vale para todas las recompensas).
 const REWARD_REGION = {
   Johto: {chapa:5, chapaplata:5, tickets:10},
-  Hoenn: {chapa:5, chapaplata:5, tickets:10}
+  Hoenn: {chapa:5, chapaplata:5, tickets:10},
+  Sinnoh: {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => REWARD_REGION[F.region] || REWARD[F.kind];

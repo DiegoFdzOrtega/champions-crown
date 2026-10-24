@@ -120,6 +120,7 @@ function update(dt){
   g.pops.forEach(p => p.t -= dt); g.pops = g.pops.filter(p => p.t > 0);
   fxUpdate(dt);
   swapUpdate(dt);                                // animación de cambio de Pokémon (swap.js)
+  if(g.swGrace > 0) g.swGrace = Math.max(0, g.swGrace - dt);        // margen del rival tras tu cambio (AI_SWAP.grace, ai.js)
   if(g.swCd > 0) g.swCd = Math.max(0, g.swCd - dt);                  // espera entre cambios (SWITCH_CD)
   if(g.swNote > 0) g.swNote -= dt;
 

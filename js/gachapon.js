@@ -16,13 +16,15 @@ function ticketIcon(c, col){ bitmap(c, ICONS.ticket, col); }
 function openGacha(){
   if(!REGION_DEX[save.gachaRegion]) save.gachaRegion = 'Kanto';
   if(!gx.built){
-    $('gachav').innerHTML = `<div class="dx gc">
+    $('gachav').innerHTML = `<canvas id="gcBg"></canvas><div class="dx gc">
       <header class="dxh"><button id="gcBack">← Menú</button><h1>Gachapon</h1><span id="gcTop"></span></header>
       <div id="gcTabs" class="tabs"></div>
       <div class="dxc gcc"><section id="gcLeft"></section><aside id="gcRight" class="ddet"></aside></div></div>`;
     $('gcBack').onclick = goMain;
     $('gcTabs').onclick = e => { const b = e.target.closest('.tab'); if(b){ save.gachaRegion = b.dataset.r; persist(); renderGacha(); } };
-    $('gcLeft').onclick = e => { const b = e.target.closest('[data-mode]'); if(b && !b.disabled) startPull(b.dataset.mode); };
+    $('gcLeft').onclick = e => {
+      if(e.target.closest('.gm-box')){ gcShake(); return; }                         // tocar la máquina solo la agita (no gasta tickets)
+      const b = e.target.closest('[data-mode]'); if(b && !b.disabled) startPull(b.dataset.mode); };
     $('gOv').onclick = e => {
       const b = e.target.closest('[data-g]'); if(!b) return;
       if(b.dataset.g === 'skip') showStage('reveal');
@@ -35,28 +37,41 @@ function openGacha(){
 }
 
 function renderGacha(){
-  const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = b - a + 1, col = REG_COL[reg];
-  $('gcTop').textContent = `Tickets ${save.tickets} · Especiales ${save.ticketsL} · ${save.bp} PB`;
+  const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = regionSize(a, b), col = REG_COL[reg];
+  $('gachav').style.setProperty('--c', col);
+  $('gcTop').innerHTML = `<i class="gchip">🎟 <b>${save.tickets}</b> tickets</i><i class="gchip sp">🌟 <b>${save.ticketsL}</b> especiales</i><i class="gchip">🪙 <b>${save.bp}</b> PB</i>`;
   $('gcTabs').innerHTML = REGIONS_DEX.map(r =>
-    `<button class="tab${r.n === reg ? ' on' : ''}" data-r="${r.n}">${r.n} <small>${ownedIn(r.n)}/${r.b - r.a + 1}</small></button>`).join('');
+    `<button class="tab${r.n === reg ? ' on' : ''}" style="--rc:${REG_COL[r.n]}" data-r="${r.n}">${r.n} <small>${ownedIn(r.n)}/${regionSize(r.a, r.b)}</small></button>`).join('');
 
   // Destacados del banner: primero legendarias, luego épicas (máx. 6)
   const feat = [...pool(reg, 'legendary'), ...pool(reg, 'epic')].slice(0, 6);
-  const btn = (mode, label, n, l) => `<button class="gb${mode === 'special' ? ' sp' : ''}" data-mode="${mode}" ${canPull(mode) ? '' : 'disabled'}>
-      ${label} <canvas class="ic" data-sp="${l ? 1 : 0}" width="16" height="16"></canvas><b>${l || n}</b></button>`;
+  const btn = (mode, label, n, l) => `<button class="gb${mode === 'special' ? ' sp' : ''}" data-mode="${mode}" ${canPull(mode) ? '' : 'disabled title="No tienes tickets suficientes"'}>
+      <span>${label}</span><em><canvas class="ic" data-sp="${l ? 1 : 0}" width="16" height="16"></canvas><b>${l || n}</b></em></button>`;
+  const pity = pityOf(reg), hot = pity >= PITY_MAX - 1;
+  gx.hp = gx.hp || domePile(Math.random() * 4294967296);
   $('gcLeft').innerHTML = `
     <div class="banner" style="--c:${col}">
-      <div class="bn-h"><h2>${BANNERS[reg]}</h2>
-        <div class="cnt"><span><b>${ownedIn(reg)}</b> de ${total}</span><span class="shn">⭐ ${shinyIn(reg)} shiny</span></div></div>
-      <div class="feat">${feat.map(d => `<div class="fc" style="--c:${RAR[DEX[d-1].rar].col}"><canvas data-d="${d}" width="96" height="96"></canvas>
-        <i>${RAR[DEX[d-1].rar].ic} ${esc(DEX[d-1].name)}</i></div>`).join('') || '<p>Sin destacados en esta región.</p>'}</div>
-      <div class="gbar">${btn('one', 'Tirar x1', 1, 0)}${btn('ten', 'Tirar x10', 10, 0)}${btn('special', 'Tirar x10 especial', 0, 1)}</div>
-      <p class="inv">Tickets: <b>${save.tickets}</b> · Tickets especiales: <b>${save.ticketsL}</b></p>
-      <p class="pity">Tiradas sin legendaria: <b>${pityOf(reg)} / ${PITY_MAX}</b></p>
-      <div class="pbar"><i style="width:${pityOf(reg) / PITY_MAX * 100}%"></i></div>
+      <div class="gm"><i class="gm-halo"></i>
+        <div class="gm-box" id="gcMachBox" title="¡Tócala!"><canvas id="gcMach"></canvas>
+          <div class="dome" id="gcDome">${gx.hp.map(p => `<img class="db" alt="" src="${ballURL(p.type)}">`).join('')}<i class="glass"></i></div></div>
+        <i class="gm-floor"></i><span class="gm-tag">¡Tócala!</span></div>
+      <div class="bn-main">
+        <div class="bn-h"><h2>${BANNERS[reg]}</h2>
+          <div class="cnt"><span><b>${ownedIn(reg)}</b> de ${total}</span><span class="shn">⭐ ${shinyIn(reg)} shiny</span></div></div>
+        <p class="bn-sub">Destacados del banner</p>
+        <div class="feat">${feat.map((d, i) => `<div class="fc${DEX[d-1].rar === 'legendary' ? ' lg' : ''}${own(d) ? ' got' : ''}" style="--c:${RAR[DEX[d-1].rar].col};--i:${i}"><canvas data-d="${d}" width="128" height="128"></canvas>
+          <i>${RAR[DEX[d-1].rar].ic} ${esc(DEX[d-1].name)}</i></div>`).join('') || '<p>Sin destacados en esta región.</p>'}</div>
+        <div class="gbar">${btn('one', 'Tirar x1', 1, 0)}${btn('ten', 'Tirar x10', 10, 0)}${btn('special', 'Tirar x10 especial', 0, 1)}</div>
+        <div class="pity-box${hot ? ' hot' : ''}">
+          <div class="pity-h"><span>Garantía de legendaria</span><b>${pity} / ${PITY_MAX}</b></div>
+          <div class="pbar"><i style="width:${Math.min(100, pity / PITY_MAX * 100)}%"></i></div>
+          <small>${hot ? '¡La próxima tirada es legendaria!' : `Legendaria asegurada en ${PITY_MAX - pity} tiradas como máximo`}</small></div>
+      </div>
     </div>`;
+  drawMachine($('gcMach'));
   $('gcLeft').querySelectorAll('canvas.ic').forEach(c => ticketIcon(c, c.dataset.sp === '1' ? '#1b1500' : '#ffffff'));
-  $('gcLeft').querySelectorAll('.fc canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:3, fit:88}));
+  $('gcLeft').querySelectorAll('.fc canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:8, fit:150}));
+  gcStart(col);
 
   const row = r => { const n = pool(reg, r.id).length, have = pool(reg, r.id).filter(own).length;
     return `<tr style="--c:${r.col}"><td>${r.ic} ${r.n}</td><td class="pc">${(GACHA_RATES[r.id] * 100).toFixed(0)}%</td><td>${have}/${n}</td></tr>`; };
@@ -72,6 +87,74 @@ function renderGacha(){
       <li>Los <b>repetidos</b> te dan monedas (PB): ${RARITIES.map(r => r.ic + ' ' + DUP_BP[r.id]).join(' · ')}.</li>
       <li>Los tickets se consiguen <b>jugando</b>: la primera vez que vences a cada líder te dan uno. También puedes comprarlos en la tienda.</li>
     </ul>`;
+}
+
+// ---------------------------------------------------------------------
+// VIDA DE LA PANTALLA (solo adorno): fondo con partículas, bolas que se mueven dentro de la máquina y destacados animados.
+// Se detiene sola cuando la pantalla se oculta o mientras hay una tirada en marcha.
+// ---------------------------------------------------------------------
+const GC = {raf:0, tok:0, shake:0, motes:null, balls:{}};
+function gcStop(){ if(GC.raf) cancelAnimationFrame(GC.raf); GC.raf = 0; GC.tok++; }
+function gcShake(){
+  GC.shake = 1; const b = $('gcMachBox'); if(!b) return;
+  b.classList.remove('clunk'); void b.offsetWidth; b.classList.add('clunk');
+}
+function gcStart(col){
+  gcStop(); const tok = GC.tok;
+  const bg = $('gcBg'), dome = $('gcDome'), imgs = dome ? [...dome.querySelectorAll('.db')] : [], pile = gx.hp,
+        feats = [...$('gcLeft').querySelectorAll('.fc canvas')], RM = matchMedia('(prefers-reduced-motion:reduce)').matches,
+        rn = (a, b) => a + Math.random() * (b - a);
+  if(!GC.motes){                                                               // partículas: posiciones como fracción de la pantalla
+    GC.motes = Array.from({length: 46}, (_, i) => ({x: Math.random(), y: Math.random(), v: rn(.012, .04), s: rn(2, 4), f: rn(.4, 1.2), ph: rn(0, 6.28),
+      a: rn(.01, .03), k: i < 12 ? 'ball' : i < 30 ? 'star' : 'dot', t: DOME_MIX[i % DOME_MIX.length], w: Math.random() < .5}));
+  }
+  const ballImg = t => { if(!GC.balls[t]){ const im = new Image(); im.src = ballURL(t); GC.balls[t] = im; } return GC.balls[t]; };
+  const order = pile.map((p, i) => i).sort((a, b) => pile[a].y - pile[b].y); order.forEach((i, z) => { if(imgs[i]) imgs[i].style.zIndex = z + 1; });
+  const place = (i, x, y, rot) => { const im = imgs[i]; if(!im) return;
+    im.style.left = ((x - BALL_R - (DOME.cx - DOME.rx)) / (DOME.rx * 2) * 100) + '%';
+    im.style.top = ((y - BALL_R - (DOME.cy - DOME.ry)) / (DOME.ry * 2) * 100) + '%'; im.style.transform = `rotate(${rot}deg)`; };
+  let last = performance.now(), tf = 0;
+
+  function draw(now, dt){
+    const ts = now / 1000;
+    // 1) Bolas dentro de la cúpula (se agitan al tocar la máquina)
+    GC.shake = Math.max(0, GC.shake - dt * .9);
+    const ag = GC.shake, amp = RM ? .1 : .3 + ag * .9;
+    pile.forEach((p, i) => {
+      const hop = RM ? 0 : ag * Math.max(0, Math.sin(ts * p.f * 5 + p.ph)) * 1.7;
+      place(i, p.x + Math.sin(ts * p.f * 1.3 + p.ph) * amp, p.y + Math.sin(ts * p.f + p.ph2) * amp * .6 - hop,
+            p.rot + Math.sin(ts * p.f * 2 + p.ph) * (3 + ag * (RM ? 0 : 14)));
+    });
+    // 2) Fondo: bolas, destellos y puntitos que suben despacio
+    if(bg){
+      const W = bg.clientWidth, H = bg.clientHeight;
+      if(bg.width !== W) bg.width = W; if(bg.height !== H) bg.height = H;
+      const x = bg.getContext('2d'); x.clearRect(0, 0, W, H); x.imageSmoothingEnabled = false;
+      GC.motes.forEach(m => {
+        if(!RM){ m.y -= m.v * dt; if(m.y < -.05){ m.y = 1.05; m.x = Math.random(); } }
+        const px = m.x * W + Math.sin(ts * m.f + m.ph) * m.a * W, py = m.y * H, tw = .5 + .5 * Math.sin(ts * m.f * 2 + m.ph);
+        if(m.k === 'ball'){ const im = ballImg(m.t), s = m.s * 7; if(im.complete){ x.globalAlpha = .13 + .08 * tw; x.drawImage(im, Math.round(px - s / 2), Math.round(py - s / 2), s, s); } }
+        else if(m.k === 'star'){ const s = m.s * 1.6; x.globalAlpha = .12 + .55 * tw; x.fillStyle = m.w ? '#ffffff' : col;
+          x.fillRect(Math.round(px - 1), Math.round(py - s), 2, s * 2); x.fillRect(Math.round(px - s), Math.round(py - 1), s * 2, 2); }
+        else{ x.globalAlpha = .1 + .3 * tw; x.fillStyle = m.w ? '#cfe3ff' : col; x.fillRect(Math.round(px), Math.round(py), m.s, m.s); }
+      });
+      x.globalAlpha = 1;
+    }
+    // 3) Destacados: se mueven con su animación de reposo (unas 8 veces por segundo)
+    if((tf += dt) >= .12){ tf = 0;
+      feats.forEach(c => { const d = +c.dataset.d, im = sheet(d, 'Idle', false); if(!im.ok) return;
+        const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height); drawFrame(x, d, 'Idle', ts, 0, c.width / 2, c.height / 2 + 2, 8, 150, false); });
+    }
+  }
+  function frame(now){
+    if(GC.tok !== tok) return;
+    if($('gachav').classList.contains('hide')){ GC.raf = 0; return; }            // pantalla oculta: se para (openGacha la vuelve a arrancar)
+    GC.raf = requestAnimationFrame(frame);
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if(!gx.anim) draw(now, dt);
+  }
+  draw(last, .016);                                                            // primer cuadro ya pintado (aunque aún no corra la animación)
+  GC.raf = requestAnimationFrame(frame);
 }
 
 // ---------------------------------------------------------------------

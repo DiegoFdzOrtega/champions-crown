@@ -7,7 +7,7 @@
      2) LANZAMIENTO: la Poké Ball del nuevo Pokémon (su color depende de su rareza, como en el Gachapon) vuela en arco hasta el suelo.
      3) APERTURA  : la bola se abre con un destello, onda de luz y chispas, y el Pokémon sale como una silueta blanca que recupera su color.
    Mientras dura, el Pokémon que entra está "fantasma" (ghost): no se dibuja como siempre, no recibe golpes ni se puede mover ni atacar.
-   No se puede empezar otro cambio tuyo hasta que acabe, y después hay que esperar SWITCH_CD (5 s, combat.js) para volver a cambiar por tu cuenta (g.swCd). El cambio por debilitamiento no tiene espera. Si el Pokémon se debilitó, se salta la retirada (ya se había ido).
+   No se puede empezar otro cambio tuyo hasta que acabe, y después hay que esperar SWITCH_CD (5 s, combat.js) para volver a cambiar por tu cuenta (g.swCd). El cambio por debilitamiento no tiene espera. Mientras cambias, el rival se aleja y no ataca; al terminar espera AI_SWAP.grace segundos (ai.js). Si el Pokémon se debilitó, se salta la retirada (ya se había ido).
    El estado vive en g.sw (lista de cambios en curso). Las funciones que usa el combate: swapStart · swapUpdate · swapBusy · swapDraw.
    ===================================================================== */
 const SWAP = {recall:.78, thrown:.5, open:.7};             // segundos de cada fase (retirada · lanzamiento · apertura)
@@ -114,7 +114,7 @@ function swapUpdate(dt){
       fx.shake = Math.max(fx.shake, 3); if(typeof Sfx !== 'undefined') Sfx.play('sendout');
     }
   }
-  g.sw = g.sw.filter(s => { if(s.t >= s.tR + s.tT + s.tO){ s.to.ghost = false; if(s.vol && s.side === 'p') g.swCd = SWITCH_CD; return false; } return true; });    // terminó: el combate sigue con normalidad
+  g.sw = g.sw.filter(s => { if(s.t >= s.tR + s.tT + s.tO){ s.to.ghost = false; if(s.vol && s.side === 'p') g.swCd = SWITCH_CD; if(s.side === 'p') g.swGrace = AI_SWAP.grace; return false; } return true; });    // terminó: el combate sigue con normalidad
 }
 
 // ---------------------------------------------------------------------

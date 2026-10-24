@@ -69,6 +69,18 @@ REGIONS_DEX.forEach(r => POKE_RAW[r.n].split('\n').forEach(line => {
 }));
 const DEX_TOTAL = DEX.length;
 
+/* Pokémon SIN sprites (de momento): no salen en el Gachapon, la Pokédex, el equipo ni el perfil. Siguen existiendo en los datos y, si ya los tenías,
+   se quedan guardados en tu partida (no se pierde nada). Para volver a ponerlos: mete su carpeta pokemon/<nº>/ y borra su número de esta lista. */
+const NO_SPRITE = new Set([
+  514, 516, 520, 522, 523, 538, 558, 564, 565, 591, 592, 593, 616, 626, 668, 732,         // Teselia y Kalos
+  735, 756, 765, 837, 838, 839, 866, 870, 878, 893,         // Alola y Galar
+  931, 942, 943, 944, 947, 948, 949, 950, 954, 956, 962, 973, 986, 993, 999, 1001, 1002, 1008, 1014, 1022, 1023          // Paldea
+]);
+const hidden = d => NO_SPRITE.has(d);
+const regionSize = (a, b) => { let n = b - a + 1; NO_SPRITE.forEach(d => { if(d >= a && d <= b) n--; }); return n; };      // Pokémon de un rango sin contar los ocultos
+const DEX_SHOWN = regionSize(1, DEX_TOTAL);
+const boxCount = () => save.box.filter(d => !hidden(d)).length;                                                              // Pokémon que tienes y se ven
+
 // Estos Pokémon tienen ataques con nombre propio (los demás los genera moves.js según su tipo)
 const CUSTOM = {
   94:{mv:['Lengüetazo','Bomba Lodo','Maldición','Bola Sombra']},
@@ -175,7 +187,9 @@ const LEADER_PATHS = ['lideres/{Region}/{Id2}.png', 'lideres/{Region}/{Id}.png',
 // Se prueban todos los nombres de la lista: lideres/Johto/Pegaso.png, lideres/Johto/Morti.png (o Moti.png)...
 const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], morti:['morti', 'moti'], anton:['anton', 'antón'], anibal:['anibal', 'aníbal'], debora:['debora', 'débora'],
                      // Hoenn: los archivos llevan tilde y el de Vito y Leti es un solo retrato (lideres/Hoenn/Vito_y_Leti.png)
-                     fatima:['fátima'], nivea:['nívea'], dracon:['dracón'], vitoleti:['Vito_y_Leti']};
+                     fatima:['fátima'], nivea:['nívea'], dracon:['dracón'], vitoleti:['Vito_y_Leti'],
+                     // Sinnoh: los de Acerón y Alecrán llevan tilde (lideres/Sinnoh/Acerón.png, lideres/Sinnoh/Alecrán.png)
+                     aceron:['acerón'], alecran:['alecrán']};
 
 // Gachapon: cada región tiene su banner. Los Pokémon que salen son los de su rango de Pokédex.
 const BANNERS = Object.fromEntries(Object.keys(REGION_DEX).map(r => [r, r]));   // el banner solo lleva el nombre de la región
