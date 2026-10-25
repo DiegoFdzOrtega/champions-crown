@@ -229,13 +229,14 @@ function openCampo(){
       <p>Combate todas las veces que quieras: perder no cuesta nada y cada victoria da siempre la misma recompensa. Gasta las Chapas en Equipo Pokémon › Ver datos para subir los IV y EV de tus Pokémon.</p>
       <div class="cp-rw"><span class="cp-lab">Cada victoria:</span><span id="cpRw" class="lc-rw"></span></div>
       <div class="stchips"><span class="stc"><i id="cpIcoS"></i><b id="cmpS"></b> Chapas Plateadas</span><span class="stc gold"><i id="cpIcoG"></i><b id="cmpG"></b> Chapas Doradas</span>
-        <button id="cmpTeam" class="cp-team">Equipo Pokémon →</button></div></div>
+        <label class="tsel cp-sel">Equipo <select id="cpTeamSel"></select></label><button id="cmpTeam" class="cp-team">Equipo Pokémon →</button></div></div>
     <p id="cmpWarn" class="warn"></p>
     <div id="cpTabs" class="cptabs"></div><div id="cpNote" class="cp-note"></div><div id="cmpList"></div>`);
   $('panelBody').classList.add('wide');
   $('cmpS').textContent = held('chapaplata'); $('cmpG').textContent = held('chapa'); $('cmpTeam').onclick = () => openTeam('campo');
   $('cpIcoS').appendChild(rwIcon('chapaplata', '#c9d6f5')); $('cpIcoG').appendChild(rwIcon('chapa', '#ffcc33'));
   Object.entries(rewardOf({kind:'campo'})).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id]; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('cpRw').appendChild(c); });
+  fillTeamSel('cpTeamSel', openCampo);
   $('cmpWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
   renderCampo();
 }

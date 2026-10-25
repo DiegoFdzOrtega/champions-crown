@@ -157,6 +157,7 @@ function buildStory(){
     }).join('') + '</div>' +
     `<p class="stp-next">${nextF ? `Siguiente: <b>${esc(nextF.leader)}</b>${nextF.kind === 'lider' ? ' · Líder ' + esc(nextF.tag) : nextF.kind === 'alto' ? ' · Alto Mando' : ' · Campeón'}${nextF.place ? ' · ' + esc(nextF.place) : ''}` : '¡Has vencido a todos en esta región!'}</p>`;
   // ---- tu equipo (compacto) ----
+  fillTeamSel('stTeamSel', buildStory);                                                  // selector de equipo (team.js)
   const bar = $('teamBar'); bar.innerHTML = ''; thumbs.length = 0;
   team.forEach(id=>{
     const m = mon(id), d = document.createElement('div'); d.className = 'card';           // carta compacta: miniatura + nombre + tipos + objeto

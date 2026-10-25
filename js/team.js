@@ -29,8 +29,9 @@ function teamVisible(r){
 function buildTeamShell(){
   $('teamv').innerHTML = `<canvas id="tmRoom" class="room" aria-hidden="true"></canvas>
     <div class="dx tmx">
-    <header class="dxh tmhd"><h1>Equipo Pokémon</h1><div class="tmhr"><span id="tmTotal"></span><button id="tmBack" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></div></header>
-    <p class="tmhint">⠿ Arrastra las cajas para cambiar el orden · el nº 1 sale primero al combate</p>
+    <header class="dxh tmhd"><div class="tmhl"><h1>Equipo Pokémon</h1><p class="tmhint">⠿ Arrastra las cajas para ordenar · el nº 1 sale primero al combate · cada equipo lleva sus propios objetos</p></div><div class="tmhr"><span id="tmTotal"></span><button id="tmBack" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></div></header>
+    <section class="tmteams"><div id="tmTabs" class="tmtabs"></div><label class="tmname">Nombre del equipo <input id="tmName" maxlength="14" autocomplete="off"></label></section>
+    <div id="tmCov" class="tmcov"></div>
     <section class="tmtop"><div id="tmSlots" class="tmslots"></div></section></div>
     <div id="tmPick" class="tmm hide"><div class="dx tmmb">
       <header class="dxh"><h1 id="tmPickT">Añadir Pokémon</h1><span id="tmPickS"></span><button id="tmPickX" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></header>
@@ -44,6 +45,8 @@ function buildTeamShell(){
   ['pointerdown','pointermove','pointerup','pointercancel'].forEach(t => $('tmSlots').addEventListener(t, slotDrag));   // arrastrar las cajas para ordenar el equipo   // desplegable de objetos (se reparte por eventos: las tarjetas se redibujan)
   document.addEventListener('click', e => { if(!e.target.closest('.idd')) closeDd(); });
   $('tmBack').onclick = closeTeam; $('tmPickX').onclick = closePick;
+  $('tmTabs').onclick = e => { const b = e.target.closest('.tmtab'); if(!b || +b.dataset.i === save.tsel) return; closePick(); closeDd(); selectTeam(+b.dataset.i); renderTeamSlots(); };
+  $('tmName').oninput = e => { const t = save.teams[save.tsel]; t.n = e.target.value.trim().slice(0, 14) || 'Equipo ' + (save.tsel + 1); persist(); const b = $('tmTabs').querySelector('.tmtab.on b'); if(b) b.textContent = t.n; $('tmTotal').textContent = teamTotalText(); };
   $('tmPick').onclick = e => { if(e.target === $('tmPick')) closePick(); };                  // clic fuera de la ventana = cerrar
   $('tmData').onclick = e => { if(e.target === $('tmData')) closeData(); };
   $('tmQ').oninput = e => { tm.q = e.target.value; renderTeamList(); };
@@ -203,8 +206,37 @@ function slotDragEnd(cancel){
 const stopOnce = ev => ev.stopPropagation();
 
 // ---- Tu equipo (3 tarjetas grandes) ----
+const teamTotalText = () => `${save.teams[save.tsel].n} · ${team.length}/3 • ${boxCount()} Pokémon`;
+// ---- Pestañas de los 5 equipos (con los Pokémon de cada uno en miniatura) ----
+function renderTeamTabs(){
+  $('tmTabs').innerHTML = save.teams.map((t, i) => {
+    const ms = i === save.tsel ? team : t.mons;
+    return `<button class="tmtab${i === save.tsel ? ' on' : ''}" data-i="${i}"><span class="tmt-n">${i + 1}</span><b>${esc(t.n)}</b>` +
+      `<span class="tmt-m">${ms.length ? ms.map(d => `<canvas width="36" height="36" data-d="${d}"></canvas>`).join('') : '<em>Vacío</em>'}</span></button>`;
+  }).join('');
+  $('tmTabs').querySelectorAll('canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:2, fit:34, shiny:useShiny(+c.dataset.d)}));
+  if(document.activeElement !== $('tmName')) $('tmName').value = save.teams[save.tsel].n;
+}
+// ---- Debilidades compartidas del equipo (tabla de tipos CH de data.js): tipos a los que 2 o más de tus Pokémon son débiles / resisten ----
+function renderCov(){
+  const ms = team.map(mon), el = $('tmCov'), hint = '';
+  if(ms.length < 2){ el.innerHTML = hint; return; }
+  const weak = [], res = [];
+  Object.keys(CH).forEach(t => { const w = ms.filter(m => eff(t, m.types) > 1).length, r = ms.filter(m => eff(t, m.types) < 1).length; if(w >= 2) weak.push([t, w]); if(r >= 2) res.push([t, r]); });
+  weak.sort((a, b) => b[1] - a[1]);
+  const chip = ([t, n]) => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]} <i>${n}/${ms.length}</i></span>`;
+  el.innerHTML = `<span class="cvl ${weak.length ? 'bad' : 'ok'}">${weak.length ? 'Débiles a:' : '✓ Sin debilidades compartidas'}</span>${weak.map(chip).join('')}` +
+    (res.length ? `<span class="cvl good">Resisten bien:</span>${res.map(chip).join('')}` : '') + hint;
+}
+// Selector «Equipo» de las pantallas de Historia y Campo (cambia el equipo activo y vuelve a dibujar la pantalla)
+function fillTeamSel(id, after){
+  const s = $(id); if(!s) return;
+  s.innerHTML = save.teams.map((t, i) => `<option value="${i}">${esc(t.n)}${t.mons.length || i === save.tsel ? '' : ' (vacío)'}</option>`).join('');
+  s.value = save.tsel; s.onchange = e => { selectTeam(+e.target.value); after(); };
+}
+
 function renderTeamSlots(){
-  $('tmTotal').textContent = `Equipo ${team.length}/3 • ${boxCount()} Pokémon`;
+  $('tmTotal').textContent = teamTotalText(); renderTeamTabs(); renderCov();
   $('tmSlots').innerHTML = [0, 1, 2].map(i => {
     const dex = team[i];
     if(!dex) return `<article class="tslot empty" data-i="${i}"><i class="tsn">${i + 1}</i><button class="addbtn">＋ Añadir Pokémon</button><p>Hueco libre. Elige uno de tu colección.</p></article>`;

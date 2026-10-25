@@ -1101,3 +1101,90 @@ button.leg:disabled{box-shadow:none}
 #pAsk .warn{min-height:0;margin:0 0 1.1rem;line-height:1.8;font-size:.95rem;color:#ffb4a8}
 #pAsk .pz-btns{flex-direction:column-reverse}
 .pz-btns.hide,#pAsk.hide{display:none}
+
+/* ===== Pokédex: filtros compactos y ficha nueva (todo bajo #dexv) ===== */
+#dexv #dxTabs{gap:.25em;margin-bottom:0}
+#dexv #dxTabs .tab{flex:none;padding:.35em .4em;font-size:.76em;white-space:nowrap}
+#dexv #dxTabs .tab small{margin-left:.2em}
+#dexv .tool select{width:auto;max-width:17em;flex:none;padding:.55em .5em;font-size:.9em;color:var(--text)}
+#dexv .tool2{display:flex;align-items:center;justify-content:space-between;gap:1em}
+#dexv #dxRar{gap:.3em}
+#dexv #dxRar .pill{padding:.25em .7em;font-size:.8em}
+#dexv #dxCount{color:#8fb3e8;white-space:nowrap;font-size:.9em}
+/* ficha */
+#dexv .dtop{display:grid;grid-template-columns:12.5em minmax(0,1fr);gap:1em;align-items:center}
+#dexv .dtop .viewer{width:100%}
+#dexv .dwho{min-width:0;display:flex;flex-direction:column;gap:.4em}
+#dexv .dwho h2{margin:0;font-size:1.7em;line-height:1.2;word-break:break-word}
+#dexv .dwho .vbtn{margin:.3em 0 0;justify-content:flex-start;flex-wrap:wrap}
+#dexv .dwho .vbtn .pill{padding:.3em .7em;font-size:.8em}
+#dexv .dact{display:flex;gap:.5em;margin:.9em 0 .2em}
+#dexv .dact button{margin:0;padding:.65em .8em;font-size:.85em}
+#dexv .dact .gob{flex:1;background:#ffcc33;border-color:#ffcc33;color:#1b1500}
+#dexv .dact .gob:hover{filter:brightness(1.1);border-color:#fff4c2}
+#dexv .dact .favb{flex:none;width:auto;margin:0!important}
+#dexv .dact.solo .favb{flex:1}
+#dexv .anbtn{display:flex;align-items:center;gap:.4em;flex-wrap:wrap;margin:.5em 0 0}
+#dexv .anbtn span{color:#8fb3e8;font-size:.8em;margin-right:.3em}
+#dexv .anbtn .pill{padding:.3em .8em;font-size:.8em}
+/* debilidades */
+#dexv .dxw{display:grid;gap:.4em}
+#dexv .wk{display:grid;grid-template-columns:2.6em 8em minmax(0,1fr);gap:.5em;align-items:center;padding:.4em .6em;border-radius:.6em;background:#0a1226;border-left:.3em solid #6d7899}
+#dexv .wk.w4{border-left-color:#ff4d4d}#dexv .wk.w2{border-left-color:#ff9a3a}#dexv .wk.r{border-left-color:#4ccf6a}#dexv .wk.i{border-left-color:#3ea6ff}
+#dexv .wx{font-size:1.05em;color:#fff}#dexv .wl{font-size:.75em;color:#8fb3e8}
+#dexv .wt{display:flex;flex-wrap:wrap;gap:.25em}
+#dexv .wt .tb{padding:.2em .6em;font-size:.75em}
+/* estadísticas: etiquetas cortas, sin cortes */
+#dexv .st{grid-template-columns:6.4em 1fr 2.4em 5.4em;gap:.55em;font-size:.85em}
+#dexv .st span,#dexv .st u{white-space:nowrap}
+@media (max-width:1100px){#dexv .dtop{grid-template-columns:10em minmax(0,1fr)}}
+
+/* ===== Equipos múltiples (Equipo Pokémon, Historia y Campo) ===== */
+#teamv .tmteams{display:flex;align-items:stretch;gap:1em;margin:0 0 .6em;flex-wrap:wrap}
+#teamv .tmtabs{display:flex;gap:.5em;flex:1;min-width:0;flex-wrap:wrap}
+#teamv .tmtab{margin:0;flex:1 1 11em;max-width:17em;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:.6em;row-gap:.2em;align-items:center;text-align:left;padding:.5em .7em;border-radius:.9em;
+  background:rgba(10,16,32,.78);border:2px solid #2d4a7c;color:#b9d0f5;backdrop-filter:blur(4px);cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s}
+#teamv .tmtab:hover{transform:translateY(-.12em);border-color:#5aa7ff}
+#teamv .tmtab.on{border-color:#ffcc33;background:linear-gradient(160deg,rgba(40,34,12,.9),rgba(14,20,40,.9));box-shadow:0 0 1.2em #ffcc3344;color:#fff}
+#teamv .tmt-n{grid-row:1/3;display:inline-flex;align-items:center;justify-content:center;width:1.9em;height:1.9em;border-radius:50%;background:#0b1224;border:1px solid #3a5f9c;font-size:.9em;color:#ffcc33}
+#teamv .tmtab.on .tmt-n{background:#ffcc33;color:#1b1500;border-color:#fff4c2}
+#teamv .tmtab b{font-weight:normal;font-size:.9em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#teamv .tmt-m{display:flex;gap:.1em;min-height:2.2em;align-items:center}
+#teamv .tmt-m canvas{width:2.2em;height:2.2em;image-rendering:pixelated}
+#teamv .tmt-m em{font-style:normal;font-size:.7em;color:#7d93bd}
+#teamv .tmname{display:flex;flex-direction:column;justify-content:center;gap:.3em;font-size:.75em;color:#8fb3e8}
+#teamv .tmname input{margin:0;width:15em;font-size:1.15em;padding:.55em .7em;border-radius:.6em;background:rgba(10,16,32,.85);border:2px solid #2d4a7c;color:#fff}
+#teamv .tmname input:focus{outline:0;border-color:#ffcc33}
+#teamv .tmcov{display:flex;align-items:center;flex-wrap:wrap;gap:.4em;margin:0 0 .5em;min-height:2.2em;padding:.35em .8em;border-radius:.7em;background:rgba(10,16,32,.7);border:1px solid #243a66;font-size:.85em}
+#teamv .tmcov .cvl{margin-right:.2em;color:#8fb3e8}#teamv .tmcov .cvl.bad{color:#ff9a7a}#teamv .tmcov .cvl.ok{color:#4ccf6a}#teamv .tmcov .cvl.good{margin-left:.8em;color:#4ccf6a}
+#teamv .tmcov .tb{padding:.15em .6em;font-size:.8em}#teamv .tmcov .tb i{font-style:normal;opacity:.85;margin-left:.2em}
+/* cartas: misma estructura en las tres (la zona del objeto se reparte el hueco que sobra) */
+#teamv .tshead{flex:none;margin-top:1em}
+#teamv .tsitem{flex:1}
+#teamv .idesc{flex:1;height:auto;min-height:7em;max-height:none}
+#teamv .tsprite{width:clamp(9em,19vh,15em);height:clamp(9em,19vh,15em)}
+/* selector «Equipo» en Historia y Campo */
+.stt-r{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.tsel{display:inline-flex;align-items:center;gap:.5em;font-size:.85rem;color:#8fb3e8}
+.tsel select{margin:0;padding:.55em .7em;font-size:.95em;border-radius:.6em;background:#0b1224;border:2px solid #2d4a7c;color:#fff;max-width:14em}
+.tsel select:focus{outline:0;border-color:#ffcc33}
+.cpbanner .cp-sel{margin-left:auto}.cpbanner .cp-sel+.cp-team{margin-left:0}
+@media (max-width:1100px){.cpbanner .cp-sel{margin-left:0}}
+#teamv .tmcov .cvh{margin-left:auto;font-size:.8em;color:#7d93bd}
+#teamv .tmx{padding-top:.8em}
+#teamv .tsprite{width:clamp(8em,15vh,13em);height:clamp(8em,15vh,13em)}
+#teamv .idesc{min-height:6em}
+#teamv .tmhd{margin-bottom:.6em}
+#teamv .tmteams,#teamv .tmcov,#teamv .tmhd{flex:none}
+#teamv .tmt-m canvas{width:2.6em;height:2.6em}
+#teamv .tmhl{display:flex;flex-direction:column;gap:.3em}#teamv .tmhl h1{margin:0}#teamv .tmhint{margin:0!important;font-size:.8em!important;color:#b9d0f5;text-shadow:0 1px 3px #000}
+#teamv .tmtop{align-items:flex-start}
+#teamv .tmslots{grid-auto-rows:auto;align-items:stretch;gap:1.4em}
+#teamv .tmx{padding-bottom:.8em}
+#teamv .tmtab{padding:.35em .6em}
+#teamv .tmt-m{min-height:2em}#teamv .tmt-m canvas{width:2.3em;height:2.3em}
+#teamv .tsprite{width:clamp(8em,14vh,12em);height:clamp(8em,14vh,12em)}
+#teamv .idesc{min-height:5.5em}
+#teamv .tmhl{flex:1;min-width:0}#teamv .tmhr{flex:none}#teamv .tmhd #tmTotal{white-space:nowrap}
+#teamv .tmhint{max-width:46em}
+#teamv .tmhint{max-width:70em;width:auto}

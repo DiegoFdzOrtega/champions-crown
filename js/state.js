@@ -18,7 +18,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 // box = Pokémon que tienes (en orden de llegada) · shiny/fav = nº de Pokédex · nat = naturaleza de cada uno
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
 const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
-              items:{}, equip:{}, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
+              items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, shinyOff:[], avatar:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
               iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, mtBought:{day:0, n:{}}, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv/mtBought: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
@@ -50,7 +50,28 @@ try{
 }catch(e){}
 // ¿Se usa la versión shiny de este Pokémon? Solo si lo tienes shiny y no lo has puesto en "normal" desde Equipo Pokémon
 const useShiny = d => save.shiny.includes(d) && !save.shinyOff.includes(d);
-function persist(){ try{ localStorage.setItem('arena2d_v2', JSON.stringify({team, ...save})); }catch(e){} }
+// ---- EQUIPOS (hasta 5): cada uno con sus Pokémon y SUS objetos. Siempre hay uno activo: 'team' (sus Pokémon) y 'save.equip' (sus objetos) apuntan a él,
+//      así todo lo que ya usaba team/save.equip (combate, tienda, mochila, objetos libres) sigue funcionando sin cambios. ----
+const TEAM_MAX = 5;
+(function initTeams(){
+  let s = null; try{ s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null'); }catch(e){}
+  const okMons = a => Array.isArray(a) && a.length <= 3 && new Set(a).size === a.length && a.every(id => save.box.includes(id) && !hidden(id));
+  const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+  const T = [];
+  if(s && Array.isArray(s.teams)) s.teams.slice(0, TEAM_MAX).forEach((t, i) => T.push({n:String((t && t.n) || '').slice(0, 14) || 'Equipo ' + (i + 1), mons:t && okMons(t.mons) ? t.mons.slice() : [], equip:obj(t && t.equip)}));
+  else T.push({n:'Equipo 1', mons:team.slice(), equip:save.equip});                      // partidas antiguas: tu equipo de siempre pasa a ser el Equipo 1
+  while(T.length < TEAM_MAX) T.push({n:'Equipo ' + (T.length + 1), mons:[], equip:{}});            // los equipos nuevos empiezan vacíos: los rellenas tú en Equipo Pokémon
+  if(!T[0].mons.length) T[0].mons = team.slice();                                                 // el Equipo 1 nunca queda vacío (si no hay nada guardado, el equipo inicial)
+  save.teams = T; save.tsel = s && s.tsel >= 0 && s.tsel < TEAM_MAX ? s.tsel : 0;
+  team = T[save.tsel].mons; save.equip = T[save.tsel].equip;
+})();
+function teamSync(){ const T = save.teams[save.tsel]; if(T){ T.mons = team; T.equip = save.equip; } }       // guarda en el equipo activo lo que haya en team / save.equip
+function selectTeam(i){                                                                              // cambia de equipo activo
+  if(i === save.tsel || !(i >= 0 && i < TEAM_MAX)) return;
+  teamSync(); const T = save.teams[i];
+  save.tsel = i; team = T.mons; save.equip = T.equip; persist();
+}
+function persist(){ try{ teamSync(); localStorage.setItem('arena2d_v2', JSON.stringify({team, ...save})); }catch(e){} }
 
 let g = null;                                    // combate en curso
 const keys = {}, mouse = {x:W/2, y:H/2, l:false, r:false};
@@ -71,7 +92,8 @@ function enemyMon(e){
   return m;
 }
 
-function startBattle(o, again){                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
+function startBattle(o, again){
+  if(!team.length){ toast('Tu equipo está vacío: añade Pokémon en Equipo Pokémon.'); return; }                // por seguridad (los botones de combate ya se desactivan si no hay 3)                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
   if(!again){ team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist(); }                 // para ordenar por "más usados"
   const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; return f; }),   // IVs, EVs, naturaleza y ataques de MT
          e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)
