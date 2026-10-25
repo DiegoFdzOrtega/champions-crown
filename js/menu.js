@@ -38,7 +38,7 @@ function bitmap(c, rows, col, pal){
 // Botones del menú, en orden. 'lock' = cerrado.
 const NAV = [
   {k:'story',   n:'HISTORIA',        c:'#ffcc33', d:'Recorre las regiones y vence a los líderes de gimnasio y al Alto Mando.', f:()=>`Combates de la Liga: ${progTotal()} / ${FLOORS.length}`},
-  {k:'campo',   n:'CAMPO DE ENTRENAMIENTO', c:'#4ccf6a', d:`Vence a entrenadores todas las veces que quieras y gana ${rewardText({kind:'campo'})} por cada victoria.`, f:()=>`Chapas: ${held('chapaplata')} plateadas · ${held('chapa')} doradas`},
+  {k:'campo',   n:'CAMPO DE ENTRENAMIENTO', c:'#4ccf6a', d:`Vence a entrenadores todas las veces que quieras y gana 1 tirada de Gachapon + 50 BP + de ${REWARD_CAMPO_CHAPAS[1]} a ${REWARD_CAMPO_CHAPAS[3]} Chapas Plateadas y Doradas (según la dificultad) por cada victoria.`, f:()=>`Chapas: ${held('chapaplata')} plateadas · ${held('chapa')} doradas`},
   {k:'team',    n:'EQUIPO POKÉMON',  c:'#3ea6ff', d:'Elige 3 Pokémon y equípales un objeto de combate.',                       f:()=>`Equipo: ${team.length} / 3`},
   {k:'shop',    n:'TIENDA',          c:'#ffcc33', d:'Compra tickets de Gachapon y objetos con tus Puntos de Batalla.',         f:()=>`Puntos de Batalla: ${save.bp}`},
   {k:'dex',     n:'POKÉDEX',         c:'#3ea6ff', d:'Tu colección de Pokémon desbloqueados.',                                  f:()=>`Desbloqueados: ${boxCount()} / ${DEX_SHOWN}`},

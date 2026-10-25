@@ -2,7 +2,7 @@
 /* =====================================================================
    16b) CAMPO DE ENTRENAMIENTO: la zona para farmear Chapas Plateadas y Chapas Doradas
    Entrenadores normales (no líderes) con 3-4 Pokémon cada uno, repetibles todas las veces que quieras.
-   Cada victoria da una recompensa FIJA: 1 ticket + 50 BP + 5 Chapas Plateadas + 5 Chapas Doradas (REWARD.campo en teams.js).
+   Cada victoria da una recompensa FIJA: 1 ticket + 50 BP + Chapas Plateadas y Doradas según la dificultad: Fácil 50+50, Media 100+100, Difícil 150+150 (REWARD.campo y REWARD_CAMPO_CHAPAS en teams.js).
    Se carga DESPUÉS de teams.js (usa P(), ITEMS, MOVES, enemyBoost...). Los sprites están en la carpeta entrenadores/ (80x80).
 
    Cada entrenador es una entrada de CAMPO:
@@ -196,7 +196,7 @@ function campoEnd(won){                                    // lo llama endBattle
   const add = (t, fn, main) => { const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
   if(won){
     const before = campoCleared(T.tier); save.campoWins[T.id] = 1;
-    giveReward({kind:'campo'}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 50 BP + 5 Chapas Plateadas + 5 Doradas, siempre; cuenta para los logros · la pantalla de victoria (victoria.js) las enseña con iconos
+    giveReward({kind:'campo', tier:T.tier}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 1 tirada + 50 BP + chapas según la dificultad (50/100/150 de cada), siempre; cuenta para los logros · la pantalla de victoria (victoria.js) las enseña con iconos
     const chips = [];
     if(!T.opt){
       const nd = campoNeeded(T.tier).length;
@@ -227,7 +227,7 @@ function openCampo(){
   }
   panel(`<div class="stbanner cpbanner"><h1>Campo de Entrenamiento</h1>
       <p>Combate todas las veces que quieras: perder no cuesta nada y cada victoria da siempre la misma recompensa. Gasta las Chapas en Equipo Pokémon › Ver datos para subir los IV y EV de tus Pokémon.</p>
-      <div class="cp-rw"><span class="cp-lab">Cada victoria:</span><span id="cpRw" class="lc-rw"></span></div>
+      <div class="cp-rw"><span id="cpLab" class="cp-lab">Cada victoria:</span><span id="cpRw" class="lc-rw"></span></div>
       <div class="stchips"><span class="stc"><i id="cpIcoS"></i><b id="cmpS"></b> Chapas Plateadas</span><span class="stc gold"><i id="cpIcoG"></i><b id="cmpG"></b> Chapas Doradas</span>
         <label class="tsel cp-sel">Equipo <select id="cpTeamSel"></select></label><button id="cmpTeam" class="cp-team">Equipo Pokémon →</button></div></div>
     <p id="cmpWarn" class="warn"></p>
@@ -235,13 +235,14 @@ function openCampo(){
   $('panelBody').classList.add('wide');
   $('cmpS').textContent = held('chapaplata'); $('cmpG').textContent = held('chapa'); $('cmpTeam').onclick = () => openTeam('campo');
   $('cpIcoS').appendChild(rwIcon('chapaplata', '#c9d6f5')); $('cpIcoG').appendChild(rwIcon('chapa', '#ffcc33'));
-  Object.entries(rewardOf({kind:'campo'})).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id]; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('cpRw').appendChild(c); });
   fillTeamSel('cpTeamSel', openCampo);
   $('cmpWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
   renderCampo();
 }
 function renderCampo(){
   const ready = team.length === 3, tier = campoTab, open = campoOpen(tier), nd = campoNeeded(tier).length;
+  $('cpLab').textContent = 'Cada victoria (' + CAMPO_TIER[tier].nombre + '):'; $('cpRw').innerHTML = '';                      // la recompensa cambia con la dificultad
+  Object.entries(rewardOf({kind:'campo', tier})).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id]; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('cpRw').appendChild(c); });
   dexThumbs.length = 0;
   // ---- pestañas de dificultad ----
   const tabs = $('cpTabs'); tabs.innerHTML = '';

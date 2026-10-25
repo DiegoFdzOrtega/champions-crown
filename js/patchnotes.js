@@ -6,8 +6,10 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
-  {v:'Chapas más baratas', date:'25 oct 2026', sections:[
-    {t:'Tienda', i:['La Chapa Dorada (antes 60 PB) y la Chapa Plateada (antes 40 PB) cuestan ahora 20 PB cada una.']}
+  {v:'Chapas: más baratas y más premios', date:'25 oct 2026', sections:[
+    {t:'Tienda', i:['La Chapa Dorada (antes 60 PB) y la Chapa Plateada (antes 40 PB) cuestan ahora 20 PB cada una.']},
+    {t:'Campo de Entrenamiento', i:['Cada victoria da ahora muchas más chapas, según la dificultad: Fácil 50 Doradas y 50 Plateadas, Media 100 y 100, Difícil 150 y 150 (antes eran 5 y 5).',
+      'Lo demás de la recompensa sigue igual: 1 tirada de Gachapon y 50 BP.']}
   ]},
   {v:'Nuevos puños', date:'25 oct 2026', sections:[
     {t:'Ataques nuevos', i:[
