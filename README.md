@@ -21,6 +21,8 @@ Carpetas de imágenes (junto a `index.html`):
 - js/combat.js: movimiento, ataques, daño, efectos de los objetos y cambio de Pokémon (la IA del rival se llama desde aquí)
 - js/status.js: estados (paralizado, envenenado, quemado, dormido, confuso, enamorado) y los 7 ataques que los ponen; los números están en `STX`
 - js/abilities.js: las habilidades en combate (las ~100 que usan tus Pokémon y los rivales) y el clima; los números están en `ABX`
+- js/shop.js: la Tienda con diseño «Escaparate» (categorías a la izquierda, estantes con los objetos, panel de detalle a la derecha).
+- js/moveinfo.js: la descripción de cada ataque (`MOVE_DESC`, una frase por ataque) y `moveInfo()`, que saca daño, energía y recarga de los números reales del juego.
 - js/patchnotes.js: el botón «Notas del parche» (abajo a la izquierda del menú) y el texto de cada parche. Para añadir uno nuevo, copia un bloque de `PATCHES` y ponlo el primero
 - js/ai.js: la **IA del rival** (estilo melee / a distancia / mixto, esquiva, apunta con ventaja, gasta la energía con cabeza)
 - js/background.js: fondo pixel art del menú
@@ -84,13 +86,14 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - **Chapa Dorada** (60 PB, `objetos/ivs/chapa-dorada.png`): +5 a un IV. **Chapa Plateada** (40 PB, `objetos/ivs/Chapa-plateada.png`): +10 EV a un stat. Los límites son los reales de los juegos: IV 0-31 por stat (186 en total) y EV 252 por stat útiles (el máximo teórico es 255) y 510 en total.
 - **Restablecer** (en Ver datos): «↺ Restablecer IVs» vuelve los IV a 0 y devuelve las Chapas Doradas gastadas en ese Pokémon; «↺ Restablecer EVs» quita los EVs que dieron las Chapas Plateadas (los ganados en combate se quedan) y las devuelve. Pide confirmación. Datos: `save.ivBase`, `save.evCap`, `save.capUsed`.
 - **Todos los Pokémon empiezan con IV 0 y EV 0 en todo** (da igual cuál sea o cómo lo consigas). La única forma de subirlos es gastar Chapas Doradas (IV) y Plateadas (EV) en la ficha. Las chapas se consiguen en la tienda y como recompensa al vencer a los líderes (5 + 5). Así cada chapa tiene sentido. **Menta** (120 PB): cambia la naturaleza a la que elijas. **Cápsula de Habilidad** (150 PB): cambia a la otra habilidad. **MT**: enseña un movimiento y sustituye al que haya en ese hueco (golpe, disparo, mejora o fuerte).
-- **MTs siempre a la venta (provisional, para probar):** los 7 ataques de estado (Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis) y **Bola Sombra** están siempre en la tienda, además de los 8 del día, con 10 unidades al día de cada uno. Están en `TRAIN.mtFixed` (`js/training.js`): para devolverlos a la rotación normal, deja esa lista vacía (`mtFixed: []`).
-- **MTs del día** (Tienda > MTs del día): 8 MTs (2 por hueco), 3 unidades de cada uno, precio según el hueco (70-130 PB). Cambian solos a medianoche (hora del ordenador); salen del número de día, así que no hace falta guardar nada.
+- **MTs en la tienda:** están **todos siempre a la venta** (98: todos los ataques de `MOVES` que algún Pokémon puede aprender; Afilar y Bomba Imán no entran porque nadie los aprende). Sin límite de unidades y sin cambio diario. Se ordenan por hueco, tipo y nombre.
+- **Tienda > MTs:** precio según el hueco (Golpe 80, Disparo 90, Mejora 70, Fuerte 130 PB, en `TRAIN.price.mt`). Arriba hay un buscador y filtros de **Hueco** y **Tipo** (`shopSt` en `js/shop.js`).
+- **Diseño de la tienda («Escaparate»):** toldo rojo y blanco con tus saldos, categorías a la izquierda, los objetos en estantes de madera con su precio colgando (punto de color = tipo del MT, `×N` = cuántos tienes) y, a la derecha, el panel del objeto elegido. En un MT el panel enseña **Qué es** (frase de `MOVE_DESC`), **Qué hace aquí** (daño, energía y recarga, o el estado que pone) y si **tu equipo puede aprenderlo** (con los sprites) y cuántos de tus Pokémon lo aprenden. Los colores y tamaños están en el bloque `sa-` de `css/style.css`. Para cambiar la descripción de un ataque, edita su línea en `MOVE_DESC`.
 - Los IV y EV ya **no se sortean ni se ganan en combate** (`TRAIN.evPerFoe = 0`; si quieres que los rivales vuelvan a dar EVs, ponlo en 4). Para que el juego siga siendo justo, la referencia de las estadísticas es ahora «IV 0, EV 0, naturaleza neutra» (multiplicador ×1,00 en `refStat`), así que los rivales (que sí llevan IV 31 y EV) resultan relativamente más difíciles hasta que entrenes con chapas. Si te pasas de difícil, baja `ENEMY_POWER`.
 - **Partidas antiguas:** al cargar un guardado anterior (`trainV` menor que 2) se ponen a 0 todos los IV y EV y se **devuelven las chapas** que habías gastado, para que las vuelvas a gastar como quieras.
 - En combate (solo tus Pokémon) IV, EV y naturaleza cambian PS, daño, velocidad y resistencia. `TRAIN.power` (0.6) controla cuánto se nota (1 = igual que los juegos). Los ataques cambiados con MT también cambian el tipo del golpe.
 - Habilidades: cada Pokémon tiene 2. Para poner las oficiales: `ABILITIES[25] = ['Elec. Estática', 'Pararrayos']` (data.js); si no, se reparten por tipo (`ABIL_POOL`). **Ya funcionan en el combate** (ver «Habilidades en combate»).
-- En la partida (`save`): `iv`, `ev`, `abil`, `mv` (solo los huecos cambiados), `mtBought` y `nat` (ya existía). Los consumibles están en `save.items` como los demás objetos.
+- En la partida (`save`): `iv`, `ev`, `abil`, `mv` (solo los huecos cambiados) y `nat` (ya existía). Los consumibles están en `save.items` como los demás objetos.
 
 ## Objetos y Tienda
 - Las imágenes de los objetos están en `objetos/` (la ruta de cada una se define en `ITEMS`, js/data.js). Hay 16 objetos en 4 categorías: Ataque, Defensa, Tipos y Utilidad.
@@ -532,7 +535,7 @@ En el combate, la caja de datos del rival **ya no muestra «NV 120»** (en `hud(
 - **Pulsar Confirmar dos veces:** solo cuenta una (hay un bloqueo de medio segundo y además `useMT` vuelve a comprobar que quede el MT y que no lo conozca ya).
 - **Se guarda en la partida:** `save.mv` (ataques cambiados), `save.mvHist` (ataques anteriores de cada hueco) y `save.mtV`. Al reiniciar el juego siguen igual.
 - **Partidas antiguas:** si un Pokémon ya había aprendido un MT que no podía (por ejemplo, Venusaur con Ventisca), al cargar se **quita ese ataque, vuelve el original y el MT se devuelve a la mochila** (sale un aviso). Solo ocurre una vez (`save.mtV`).
-- **Tienda:** los MTs del día nunca incluyen un movimiento que ningún Pokémon pueda aprender.
+- **Tienda:** solo se venden MTs de movimientos que algún Pokémon pueda aprender.
 
 ## Lista de ataques del juego (los que se pueden enseñar con MT)
 Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
@@ -661,7 +664,7 @@ Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 Los **Restos** curaban un 1,5% de la vida máxima **cada segundo** (≈90% por minuto), demasiado para un juego en tiempo real: los tanques rivales casi no se podían matar. Ahora curan un **0,4% por segundo** (≈24% por minuto; en los juegos es 1/16 por turno). Vale igual para ti y para los rivales. El número es `IFX.restos` en `js/data.js` (`.004`); súbelo o bájalo si quieres otro equilibrio.
 
 ## Ataques de estado: Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis (js/status.js, js/fxstatus.js)
-Son 7 ataques nuevos del **hueco 3 (tecla Q)**. Compiten con las mejoras (Afilar, Danza Espada...): en ese hueco solo cabe un movimiento. Se consiguen con **MT** (tienda, MTs del día) y se enseñan igual que los demás. Nadie los lleva de serie.
+Son 7 ataques nuevos del **hueco 3 (tecla Q)**. Compiten con las mejoras (Afilar, Danza Espada...): en ese hueco solo cabe un movimiento. Se consiguen con **MT** (tienda, pestaña MTs) y se enseñan igual que los demás. Nadie los lleva de serie.
 
 Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el rival recibe un **estado**. Cuestan lo mismo que cualquier Q (energía 20, recarga 10 s).
 

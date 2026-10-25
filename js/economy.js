@@ -7,22 +7,20 @@ const used = id => Object.values(save.equip).filter(x => x === id).length;    //
 const free = id => held(id) - used(id);                                        // objetos libres
 
 // Comprar en la tienda con Puntos de Batalla. Devuelve false si no llega el dinero.
-function buyMany(id, n){                                           // compra n unidades de golpe (tope: lo que puedes pagar y, en los MTs, el stock de hoy). Devuelve cuántas compró
+function buyMany(id, n){                                           // compra n unidades de golpe (tope: lo que puedes pagar). Devuelve cuántas compró
   const it = SHOP.find(s => s.id === id); n = Math.floor(+n);
   if(!it || !(n >= 1)) return 0;
   let k = Math.min(n, Math.floor(save.bp / it.p));
-  if(it.cat === 'mt') k = Math.min(k, Math.max(0, mtLeft(id)));    // MTs: stock diario limitado
   if(k < 1) return 0;
-  if(it.cat === 'mt') mtBoughtToday()[id] = (mtBoughtToday()[id] || 0) + k;
   save.bp -= it.p * k;
   if(id === 'ticket_n') save.tickets += k;
   else if(id === 'ticket_l') save.ticketsL += k;
   else save.items[id] = held(id) + k;
   persist(); return k;
 }
-function maxBuy(id){                                               // cuántas unidades puedes comprar ahora mismo (por dinero y por stock)
+function maxBuy(id){                                               // cuántas unidades puedes comprar ahora mismo (por dinero)
   const it = SHOP.find(s => s.id === id); if(!it) return 0;
-  const k = Math.floor(save.bp / it.p); return it.cat === 'mt' ? Math.min(k, Math.max(0, mtLeft(id))) : k;
+  return Math.floor(save.bp / it.p);
 }
 function buy(id){ return buyMany(id, 1) === 1; }
 

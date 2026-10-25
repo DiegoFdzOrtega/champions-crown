@@ -20,7 +20,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, shinyOff:[], avatar:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
-              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, mtBought:{day:0, n:{}}, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv/mtBought: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
+              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){
@@ -44,7 +44,6 @@ try{
     }
     save.champ = obj(s.champ); save.prog = obj(s.prog); save.campoWins = obj(s.campoWins); save.stats = obj(s.stats); if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
          // quien ya venció a Azul tiene el trofeo de Kanto
-    save.mtBought = (s.mtBought && typeof s.mtBought === 'object' && s.mtBought.n) ? s.mtBought : {day:0, n:{}};
     save.profileFav = Array.isArray(s.profileFav) ? s.profileFav : []; save.profileSh = Array.isArray(s.profileSh) ? s.profileSh : []; save.ach = (s.ach && typeof s.ach === 'object') ? s.ach : {};   save.welcome = s.welcome === undefined ? 1 : s.welcome; save.login = (s.login && typeof s.login === 'object') ? {streak:+s.login.streak || 0, last:String(s.login.last || '')} : {streak:0, last:''}; save.firstWin = String(s.firstWin || '');   // profileSh = 1 en cada favorito que enseñas en su versión shiny
   }
 }catch(e){}

@@ -12,7 +12,6 @@
      save.nat[dex] = nº de NATURES              (ya existía; las Mentas lo cambian)
      save.abil[dex]= 0 | 1                      cuál de sus 2 habilidades usa (las Cápsulas lo alternan)
      save.mv[dex]  = {1:'Nombre', 3:'Nombre'}   solo los huecos que has cambiado con MTs (el resto sigue como en data.js/moves.js)
-     save.mtBought = {day, n:{idMT: comprados}} stock diario de MTs ya comprado hoy
      save.mvHist[dex] = {hueco:['Nombre', ...]}  ataques que olvidó en cada hueco (se pueden recuperar gratis desde «Cambiar ataque»)
      save.mtV = 2                               versión de la partida en cuanto a MTs (2 = ya se comprobó que los ataques enseñados son compatibles)
    Los objetos consumibles (Chapa, Menta, Cápsula, MTs) se guardan en save.items como el resto de objetos.
@@ -25,10 +24,7 @@ const TRAIN = {
   chapaEV: 10,                                   // una Chapa Plateada suma +10 EV a un stat (como las vitaminas de los juegos)
   evCap: 252, evTotal: 510, evPerFoe: 0,         // EVs: tope por stat, tope total y EVs que da cada rival vencido (0 = los EVs solo se consiguen con Chapas Plateadas)
   power: .6,                                     // fracción del efecto "oficial" de IVs/EVs/naturaleza que se nota en combate (1 = igual que los juegos)
-  mtStockEach: 3, mtPerSlot: 2,                  // cada MT del día tiene 3 unidades; salen 2 MTs por cada hueco de ataque (8 al día)
-  // MTs SIEMPRE a la venta (para probarlos): no entran en el sorteo diario y tienen mtFixedEach unidades al día.
-  // Para devolverlos a la rotación normal, vacía la lista:  mtFixed: []
-  mtFixed: ['Onda Trueno', 'Tóxico', 'Fuego Fatuo', 'Somnífero', 'Brecha Negra', 'Rayo Confuso', 'Hipnosis', 'Bola Sombra'], mtFixedEach: 10,
+  // MTs: están TODOS siempre a la venta (todos los ataques de MOVES que algún Pokémon puede aprender), sin límite de unidades ni cambio diario.
   price: {chapa: 60, plata: 40, menta: 120, capsula: 150, mt: {1: 80, 2: 90, 3: 70, 4: 130}}      // precios en Puntos de Batalla
 };
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
@@ -145,22 +141,10 @@ const mtId = n => 'mt_' + slug(n);
 const mtMove = id => MT_ID[id] || null;
 const myMTs = slot => Object.keys(save.items).filter(id => MT_ID[id] && held(id) > 0 && MOVES[MT_ID[id]].s === slot);
 
-// ---- Stock diario: cambia solo a medianoche (hora local). Sale del nº de día, así no depende de nada guardado. ----
-const DAY_MS = 86400000;
-const dayNumber = (t = Date.now()) => { const d = new Date(t); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY_MS); };
-const nextReset = (t = Date.now()) => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime(); };
-function mulberry(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-function mtStock(day = dayNumber()){
-  const r = mulberry(day * 7919 + 20241), out = [];
-  for(let s = 1; s <= 4; s++){
-    const pool = MT_LIST.filter(n => MOVES[n].s === s && learnersOf(n) > 0 && !TRAIN.mtFixed.includes(n));          // nunca salen MTs que ningún Pokémon puede aprender (ni los fijos: esos van aparte)
-    for(let i = pool.length - 1; i > 0; i--){ const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-    out.push(...pool.slice(0, TRAIN.mtPerSlot));
-  }
-  return out.concat(TRAIN.mtFixed.filter(n => MOVES[n] && learnersOf(n) > 0));         // + los que están siempre a la venta
+// ---- MTs a la venta: todos los que algún Pokémon puede aprender, ordenados por hueco (Golpe, Disparo, Mejora, Fuerte), luego por tipo y nombre ----
+function mtStock(){
+  return MT_LIST.filter(n => learnersOf(n) > 0).sort((a, b) => MOVES[a].s - MOVES[b].s || MOVES[a].t.localeCompare(MOVES[b].t, 'es') || a.localeCompare(b, 'es'));
 }
-function mtBoughtToday(){ const d = dayNumber(); if(!save.mtBought || save.mtBought.day !== d) save.mtBought = {day: d, n: {}}; return save.mtBought.n; }
-const mtLeft = id => (TRAIN.mtFixed.includes(MT_ID[id]) ? TRAIN.mtFixedEach : TRAIN.mtStockEach) - (mtBoughtToday()[id] || 0);
 
 // ---------------------------------------------------------------------
 // Objetos de mejora e iconos (dibujados en píxeles, sin imágenes externas)
@@ -210,18 +194,15 @@ const trainIcon = id => CONS[id] ? CONS[id].icon : MT_ID[id] ? 'objetos/mts/' + 
 const itemName = id => CONS[id] ? CONS[id].n : MT_ID[id] ? 'MT ' + MT_ID[id] : (ITEMS[id] ? ITEMS[id].n : id);
 Object.keys(CONS).forEach(id => SHOP.push({id, n:CONS[id].n, d:CONS[id].d, p:CONS[id].p, cat:'mejora', icon:CONS[id].icon}));
 
-// Reemplaza en la tienda los MTs del día (se llama al abrir la tienda y cuando cambia el día)
+// Mete en la tienda todos los MTs (se llama al abrir la tienda)
 function refreshMtShop(){
   for(let i = SHOP.length - 1; i >= 0; i--) if(SHOP[i].cat === 'mt') SHOP.splice(i, 1);
   mtStock().forEach(n => { const mv = MOVES[n];
     SHOP.push({id:mtId(n), n:'MT ' + n, p:TRAIN.price.mt[mv.s], cat:'mt', mv:n, icon:trainIcon(mtId(n)),
-      d:`Enseña «${n}» (${TYPE_ES[mv.t]}) en el hueco de ${SLOT_NAMES[mv.s]}. Se gasta al usarla.` + (TRAIN.mtFixed.includes(n) ? ' ¡Nuevo! Siempre a la venta.' : '')}); });
+      d:`Enseña «${n}» (${TYPE_ES[mv.t]}) en el hueco de ${SLOT_NAMES[mv.s]}. Se gasta al usarla.`}); });
 }
 function buyError(id, n){                                             // por qué ha fallado una compra
-  const it = SHOP.find(s => s.id === id);
-  if(!it) return 'Ese MT ya no está a la venta: el stock ha cambiado.';
-  if(it.cat === 'mt' && mtLeft(id) <= 0) return 'Agotado hasta mañana.';
-  if(it.cat === 'mt' && n > mtLeft(id) && save.bp >= it.p * n) return `Solo quedan ${mtLeft(id)} de este MT hoy.`;
+  if(!SHOP.find(s => s.id === id)) return 'Ese objeto ya no está a la venta.';
   return 'No tienes suficientes Puntos de Batalla.';
 }
 

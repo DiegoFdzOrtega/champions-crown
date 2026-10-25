@@ -6,6 +6,16 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Tienda: nuevo diseño y todos los MTs', date:'25 oct 2026', sections:[
+    {t:'Tienda', i:[
+      'Los MTs ya no cambian cada día: están los 98 siempre a la venta y sin límite de unidades.',
+      'La pestaña ahora se llama «MTs» y tiene filtros por hueco y por tipo.',
+      'Nuevo buscador por nombre, que funciona en todas las pestañas.']},
+    {t:'Nuevo diseño', i:[
+      'La tienda estrena diseño de escaparate: toldo, categorías a la izquierda, objetos en estantes y un panel de detalle a la derecha.',
+      'Cada MT tiene ahora su descripción: qué es el ataque y qué hace en el juego (daño, energía, recarga o estado que pone).',
+      'El panel de cada MT te dice si tu equipo puede aprenderlo y qué Pokémon.']}
+  ]},
   {v:'Habilidades en combate', date:'25 oct 2026', sections:[
     {t:'Habilidades', i:[
       'Las habilidades ya funcionan en combate, las de tus Pokémon y las de los rivales. Se ven en el marcador y sale su nombre cuando se activan.',
