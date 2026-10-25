@@ -169,6 +169,48 @@ const CAMPO = [
     P(625, 'Firme',   'Rebelión',       'cinturon',  {atk:252, hp:252, spe:4}, ['Garra Metal',  'Pulso Umbrío',    'Danza Espada',    'Pulso Noche']),     // Bisharp: el filo
     P(589, 'Firme',   'Enjambre',       'casco',     {hp:252, atk:252, spd:4}, ['Tijera X',     'Bomba Imán',      'Defensa Férrea',  'Megacuerno']),      // Escavalier: la armadura
     P(983, 'Firme',   'Rebelión',       'aguante',   {hp:252, atk:252, spd:4}, ['Mordisco',     'Bomba Imán',      'Danza Espada',    'Pulso Noche'])      // Kingambit: el general
+  ]},
+  {id:'ocultista', file:'hexmaniac.png', name:'Ocultista', cls:'Ocultista', theme:'Fantasmas, maldiciones y sombras', tier:3, arena:'agatha', team:[
+    P( 94, 'Miedosa', 'Cuerpo Maldito', 'gafasesp',  {spa:252, spe:252, hp:4}, ['Lengüetazo',   'Bomba Lodo',      'Maquinación',     'Bola Sombra']),     // Gengar: la sombra que ríe
+    P(429, 'Miedosa', 'Levitación',     'cinturon',  {spa:252, spe:252, hp:4}, ['Garra Umbría', 'Psicorrayo',      'Paz Mental',      'Bola Sombra']),     // Mismagius: el hechizo
+    P(609, 'Modesta', 'Absorbe Fuego',  'gafaselec', {spa:252, hp:252, spe:4}, ['Lengüetazo',   'Lanzallamas',     'Fuego Fatuo',     'Llamarada']),       // Chandelure: la llama de las almas
+    P(477, 'Firme',   'Presión',        'restos',    {hp:252, atk:252, spd:4}, ['Puño Sombra',  'Pulso Umbrío',    'Maldición',       'Bola Sombra'])      // Dusknoir: el que se lleva las almas
+  ]},
+  {id:'ivor', file:'ivor.png', name:'Ivor', cls:'Luchador de puños', theme:'Puños de fuego, hielo, trueno y sombra', tier:3, arena:'bruno', team:[
+    P(534, 'Firme',   'Agallas',        'chaleco',   {hp:252, atk:252, spd:4}, ['Puño Hielo',   'Lanzarrocas',     'Corpulencia',     'Onda Certera']),    // Conkeldurr: el puño de hormigón
+    P(392, 'Alegre',  'Mar Llamas',     'vidasfera', {atk:252, spe:252, hp:4}, ['Puño Fuego',   'Lanzallamas',     'Danza Espada',    'Envite Ígneo']),    // Infernape: el mono de fuego
+    P(448, 'Alegre',  'Justiciero',     'cinturon',  {atk:252, spe:252, hp:4}, ['Puño Trueno',  'Esfera Aural',    'Danza Espada',    'Onda Certera']),    // Lucario: el aura
+    P(979, 'Firme',   'Foco Interno',   'aguante',   {hp:252, atk:252, spd:4}, ['Puño Sombra',  'Tinieblas',       'Corpulencia',     'Onda Certera'])     // Annihilape: la furia
+  ]},
+  {id:'kamado', file:'kamado.png', name:'Maestro Kamado', cls:'Maestro herrero', theme:'Forja, brasas y fuego eterno', tier:3, arena:'blaine', team:[
+    P(839, 'Osada',   'Cuerpo Llama',   'restos',    {hp:252, def:252, spa:4}, ['Puño Fuego',   'Lanzallamas',     'Defensa Férrea',  'Llamarada']),       // Coalossal: el carbón vivo
+    P(157, 'Modesta', 'Mar Llamas',     'gafasesp',  {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Día Soleado',     'Llamarada']),       // Typhlosion: la forja en la espalda
+    P(637, 'Miedosa', 'Cuerpo Llama',   'cuchara',   {spa:252, spe:252, hp:4}, ['Tijera X',     'Lanzallamas',     'Danza Aleteo',    'Llamarada']),       // Volcarona: el sol pequeño
+    P(467, 'Modesta', 'Cuerpo Llama',   'gafaselec', {spa:252, hp:252, spe:4}, ['Puño Trueno',  'Rayo',            'Fuego Fatuo',     'Llamarada'])           // Magmortar: el cañón de lava
+  ]},
+  {id:'kimono', file:'kimonogirl.png', name:'Chica Kimono', cls:'Bailarina', theme:'Danza, elegancia y kimonos', tier:3, arena:'sabrina', team:[
+    P(350, 'Modesta', 'Escama Especial','gafasesp',  {hp:252, spa:252, spe:4}, ['Acua Cola',    'Rayo Hielo',      'Neblina',         'Hidrobomba']),      // Milotic: la belleza del agua
+    P(282, 'Modesta', 'Sincronía',      'cuchara',   {spa:252, hp:252, spd:4}, ['Cabezazo Zen', 'Psicorrayo',      'Paz Mental',      'Fuerza Lunar']),    // Gardevoir: la bailarina de la luna
+    P(549, 'Modesta', 'Clorofila',      'periscopio',{spa:252, spe:252, hp:4}, ['Látigo Cepa',  'Hoja Afilada',    'Danza Aleteo',    'Rayo Solar']),      // Lilligant: la danza de las flores
+    P( 38, 'Miedosa', 'Absorbe Fuego',  'gafasol',   {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Fuego Fatuo',     'Llamarada'])        // Ninetales: las nueve colas
+  ]},
+  {id:'palmer', file:'palmer.png', name:'Palmer', cls:'Magnate de la Torre', theme:'Pesos pesados de la torre de batalla', tier:3, arena:'giovanni', team:[
+    P(143, 'Firme',   'Sebo',           'restos',    {hp:252, atk:252, spd:4}, ['Golpe Cuerpo', 'Rayo Hielo',      'Amnesia',         'Hiperrayo']),       // Snorlax: el muro que duerme
+    P(149, 'Alegre',  'Multiescala',    'cinturon',  {atk:252, spe:252, hp:4}, ['Garra Dragón', 'Pulso Dragón',    'Danza Dragón',    'Terremoto']),       // Dragonite: el dragón cartero
+    P(464, 'Firme',   'Roca Sólida',    'casco',     {hp:252, atk:252, def:4}, ['Tumba Rocas',  'Disparo Lodo',    'Pulimento',       'Roca Afilada']),    // Rhyperior: el taladro
+    P(473, 'Alegre',  'Manto Níveo',    'vidasfera', {atk:252, spe:252, hp:4}, ['Colmillo Hielo','Rayo Hielo',     'Maldición',       'Terremoto'])        // Mamoswine: el mamut helado
+  ]},
+  {id:'veterano', file:'veteran.png', name:'Veterano', cls:'Veterano', theme:'Los iniciales de Kanto y su fiel Arcanine', tier:3, arena:'azul', team:[
+    P(  6, 'Miedosa', 'Mar Llamas',     'gafasesp',  {spa:252, spe:252, hp:4}, ['Garra Dragón', 'Lanzallamas',     'Danza Dragón',    'Llamarada']),       // Charizard: el dragón de fuego
+    P(  9, 'Modesta', 'Torrente',       'restos',    {hp:252, spa:252, def:4}, ['Acua Cola',    'Hidropulso',      'Refugio',         'Hidrobomba']),      // Blastoise: el cañón de agua
+    P(  3, 'Modesta', 'Espesura',       'chaleco',   {hp:252, spa:252, def:4}, ['Látigo Cepa',  'Bomba Lodo',      'Desarrollo',      'Rayo Solar']),      // Venusaur: la flor gigante
+    P( 59, 'Alegre',  'Intimidación',   'cinturon',  {atk:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Agilidad',        'Envite Ígneo'])     // Arcanine: el compañero
+  ]},
+  {id:'wikstrom', file:'wikstrom.png', name:'Duque Wikstrom', cls:'Caballero de acero', theme:'Armaduras, espadas y acero', tier:3, arena:'azul', team:[
+    P(681, 'Modesta', 'Cambio Táctico', 'aguante',   {hp:252, spa:252, spd:4}, ['Garra Metal',  'Tinieblas',       'Danza Espada',    'Foco Resplandor']), // Aegislash: la espada del duque
+    P(212, 'Firme',   'Técnico',        'vidasfera', {atk:252, hp:252, spe:4}, ['Puño Bala',    'Bomba Imán',      'Danza Espada',    'Megacuerno']),      // Scizor: el puño de acero
+    P(823, 'Osada',   'Presión',        'restos',    {hp:252, def:252, atk:4}, ['Ataque Ala',   'Tajo Aéreo',      'Defensa Férrea',  'Pájaro Osado']),    // Corviknight: el corcel blindado
+    P(530, 'Alegre',  'Chorro Arena',   'cinturon',  {atk:252, spe:252, hp:4}, ['Excavar',      'Bomba Imán',      'Danza Espada',    'Terremoto'])        // Excadrill: el taladro de acero
   ]}
 ];
 

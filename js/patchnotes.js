@@ -6,6 +6,12 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'7 entrenadores nuevos en Difícil', date:'26 oct 2026', sections:[
+    {t:'Campo de Entrenamiento', i:[
+      'La dificultad Difícil pasa de 3 a 10 entrenadores: Ocultista, Ivor, Maestro Kamado, Chica Kimono, Palmer, Veterano y Duque Wikstrom.',
+      'Cada uno lleva un equipo de 4 Pokémon pensado para su aspecto: fantasmas, puños, fuego, danza, pesos pesados, los iniciales de Kanto y acero.',
+      'Para desbloquear el final del Campo ahora hay que vencer a los 10.']}
+  ]},
   {v:'Chapas: más baratas y más premios', date:'25 oct 2026', sections:[
     {t:'Tienda', i:['La Chapa Dorada (antes 60 PB) y la Chapa Plateada (antes 40 PB) cuestan ahora 20 PB cada una.']},
     {t:'Campo de Entrenamiento', i:['Cada victoria da ahora más premio según la dificultad: Fácil 50 BP y 5 chapas de cada tipo, Media 100 BP y 10 de cada, Difícil 150 BP y 15 de cada (antes siempre 50 BP y 5 de cada).',

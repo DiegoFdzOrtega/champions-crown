@@ -34,7 +34,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/arenashoenn.js: los 13 fondos de combate de Hoenn
 - js/sinnoh.js: la **Historia de Sinnoh** (8 líderes, Alto Mando de 4 y Campeona Cintia, con sus equipos de Pokémon Platino y recompensas)
 - js/arenassinnoh.js: los 13 fondos de combate de Sinnoh
-- js/campo.js: el **Campo de Entrenamiento** (23 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
+- js/campo.js: el **Campo de Entrenamiento** (30 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
 - js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate); cada MT tiene «Enseñar a un Pokémon» (mismas reglas que Ver datos)
 - js/learnsets.js: qué Pokémon puede aprender cada movimiento (archivo generado por tools/gen_learnsets.py; ver «MTs y compatibilidad real de movimientos»)
 - tools/gen_learnsets.py: genera js/learnsets.js a partir de los CSV de PokéAPI
@@ -169,10 +169,11 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 ## Campo de Entrenamiento (js/campo.js, carpeta entrenadores/)
 Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **1 tirada de Gachapon + BP + Chapas Plateadas y Doradas según la dificultad: Fácil 50 BP + 5 de cada chapa, Media 100 BP + 10 de cada, Difícil 150 BP + 15 de cada** (`REWARD.campo` y `REWARD_CAMPO` en teams.js; para cambiar las cantidades edita `REWARD_CAMPO`). Perder no da nada. No cuenta para el progreso de la Historia y no toca `save.record`.
 
-- **Entrenadores:** uno por cada imagen de `entrenadores/` (23). Cada uno tiene un equipo temático según su dibujo, por ejemplo: Montañero → Rhyperior, Steelix, Golem, Machamp · Marinero → Poliwrath, Tentacruel, Kingler, Sharpedo · Médium → Gardevoir, Reuniclus, Xatu, Meowstic · Entrenador Guay → Garchomp, Metagross, Salamence, Tyranitar · Pescador → Gyarados, Milotic, Seaking · Criador → Vaporeon, Umbreon, Leafeon, Sylveon. Están todos en el array `CAMPO` de campo.js, con el tema de cada uno.
-- **Dificultad (`CAMPO_TIER`):** 1 = fácil (nivel 110, 3 Pokémon), 2 = media (nivel 118, 4 Pokémon), 3 = difícil (nivel 125, 4 Pokémon: Entrenador Guay, Maestro Li y Maestro Magnus). Usa la misma fórmula que la Historia (`DIFF.dificil`): tier 1 ≈ Brock-Misty, tier 2 ≈ Erika-Koga, tier 3 ≈ Sabrina-Blaine, pero con menos Pokémon para poder repetirlo muchas veces. Para cambiarla, toca `CAMPO_TIER` (nivel `lvl` y posición equivalente `n`).
+- **Entrenadores:** uno por cada imagen de `entrenadores/` (30, sin contar el Cazabichos, que aún no tiene imagen). Cada uno tiene un equipo temático según su dibujo, por ejemplo: Montañero → Rhyperior, Steelix, Golem, Machamp · Marinero → Poliwrath, Tentacruel, Kingler, Sharpedo · Médium → Gardevoir, Reuniclus, Xatu, Meowstic · Entrenador Guay → Garchomp, Metagross, Salamence, Tyranitar · Pescador → Gyarados, Milotic, Seaking · Criador → Vaporeon, Umbreon, Leafeon, Sylveon. Están todos en el array `CAMPO` de campo.js, con el tema de cada uno.
+- **Dificultad (`CAMPO_TIER`):** 1 = fácil (nivel 110, 3 Pokémon), 2 = media (nivel 118, 4 Pokémon), 3 = difícil (nivel 125, 4 Pokémon: Entrenador Guay, Maestro Li, Maestro Magnus, Ocultista, Ivor, Maestro Kamado, Chica Kimono, Palmer, Veterano y Duque Wikstrom: 10 entrenadores). Usa la misma fórmula que la Historia (`DIFF.dificil`): tier 1 ≈ Brock-Misty, tier 2 ≈ Erika-Koga, tier 3 ≈ Sabrina-Blaine, pero con menos Pokémon para poder repetirlo muchas veces. Para cambiarla, toca `CAMPO_TIER` (nivel `lvl` y posición equivalente `n`).
 - **Equipos competitivos:** todos con IV 31 (los pone `P()`), EVs coherentes con el papel (atacante físico = Ataque + Velocidad, especial = At. Esp. + Velocidad, tanque = PS + Defensa; máx 252 por stat y 510 en total), naturaleza que sube lo que usan y objeto que encaja (Restos, Vidasfera, Cinta/Gafas Elección, Banda Aguante, Cinturón de Experto...). Se comprueba al cargar (`validateTeams()` ahora revisa también el Campo; 6 Pokémon en los líderes y 3-4 en el Campo). El «Mineral Evolutivo» no existe en este juego, así que no se usa (el juego solo tiene los 16 objetos de ITEMS).
 - **Fondo:** cada entrenador usa el estadio de su tema (`arena`: Montañero → Brock, Marinero/Surfista/Pescador → Misty, Médium/Jugador/Li → Sabrina...). Su retrato sale en el marcador del combate (`portrait`).
+- **Entrenadores nuevos de Difícil:** Ocultista (Gengar, Mismagius, Chandelure, Dusknoir) · Ivor (Conkeldurr, Infernape, Lucario, Annihilape: llevan los **puños** Hielo, Fuego, Trueno y Sombra) · Maestro Kamado (Coalossal, Typhlosion, Volcarona, Magmortar) · Chica Kimono (Milotic, Gardevoir, Lilligant, Ninetales) · Palmer (Snorlax, Dragonite, Rhyperior, Mamoswine) · Veterano (Charizard, Blastoise, Venusaur, Arcanine) · Duque Wikstrom (Aegislash, Scizor, Corviknight, Excadrill, con el Puño Bala). Sus ataques de partida son de especies que de verdad pueden aprenderlos (salvo el golpe de Chandelure, que no tiene ninguno disponible).
 - **Añadir un entrenador:** copia una entrada de `CAMPO`, cambia sus datos y pon su imagen en `entrenadores/`. Ya hay una entrada para el **Cazabichos** (`bugcatcher.png`, marcada `opt:true`): solo aparece cuando existe esa imagen.
 
 ## Campo de Entrenamiento rediseñado (js/campo.js `openCampo`/`renderCampo`, final de css/style.css)
@@ -379,7 +380,7 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 **Desbloqueo**:
 - **Fácil**: siempre abierta.
 - **Media**: se abre al vencer a los 9 entrenadores de Fácil.
-- **Difícil**: se abre al vencer a los 11 entrenadores de Media.
+- **Difícil**: se abre al vencer a los 11 entrenadores de Media (y tiene 10 entrenadores propios).
 - Las dificultades bloqueadas se ven en gris con 🔒, botón "Bloqueado" y un aviso de cuántos faltan; cada dificultad muestra "N de M entrenadores vencidos" y los vencidos llevan ✓. Al terminar una dificultad, la pantalla de victoria avisa de la que se desbloquea. No se puede entrar a una bloqueada ni desde la consola.
 - Las victorias se guardan en `save.campoWins` (`{id:1}`). Las partidas antiguas empiezan con 0 victorias (la Fácil está abierta).
 - Los entrenadores con `opt:true` (por ejemplo Cazabichos, que solo sale si existe su imagen) no cuentan.
