@@ -69,19 +69,19 @@ function use(f, i, ang, mine){
   if(i > 0){ f.lastUse = i; if(f.ab === 'Indolente') f.truant = ABX.indolente; }
   if(sm && f.ab === 'Bromista') f.cd[i] *= ABX.bromistaCd;                      // Bromista: sus ataques de estado se recargan antes
   const t = sm ? MOVES[nm].t : (f.ab === 'Normalidad' ? 'normal' : mtype(f, i)), shotMv = (i === 2 || i === 4), it = f.item, boost = ITEMS[it] && ITEMS[it].type === t ? IFX.tipo : 1;   // objetos de tipo
-  const d = f.dmg * (f.buff > 0 ? 1.3 : 1) * (it === 'vidasfera' ? 1.3 : 1) * boost
+  const d = f.dmg * qAtk(f) * (it === 'vidasfera' ? 1.3 : 1) * boost
           * (it === 'cintaelec' && i === 1 ? IFX.cinta : 1) * (it === 'gafaselec' && shotMv ? IFX.gafaselec : 1) * (it === 'gafasesp' && shotMv ? IFX.gafasesp : 1);
   if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4) && f.ab !== 'Cabeza Roca' && f.ab !== 'Muro Mágico') f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
   if(i === 0){ f.dash = .25; f.da = ang; }
   if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
   if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
-  else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  f.buff = 5; }
+  else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  qApply(f, nm); }      // mejora: cada ataque hace lo suyo (js/qmoves.js)
   if(i === 4){ setAct(f,'Charge',.6);  fxShotStart(f, shot(f, ang, m.dmg*d, 380, 22, t, mine), nm, true); }
 }
 
 function move(f, dx, dy, dt, k){
-  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * (f.buff > 0 ? 1.25 : 1) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1) * abSpeed(f);
+  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * qSpd(f) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1) * abSpeed(f);
   let vx = 0, vy = 0;
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }

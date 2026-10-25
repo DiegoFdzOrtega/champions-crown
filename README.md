@@ -23,6 +23,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/abilities.js: las habilidades en combate (las ~100 que usan tus Pokémon y los rivales) y el clima; los números están en `ABX`
 - js/shop.js: la Tienda con diseño «Escaparate» (categorías a la izquierda, estantes con los objetos, panel de detalle a la derecha).
 - js/moveinfo.js: la descripción de cada ataque (`MOVE_DESC`, una frase por ataque) y `moveInfo()`, que saca daño, energía y recarga de los números reales del juego.
+- js/qmoves.js: lo que hace cada ataque de la tecla Q (tabla `Q_FX`).
 - js/patchnotes.js: el botón «Notas del parche» (abajo a la izquierda del menú) y el texto de cada parche. Para añadir uno nuevo, copia un bloque de `PATCHES` y ponlo el primero
 - js/ai.js: la **IA del rival** (estilo melee / a distancia / mixto, esquiva, apunta con ventaja, gasta la energía con cabeza)
 - js/background.js: fondo pixel art del menú
@@ -693,6 +694,19 @@ Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el ri
 - `tools/gen_learnsets.py`: tienen su nombre de PokéAPI en `MOVES_ES` y Brecha Negra está forzada a Darkrai en `ONLY`.
 - **Sprites:** los dibujos están hechos por código en `js/fxstatus.js` y copian el aspecto del anime: Onda Trueno = anillos eléctricos amarillos que se expanden y chispas que recorren el cuerpo; Tóxico = gota de veneno morado con burbujas que chorrea; Fuego Fatuo = llamitas azul-violeta que giran y luego se alzan alrededor del rival; Somnífero = polvo brillante verde-amarillo que cae sobre el rival; Brecha Negra = esfera de vacío con remolino que se abre bajo el rival; Rayo Confuso = orbe espectral con cinta ondulante y espirales de luz; Hipnosis = ondas hipnóticas rosas y violetas que se expanden con el péndulo dorado balanceándose en el centro, y al impactar anillos que se cierran sobre la cabeza del rival, ojos en espiral, el péndulo sobre él y las «z» del sueño. Proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`. Si algún día tienes sprites propios, solo hay que sustituir esas funciones.
 - Los rivales **todavía no usan** estos ataques (de momento solo el jugador).
+
+## Mejoras de la tecla Q (js/qmoves.js)
+Antes todos los ataques de la tecla Q daban lo mismo (+30 % de daño y +25 % de velocidad). Ahora **cada uno hace lo que dice**. Duran **5 s** (el clima, 20 s), cuestan 20 de energía y se recargan en 10 s. Todos los números están en la tabla `Q_FX` de `js/qmoves.js`: `atk` (daño que haces), `spd` (velocidad), `def` (el daño que recibes se multiplica por esto) y, a veces, `mist`, `noStatus` o `wx`. Lo que no esté en la tabla usa `Q_DEFAULT`. Los ataques de estado (Onda Trueno, Hipnosis...) no pasan por aquí: van por `js/status.js`.
+
+| Tipo de mejora | Ataques y efecto |
+|---|---|
+| **Ataque** | Afilar +30 % · Danza Espada +40 % · Maquinación +40 % · Desarrollo +35 % · Corpulencia +20 % daño y −10 % daño recibido · Danza Dragón +25 % daño y +30 % velocidad |
+| **Velocidad** | Agilidad +90 % · Pulimento +90 % · Viento Afín +60 % velocidad y +15 % daño |
+| **Defensa** | Defensa Férrea y Armadura Ácida (recibes un 30 % menos) · Amnesia (28 % menos) · Refugio (20 % menos) · Neblina (20 % menos y **nadie te baja las estadísticas**: Intimidación no te afecta) · Campo Neblinoso (20 % menos y **nadie te puede poner un estado**) |
+| **Mixtas** | Paz Mental +20 % daño y −10 % recibido · Carga +25 % y −10 % · Danza Aleteo +20 % daño, −12 % recibido y +20 % velocidad · Maldición +25 % daño, −15 % recibido y −15 % velocidad |
+| **Clima** | Día Soleado (sol), Danza Lluvia (lluvia) y Tormenta de Arena (arena): cambian el tiempo 20 s, para los dos Pokémon, como las habilidades (Sequía, Llovizna, Chorro Arena); además dan un pequeño extra a quien los usa (+10 % de daño o −10 % de daño recibido). Ayudan sobre todo a los tipos que el clima favorece. |
+
+**Equilibrio:** se simularon combates entre dos Pokémon iguales con cada mejora. Casi todas suben entre +5 y +19 puntos el porcentaje de victorias frente a no usar la Q. Las de **velocidad** y las de **clima** salen cerca de 0 o algo negativas en la prueba, porque el bot de prueba no esquiva y en los combates entre iguales el clima favorece a los dos; jugando se notan más (la velocidad sirve para esquivar y el clima para los tipos que beneficia). Si alguna te parece floja o rota, cambia su línea en `Q_FX`. Ignorante (habilidad) ahora ignora la mitad de la subida de ataque de la Q del rival (`ABX.ignorante`).
 
 ## Habilidades en combate (js/abilities.js)
 Las habilidades **ya funcionan** en el combate, tanto las de tus Pokémon (la que elijas con la Cápsula de Habilidad) como las de los rivales (las de su plantilla). Se ven en el marcador de cada Pokémon y, al activarse, sale su nombre sobre él. **Todos los números están en `ABX`**, al principio de `js/abilities.js`; las descripciones que ves en el juego están al final del archivo (`ABIL_DESC`). Los juegos son por turnos y este es en tiempo real, así que varias están adaptadas.

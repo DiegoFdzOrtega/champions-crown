@@ -52,6 +52,7 @@ function stDamage(f, amt, kind){
 // Pone el estado k a T. Devuelve true si se ha puesto.
 function statusInflict(T, k, dur, src){                                          // src = quien lo pone (para Sincronía y Rompemoldes)
   if(T.dead || T.ghost) return false;
+  if(qOf(T) && qOf(T).noStatus){ popAt(T, '¡Protegido!', '#9fe8ff'); return false; }      // Campo Neblinoso
   const inf = STATUS_INFO[k];
   if(STATUS_IMMUNE[k].some(t => T.m.types.includes(t))){ popAt(T, 'Inmune', '#c8c8d4'); return false; }
   if(abStatusBlock(T, k, src)) return false;                                      // Insomnio, Flexibilidad, Velo Agua, Ritmo Propio, Despiste

@@ -34,7 +34,7 @@ const ABX = {
   encadenado: 1.3,                    // Encadenado: Pin Misil (ataque de varios golpes)
   intim: .93, intimMin: .8,           // Intimidación: baja un 7 % el daño del rival (mínimo ×0,8 si entra varias veces)
   // --- daño que recibes ---
-  superguardia: .75, cromolente: 1.5, ignorante: 1.15, sebo: .5, multiescala: .5, filtro: .75, escama: 1 / 1.5, piel: 1.25,
+  superguardia: .75, cromolente: 1.5, ignorante: .5, sebo: .5, multiescala: .5, filtro: .75, escama: 1 / 1.5, piel: 1.25,
   absorb: .2,                         // Absorbe Agua/Fuego/Elec., Piel Seca: curan este % de la vida máxima en vez de recibir daño
   pararrayos: .2, pararrayosMax: 3,   // Pararrayos: +20 % de daño por cada ataque eléctrico absorbido (máx. 3)
   electromotor: 1.4,                  // Electromotor: velocidad ×1,4 tras absorber un ataque eléctrico
@@ -75,7 +75,7 @@ const defAb = (T, A) => abMold(A) ? '' : (T.ab || '');                          
 const wxIs = k => !!(g && g.wx && g.wx.k === k);
 const abOpp = f => g.p.includes(f) ? g.e[g.ei] : g.p[g.pi];                          // el rival que tiene delante
 const abSide = f => g.p.includes(f) ? 'p' : 'e';
-const abBlockStats = T => ['Cuerpo Puro', 'Humo Blanco', 'Corte Fuerte'].includes(T.ab);   // nadie le baja las estadísticas (Corte Fuerte: el Ataque)
+const abBlockStats = T => ['Cuerpo Puro', 'Humo Blanco', 'Corte Fuerte'].includes(T.ab) || !!(qOf(T) && qOf(T).mist);   // nadie le baja las estadísticas (Corte Fuerte: el Ataque)
 const abSpeedOf = f => f.m.spd * (f.spdm || 1);
 function abIndirect(f, amt){                                                         // daño que no viene de un golpe (Muro Mágico lo evita)
   if(f.dead || amt <= 0 || f.ab === 'Muro Mágico') return;
@@ -192,7 +192,8 @@ function abHit(T, A, type, mult, close, big, mvn){
   if(dAb === 'Piel Seca' && type === 'fuego') R.inn *= ABX.piel;
   if(dAb === 'Escama Especial' && T.st) R.inn *= ABX.escama;
   if(dAb === 'Don Floral' && wxIs('sun')) R.inn /= ABX.donFloral;
-  if(dAb === 'Ignorante' && A && A.buff > 0) R.inn /= ABX.ignorante;                            // ignora la mejora (Q) del rival
+  if(dAb === 'Ignorante' && A) R.inn /= 1 + (qAtk(A) - 1) * ABX.ignorante;                     // ignora parte de la mejora de ataque (Q) del rival
+  if(qOf(T) && qOf(T).def) R.inn *= qOf(T).def;                                                 // mejora de defensa (Q) de quien recibe el golpe
   return R;
 }
 

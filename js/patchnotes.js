@@ -6,6 +6,15 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Las mejoras (Q) ya hacen lo que dicen', date:'25 oct 2026', sections:[
+    {t:'Combate', i:[
+      'Antes todos los ataques de la tecla Q daban lo mismo (+30 % de daño y +25 % de velocidad). Ahora cada uno hace lo suyo durante 5 segundos.',
+      'Ataque: Danza Espada, Maquinación, Afilar, Desarrollo... Velocidad: Agilidad, Pulimento, Viento Afín. Defensa: Defensa Férrea, Armadura Ácida, Amnesia, Refugio.',
+      'Neblina evita que te bajen las estadísticas y Campo Neblinoso evita que te pongan estados.',
+      'Día Soleado, Danza Lluvia y Tormenta de Arena cambian el clima del combate.',
+      'Los rivales que usan estos ataques también los aprovechan, así que algunos combates cambian un poco.']},
+    {t:'Tienda', i:['La descripción de cada MT de mejora dice exactamente lo que hace.']}
+  ]},
   {v:'Tienda: nuevo diseño y todos los MTs', date:'25 oct 2026', sections:[
     {t:'Tienda', i:[
       'Los MTs ya no cambian cada día: están los 98 siempre a la venta y sin límite de unidades.',

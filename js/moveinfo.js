@@ -77,7 +77,10 @@ function moveInfo(n){
            k === 'brn' ? `Quemado ${X.dur} s: pierde vida y sus golpes cuerpo a cuerpo hacen la mitad.` : k === 'slp' ? `Dormido ${sm.dur || X.dur} s: no puede hacer nada` + (sm.acc ? `. Acierta el ${Math.round(sm.acc * 100)} % de las veces.` : '.') :
            k === 'cnf' ? `Confuso ${X.dur} s: se pega a sí mismo y falla muchos ataques.` : '');
     if(sm.immune) g.push('No afecta a los de tipo ' + sm.immune.join(', ') + '.');
-  } else g.push(`Mejora: +30 % de daño y +25 % de velocidad durante 5 s.`);
+  } else {                                                                      // mejora (Q): lo que hace sale de Q_FX (qmoves.js)
+    const q = qLines(n);
+    if(q.head.length) g.push(...q.head); else g.push(`Mejora durante ${q.dur} s: ${q.list.join(', ')}.`);
+  }
   g.push(`Gasta ${M.en} de energía y se recarga en ${M.cd} s.`);
   return {real: MOVE_DESC[n] || 'Sin descripción todavía.', game: g.filter(Boolean)};
 }
