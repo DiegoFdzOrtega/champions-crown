@@ -167,7 +167,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - Código: `pauseBattle()`, `restartBattle()` y `exitBattle()` en js/modes.js; `g.paused` en js/combat.js; tecla en js/ui.js; overlay `#pause` en index.html; estilos `.pz-*` al final de css/style.css.
 
 ## Campo de Entrenamiento (js/campo.js, carpeta entrenadores/)
-Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **1 tirada de Gachapon + 50 BP + Chapas Plateadas y Doradas según la dificultad: Fácil 50 de cada, Media 100 de cada y Difícil 150 de cada** (`REWARD.campo` y `REWARD_CAMPO_CHAPAS` en teams.js; para cambiar las cantidades edita `REWARD_CAMPO_CHAPAS`). Perder no da nada. No cuenta para el progreso de la Historia y no toca `save.record`.
+Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón). Cada entrenador se puede combatir **todas las veces que quieras** y cada victoria da siempre **1 tirada de Gachapon + BP + Chapas Plateadas y Doradas según la dificultad: Fácil 50 BP + 5 de cada chapa, Media 100 BP + 10 de cada, Difícil 150 BP + 15 de cada** (`REWARD.campo` y `REWARD_CAMPO` en teams.js; para cambiar las cantidades edita `REWARD_CAMPO`). Perder no da nada. No cuenta para el progreso de la Historia y no toca `save.record`.
 
 - **Entrenadores:** uno por cada imagen de `entrenadores/` (23). Cada uno tiene un equipo temático según su dibujo, por ejemplo: Montañero → Rhyperior, Steelix, Golem, Machamp · Marinero → Poliwrath, Tentacruel, Kingler, Sharpedo · Médium → Gardevoir, Reuniclus, Xatu, Meowstic · Entrenador Guay → Garchomp, Metagross, Salamence, Tyranitar · Pescador → Gyarados, Milotic, Seaking · Criador → Vaporeon, Umbreon, Leafeon, Sylveon. Están todos en el array `CAMPO` de campo.js, con el tema de cada uno.
 - **Dificultad (`CAMPO_TIER`):** 1 = fácil (nivel 110, 3 Pokémon), 2 = media (nivel 118, 4 Pokémon), 3 = difícil (nivel 125, 4 Pokémon: Entrenador Guay, Maestro Li y Maestro Magnus). Usa la misma fórmula que la Historia (`DIFF.dificil`): tier 1 ≈ Brock-Misty, tier 2 ≈ Erika-Koga, tier 3 ≈ Sabrina-Blaine, pero con menos Pokémon para poder repetirlo muchas veces. Para cambiarla, toca `CAMPO_TIER` (nivel `lvl` y posición equivalente `n`).
@@ -176,7 +176,7 @@ Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón).
 - **Añadir un entrenador:** copia una entrada de `CAMPO`, cambia sus datos y pon su imagen en `entrenadores/`. Ya hay una entrada para el **Cazabichos** (`bugcatcher.png`, marcada `opt:true`): solo aparece cuando existe esa imagen.
 
 ## Campo de Entrenamiento rediseñado (js/campo.js `openCampo`/`renderCampo`, final de css/style.css)
-- **Banner verde** (césped) con el título, la recompensa de cada victoria en iconos (×1 tirada, ×50 BP y las chapas de la dificultad que estés viendo; cambia al pulsar cada pestaña), tus Chapas Plateadas y Doradas con icono y el botón «Equipo Pokémon →».
+- **Banner verde** (césped) con el título, la recompensa de cada victoria en iconos (×1 tirada y los BP y las chapas de la dificultad que estés viendo; cambia al pulsar cada pestaña), tus Chapas Plateadas y Doradas con icono y el botón «Equipo Pokémon →».
 - **Pestañas de dificultad** (Fácil · Media · Difícil): cada una con estrellas, nivel, barra de progreso y «N de M vencidos» (✓ Superada cuando la completas). Las bloqueadas llevan 🔒 y se pueden mirar, pero sus botones están desactivados y un aviso rojo dice cuántos entrenadores faltan para abrirlas. Al entrar se abre sola la primera dificultad que aún no has superado (`campoTab`).
 - **Tarjetas** con el mismo estilo que los líderes de la Historia (clases `.lcard`, `.lc-*`): en dos columnas (una en pantallas estrechas), teñidas con el color del tipo del primer Pokémon del entrenador (`campoColor`), retrato grande, insignia con su clase, tema, miniaturas de sus Pokémon (al pasar el ratón: nombre y objeto), ✓ en los vencidos y botón **Combatir** (dorado en el siguiente sin vencer) / **Repetir** / **Bloqueado**.
 - **«Ir al siguiente sin vencer»:** botón que salta a la dificultad del primer entrenador pendiente y lo centra en pantalla (`campoNext`).
@@ -395,7 +395,7 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 **Recompensas por victoria** (`REWARD` y `REWARD_REGION` en `js/teams.js`; las claves son chapas, `tickets` = tiradas de Gachapon y `bp` = Puntos de Batalla):
 | Combate | Recompensa |
 |---|---|
-| Campo de Entrenamiento (cualquier entrenador) | **1 tirada de Gachapon** + **50 BP** + Chapas Plateadas y Doradas: **50 de cada (Fácil), 100 (Media) o 150 (Difícil)** |
+| Campo de Entrenamiento (cualquier entrenador) | **1 tirada de Gachapon** + BP y chapas según la dificultad: **Fácil 50 BP + 5 Plateadas + 5 Doradas · Media 100 BP + 10 + 10 · Difícil 150 BP + 15 + 15** |
 | Líder de gimnasio (Kanto y Johto) | **10 tiradas de Gachapon** + 5 Chapas Doradas + 5 Plateadas (como antes) |
 | Alto Mando y Campeón de Kanto | **10 tiradas de Gachapon** (sin chapas, como antes) |
 | Alto Mando y Campeón de Johto | **10 tiradas de Gachapon** + 5 Doradas + 5 Plateadas (como antes) |

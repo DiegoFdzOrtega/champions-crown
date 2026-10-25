@@ -178,10 +178,10 @@ const REWARD = {
   lider:   {chapa:5, chapaplata:5, tickets:10},    // Líderes de gimnasio: 10 tiradas de Gachapon (+ las chapas de siempre), sin BP
   alto:    {tickets:10},                           // Alto Mando: 10 tiradas de Gachapon
   campeon: {tickets:10},                           // Campeón: 10 tiradas de Gachapon
-  campo:   {tickets:1, bp:50}                      // Campo de Entrenamiento (campo.js): 1 tirada de Gachapon + 50 BP por cada victoria, sin límite. Las chapas dependen de la dificultad (REWARD_CAMPO_CHAPAS)
+  campo:   {tickets:1}                             // Campo de Entrenamiento (campo.js): 1 tirada de Gachapon por cada victoria, sin límite. Los BP y las chapas dependen de la dificultad (REWARD_CAMPO)
 };
-// Campo de Entrenamiento: Chapas Plateadas Y Chapas Doradas por cada victoria, según la dificultad (1 Fácil · 2 Media · 3 Difícil)
-const REWARD_CAMPO_CHAPAS = {1:50, 2:100, 3:150};
+// Campo de Entrenamiento: BP, Chapas Plateadas y Chapas Doradas por cada victoria, según la dificultad (1 Fácil · 2 Media · 3 Difícil)
+const REWARD_CAMPO = {1:{bp:50, chapaplata:5, chapa:5}, 2:{bp:100, chapaplata:10, chapa:10}, 3:{bp:150, chapaplata:15, chapa:15}};
 // Recompensa propia de una región: sustituye a la de arriba para TODOS sus combates (líderes, Alto Mando y Campeón).
 // 'tickets' = tiradas del Gachapon (Ticket Normal). Johto: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por cada victoria.
 // Para que se den solo la primera vez, pon REWARD.once = true (vale para todas las recompensas).
@@ -191,7 +191,7 @@ const REWARD_REGION = {
   Sinnoh: {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
-const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, {chapaplata:REWARD_CAMPO_CHAPAS[F.tier || 1], chapa:REWARD_CAMPO_CHAPAS[F.tier || 1]}) : REWARD_REGION[F.region] || REWARD[F.kind];
+const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]) : REWARD_REGION[F.region] || REWARD[F.kind];
 let lastReward = null;                                              // lo que ha dado la última victoria {list:[[id, cantidad]...], dbl} (lo enseña la pantalla de victoria, victoria.js)
 function giveReward(F, firstTime){
   lastReward = null;

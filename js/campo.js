@@ -2,7 +2,7 @@
 /* =====================================================================
    16b) CAMPO DE ENTRENAMIENTO: la zona para farmear Chapas Plateadas y Chapas Doradas
    Entrenadores normales (no líderes) con 3-4 Pokémon cada uno, repetibles todas las veces que quieras.
-   Cada victoria da una recompensa FIJA: 1 ticket + 50 BP + Chapas Plateadas y Doradas según la dificultad: Fácil 50+50, Media 100+100, Difícil 150+150 (REWARD.campo y REWARD_CAMPO_CHAPAS en teams.js).
+   Cada victoria da una recompensa FIJA: 1 ticket + BP y Chapas Plateadas y Doradas según la dificultad: Fácil 50 BP + 5+5, Media 100 BP + 10+10, Difícil 150 BP + 15+15 (REWARD.campo y REWARD_CAMPO en teams.js).
    Se carga DESPUÉS de teams.js (usa P(), ITEMS, MOVES, enemyBoost...). Los sprites están en la carpeta entrenadores/ (80x80).
 
    Cada entrenador es una entrada de CAMPO:
@@ -196,7 +196,7 @@ function campoEnd(won){                                    // lo llama endBattle
   const add = (t, fn, main) => { const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
   if(won){
     const before = campoCleared(T.tier); save.campoWins[T.id] = 1;
-    giveReward({kind:'campo', tier:T.tier}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 1 tirada + 50 BP + chapas según la dificultad (50/100/150 de cada), siempre; cuenta para los logros · la pantalla de victoria (victoria.js) las enseña con iconos
+    giveReward({kind:'campo', tier:T.tier}, false); save.stats.campo = (save.stats.campo || 0) + 1; persist(); achSync(); refreshHud();   // 1 tirada + BP y chapas según la dificultad (Fácil 50 BP + 5+5 · Media 100 + 10+10 · Difícil 150 + 15+15), siempre; cuenta para los logros · la pantalla de victoria (victoria.js) las enseña con iconos
     const chips = [];
     if(!T.opt){
       const nd = campoNeeded(T.tier).length;
