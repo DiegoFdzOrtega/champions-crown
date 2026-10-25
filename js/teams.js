@@ -10,7 +10,7 @@
    - IVs: todos a 31 (el máximo) en las 6 estadísticas.
    - EVs: máximo 252 en una estadística y 510 en total. El reparto sigue el papel del Pokémon (atacante, tanque...).
    - Naturaleza: la que mejor le va a su papel (sube lo que usa y baja lo que no usa).
-   - Habilidad: la más competitiva que tiene en los juegos. De momento se muestra en el combate; no cambia el daño.
+   - Habilidad: la más competitiva que tiene en los juegos. Funciona en el combate (js/abilities.js).
    - Objeto: uno de los de ITEMS (data.js), los mismos que usas tú. Los efectos son los de combat.js.
    - Movimientos: los 4 huecos del motor (1 golpe cuerpo a cuerpo, 2 disparo, 3 mejora, 4 ataque fuerte).
 

@@ -112,7 +112,7 @@ function dataAbil(){
   const cards = ab.map((n, i) => `<button class="optb big${i === cur ? ' cur' : ''}${dt.pick === String(i) ? ' pick' : ''}" data-act="pick" data-v="${i}"${i === cur ? ' disabled' : ''}>
     <b>${esc(n)}</b><small>${esc(abilDesc(n))}</small><em>${i === cur ? 'Habilidad actual' : 'Disponible'}</em></button>`).join('');
   return `${subHead(`Habilidad de ${esc(mon(d).name)}`, 'capsula')}<div class="optgrid two">${cards}</div>
-    <p class="note">Las habilidades todavía no cambian el combate: de momento se muestran y se guardan.</p>
+    <p class="note">Esta habilidad es la que usa tu Pokémon en combate.</p>
     ${cbar(dt.pick !== null ? `Gastar 1 Cápsula de Habilidad para usar <b>${esc(ab[dt.pick])}</b>` : '')}`;
 }
 const SLOT_DESC = {1:'Golpe cuerpo a cuerpo', 2:'Disparo a distancia', 3:'Mejora para ti', 4:'Ataque fuerte a distancia'};

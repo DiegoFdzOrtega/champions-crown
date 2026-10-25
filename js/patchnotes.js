@@ -1,0 +1,40 @@
+"use strict";
+/* =====================================================================
+   NOTAS DEL PARCHE: el botón de abajo a la izquierda del menú principal.
+   Para añadir un parche nuevo: pon un bloque NUEVO ARRIBA del todo en PATCHES (el más nuevo va primero).
+   Cada bloque: {v:'nombre del parche', date:'fecha', sections:[{t:'título del grupo', i:['frase 1','frase 2']}]}
+   El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
+   ===================================================================== */
+const PATCHES = [
+  {v:'Habilidades en combate', date:'25 oct 2026', sections:[
+    {t:'Habilidades', i:[
+      'Las habilidades ya funcionan en combate, las de tus Pokémon y las de los rivales. Se ven en el marcador y sale su nombre cuando se activan.',
+      'Hay clima: Sequía, Llovizna, Nevada y Chorro Arena cambian el combate durante 20 s.',
+      'Estado nuevo: Enamorado (Gran Encanto).',
+      'Cuatro habilidades todavía no hacen nada porque el juego no tiene lo que mencionan: Humedad, Viscosidad, Metal Pesado y Escudo Magma.']},
+    {t:'Equilibrio', i:[
+      'Probamos las 96 habilidades en miles de combates simulados y bajamos las que ganaban casi solas (Energía Pura, Técnico, Adaptable, Intimidación, Presión, Piel Tosca, Cuerpo Maldito, Superguardia...). Intimidación y Presión ahora son un 7 %.']},
+    {t:'Ataques (MT)', i:[
+      'Nueva MT Hipnosis (duerme al rival) y MT Bola Sombra, las dos siempre en la tienda.']},
+    {t:'Equipos', i:[
+      'Los equipos sin usar ahora empiezan vacíos: ya no copian el que tenías.']}
+  ]}
+];
+const patchLatest = () => PATCHES[0] ? PATCHES[0].v : '';
+function patchOpen(){
+  if(document.getElementById('patchOv')) return;
+  const o = document.createElement('div'); o.id = 'patchOv'; o.className = 'dlOv';
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  o.innerHTML = `<div class="dlBox pnBox"><button class="dlx" id="patchX">✕ Cerrar</button><h2>Notas del parche</h2>` +
+    PATCHES.map((p,k) => `<section class="pn${k ? ' old' : ''}"><h3>${esc(p.v)}${k ? '' : ' <em>ÚLTIMO</em>'}<small>${esc(p.date || '')}</small></h3>` +
+      p.sections.map(s => `<h4>${esc(s.t)}</h4><ul>${s.i.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('') + `</section>`).join('') + `</div>`;
+  document.body.appendChild(o);
+  o.onclick = e => { if(e.target === o) patchClose(); };
+  document.getElementById('patchX').onclick = patchClose;
+  save.patchSeen = patchLatest(); persist(); patchDot();
+}
+function patchClose(){ const o = document.getElementById('patchOv'); if(o) o.remove(); }
+function patchDot(){ const b = document.getElementById('patchBtn'); if(b) b.classList.toggle('new', save.patchSeen !== patchLatest()); }
+addEventListener('keydown', e => { if(e.code === 'Escape' && document.getElementById('patchOv')){ patchClose(); e.stopImmediatePropagation(); } }, true);
+document.getElementById('patchBtn').onclick = patchOpen;
+patchDot();

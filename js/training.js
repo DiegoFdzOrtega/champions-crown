@@ -82,7 +82,7 @@ function gainEVs(foeDex){
 // ---------------------------------------------------------------------
 // HABILIDADES. Cada Pokémon tiene 2 posibles (la Cápsula alterna entre ellas).
 // Para poner las oficiales de un Pokémon: ABILITIES[25] = ['Elec. Estática', 'Pararrayos'] (en data.js).
-// Si no las tiene, se reparten según su tipo con este reparto. Por ahora solo informan (no cambian el combate).
+// Si no las tiene, se reparten según su tipo con este reparto. Funcionan en el combate: están programadas en js/abilities.js.
 // ---------------------------------------------------------------------
 const ABIL_POOL = {
   normal:['Intimidación','Agallas','Adaptable'], fuego:['Mar Llamas','Absorbe Fuego','Cuerpo Llama'], agua:['Torrente','Absorbe Agua','Nado Rápido'],

@@ -106,7 +106,7 @@ function enemyAI(E, P, dt){
 
   // ---- Ataques ----
   if(aiNoAtk(P)) return;                                   // no ataca justo después de tu cambio (AI_SWAP.grace)
-  const can = i => E.cd[i] <= 0 && E.en >= MV[i].en && !cant(E), rate = k => dt * k * (.6 + .6*sk) * AI_TUNE.agg[g.o.boss];   // rate(k): probabilidad por fotograma (k veces por segundo)
+  const can = i => E.cd[i] <= 0 && E.en >= enCost(E, i) && !cant(E), rate = k => dt * k * (.6 + .6*sk) * AI_TUNE.agg[g.o.boss];   // rate(k): probabilidad por fotograma (k veces por segundo)
   if(th !== null && can(0) && r() < rate(5)) return use(E, 0, th, false);                 // …y con una carrera si hace falta (cuesta 2 s volver a poder)
   if(dist <= reach - 6 && can(1) && r() < rate(7)) return use(E, 1, ang, false);         // golpe: solo si estás de verdad a su alcance
   if(st !== 'melee' && dist < reach*.9 && can(0) && r() < rate(1.5)) return use(E, 0, ang + Math.PI + E.orb*.9, false);     // tirador con el rival encima: huye con la carrera
@@ -114,5 +114,5 @@ function enemyAI(E, P, dt){
   if(!(E.buff > 0) && can(3) && dist < 450 && (st === 'melee' || E.en >= 55) && r() < rate(.9)) return use(E, 3, ang, false);   // mejora (Q): al entrar en combate
   if(can(4) && dist > 130 && dist < 560 && (st !== 'melee' || dist > reach*1.5) && r() < rate(1.1)) return use(E, 4, aimAt(380), false);   // ataque fuerte (E)
   const needE = E.cd[4] < 1.5 ? 40 : 0;                                                    // guarda energía para el E si está a punto de poder usarlo
-  if(can(2) && dist > reach*(st === 'melee' ? 2.2 : 1.15) && dist < 620 && E.en >= MV[2].en + (st === 'melee' ? 36 : needE) && r() < rate(2.2)) use(E, 2, aimAt(520), false);   // disparo
+  if(can(2) && dist > reach*(st === 'melee' ? 2.2 : 1.15) && dist < 620 && E.en >= enCost(E, 2) + (st === 'melee' ? 36 : needE) && r() < rate(2.2)) use(E, 2, aimAt(520), false);   // disparo
 }

@@ -32,36 +32,43 @@ const STATUS_INFO = {
   psn: {n: 'Envenenado',  txt: '¡Envenenado!',  ab: 'TOX', c: '#b85ee8'},
   brn: {n: 'Quemado',     txt: '¡Quemado!',     ab: 'QUE', c: '#ff7a1a'},
   slp: {n: 'Dormido',     txt: '¡Dormido!',     ab: 'DRM', c: '#8fb0ff'},
-  cnf: {n: 'Confuso',     txt: '¡Confuso!',     ab: 'CNF', c: '#ff5fb0'}
+  cnf: {n: 'Confuso',     txt: '¡Confuso!',     ab: 'CNF', c: '#ff5fb0'},
+  lov: {n: 'Enamorado',   txt: '¡Enamorado!',   ab: 'AMO', c: '#ff7ab8'}              // solo lo pone la habilidad Gran Encanto (abilities.js)
 };
-const STATUS_IMMUNE = {par: ['electrico'], psn: ['veneno', 'acero'], brn: ['fuego'], slp: [], cnf: []};   // tipos que no pueden tener ese estado
+const STATUS_IMMUNE = {par: ['electrico'], psn: ['veneno', 'acero'], brn: ['fuego'], slp: [], cnf: [], lov: []};   // tipos que no pueden tener ese estado
 
 const cant = f => f.stun > 0 || !!(f.st && f.st.k === 'slp');        // no puede moverse ni atacar (amedrentado o dormido)
-const hasStatus = f => !!(f.st || f.cnf > 0);
+const hasStatus = f => !!(f.st || f.cnf > 0 || f.lov > 0);
 const popAt = (T, txt, c) => g.pops.push({x: T.x, y: T.y - 150, txt, t: 1.1, c: c || '#fff', s: 11});
-function clearStatus(f){ f.st = null; f.cnf = 0; }
+function clearStatus(f){ f.st = null; f.cnf = 0; f.lov = 0; }
 
 // Daño directo del estado (veneno, quemadura, confusión): puede debilitar
-function stDamage(f, amt){
-  if(f.dead || amt <= 0) return;
+function stDamage(f, amt, kind){
+  if(f.dead || amt <= 0 || (f.ab === 'Muro Mágico' && kind !== 'cnf')) return;                // Muro Mágico: sin daño indirecto (veneno, quemadura)
   f.hp -= amt;
   if(f.hp <= 0){ f.hp = 0; f.dead = true; f.dt = 0; setAct(f, 'Faint', 99); clearStatus(f); }
 }
 
 // Pone el estado k a T. Devuelve true si se ha puesto.
-function statusInflict(T, k, dur){
+function statusInflict(T, k, dur, src){                                          // src = quien lo pone (para Sincronía y Rompemoldes)
   if(T.dead || T.ghost) return false;
   const inf = STATUS_INFO[k];
   if(STATUS_IMMUNE[k].some(t => T.m.types.includes(t))){ popAt(T, 'Inmune', '#c8c8d4'); return false; }
+  if(abStatusBlock(T, k, src)) return false;                                      // Insomnio, Flexibilidad, Velo Agua, Ritmo Propio, Despiste
+  dur = abStatusDur(T, k, dur);                                                   // Madrugar, Cura Natural
   if(k === 'cnf'){
     if(T.cnf > 0){ popAt(T, 'Ya está confuso', '#c8c8d4'); return false; }
     T.cnf = dur;
+  } else if(k === 'lov'){
+    if(T.lov > 0){ popAt(T, 'Ya está enamorado', '#c8c8d4'); return false; }
+    T.lov = dur;
   } else {
     if(T.st){ popAt(T, 'Ya tiene un estado', '#c8c8d4'); return false; }
     if(k === 'slp' && T.slpImm > 0){ popAt(T, 'No se duerme', '#c8c8d4'); return false; }
     T.st = {k, t: dur, el: 0};
   }
   popAt(T, inf.txt, inf.c);
+  abStatusAfter(T, k, dur, src);                                                  // Sincronía
   return true;
 }
 
@@ -69,11 +76,14 @@ function statusInflict(T, k, dur){
 function statusShotHit(T, s){
   const sm = STATUS_MOVES[s.status];
   if(T.dead || T.ghost) return;
+  if(T.ab === 'Espejo Mágico' && s.o && !s.o.dead && !s.reflected && !abMold(s.o)){      // Espejo Mágico: el ataque vuelve a quien lo lanzó
+    abPop(T, 'ESPEJO MÁGICO', '#c9a0ff'); statusShotHit(s.o, Object.assign({}, s, {o: T, reflected: true})); return;
+  }
   if(eff(s.type, T.m.types) === 0 || (sm.immune && sm.immune.some(t => T.m.types.includes(t)))){     // el tipo del ataque no le afecta (Tierra · Normal · Acero · Planta)
     popAt(T, 'Sin efecto', '#c8c8d4'); fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 6, 70); return;
   }
-  if(sm.acc && Math.random() > sm.acc){ popAt(T, '¡Falló!', '#c8c8d4'); fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 5, 60); return; }     // precisión del ataque (Hipnosis)
-  if(statusInflict(T, sm.k, sm.dur || STX[sm.k].dur)) fxHit(T, s.status, s.type, 1, false, false, s.o);
+  if(sm.acc && Math.random() > abAcc(s.o, T, sm.acc)){ popAt(T, '¡Falló!', '#c8c8d4'); fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 5, 60); return; }     // precisión del ataque (Hipnosis)
+  if(statusInflict(T, sm.k, sm.dur || STX[sm.k].dur, s.o)) fxHit(T, s.status, s.type, 1, false, false, s.o);
   else fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 5, 60);
 }
 
@@ -84,9 +94,12 @@ function statusBlock(f){
   }
   if(f.cnf > 0 && Math.random() < STX.cnf.self){
     popAt(f, '¡Se hirió a sí mismo!', STATUS_INFO.cnf.c); fxBurst(f.x, f.y - 20, ['#ff5fb0', '#ffa8d8', '#ffffff'], 10, 120);
-    stDamage(f, MV[1].dmg * f.dmg * STX.cnf.hit / (f.defm || 1));
+    stDamage(f, MV[1].dmg * f.dmg * STX.cnf.hit / (f.defm || 1), 'cnf');
     if(!f.dead) setAct(f, 'Hurt', .3);
     return true;
+  }
+  if(f.lov > 0 && Math.random() < ABX.amorFail){
+    popAt(f, '¡Está enamorado!', STATUS_INFO.lov.c); fxBurst(f.x, f.y - 20, ['#ff7ab8', '#ffc0dc', '#ffffff'], 8, 100); return true;
   }
   return false;
 }
@@ -96,6 +109,7 @@ function statusTick(f, dt){
   if(f.dead){ clearStatus(f); return; }
   if(f.slpImm > 0) f.slpImm -= dt;
   if(f.cnf > 0) f.cnf -= dt;
+  if(f.lov > 0) f.lov -= dt;
   const s = f.st; if(!s) return;
   s.t -= dt; s.el += dt;
   if(s.k === 'psn') stDamage(f, f.max * STX.psn.base * (1 + Math.floor(s.el)) * dt);

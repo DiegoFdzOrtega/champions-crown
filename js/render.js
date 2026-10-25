@@ -84,17 +84,12 @@ function hud(x, y, list, idx, col){
   bar(x+74, y+32, 254, 12, f.hp, f.max, r > .5 ? '#4ccf6a' : r > .2 ? '#e8c33a' : '#e8493a');
   bar(x+74, y+48, 254, 5, f.en, 100, '#4fb3ff');
   text(`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`, x+328, y+69, 8, '#fff', 'right');
-  if(f.lvl){                                                                                               // rival: objeto y habilidad (el nivel no se muestra)
+  {                                                                                                        // objeto y habilidad (el nivel del rival no se muestra)
     let tx = x+74;
     const im = f.item && itemImg(f.item);
     if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, tx, y+57, 16, 16); tx += 19; }
     if(f.item){ text(ITEMS[f.item].n.toUpperCase(), tx, y+69, 6, '#c9d6f5'); tx += ctx.measureText(ITEMS[f.item].n.toUpperCase()).width + 8; }
-    if(f.m.ab && tx < x+300) text(f.m.ab.toUpperCase(), tx, y+69, 6, '#9be29b');
-  }
-  else if(f.item){                                                                                         // objeto equipado: icono + nombre
-    const im = itemImg(f.item); let tx = x+74;
-    if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, x+74, y+57, 16, 16); tx = x+94; }
-    text(ITEMS[f.item].n.toUpperCase(), tx, y+69, 6, '#c9d6f5');
+    if(f.ab && tx + f.ab.length * 6 < x+252) text(f.ab.toUpperCase(), tx, y+69, 6, '#9be29b');
   }
   list.forEach((u,i)=>{                                                      // mini-iconos del equipo
     const px = x + i*52, py = y + 84;
@@ -139,6 +134,7 @@ function draw(){
   });
   fxDraw();                                        // impactos, golpes, polvo y partículas
   swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
+  abDrawWeather();                                 // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
   if(!P.dead){                                                               // cruz de puntería
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
@@ -148,6 +144,7 @@ function draw(){
 
   hudAt(0, 0, () => hud(10, 10, g.p, g.pi, '#4a8cff'));
   hudAt(W, 0, () => hud(W-350, 10, g.e, g.ei, '#ff4a5a'));
+  abDrawHud();                                                               // clima activo (js/abilities.js)
 
   // Panel central: piso y temporizador
   const s = g.clock | 0;
@@ -171,7 +168,7 @@ function draw(){
     text('ENERGÍA', x0 + 12, by + 8, 7, '#4fb3ff');
     bar(bx, by, bwid, bh, P.en, 100, '#4fb3ff');
     [[3, 'Q'], [4, 'E']].forEach(([i, k]) => {
-      const need = MV[i].en, mx = bx + 1 + (bwid - 2) * need / 100, ready = P.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
+      const need = Math.round(enCost(P, i)), mx = bx + 1 + (bwid - 2) * need / 100, ready = P.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
       ctx.fillStyle = col; ctx.fillRect(Math.round(mx) - 1, by - 3, 2, bh + 6);
       const wait = Math.max(0, (need - P.en) / EN_REGEN);
       text(`${k} ${need}` + (ready ? ' ✔' : ` · ${wait.toFixed(1)}s`), mx, by - 5, 6, ready ? '#9be29b' : col, 'center');
@@ -179,8 +176,8 @@ function draw(){
     text(String(Math.floor(P.en)), bx + bwid - 4, by + 8, 7, '#fff', 'right'); }
   hudBox(x0, y0, tw, 72, '#4a8cff');
   MV.forEach((m,i)=>{
-    const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52;
-    const enWait = Math.max(0, (m.en - P.en) / EN_REGEN), cdWait = Math.max(0, P.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
+    const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52, cost = Math.round(enCost(P, i));      // cost: energía real (Presión del rival)
+    const enWait = Math.max(0, (cost - P.en) / EN_REGEN), cdWait = Math.max(0, P.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
     const ok = wait <= 0;
     const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(P, i)];
     ctx.fillStyle = '#161c2c'; ctx.fillRect(x, y, bw, h);
@@ -189,11 +186,11 @@ function draw(){
     text(m.key, x+7, y+12, 6, '#10141e');
     const nm = mvName(P, i).toUpperCase();
     text(nm, x+bw/2, y+32, nm.length > 10 ? 7 : 8, ok ? '#fff' : '#6d7899', 'center');
-    if(m.en) text('EN ' + m.en, x+bw-5, y+14, 6, P.en >= m.en ? '#4fb3ff' : '#e8493a', 'right');
-    if(m.en){ const fr = Math.min(1, P.en / m.en); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
+    if(m.en) text('EN ' + cost, x+bw-5, y+14, 6, P.en >= cost ? '#4fb3ff' : '#e8493a', 'right');
+    if(m.en){ const fr = Math.min(1, P.en / cost); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
       ctx.fillStyle = fr >= 1 ? '#9be29b' : '#4fb3ff'; ctx.fillRect(x+4, y+h-6, (bw-8)*fr, 3); }
     if(!ok){
-      const total = Math.max(m.cd, m.en / EN_REGEN, .01);
+      const total = Math.max(m.cd, cost / EN_REGEN, .01);
       ctx.fillStyle = 'rgba(5,7,12,.72)'; ctx.fillRect(x+2, y+2, bw-4, (h-4) * Math.min(1, wait/total));
       text(wait.toFixed(1) + 's', x+bw/2, y+47, 8, cdWait >= enWait ? '#fff' : '#4fb3ff', 'center');       // blanco = enfriamiento · azul = falta energía
     }

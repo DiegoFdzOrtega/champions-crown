@@ -8,23 +8,29 @@ function setAct(f, name, dur){ f.act = name; f.at = 0; f.lock = dur; }
 
 function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · close = golpe cuerpo a cuerpo · mvn = nombre del movimiento (solo para el efecto visual)
   if(T.dead || T.ghost) return;                       // ghost: está entrando o saliendo con la animación de cambio (swap.js): no recibe golpes
-  const mult = eff(type, T.m.types);
+  const R = abHit(T, A, type, eff(type, T.m.types), close, big, mvn);                                     // habilidades (js/abilities.js): inmunidades, daño que haces y recibes, esquivar
+  if(R.imm || R.dodge){                                                                                   // la habilidad lo ha parado
+    if(!R.heal) g.pops.push({x:T.x, y:T.y-110, txt: R.dodge ? '¡Esquivó!' : 'Sin efecto', t:.9});
+    abPop(T, (R.imm || R.dodge).toUpperCase()); fxBurst(T.x, T.y - 20, ['#ffffff', '#c8c8d4'], 6, 70); return;
+  }
+  const mult = R.mult;
   const foeAtk = !!(A && g.e.includes(A));
   const scope = (A && A.item === 'periscopio') ? IFX.periscopio : 0;                                      // Periscopio: más probabilidad de crítico
-  const crit = mult > 0 && Math.random() < (CRIT.chance + scope) * (big ? CRIT.big : 1) * (foeAtk ? CRIT.foe : 1);   // golpe crítico (solo si el golpe hace daño)
-  let dealt = dmg * mult * (crit ? CRIT.mult : 1) * (T.item === 'chaleco' ? .8 : 1)                       // Chaleco Asalto: -20% de daño
+  const crit = mult > 0 && !R.noCrit && Math.random() < (CRIT.chance + scope) * (big ? CRIT.big : 1) * (foeAtk ? CRIT.foe : 1);   // golpe crítico (solo si el golpe hace daño)
+  let dealt = dmg * mult * (crit ? CRIT.mult * R.critMul : 1) * (T.item === 'chaleco' && !(A && A.ab === 'Infiltrador') ? .8 : 1)   // Chaleco Asalto: -20% de daño
+              * R.out * R.inn                                                                          // habilidades: daño que haces y que recibes
               / (T.defm || 1)                                                                          // resistencia por IVs/EVs/naturaleza (solo tus Pokémon)
               * (A && A.item === 'cinturon' && mult >= 2 ? IFX.cinturon : 1);                              // Cinturón de Experto: +20% si es muy eficaz
-  if(T.item === 'aguante' && !T.aguanteUsado && dealt > 0 && T.hp >= T.max - 1e-6 && dealt >= T.hp){      // Banda Aguante: sobrevive 1 vez con 1 PS
-    dealt = T.hp - 1; T.aguanteUsado = true; g.pops.push({x:T.x, y:T.y-150, txt:'¡Aguanta!', t:1.2, c:'#ff7a7a', s:12});
+  const robusto = defAb(T, A) === 'Robustez';                                                               // Robustez: con la vida al máximo siempre aguanta (no se gasta)
+  if((robusto || (T.item === 'aguante' && !T.aguanteUsado)) && dealt > 0 && T.hp >= T.max - 1e-6 && dealt >= T.hp){      // Banda Aguante: sobrevive 1 vez con 1 PS
+    dealt = T.hp - 1; g.pops.push({x:T.x, y:T.y-150, txt:'¡Aguanta!', t:1.2, c:'#ff7a7a', s:12});
+    if(!robusto){ T.aguanteUsado = true; if(T.ab === 'Liviano' && T.ax){ T.ax.light = true; abPop(T, 'LIVIANO', '#ffe066'); } }
   }
   T.hp -= dealt;
-  if(A && A.item === 'roca' && mult > 0 && T.hp > 0 && Math.random() < IFX.rocaProb){                    // Roca del Rey: amedrenta
-    T.stun = IFX.rocaStun; setAct(T, 'Hurt', IFX.rocaStun); g.pops.push({x:T.x, y:T.y-150, txt:'¡Amedrentado!', t:1, c:'#ffd24a', s:11});
-  }
+  if(A && A.item === 'roca' && mult > 0 && T.hp > 0) abFlinch(T, A, IFX.rocaProb, IFX.rocaStun);          // Roca del Rey: amedrenta (js/abilities.js: Foco Interno, Polvo Escudo, Dicha...)
   if(A && !A.dead){
     if(A.item === 'cascabel') A.hp = Math.min(A.max, A.hp + dealt*.15);                      // Cascabel Concha
-    if(close && T.item === 'casco' && dealt > 0) A.hp = Math.max(1, A.hp - A.max*.08);      // Casco Dentado
+    if(close && T.item === 'casco' && dealt > 0 && A.ab !== 'Muro Mágico') A.hp = Math.max(1, A.hp - A.max*.08);      // Casco Dentado
   }
   const txt = mult===0 ? 'Sin efecto' : mult>=2 ? '¡Muy eficaz!' : mult<1 ? 'Poco eficaz' : '';
   if(txt) g.pops.push({x:T.x, y:T.y-110, txt, t:.9});
@@ -35,6 +41,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
   fxHit(T, mvn, type, mult, big, close, A);                                                          // efecto visual del impacto
   if(T.hp <= 0){ T.hp = 0; T.dead = true; T.dt = 0; setAct(T, 'Faint', 99); }
   else if(mult > 0) setAct(T, 'Hurt', .3);
+  abAfter(T, A, dealt, type, close, crit, big);                                                       // habilidades: efectos al contacto, venganzas, Autoestima...
 }
 function melee(f, ang, dmg, type, mine, mvn){
   const T = foe(mine), dx = T.x-f.x, dy = T.y-f.y;
@@ -53,25 +60,28 @@ function mtype(f, i){
 }
 
 function use(f, i, ang, mine){
-  const m = MV[i];
-  if(f.dead || cant(f) || f.cd[i] > 0 || f.en < m.en) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
-  f.cd[i] = m.cd; f.en -= m.en; f.dir = dirOf(ang);
-  if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede) o confuso (a veces se golpea a sí mismo): se pierde el ataque
+  const m = MV[i], cost = enCost(f, i);                                         // enCost: Presión del rival
+  if(f.dead || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
+  if(i > 0 && f.truant > 0) return;                                             // Indolente: espera tras su último ataque
+  f.cd[i] = m.cd; f.en -= cost; f.dir = dirOf(ang);
+  if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede), confuso o enamorado: se pierde el ataque
   const nm = mvName(f, i), sm = i === 3 && STATUS_MOVES[nm];                    // sm: ataque de estado (js/status.js)
-  const t = sm ? MOVES[nm].t : mtype(f, i), shotMv = (i === 2 || i === 4), it = f.item, boost = ITEMS[it] && ITEMS[it].type === t ? IFX.tipo : 1;   // objetos de tipo
+  if(i > 0){ f.lastUse = i; if(f.ab === 'Indolente') f.truant = ABX.indolente; }
+  if(sm && f.ab === 'Bromista') f.cd[i] *= ABX.bromistaCd;                      // Bromista: sus ataques de estado se recargan antes
+  const t = sm ? MOVES[nm].t : (f.ab === 'Normalidad' ? 'normal' : mtype(f, i)), shotMv = (i === 2 || i === 4), it = f.item, boost = ITEMS[it] && ITEMS[it].type === t ? IFX.tipo : 1;   // objetos de tipo
   const d = f.dmg * (f.buff > 0 ? 1.3 : 1) * (it === 'vidasfera' ? 1.3 : 1) * boost
           * (it === 'cintaelec' && i === 1 ? IFX.cinta : 1) * (it === 'gafaselec' && shotMv ? IFX.gafaselec : 1) * (it === 'gafasesp' && shotMv ? IFX.gafasesp : 1);
-  if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4)) f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
+  if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4) && f.ab !== 'Cabeza Roca' && f.ab !== 'Muro Mágico') f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
   if(i === 0){ f.dash = .25; f.da = ang; }
   if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
-  if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed, STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
+  if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
   else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  f.buff = 5; }
   if(i === 4){ setAct(f,'Charge',.6);  fxShotStart(f, shot(f, ang, m.dmg*d, 380, 22, t, mine), nm, true); }
 }
 
 function move(f, dx, dy, dt, k){
-  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * (f.buff > 0 ? 1.25 : 1) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1);
+  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * (f.buff > 0 ? 1.25 : 1) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1) * abSpeed(f);
   let vx = 0, vy = 0;
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
@@ -108,12 +118,14 @@ function update(dt){
     f.en = Math.min(100, f.en + EN_REGEN*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
     if(!f.dead && f.lock <= 0){ const w = f.mv ? 'Walk' : 'Idle'; if(f.act !== w){ f.act = w; f.at = 0; } }
     statusTick(f, dt);                           // estados (js/status.js)
+    abTick(f, dt);                               // habilidades (js/abilities.js): clima, Mudar, Impulso...
   }
+  if(g.wx){ g.wx.t -= dt; if(g.wx.t <= 0) g.wx = null; }     // el clima dura ABX.climaDur segundos
   statusBench();                                 // quien espera en el banquillo no conserva estados
   for(const s of g.shots){                       // proyectiles
     s.x += s.vx*dt; s.y += s.vy*dt; s.life -= dt;
     const T = foe(s.mine);
-    if(!T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r){ if(s.status) statusShotHit(T, s); else hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
+    if(!T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r * abShotK(s, T)){ if(s.status) statusShotHit(T, s); else hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); s.life = 0; }
     if(s.x<0 || s.x>W || s.y<0 || s.y>H) s.life = 0;
   }
   g.shots = g.shots.filter(s => s.life > 0);
@@ -134,6 +146,8 @@ function switchMon(i){                            // cambio VOLUNTARIO (teclas 1
   if(i === undefined){ for(let k=1;k<=3;k++){ const j=(g.pi+k)%3; if(!g.p[j].dead){ i=j; break; } } }
   if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead) return;
   if(swapBusy()) return;                          // ya hay un cambio en marcha: no se empieza otro hasta que acabe la animación
+  const trap = abTrapped(g.p[g.pi], g.e[g.ei]);   // Sombra Trampa · Trampa Arena · Imán del rival
+  if(trap){ const P = g.p[g.pi]; g.pops.push({x:P.x, y:P.y - 150, txt:'¡' + trap.toUpperCase() + ': no puedes cambiar!', t:1.4, c:'#ff9a3a', s:10}); return; }
   if(g.swCd > 0){ g.swNote = 1.6; return; }       // aún en espera: se avisa en el HUD ("ESPERA 3 s") y no se cambia
   swapStart('p', i, false).vol = true;            // la animación (swap.js) hace el cambio: retirada, lanzamiento y apertura · vol = voluntario: al acabar empieza la espera de SWITCH_CD
 }

@@ -97,9 +97,11 @@ function swapStart(side, idx, quick){      // quick = el Pokémon ya se había d
 }
 function swapDo(s){                        // el Pokémon que entra pasa a ser el activo (aún invisible hasta que se abra la bola)
   const o = s.from, n = s.to;
+  abExit(o);                               // el que se va: Regeneración y pierde sus subidas/bajadas
   if(s.side === 'p') g.pi = s.idx; else g.ei = s.idx;
   n.x = s.L.x; n.y = s.L.y; n.dir = o.dir; n.act = 'Idle'; n.at = 0; n.lock = 0; n.ghost = true;
   o.ghost = false; s.swapped = true;
+  abEnter(n);                              // el que entra: Intimidación, clima, trampas...
 }
 function swapUpdate(dt){
   if(!g.sw || !g.sw.length) return;
