@@ -6,6 +6,11 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Rivales rápidos, más justos', date:'26 oct 2026', sections:[
+    {t:'Combate', i:[
+      'Los rivales que sumaban Agilidad y Pañuelo Elección (como el Aerodactyl de Lance o el de Hoenn) iban más de dos veces más rápidos y no había manera de alcanzarlos.',
+      'Ahora en un rival la velocidad extra de la mejora, el Pañuelo y la habilidad juntos tiene un tope (×1,35, como un Pañuelo solo). Tus Pokémon siguen igual.']}
+  ]},
   {v:'Shuriken de Agua e Ímpetu Arena', date:'26 oct 2026', sections:[
     {t:'Ataques nuevos', i:[
       'Llega el Shuriken de Agua, el ataque de Greninja: lanza tres shuriken de agua giratorios que se clavan en el rival. Greninja ya lo lleva de serie.',

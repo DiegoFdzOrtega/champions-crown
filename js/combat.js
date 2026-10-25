@@ -81,7 +81,9 @@ function use(f, i, ang, mine){
 }
 
 function move(f, dx, dy, dt, k){
-  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * qSpd(f) * (f.item === 'panuelo' ? 1.35 : 1) * (f.st && f.st.k === 'par' ? STX.par.spd : 1) * abSpeed(f);
+  let boost = qSpd(f) * (f.item === 'panuelo' ? 1.35 : 1) * abSpeed(f);                  // mejora (Q) + Pañuelo + habilidad
+  if(g.e && g.e.includes(f)) boost = Math.min(boost, ENEMY_SPEED_BUFF_CAP);                // un rival no se hace imposible de cazar al sumar Agilidad + Pañuelo
+  const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * boost * (f.st && f.st.k === 'par' ? STX.par.spd : 1);
   let vx = 0, vy = 0;
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }

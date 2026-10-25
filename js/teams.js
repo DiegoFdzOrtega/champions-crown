@@ -161,6 +161,7 @@ function specStat(s, k){
   return k === 'hp' ? core + 60 : Math.floor((core + 5) * (nat[1] === k ? 1.1 : nat[2] === k ? .9 : 1));
 }
 const specMult = (s, k) => 1 + (specStat(s, k) / refStat(s.dex, k) - 1) * ENEMY_POWER;
+const ENEMY_SPEED_BUFF_CAP = 1.35;                                 // tope de lo que pueden subir la velocidad a un RIVAL la mejora (Q: Agilidad...), el Pañuelo y la habilidad, juntos (como un Pañuelo solo)
 const ENEMY_SPEED_CAP = 1.25;                                       // tope del extra de velocidad (con IV 31 + 252 EV un Pokémon lento llegaría a x1,5 y se haría injugable)
 function enemyBoost(s){                                            // vida, daño (su ataque principal), velocidad y resistencia
   if(!s || typeof s === 'number') return {hm:1, dm:1, spdm:1, defm:1};
