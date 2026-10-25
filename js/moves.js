@@ -13,11 +13,11 @@
 // Movimientos de cada tipo y hueco (si hay varios, se reparten según el nº de Pokédex para que no todos sean iguales)
 const MOVESET = {
   normal:   {1:['Placaje','Arañazo','Ataque Rápido'],      2:['Triataque'],                      3:['Afilar'],             4:['Hiperrayo']},
-  fuego:    {1:['Colmillo Ígneo'],                          2:['Ascuas','Lanzallamas'],            3:['Día Soleado'],        4:['Llamarada','Envite Ígneo']},
+  fuego:    {1:['Colmillo Ígneo','Puño Fuego'],                          2:['Ascuas','Lanzallamas'],            3:['Día Soleado'],        4:['Llamarada','Envite Ígneo']},
   agua:     {1:['Acua Cola'],                               2:['Pistola Agua','Hidropulso'],       3:['Danza Lluvia'],       4:['Hidrobomba']},
   planta:   {1:['Látigo Cepa'],                             2:['Hoja Afilada'],                    3:['Desarrollo'],         4:['Rayo Solar']},
-  electrico:{1:['Colmillo Rayo'],                           2:['Impactrueno','Rayo'],              3:['Carga'],              4:['Trueno']},
-  hielo:    {1:['Colmillo Hielo'],                          2:['Rayo Hielo','Nieve Polvo'],        3:['Neblina'],            4:['Ventisca']},
+  electrico:{1:['Colmillo Rayo','Puño Trueno'],                           2:['Impactrueno','Rayo'],              3:['Carga'],              4:['Trueno']},
+  hielo:    {1:['Colmillo Hielo','Puño Hielo'],                          2:['Rayo Hielo','Nieve Polvo'],        3:['Neblina'],            4:['Ventisca']},
   lucha:    {1:['Golpe Roca'],                              2:['Esfera Aural'],                    3:['Corpulencia'],        4:['Onda Certera']},
   veneno:   {1:['Puya Nociva'],                             2:['Picotazo Veneno','Bomba Lodo'],    3:['Armadura Ácida'],     4:['Lanzamugre']},
   tierra:   {1:['Excavar'],                                 2:['Disparo Lodo'],                    3:['Tormenta de Arena'],  4:['Terremoto']},
@@ -25,10 +25,10 @@ const MOVESET = {
   psiquico: {1:['Cabezazo Zen'],                            2:['Psicorrayo','Confusión'],          3:['Paz Mental'],         4:['Psíquico']},
   bicho:    {1:['Tijera X'],                                2:['Zumbido','Pin Misil'],             3:['Danza Aleteo'],       4:['Megacuerno']},
   roca:     {1:['Tumba Rocas'],                             2:['Lanzarrocas'],                     3:['Pulimento'],          4:['Roca Afilada']},
-  fantasma: {1:['Lengüetazo','Garra Umbría'],               2:['Tinieblas'],                       3:['Maldición'],          4:['Bola Sombra']},
+  fantasma: {1:['Lengüetazo','Garra Umbría','Puño Sombra'],               2:['Tinieblas'],                       3:['Maldición'],          4:['Bola Sombra']},
   dragon:   {1:['Garra Dragón'],                            2:['Pulso Dragón','Dragoaliento'],     3:['Danza Dragón'],       4:['Cometa Draco']},
   siniestro:{1:['Mordisco'],                                2:['Pulso Umbrío'],                    3:['Maquinación'],        4:['Pulso Noche']},
-  acero:    {1:['Garra Metal'],                             2:['Bomba Imán'],                      3:['Defensa Férrea'],     4:['Foco Resplandor']},
+  acero:    {1:['Garra Metal','Puño Bala'],                             2:['Bomba Imán'],                      3:['Defensa Férrea'],     4:['Foco Resplandor']},
   hada:     {1:['Carantoña'],                               2:['Viento Feérico','Voz Cautivadora'],3:['Campo Neblinoso'],    4:['Fuerza Lunar']}
 };
 // Movimientos de los Pokémon con ataques propios (CUSTOM) que no están arriba. Tipo y hueco de cada uno.
@@ -46,9 +46,17 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
 ['Colmillo Ígneo','Garra Dragón','Lanzallamas','Hidropulso','Bomba Lodo','Pulso Dragón','Lengüetazo','Maldición','Danza Dragón','Bola Sombra','Cometa Draco','Envite Ígneo','Llamarada','Hidrobomba','Hiperrayo']
   .forEach(n => { if(!MOVES[n]) console.warn('Falta el movimiento', n); });
 
+// Los PUÑOS (js/fxpunch.js): como golpe inicial solo los lleva quien de verdad los puede aprender en los juegos (datos de js/learnsets.js).
+// El resto de Pokémon de ese tipo se queda con el golpe de siempre, así que sus ataques no cambian.
+const PUNCHES = new Set(['Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra']);
+const learnHas = (n, dex) => {                      // ¿está el número de Pokédex en la lista de LEARN[n]? (LEARN_SET se crea después, en training.js)
+  const txt = (typeof LEARN !== 'undefined' && LEARN[n]) || '';
+  return txt.split(',').some(r => { if(!r) return false; const [a, b] = r.split('-').map(Number); return dex >= a && dex <= (b || a); });
+};
+
 // Asigna los 4 movimientos a todos los Pokémon que no tienen los suyos
 DEX.forEach(m => {
   if(m.mv) return;
-  const t1 = m.types[0], t2 = m.types[1] || t1, pick = (t, s, k) => { const l = MOVESET[t][s]; return l[(m.dex + k) % l.length]; };
+  const t1 = m.types[0], t2 = m.types[1] || t1, pick = (t, s, k) => { const l = MOVESET[t][s].filter(n => !PUNCHES.has(n) || learnHas(n, m.dex)); return l[(m.dex + k) % l.length]; };
   m.mv = [pick(t1, 1, 0), pick(t2, 2, 1), pick(t1, 3, 0), pick(t1, 4, 2)];
 });

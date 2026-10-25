@@ -46,6 +46,7 @@ MOVES_ES = {
  'Cabezazo':'headbutt','Golpe Cuerpo':'body-slam','Doble Filo':'double-edge','Amnesia':'amnesia','Danza Espada':'swords-dance','Agilidad':'agility','Refugio':'withdraw',
  'Onda Trueno':'thunder-wave','Tóxico':'toxic','Fuego Fatuo':'will-o-wisp','Somnífero':'sleep-powder','Brecha Negra':'dark-void','Rayo Confuso':'confuse-ray',
  'Hipnosis':'hypnosis',
+ 'Puño Fuego':'fire-punch','Puño Hielo':'ice-punch','Puño Trueno':'thunder-punch','Puño Bala':'bullet-punch','Puño Sombra':'shadow-punch',
 }
 # Movimientos exclusivos de un solo Pokémon (se fuerzan, da igual lo que digan los datos): Brecha Negra solo la usa Darkrai (nº 491)
 ONLY = {'Brecha Negra': [491]}

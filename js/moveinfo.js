@@ -19,6 +19,9 @@ const MOVE_DESC = {
   'Tumba Rocas':'Entierra al rival bajo rocas que lo frenan.', 'Mordisco':'Muerde con unos colmillos afilados y malvados.',
   'Excavar':'Se esconde bajo tierra y ataca desde abajo.', 'Puya Nociva':'Pincha con un apéndice cargado de veneno.',
   'Ataque Ala':'Golpea al rival con las dos alas abiertas.',
+  'Puño Fuego':'Un puñetazo envuelto en llamas que puede quemar.', 'Puño Hielo':'Un puñetazo helado que puede congelar al rival.',
+  'Puño Trueno':'Un puñetazo cargado de electricidad que puede paralizar.', 'Puño Bala':'Dos puñetazos rapidísimos, duros como balas de acero.',
+  'Puño Sombra':'Un puño hecho de sombra que sale de la nada y golpea al rival.',
   // ---- Disparos a distancia (clic derecho) ----
   'Hidropulso':'Lanza una onda de agua que puede confundir.', 'Pistola Agua':'Dispara un chorro de agua a presión.',
   'Pin Misil':'Lanza agujas afiladas que dan varios golpes seguidos.', 'Zumbido':'Un zumbido que hace daño con ondas de sonido.',

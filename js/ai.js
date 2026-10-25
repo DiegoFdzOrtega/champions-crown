@@ -18,7 +18,7 @@ const AI_TUNE = {
   agg: {lider: .8, alto: 1.2, campeon: 1.8}               // [AJUSTE] agresividad por tipo de rival: más alto = ataca antes y más seguido (1 = valor base)
 };
 // La IA con cabeza (enemyAI) solo la usan los jefes de la Historia: líderes, Alto Mando y Campeón (g.o.boss). Los demás rivales (Campo de Entrenamiento…) usan enemyBasic.
-// Cuando CAMBIAS de Pokémon (js/swap.js), el rival no se te echa encima: se aleja mientras dura la animación y, cuando el cambio ya está completo, espera un momento antes de volver a atacar.
+// Cuando CAMBIAS de Pokémon (js/swap.js) o el tuyo se DEBILITA, el rival no se te echa encima: se aleja mientras dura la animación y, cuando el cambio ya está completo, espera un momento antes de volver a atacar.
 const AI_SWAP = {
   back: 430,                                               // [AJUSTE] distancia a la que se aparta mientras cambias (más alto = se aleja más)
   grace: .7                                                // [AJUSTE] segundos que tarda en poder atacar DESPUÉS de que tu nuevo Pokémon ya ha salido (0 = ataca en cuanto sale)
@@ -33,11 +33,12 @@ function aiRetreat(E, P, dt){                              // aléjate del jugad
   move(E, ax, ay, dt, k);
   E.dir = dirOf(ang);
 }
-const aiNoAtk = P => !!(P.ghost || (g.swGrace > 0));        // no ataca mientras cambias ni justo después
+const aiAway = P => !!(P.ghost || P.dead);                  // tu Pokémon está cambiando O acaba de debilitarse: el rival se aparta
+const aiNoAtk = P => !!(P.ghost || P.dead || (g.swGrace > 0));        // no ataca mientras cambias, mientras caes ni justo después
 const aiSmart = () => !!(AI_TUNE.on && g.o.boss && AI_TUNE.agg[g.o.boss]);
 // La IA sencilla de siempre: se acerca o se aleja, dispara y golpea al azar
 function enemyBasic(E, P, dt){
-  if(P.ghost) return aiRetreat(E, P, dt);                    // estás cambiando de Pokémon: se aparta y no ataca
+  if(aiAway(P)) return aiRetreat(E, P, dt);                    // estás cambiando de Pokémon o te has debilitado: se aparta y no ataca
   const sk = g.o.skill, ang = Math.atan2(P.y-E.y, P.x-E.x), dist = Math.hypot(P.x-E.x, P.y-E.y);
   const want = dist > 240 ? 1 : dist < 140 ? -1 : 0, side = Math.sin(g.t*1.2 + g.ei*2);
   move(E, Math.cos(ang)*want + Math.cos(ang+1.57)*side, Math.sin(ang)*want + Math.sin(ang+1.57)*side, dt, .5 + .4*sk);
@@ -87,7 +88,7 @@ function enemyAI(E, P, dt){
   pv.x = P.x; pv.y = P.y;
   const aimAt = spd => { const lead = dist / spd * (.55 + .4*sk); return Math.atan2(P.y + pv.vy*lead - E.y, P.x + pv.vx*lead - E.x) + (1 - sk) * .5 * (r() - .5); };
 
-  if(P.ghost) return aiRetreat(E, P, dt);                  // estás cambiando de Pokémon: se aparta y no ataca
+  if(aiAway(P)) return aiRetreat(E, P, dt);                  // estás cambiando de Pokémon o te has debilitado: se aparta y no ataca
 
   // ---- Movimiento: cada estilo mantiene su distancia y da vueltas alrededor (cambia de sentido de vez en cuando) ----
   E.orbT = (E.orbT === undefined ? 0 : E.orbT) - dt; if(E.orbT <= 0){ E.orbT = .9 + r()*1.6; E.orb = r() < .5 ? 1 : -1; }

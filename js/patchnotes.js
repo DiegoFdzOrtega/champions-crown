@@ -6,6 +6,17 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Nuevos puños', date:'25 oct 2026', sections:[
+    {t:'Ataques nuevos', i:[
+      'Llegan 5 golpes de puño para el clic izquierdo: Puño Fuego, Puño Hielo, Puño Trueno, Puño Bala y Puño Sombra.',
+      'Cada uno tiene su propia animación: el puño sale disparado y deja llamas, cristales de hielo, rayos, destellos de acero o sombras.',
+      'Se compran como MT en la tienda y algunos Pokémon que pueden aprenderlos ya los llevan de serie.']}
+  ]},
+  {v:'El rival se aparta cuando caes', date:'25 oct 2026', sections:[
+    {t:'Combate', i:[
+      'Cuando se debilita tu Pokémon, el rival ya no se queda esperando a pegarte: se aleja en el momento en que caes, igual que cuando cambias tú.',
+      'Sigue sin atacar mientras entra tu siguiente Pokémon y un momento después.']}
+  ]},
   {v:'Las mejoras (Q) ya hacen lo que dicen', date:'25 oct 2026', sections:[
     {t:'Combate', i:[
       'Antes todos los ataques de la tecla Q daban lo mismo (+30 % de daño y +25 % de velocidad). Ahora cada uno hace lo suyo durante 5 segundos.',

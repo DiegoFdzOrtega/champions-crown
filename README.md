@@ -43,6 +43,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/render.js: arena (llama a drawArena), sombras, Pokémon y HUD del combate
 - js/modes.js: Historia (un combate por líder)
 - js/moves.js: lista de movimientos REALES de Pokémon por tipo y hueco (MOVESET) y asignación automática de 4 movimientos a cada Pokémon (los de CUSTOM en data.js se respetan)
+- js/fxpunch.js: los 5 puños (Puño Fuego, Hielo, Trueno, Bala y Sombra): el dibujo del puño y la animación de cada uno
 - js/fx.js: motor de efectos de ataque (lista de efectos, partículas, temblor, aura) y los "ganchos" que usa combat.js: fxMelee, fxShotStart, fxShot, fxHit, fxBuff, fxAura
 - js/fxlib.js: herramientas de dibujo pixel art (polígonos, rayos, esferas, llamas, marcas de garra...)
 - js/fxmelee.js: animaciones de los ataques cuerpo a cuerpo (Placaje, Arañazo, Mordisco, Excavar, Golpe Roca...)
@@ -87,7 +88,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - **Chapa Dorada** (60 PB, `objetos/ivs/chapa-dorada.png`): +5 a un IV. **Chapa Plateada** (40 PB, `objetos/ivs/Chapa-plateada.png`): +10 EV a un stat. Los límites son los reales de los juegos: IV 0-31 por stat (186 en total) y EV 252 por stat útiles (el máximo teórico es 255) y 510 en total.
 - **Restablecer** (en Ver datos): «↺ Restablecer IVs» vuelve los IV a 0 y devuelve las Chapas Doradas gastadas en ese Pokémon; «↺ Restablecer EVs» quita los EVs que dieron las Chapas Plateadas (los ganados en combate se quedan) y las devuelve. Pide confirmación. Datos: `save.ivBase`, `save.evCap`, `save.capUsed`.
 - **Todos los Pokémon empiezan con IV 0 y EV 0 en todo** (da igual cuál sea o cómo lo consigas). La única forma de subirlos es gastar Chapas Doradas (IV) y Plateadas (EV) en la ficha. Las chapas se consiguen en la tienda y como recompensa al vencer a los líderes (5 + 5). Así cada chapa tiene sentido. **Menta** (120 PB): cambia la naturaleza a la que elijas. **Cápsula de Habilidad** (150 PB): cambia a la otra habilidad. **MT**: enseña un movimiento y sustituye al que haya en ese hueco (golpe, disparo, mejora o fuerte).
-- **MTs en la tienda:** están **todos siempre a la venta** (98: todos los ataques de `MOVES` que algún Pokémon puede aprender; Afilar y Bomba Imán no entran porque nadie los aprende). Sin límite de unidades y sin cambio diario. Se ordenan por hueco, tipo y nombre.
+- **MTs en la tienda:** están **todos siempre a la venta** (103: todos los ataques de `MOVES` que algún Pokémon puede aprender; Afilar y Bomba Imán no entran porque nadie los aprende). Sin límite de unidades y sin cambio diario. Se ordenan por hueco, tipo y nombre.
 - **Tienda > MTs:** precio según el hueco (Golpe 80, Disparo 90, Mejora 70, Fuerte 130 PB, en `TRAIN.price.mt`). Arriba hay un buscador y filtros de **Hueco** y **Tipo** (`shopSt` en `js/shop.js`).
 - **Diseño de la tienda («Escaparate»):** toldo rojo y blanco con tus saldos, categorías a la izquierda, los objetos en estantes de madera con su precio colgando (punto de color = tipo del MT, `×N` = cuántos tienes) y, a la derecha, el panel del objeto elegido. En un MT el panel enseña **Qué es** (frase de `MOVE_DESC`), **Qué hace aquí** (daño, energía y recarga, o el estado que pone) y si **tu equipo puede aprenderlo** (con los sprites) y cuántos de tus Pokémon lo aprenden. Los colores y tamaños están en el bloque `sa-` de `css/style.css`. Para cambiar la descripción de un ataque, edita su línea en `MOVE_DESC`.
 - Los IV y EV ya **no se sortean ni se ganan en combate** (`TRAIN.evPerFoe = 0`; si quieres que los rivales vuelvan a dar EVs, ponlo en 4). Para que el juego siga siendo justo, la referencia de las estadísticas es ahora «IV 0, EV 0, naturaleza neutra» (multiplicador ×1,00 en `refStat`), así que los rivales (que sí llevan IV 31 y EV) resultan relativamente más difíciles hasta que entrenes con chapas. Si te pasas de difícil, baja `ENEMY_POWER`.
@@ -464,7 +465,7 @@ Reglas: mientras dura (unos 2 segundos, `SWAP` al principio de `js/swap.js`) el 
 - **Dificultad:** la habilidad del combate (`g.o.skill`, `DIFF` en data.js) controla cuánto tarda en reaccionar, cuánto esquiva y cuánto falla al apuntar. `AI_TUNE.agg` (js/ai.js; un número por tipo de jefe: líder .8 · Alto Mando 1.2 · Campeón 1.8) sube o baja la agresividad de todos.
 - No hay trampas: el rival usa las mismas funciones `use()`, `melee()` y `shot()` que el jugador, con su propia energía y sus propios enfriamientos.
 - **Interruptor:** `AI_TUNE.on = false` (js/ai.js) hace que TODOS los rivales vuelvan a la IA sencilla de siempre.
-- **Cuando tú cambias de Pokémon:** el rival (todos, no solo los jefes) **se aleja** mientras dura la animación de cambio (`aiRetreat()` en js/ai.js; se aparta hasta `AI_SWAP.back` ≈ 430 px, o rodea hacia el centro si está en una esquina) y **no ataca**. Cuando tu nuevo Pokémon ya ha salido, espera `AI_SWAP.grace` ≈ 0,7 s antes de volver a atacar (`g.swGrace`, que descuenta `update()` en combat.js y pone `swapUpdate()` en swap.js). Para que ataque nada más salir: `AI_SWAP.grace = 0`. Vale también cuando tu Pokémon se debilita y entra el siguiente.
+- **Cuando tú cambias de Pokémon:** el rival (todos, no solo los jefes) **se aleja** mientras dura la animación de cambio (`aiRetreat()` en js/ai.js; se aparta hasta `AI_SWAP.back` ≈ 430 px, o rodea hacia el centro si está en una esquina) y **no ataca**. Cuando tu nuevo Pokémon ya ha salido, espera `AI_SWAP.grace` ≈ 0,7 s antes de volver a atacar (`g.swGrace`, que descuenta `update()` en combat.js y pone `swapUpdate()` en swap.js). Para que ataque nada más salir: `AI_SWAP.grace = 0`. Vale también cuando tu Pokémon se debilita: el rival **se aleja en cuanto cae** (no espera a que salga el siguiente; `aiAway()` en js/ai.js cuenta como "te estás yendo" tanto `ghost` como `dead`), no ataca mientras tu Pokémon está caído y, al salir el siguiente, también espera `AI_SWAP.grace`.
 - Nota de equilibrio: contra un jugador que se mueve, la IA lista hace aproximadamente el doble de daño por segundo que la sencilla; subir o bajar `agg` cambia poco, porque el límite lo ponen la energía y los enfriamientos.
 
 ## Cambiar de Pokémon en combate: clic y espera de 5 s (js/combat.js, js/render.js, js/ui.js)
@@ -538,23 +539,43 @@ En el combate, la caja de datos del rival **ya no muestra «NV 120»** (en `hud(
 - **Partidas antiguas:** si un Pokémon ya había aprendido un MT que no podía (por ejemplo, Venusaur con Ventisca), al cargar se **quita ese ataque, vuelve el original y el MT se devuelve a la mochila** (sale un aviso). Solo ocurre una vez (`save.mtV`).
 - **Tienda:** solo se venden MTs de movimientos que algún Pokémon pueda aprender.
 
-## Lista de ataques del juego (los que se pueden enseñar con MT)
-Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
+## Los puños (golpe cuerpo a cuerpo)
+Hay **5 golpes de puño** en el hueco 1 (clic izquierdo), cada uno con su propia animación: un puño de pixel art sale del atacante, golpea al rival y deja el efecto de su tipo. Están en `js/fxpunch.js` (dibujo del puño con `fist()`, recorrido con `punchPos()` y una receta por ataque en `MEL['...']`; la duración y cuánto se lanza el atacante están en `FXC['...']`, al final del archivo).
 
-**Golpe (clic izquierdo): 23 ataques**
+| Ataque | Tipo | Cómo se ve |
+|---|---|---|
+| Puño Fuego | Fuego | Puño naranja con cola de llamas; al golpear estalla una onda de fuego y salen brasas. |
+| Puño Hielo | Hielo | Puño helado con escarcha y trocitos de hielo; al golpear salen cristales en estrella y una onda de frío. |
+| Puño Trueno | Eléctrico | Puño amarillo con rayitos alrededor; al golpear salen rayos en todas direcciones. |
+| Puño Bala | Acero | Dos puñetazos seguidos, muy rápidos, con líneas de velocidad y destellos de metal. |
+| Puño Sombra | Fantasma | Dos puños fantasma salen de un remolino oscuro; al golpear queda una mancha de sombra con llamitas. |
+
+- **Mecánica:** igual que el resto de golpes del hueco 1 (daño, energía y recarga salen de `MV[1]`). La diferencia es el **tipo** del ataque y la animación; los estados (quemar, paralizar...) no se añaden. Se pueden aprender con **MT** en la tienda (pueden aprenderlos 164 Pokémon el Puño Fuego, 179 el Puño Hielo y 199 el Puño Trueno; solo 13 el Puño Bala y 9 el Puño Sombra).
+- **Quién los lleva de serie:** solo un Pokémon que de verdad pueda aprenderlo en los juegos (`PUNCHES` y `learnHas()` en `js/moves.js`, con los datos de `js/learnsets.js`). A los demás Pokémon de ese tipo no les cambia nada, siguen con su golpe de siempre. Por eso `learnsets.js` se carga **antes** que `moves.js` en `index.html`.
+- **Para añadir otro puño:** ponlo en `MOVESET` (`js/moves.js`) y en `PUNCHES`, escribe su frase en `MOVE_DESC` (`js/moveinfo.js`), añade su nombre de PokéAPI a `MOVES_ES` (`tools/gen_learnsets.py`) y vuelve a generar `js/learnsets.js`, y crea su receta `MEL['Nombre']` y `FXC['Nombre']` en `js/fxpunch.js`.
+
+## Lista de ataques del juego (los que se pueden enseñar con MT)
+Son **104 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
+
+**Golpe (clic izquierdo): 28 ataques**
 
 | Ataque | Tipo | Aprenden |
 |---|---|---|
 | Garra Metal | Acero | 95 |
+| Puño Bala | Acero | 13 |
 | Acua Cola | Agua | 58 |
 | Tijera X | Bicho | 117 |
 | Garra Dragón | Dragón | 81 |
 | Colmillo Rayo | Eléctrico | 99 |
+| Puño Trueno | Eléctrico | 199 |
 | Garra Umbría | Fantasma | 192 |
 | Lengüetazo | Fantasma | 43 |
+| Puño Sombra | Fantasma | 9 |
 | Colmillo Ígneo | Fuego | 109 |
+| Puño Fuego | Fuego | 164 |
 | Carantoña | Hada | 162 |
 | Colmillo Hielo | Hielo | 96 |
+| Puño Hielo | Hielo | 179 |
 | Golpe Roca | Lucha | 44 |
 | Arañazo | Normal | 93 |
 | Ataque Rápido | Normal | 142 |
