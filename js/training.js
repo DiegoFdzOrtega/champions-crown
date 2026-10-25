@@ -25,7 +25,7 @@ const TRAIN = {
   evCap: 252, evTotal: 510, evPerFoe: 0,         // EVs: tope por stat, tope total y EVs que da cada rival vencido (0 = los EVs solo se consiguen con Chapas Plateadas)
   power: .6,                                     // fracción del efecto "oficial" de IVs/EVs/naturaleza que se nota en combate (1 = igual que los juegos)
   // MTs: están TODOS siempre a la venta (todos los ataques de MOVES que algún Pokémon puede aprender), sin límite de unidades ni cambio diario.
-  price: {chapa: 60, plata: 40, menta: 120, capsula: 150, mt: {1: 80, 2: 90, 3: 70, 4: 130}}      // precios en Puntos de Batalla
+  price: {chapa: 20, plata: 20, menta: 120, capsula: 150, mt: {1: 80, 2: 90, 3: 70, 4: 130}}      // precios en Puntos de Batalla
 };
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const SLOT_NAMES = {1: 'Golpe (clic izq.)', 2: 'Disparo (clic dcho.)', 3: 'Mejora (Q)', 4: 'Ataque fuerte (E)'};

@@ -6,6 +6,9 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Chapas más baratas', date:'25 oct 2026', sections:[
+    {t:'Tienda', i:['La Chapa Dorada (antes 60 PB) y la Chapa Plateada (antes 40 PB) cuestan ahora 20 PB cada una.']}
+  ]},
   {v:'Nuevos puños', date:'25 oct 2026', sections:[
     {t:'Ataques nuevos', i:[
       'Llegan 5 golpes de puño para el clic izquierdo: Puño Fuego, Puño Hielo, Puño Trueno, Puño Bala y Puño Sombra.',
