@@ -28,7 +28,7 @@ const TRAIN = {
   mtStockEach: 3, mtPerSlot: 2,                  // cada MT del día tiene 3 unidades; salen 2 MTs por cada hueco de ataque (8 al día)
   // MTs SIEMPRE a la venta (para probarlos): no entran en el sorteo diario y tienen mtFixedEach unidades al día.
   // Para devolverlos a la rotación normal, vacía la lista:  mtFixed: []
-  mtFixed: ['Onda Trueno', 'Tóxico', 'Fuego Fatuo', 'Somnífero', 'Brecha Negra', 'Rayo Confuso'], mtFixedEach: 10,
+  mtFixed: ['Onda Trueno', 'Tóxico', 'Fuego Fatuo', 'Somnífero', 'Brecha Negra', 'Rayo Confuso', 'Hipnosis', 'Bola Sombra'], mtFixedEach: 10,
   price: {chapa: 60, plata: 40, menta: 120, capsula: 150, mt: {1: 80, 2: 90, 3: 70, 4: 130}}      // precios en Puntos de Batalla
 };
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];

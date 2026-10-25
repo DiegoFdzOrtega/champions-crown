@@ -1,6 +1,6 @@
 "use strict";
 /* =====================================================================
-   EFECTOS de los 6 ataques de estado (js/status.js), dibujados por código en pixel art.
+   EFECTOS de los 7 ataques de estado (js/status.js), dibujados por código en pixel art.
    Para cada ataque: FLT = el proyectil en vuelo · TRL = su estela · IMP = el impacto.
    Aparte: aura de cada estado sobre el Pokémon (fxStatusAura) y las etiquetas PAR · TOX · QUE · DRM · CNF (statusChips).
    Cuando tengas los sprites definitivos, solo hay que sustituir estas funciones (o dibujar la imagen en su lugar).
@@ -10,7 +10,8 @@ const STP = {                                                                   
   dark:      ['#05030a', '#14082a', '#2a1250', '#5a2fa0', '#c8a8ff'],
   spore:     ['#3a5a1a', '#8fc84a', '#d4f08a', '#fff7b0', '#ffffff'],            // polvo del anime: verde-amarillo brillante
   confuse:   ['#2a0a4a', '#7a3cc8', '#b57aff', '#ffe066', '#ffffff'],            // luz espectral: morado y amarillo
-  toxic:     ['#2a0a3a', '#6a1f9a', '#a23fd0', '#d98cf5', '#f6dcff']             // veneno líquido morado
+  toxic:     ['#2a0a3a', '#6a1f9a', '#a23fd0', '#d98cf5', '#f6dcff'],            // veneno líquido morado
+  hypno:     ['#3a0a5a', '#8a3cc8', '#d070e8', '#ff9ee0', '#ffffff']             // ondas hipnóticas del anime: rosa y violeta
 };
 const RAINBOW = ['#ff5fb0', '#ffe066', '#7de3ff', '#9fe23a'];
 
@@ -81,6 +82,15 @@ FLT['Rayo Confuso'] = (s, a, an) => {                                          /
   orb(s.x, s.y, 5, p);
   for(let i = 0; i < 3; i++){ const t = g.t * 6 + i * 2.09; Spark(s.x + Math.cos(t) * 11, s.y + Math.sin(t) * 11, 1, i === 0 ? '#ffffff' : p[3]); }
 };
+FLT['Hipnosis'] = (s, a, an) => {                                              // ondas hipnóticas (anillos rosa y violeta que se expanden) y, en el centro, el péndulo dorado que oscila
+  const p = STP.hypno, c = Math.cos(an), n = Math.sin(an), sw = Math.sin(g.t * 11);
+  for(let j = 0; j < 3; j++){ const u = (g.t * 1.7 + j / 3) % 1, r = 3 + 15 * u; ctx.globalAlpha = 1 - u * .8; Rg(s.x, s.y, r, j % 2 ? p[3] : p[2], r * .9, 2); }
+  ctx.globalAlpha = 1;
+  const px = s.x - n * sw * 8, py = s.y + c * sw * 8;                          // el péndulo se balancea de lado a lado, perpendicular al vuelo
+  Ln(s.x, s.y - 1, px, py, p[4], 1);
+  orb(px, py, 3, FXP.electrico); D(px - 1, py - 1, 1, '#ffffff');
+  for(let i = 0; i < 2; i++){ const t = g.t * 5 + i * 3.14; Spark(s.x + Math.cos(t) * 13, s.y + Math.sin(t) * 13, 1, i ? '#ffffff' : p[3]); }
+};
 
 // ---------- Estelas ----------
 TRL['Onda Trueno']  = {rate: 40, cols: ['#ffd91f', '#fff27a', '#ffffff'], life: .2, speed: 30};
@@ -89,6 +99,7 @@ TRL['Fuego Fatuo']  = {rate: 44, cols: ['#4a2fc8', '#7a6bff', '#c4b8ff'], life: 
 TRL['Somnífero']    = {rate: 40, cols: ['#d4f08a', '#fff7b0', '#ffe9f8'], life: .6, rise: -.3, speed: 14, spread: 6, s: 1};
 TRL['Brecha Negra'] = {rate: 44, cols: ['#2a1250', '#5a2fa0', '#14082a'], life: .5, rise: .3, speed: 18, s: 2};
 TRL['Rayo Confuso'] = {rate: 30, cols: ['#b57aff', '#ffe066', '#ffffff'], life: .35, speed: 14, s: 1};
+TRL['Hipnosis']     = {rate: 34, cols: ['#d070e8', '#ff9ee0', '#8a3cc8'], life: .4, speed: 12, spread: 4, s: 1};
 
 // ---------- Impactos (estilo anime) ----------
 IMP['Onda Trueno'] = (e, a) => {                                               // anillos eléctricos que salen del rival + chispas recorriendo el cuerpo
@@ -150,6 +161,17 @@ IMP['Rayo Confuso'] = (e, a) => {                                              /
     spiral(e.x, hy, 3, 18, a * 7, 18, 2.2, v => v < .5 ? p[2] : p[3], 2, .4);
     for(let i = 0; i < 3; i++){ const t = a * 7 + i * 2.09; Star(e.x + Math.cos(t) * 20, hy + Math.sin(t) * 8, 4, 0, 3, i % 2 ? '#ffffff' : p[3], 1); }
     ctx.globalAlpha = 1; }
+};
+IMP['Hipnosis'] = (e, a) => {                                                  // anillos que se cierran sobre la cabeza del rival, ojos en espiral y el péndulo que se balancea; luego se duerme
+  const p = STP.hypno, b = bodyOf(e.T), hy = b.top + 2;
+  flashDisc(e, a, p, 3, 11, .1);
+  if(a < .75){ ctx.globalAlpha = fade(a, .5, .25);
+    for(let j = 0; j < 3; j++){ const u = ((a * 1.5 + j / 3) % 1), r = 30 * (1 - u) + 4; ctx.globalAlpha *= 1; Rg(e.x, hy, r, j % 2 ? p[3] : p[2], r * .4, 2); }
+    spiral(e.x, hy, 2, 15, a * 6, 18, 2.2, v => v < .5 ? p[3] : p[4], 2, .45);
+    const sw = Math.sin(a * 16), px = e.x + sw * 14, py = hy - 30 + Math.abs(sw) * 4;                 // péndulo dorado sobre la cabeza
+    Ln(e.x, hy - 42, px, py, p[4], 1); orb(px, py, 3, FXP.electrico); D(px - 1, py - 1, 1, '#ffffff');
+    ctx.globalAlpha = 1; }
+  if(a > .3 && a < .85){ ctx.globalAlpha = fade(a, .55, .3); const u = (a - .3) / .55; text('z', e.x + 14 + u * 8, b.top - 6 - u * 18, 8, '#c9d6f5', 'center'); text('Z', e.x + 20 + u * 10, b.top - 12 - u * 22, 11, '#c9d6f5', 'center'); ctx.globalAlpha = 1; }
 };
 
 // ---------- Aura del estado sobre el Pokémon (mientras dura) ----------

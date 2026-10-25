@@ -82,7 +82,7 @@ Pokédex y Gachapon usan save.box (los que tienes), save.shiny, save.fav, save.n
 - **Chapa Dorada** (60 PB, `objetos/ivs/chapa-dorada.png`): +5 a un IV. **Chapa Plateada** (40 PB, `objetos/ivs/Chapa-plateada.png`): +10 EV a un stat. Los límites son los reales de los juegos: IV 0-31 por stat (186 en total) y EV 252 por stat útiles (el máximo teórico es 255) y 510 en total.
 - **Restablecer** (en Ver datos): «↺ Restablecer IVs» vuelve los IV a 0 y devuelve las Chapas Doradas gastadas en ese Pokémon; «↺ Restablecer EVs» quita los EVs que dieron las Chapas Plateadas (los ganados en combate se quedan) y las devuelve. Pide confirmación. Datos: `save.ivBase`, `save.evCap`, `save.capUsed`.
 - **Todos los Pokémon empiezan con IV 0 y EV 0 en todo** (da igual cuál sea o cómo lo consigas). La única forma de subirlos es gastar Chapas Doradas (IV) y Plateadas (EV) en la ficha. Las chapas se consiguen en la tienda y como recompensa al vencer a los líderes (5 + 5). Así cada chapa tiene sentido. **Menta** (120 PB): cambia la naturaleza a la que elijas. **Cápsula de Habilidad** (150 PB): cambia a la otra habilidad. **MT**: enseña un movimiento y sustituye al que haya en ese hueco (golpe, disparo, mejora o fuerte).
-- **MTs siempre a la venta (provisional, para probar):** los 6 ataques de estado (Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra y Rayo Confuso) están siempre en la tienda, además de los 8 del día, con 10 unidades al día de cada uno. Están en `TRAIN.mtFixed` (`js/training.js`): para devolverlos a la rotación normal, deja esa lista vacía (`mtFixed: []`).
+- **MTs siempre a la venta (provisional, para probar):** los 7 ataques de estado (Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis) y **Bola Sombra** están siempre en la tienda, además de los 8 del día, con 10 unidades al día de cada uno. Están en `TRAIN.mtFixed` (`js/training.js`): para devolverlos a la rotación normal, deja esa lista vacía (`mtFixed: []`).
 - **MTs del día** (Tienda > MTs del día): 8 MTs (2 por hueco), 3 unidades de cada uno, precio según el hueco (70-130 PB). Cambian solos a medianoche (hora del ordenador); salen del número de día, así que no hace falta guardar nada.
 - Los IV y EV ya **no se sortean ni se ganan en combate** (`TRAIN.evPerFoe = 0`; si quieres que los rivales vuelvan a dar EVs, ponlo en 4). Para que el juego siga siendo justo, la referencia de las estadísticas es ahora «IV 0, EV 0, naturaleza neutra» (multiplicador ×1,00 en `refStat`), así que los rivales (que sí llevan IV 31 y EV) resultan relativamente más difíciles hasta que entrenes con chapas. Si te pasas de difícil, baja `ENEMY_POWER`.
 - **Partidas antiguas:** al cargar un guardado anterior (`trainV` menor que 2) se ponen a 0 todos los IV y EV y se **devuelven las chapas** que habías gastado, para que las vuelvas a gastar como quieras.
@@ -629,6 +629,7 @@ Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 | Somnífero | Planta | 28 |
 | Brecha Negra | Siniestro | 1 (solo Darkrai) |
 | Rayo Confuso | Fantasma | 159 |
+| Hipnosis | Psíquico | 65 |
 
 **Ataque fuerte (E): 19 ataques**
 
@@ -657,8 +658,8 @@ Son **99 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1
 ## Restos (rebalanceo)
 Los **Restos** curaban un 1,5% de la vida máxima **cada segundo** (≈90% por minuto), demasiado para un juego en tiempo real: los tanques rivales casi no se podían matar. Ahora curan un **0,4% por segundo** (≈24% por minuto; en los juegos es 1/16 por turno). Vale igual para ti y para los rivales. El número es `IFX.restos` en `js/data.js` (`.004`); súbelo o bájalo si quieres otro equilibrio.
 
-## Ataques de estado: Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra y Rayo Confuso (js/status.js, js/fxstatus.js)
-Son 6 ataques nuevos del **hueco 3 (tecla Q)**. Compiten con las mejoras (Afilar, Danza Espada...): en ese hueco solo cabe un movimiento. Se consiguen con **MT** (tienda, MTs del día) y se enseñan igual que los demás. Nadie los lleva de serie.
+## Ataques de estado: Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis (js/status.js, js/fxstatus.js)
+Son 7 ataques nuevos del **hueco 3 (tecla Q)**. Compiten con las mejoras (Afilar, Danza Espada...): en ese hueco solo cabe un movimiento. Se consiguen con **MT** (tienda, MTs del día) y se enseñan igual que los demás. Nadie los lleva de serie.
 
 Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el rival recibe un **estado**. Cuestan lo mismo que cualquier Q (energía 20, recarga 10 s).
 
@@ -670,21 +671,22 @@ Cada uno lanza un **proyectil sin daño** (se puede esquivar). Si impacta, el ri
 | Somnífero | Planta | Dormido, 2 s | No se mueve ni ataca. Es un polvo: los tipo Planta no se ven afectados. | 28 |
 | Brecha Negra | Siniestro | Dormido, 2,5 s | Igual que Somnífero, pero afecta a todos los tipos. **Solo la puede aprender Darkrai.** | 1 |
 | Rayo Confuso | Fantasma | Confuso, 4 s | El 33 % de sus ataques se los hace a sí mismo (con la mitad de la fuerza de su golpe). | 159 |
+| Hipnosis | Psíquico | Dormido, 2 s | Como Somnífero, pero **funciona con los tipo Planta** y **a veces falla** (acierta el 70 % de las veces que el proyectil toca; en los juegos tiene un 60 % de precisión). Al ser Psíquico, no afecta a los tipo Siniestro. Lo aprenden 65 especies según los juegos oficiales (Drowzee, Hypno, Gastly, Haunter, Gengar, Exeggcute, Exeggutor, Hoothoot, Noctowl, Darkrai, Munna, Musharna...). | 65 |
 
 **Reglas:**
 - Solo un estado entre paralizado, envenenado, quemado y dormido. Si ya tiene uno, el ataque no hace nada (sale «Ya tiene un estado»). La **confusión** se puede sumar a otro estado.
-- **Inmunidades** (las de los juegos): los Eléctricos no se paralizan, los Veneno y Acero no se envenenan, los Fuego no se queman. Además, el tipo del ataque también cuenta: Onda Trueno no afecta a Tierra, Rayo Confuso no afecta a Normal, Tóxico no afecta a Acero y Somnífero no afecta a Planta.
+- **Inmunidades** (las de los juegos): los Eléctricos no se paralizan, los Veneno y Acero no se envenenan, los Fuego no se queman. Además, el tipo del ataque también cuenta: Onda Trueno no afecta a Tierra, Rayo Confuso no afecta a Normal, Tóxico no afecta a Acero y Somnífero no afecta a Planta e Hipnosis no afecta a Siniestro.
 - Al despertar, un Pokémon no se puede volver a dormir durante 5 s.
 - Los estados desaparecen al debilitarse el Pokémon o al salir del combate (cambio de Pokémon). Veneno y quemadura sí pueden debilitar.
 - Se ve en la tarjeta (etiqueta PAR, TOX, QUE, DRM o CNF bajo el retrato), sobre la barra de vida del Pokémon, y con una aura en pixel art.
 
-**Dónde cambiar los números:** `STX` al principio de `js/status.js` (duraciones, daño por segundo, velocidad del proyectil...). `STATUS_MOVES` dice qué estado pone cada ataque y a qué tipos no afecta.
+**Dónde cambiar los números:** `STX` al principio de `js/status.js` (duraciones, daño por segundo, velocidad del proyectil...). `STATUS_MOVES` dice qué estado pone cada ataque, a qué tipos no afecta y, con `acc`, qué probabilidad tiene de acertar cuando el proyectil toca (solo Hipnosis, `acc: .7`).
 
 **Cómo está hecho:**
 - `js/status.js`: los estados (`statusInflict`, `statusTick`, `statusBlock`...). `js/combat.js` solo llama a esas funciones: `use()` (dormido, paralizado, confuso, quemado y el proyectil de estado), `move()` (velocidad) y `update()` (el paso del tiempo y el impacto del proyectil).
-- `js/moves.js`: los 6 ataques están en `EXTRA_MOVES` (hueco 3), así que no los lleva ningún Pokémon por defecto.
+- `js/moves.js`: los 7 ataques están en `EXTRA_MOVES` (hueco 3), así que no los lleva ningún Pokémon por defecto.
 - `tools/gen_learnsets.py`: tienen su nombre de PokéAPI en `MOVES_ES` y Brecha Negra está forzada a Darkrai en `ONLY`.
-- **Sprites:** los dibujos están hechos por código en `js/fxstatus.js` y copian el aspecto del anime: Onda Trueno = anillos eléctricos amarillos que se expanden y chispas que recorren el cuerpo; Tóxico = gota de veneno morado con burbujas que chorrea; Fuego Fatuo = llamitas azul-violeta que giran y luego se alzan alrededor del rival; Somnífero = polvo brillante verde-amarillo que cae sobre el rival; Brecha Negra = esfera de vacío con remolino que se abre bajo el rival; Rayo Confuso = orbe espectral con cinta ondulante y espirales de luz. Proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`. Si algún día tienes sprites propios, solo hay que sustituir esas funciones.
+- **Sprites:** los dibujos están hechos por código en `js/fxstatus.js` y copian el aspecto del anime: Onda Trueno = anillos eléctricos amarillos que se expanden y chispas que recorren el cuerpo; Tóxico = gota de veneno morado con burbujas que chorrea; Fuego Fatuo = llamitas azul-violeta que giran y luego se alzan alrededor del rival; Somnífero = polvo brillante verde-amarillo que cae sobre el rival; Brecha Negra = esfera de vacío con remolino que se abre bajo el rival; Rayo Confuso = orbe espectral con cinta ondulante y espirales de luz; Hipnosis = ondas hipnóticas rosas y violetas que se expanden con el péndulo dorado balanceándose en el centro, y al impactar anillos que se cierran sobre la cabeza del rival, ojos en espiral, el péndulo sobre él y las «z» del sueño. Proyectil `FLT`, estela `TRL`, impacto `IMP`, aura `fxStatusAura` y etiquetas `statusChips`. Si algún día tienes sprites propios, solo hay que sustituir esas funciones.
 - Los rivales **todavía no usan** estos ataques (de momento solo el jugador).
 
 ## Barra de energía y tiempos de los ataques (js/render.js)

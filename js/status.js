@@ -1,7 +1,7 @@
 "use strict";
 /* =====================================================================
    15) ESTADOS: paralizado, envenenado, quemado, dormido y confuso
-   Se aplican con 6 ataques del hueco 3 (Q): Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra y Rayo Confuso.
+   Se aplican con 7 ataques del hueco 3 (Q): Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis.
    Cada uno lanza un proyectil SIN daño (se puede esquivar). Si impacta, el rival recibe el estado.
    Todos los números están en STX: cámbialos aquí para equilibrar el juego.
    Los dibujos de cada ataque están en js/fxstatus.js.
@@ -24,7 +24,8 @@ const STATUS_MOVES = {
   'Fuego Fatuo':  {k: 'brn', desc: 'Lanza llamas fantasmales que queman al rival.'},
   'Somnífero':    {k: 'slp', immune: ['planta'], desc: 'Lanza un polvo que duerme al rival.'},
   'Brecha Negra': {k: 'slp', dur: 2.5, desc: 'Lanza una esfera oscura que duerme al rival. Solo la usa Darkrai.'},
-  'Rayo Confuso': {k: 'cnf', desc: 'Lanza una luz extraña que confunde al rival.'}
+  'Rayo Confuso': {k: 'cnf', desc: 'Lanza una luz extraña que confunde al rival.'},
+  'Hipnosis':     {k: 'slp', acc: .7, desc: 'Un péndulo y ondas hipnóticas duermen al rival. A veces falla (como en los juegos, donde tiene un 60 % de precisión).'}
 };
 const STATUS_INFO = {
   par: {n: 'Paralizado',  txt: '¡Paralizado!',  ab: 'PAR', c: '#f8d030'},
@@ -71,6 +72,7 @@ function statusShotHit(T, s){
   if(eff(s.type, T.m.types) === 0 || (sm.immune && sm.immune.some(t => T.m.types.includes(t)))){     // el tipo del ataque no le afecta (Tierra · Normal · Acero · Planta)
     popAt(T, 'Sin efecto', '#c8c8d4'); fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 6, 70); return;
   }
+  if(sm.acc && Math.random() > sm.acc){ popAt(T, '¡Falló!', '#c8c8d4'); fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 5, 60); return; }     // precisión del ataque (Hipnosis)
   if(statusInflict(T, sm.k, sm.dur || STX[sm.k].dur)) fxHit(T, s.status, s.type, 1, false, false, s.o);
   else fxBurst(T.x, T.y - 6, ['#ffffff', '#c8c8d4'], 5, 60);
 }

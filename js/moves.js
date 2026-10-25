@@ -36,7 +36,7 @@ const EXTRA_MOVES = {
   'Cabezazo':['normal',1], 'Golpe Cuerpo':['normal',1], 'Doble Filo':['normal',2], 'Amnesia':['psiquico',3], 'Danza Espada':['normal',3],
   'Agilidad':['psiquico',3], 'Refugio':['agua',3],
   // Ataques de estado (hueco 3): no los tiene nadie de serie, solo se aprenden con MT (ver js/status.js)
-  'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3]
+  'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3]
 };
 // Nombre -> {t: tipo, s: hueco}
 const MOVES = {};
