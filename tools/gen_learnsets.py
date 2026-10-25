@@ -47,6 +47,7 @@ MOVES_ES = {
  'Onda Trueno':'thunder-wave','Tóxico':'toxic','Fuego Fatuo':'will-o-wisp','Somnífero':'sleep-powder','Brecha Negra':'dark-void','Rayo Confuso':'confuse-ray',
  'Hipnosis':'hypnosis',
  'Puño Fuego':'fire-punch','Puño Hielo':'ice-punch','Puño Trueno':'thunder-punch','Puño Bala':'bullet-punch','Puño Sombra':'shadow-punch',
+ 'Shuriken de Agua':'water-shuriken',
 }
 # Movimientos exclusivos de un solo Pokémon (se fuerzan, da igual lo que digan los datos): Brecha Negra solo la usa Darkrai (nº 491)
 ONLY = {'Brecha Negra': [491]}

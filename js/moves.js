@@ -14,7 +14,7 @@
 const MOVESET = {
   normal:   {1:['Placaje','Arañazo','Ataque Rápido'],      2:['Triataque'],                      3:['Afilar'],             4:['Hiperrayo']},
   fuego:    {1:['Colmillo Ígneo','Puño Fuego'],                          2:['Ascuas','Lanzallamas'],            3:['Día Soleado'],        4:['Llamarada','Envite Ígneo']},
-  agua:     {1:['Acua Cola'],                               2:['Pistola Agua','Hidropulso'],       3:['Danza Lluvia'],       4:['Hidrobomba']},
+  agua:     {1:['Acua Cola'],                               2:['Pistola Agua','Hidropulso','Shuriken de Agua'], 3:['Danza Lluvia'],       4:['Hidrobomba']},
   planta:   {1:['Látigo Cepa'],                             2:['Hoja Afilada'],                    3:['Desarrollo'],         4:['Rayo Solar']},
   electrico:{1:['Colmillo Rayo','Puño Trueno'],                           2:['Impactrueno','Rayo'],              3:['Carga'],              4:['Trueno']},
   hielo:    {1:['Colmillo Hielo','Puño Hielo'],                          2:['Rayo Hielo','Nieve Polvo'],        3:['Neblina'],            4:['Ventisca']},
@@ -46,9 +46,11 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
 ['Colmillo Ígneo','Garra Dragón','Lanzallamas','Hidropulso','Bomba Lodo','Pulso Dragón','Lengüetazo','Maldición','Danza Dragón','Bola Sombra','Cometa Draco','Envite Ígneo','Llamarada','Hidrobomba','Hiperrayo']
   .forEach(n => { if(!MOVES[n]) console.warn('Falta el movimiento', n); });
 
-// Los PUÑOS (js/fxpunch.js): como golpe inicial solo los lleva quien de verdad los puede aprender en los juegos (datos de js/learnsets.js).
-// El resto de Pokémon de ese tipo se queda con el golpe de siempre, así que sus ataques no cambian.
-const PUNCHES = new Set(['Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra']);
+// Movimientos que de serie solo lleva quien de verdad los puede aprender en los juegos (datos de js/learnsets.js):
+// los PUÑOS (js/fxpunch.js) y el Shuriken de Agua (js/fxshuriken.js). El resto de Pokémon de ese tipo se queda con su ataque de siempre.
+const PUNCHES = new Set(['Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
+// Ataque propio de un Pokémon concreto: {nº Pokédex: {hueco: ataque}}. Greninja (siniestro) lleva el Shuriken de Agua, que es de agua.
+const SIGNATURE = {658: {2:'Shuriken de Agua'}};
 const learnHas = (n, dex) => {                      // ¿está el número de Pokédex en la lista de LEARN[n]? (LEARN_SET se crea después, en training.js)
   const txt = (typeof LEARN !== 'undefined' && LEARN[n]) || '';
   return txt.split(',').some(r => { if(!r) return false; const [a, b] = r.split('-').map(Number); return dex >= a && dex <= (b || a); });
@@ -59,4 +61,5 @@ DEX.forEach(m => {
   if(m.mv) return;
   const t1 = m.types[0], t2 = m.types[1] || t1, pick = (t, s, k) => { const l = MOVESET[t][s].filter(n => !PUNCHES.has(n) || learnHas(n, m.dex)); return l[(m.dex + k) % l.length]; };
   m.mv = [pick(t1, 1, 0), pick(t2, 2, 1), pick(t1, 3, 0), pick(t1, 4, 2)];
+  Object.entries(SIGNATURE[m.dex] || {}).forEach(([s, n]) => m.mv[s - 1] = n);
 });

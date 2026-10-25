@@ -555,8 +555,13 @@ Hay **5 golpes de puño** en el hueco 1 (clic izquierdo), cada uno con su propia
 - **Quién los lleva de serie:** solo un Pokémon que de verdad pueda aprenderlo en los juegos (`PUNCHES` y `learnHas()` en `js/moves.js`, con los datos de `js/learnsets.js`). A los demás Pokémon de ese tipo no les cambia nada, siguen con su golpe de siempre. Por eso `learnsets.js` se carga **antes** que `moves.js` en `index.html`.
 - **Para añadir otro puño:** ponlo en `MOVESET` (`js/moves.js`) y en `PUNCHES`, escribe su frase en `MOVE_DESC` (`js/moveinfo.js`), añade su nombre de PokéAPI a `MOVES_ES` (`tools/gen_learnsets.py`) y vuelve a generar `js/learnsets.js`, y crea su receta `MEL['Nombre']` y `FXC['Nombre']` en `js/fxpunch.js`.
 
+## Shuriken de Agua (el ataque de Greninja)
+Ataque de agua del hueco 2 (clic derecho), el que usa Greninja en los juegos (varios shuriken de agua seguidos) y en el anime (los forma con agua y los lanza girando). Animación en `js/fxshuriken.js`: salen 3 shuriken de agua en abanico, girando con una estela de gotas; al llegar dan tres cortes cruzados y salpican. Daño, energía y recarga salen de `MV[2]` como cualquier disparo pequeño.
+- **Quién lo lleva de serie:** solo Greninja (`SIGNATURE` en `js/moves.js`; es de tipo agua/siniestro y su hueco 2 normalmente sería de siniestro). Pueden aprenderlo con MT solo los 2 Pokémon que lo aprenden en los juegos: Greninja y Accelgor (`js/learnsets.js`).
+- **Más Excadrill:** Drilbur y Excadrill ahora tienen **Ímpetu Arena** (en `ABILITIES` de `js/data.js`), que dobla su velocidad con tormenta de arena. El Excadrill del Duque Wikstrom la lleva y usa Tormenta de Arena para activarla.
+
 ## Lista de ataques del juego (los que se pueden enseñar con MT)
-Son **104 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
+Son **105 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 1025 Pokémon pueden aprenderlo (datos de `js/learnsets.js`). Para añadir un ataque nuevo: ponlo en `MOVESET` (`js/moves.js`), añade su nombre a `MOVES_ES` en `tools/gen_learnsets.py` y vuelve a generar `js/learnsets.js`.
 
 **Golpe (clic izquierdo): 28 ataques**
 
@@ -598,6 +603,7 @@ Son **104 ataques**, repartidos en los 4 huecos. «Aprenden» = cuántos de los 
 | Bomba Imán | Acero | nadie |
 | Hidropulso | Agua | 198 |
 | Pistola Agua | Agua | 137 |
+| Shuriken de Agua | Agua | 2 |
 | Pin Misil | Bicho | 36 |
 | Zumbido | Bicho | 71 |
 | Dragoaliento | Dragón | 60 |
@@ -743,7 +749,7 @@ Las habilidades **ya funcionan** en el combate, tanto las de tus Pokémon (la qu
 | **Al entrar** | Intimidación (el rival hace un 7 % menos de daño; si entra varias veces, hasta −20 %) · Presión (el rival gasta un 7 % más de energía; el HUD ya lo enseña) · Sombra Trampa, Trampa Arena e Imán (no puedes cambiar de Pokémon a mano mientras estén delante; los Fantasma, los Voladores/Levitación y los Acero, respectivamente, se libran) · Sequía, Llovizna, Nevada y Chorro Arena (clima) |
 | **Al salir** | Regeneración (recupera ⅓ de la vida). Al salir cualquier Pokémon pierde sus subidas y bajadas. |
 | **Estados** | Insomnio (no se duerme) · Flexibilidad (no se paraliza) · Velo Agua (no se quema) · Ritmo Propio (no se confunde) · Despiste (no se enamora) · Sincronía (devuelve parálisis, veneno o quemadura) · Espejo Mágico (refleja los ataques de estado) · Madrugar (sueño a la mitad) · Cura Natural (estados un 40 % más cortos) · Mudar (12 % por segundo de curarse) · Muro Mágico (sin daño de veneno, quemadura, clima ni Vidasfera) · Cuerpo Puro, Humo Blanco y Corte Fuerte (inmunes a Intimidación) · Foco Interno (no se amedrenta) · Impasible (amedrentado = velocidad ×1,4) · Polvo Escudo (no le afectan amedrentar ni Toque Tóxico) · Rompemoldes (ignora las habilidades defensivas del rival) · Infiltrador (ignora Multiescala, Filtro, Sebo y el Chaleco Asalto) |
-| **Velocidad** | Clorofila (sol) y Nado Rápido (lluvia): ×1,5 · Impulso (+3 % por segundo, hasta +60 %) · Liviano (×1,5 al gastar la Banda Aguante) |
+| **Velocidad** | Clorofila (sol) y Nado Rápido (lluvia): ×1,5 · Ímpetu Arena (tormenta de arena): ×2, y no sufre la arena (la tiene Excadrill) · Impulso (+3 % por segundo, hasta +60 %) · Liviano (×1,5 al gastar la Banda Aguante) |
 | **Tiempo real (adaptadas)** | Indolente («un turno de cada dos» = espera ½ s tras cada ataque) · Bromista («los de estado van primero» = esos proyectiles vuelan ×1,5 y se recargan antes) · Sin Guarda y Ojo Compuesto (los proyectiles aciertan más fácil; Hipnosis no falla / falla menos) · Vista Lince (ignora la esquiva del rival) · Cabeza Roca (no se hace daño con la Vidasfera) |
 
 **Clima** (`abWeather`): lo ponen Sequía (sol), Llovizna (lluvia), Nevada (granizo) y Chorro Arena (arena) al entrar el Pokémon; dura **20 s** (`ABX.climaDur`) y el último que entra manda. Se ve un velo con partículas y un cartel «SOL 14» arriba. Efectos: **sol** Fuego ×1,5 y Agua ×0,5; **lluvia** al revés; **arena** y **granizo** quitan un 0,4 % de la vida por segundo a quien no es de Roca/Tierra/Acero (arena) o de Hielo (granizo). Cura Lluvia y Piel Seca se curan con lluvia; Cuerpo Gélido con granizo.

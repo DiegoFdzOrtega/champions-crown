@@ -6,6 +6,14 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Shuriken de Agua e Ímpetu Arena', date:'26 oct 2026', sections:[
+    {t:'Ataques nuevos', i:[
+      'Llega el Shuriken de Agua, el ataque de Greninja: lanza tres shuriken de agua giratorios que se clavan en el rival. Greninja ya lo lleva de serie.',
+      'Se puede enseñar con MT en la tienda a Greninja y a Accelgor, los únicos Pokémon que lo aprenden en los juegos.']},
+    {t:'Habilidades', i:[
+      'Nueva habilidad Ímpetu Arena: dobla la Velocidad con tormenta de arena y no sufre la arena. Es la de Drilbur y Excadrill (cambia a Robustez, que tenían antes).',
+      'El Excadrill del Duque Wikstrom la usa con Tormenta de Arena para activarla.']}
+  ]},
   {v:'7 entrenadores nuevos en Difícil', date:'26 oct 2026', sections:[
     {t:'Campo de Entrenamiento', i:[
       'La dificultad Difícil pasa de 3 a 10 entrenadores: Ocultista, Ivor, Maestro Kamado, Chica Kimono, Palmer, Veterano y Duque Wikstrom.',

@@ -210,7 +210,7 @@ const CAMPO = [
     P(681, 'Modesta', 'Cambio Táctico', 'aguante',   {hp:252, spa:252, spd:4}, ['Garra Metal',  'Tinieblas',       'Danza Espada',    'Foco Resplandor']), // Aegislash: la espada del duque
     P(212, 'Firme',   'Técnico',        'vidasfera', {atk:252, hp:252, spe:4}, ['Puño Bala',    'Bomba Imán',      'Danza Espada',    'Megacuerno']),      // Scizor: el puño de acero
     P(823, 'Osada',   'Presión',        'restos',    {hp:252, def:252, atk:4}, ['Ataque Ala',   'Tajo Aéreo',      'Defensa Férrea',  'Pájaro Osado']),    // Corviknight: el corcel blindado
-    P(530, 'Alegre',  'Chorro Arena',   'cinturon',  {atk:252, spe:252, hp:4}, ['Excavar',      'Bomba Imán',      'Danza Espada',    'Terremoto'])        // Excadrill: el taladro de acero
+    P(530, 'Alegre',  'Ímpetu Arena',   'cinturon',  {atk:252, spe:252, hp:4}, ['Excavar',      'Bomba Imán',      'Tormenta de Arena','Terremoto'])        // Excadrill: el taladro de acero
   ]}
 ];
 

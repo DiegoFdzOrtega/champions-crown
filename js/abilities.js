@@ -38,6 +38,7 @@ const ABX = {
   absorb: .2,                         // Absorbe Agua/Fuego/Elec., Piel Seca: curan este % de la vida máxima en vez de recibir daño
   pararrayos: .2, pararrayosMax: 3,   // Pararrayos: +20 % de daño por cada ataque eléctrico absorbido (máx. 3)
   electromotor: 1.4,                  // Electromotor: velocidad ×1,4 tras absorber un ataque eléctrico
+  impetuArena: 2,                     // Ímpetu Arena: velocidad ×2 con tormenta de arena (y no la sufre)
   evade: .25,                         // Manto Níveo (con granizo) · Velo Arena (con tormenta de arena): 25 % de esquivar
   // --- efectos al contacto ---
   contact: .2, contactBrn: .06, hedor: .1, cursed: .08, cursedCd: 3, toqueToxico: .2,
@@ -231,7 +232,7 @@ function abTick(f, dt){
   if(f.truant > 0) f.truant -= dt;
   if(g.wx){
     const k = g.wx.k, ty = f.m.types;
-    if(k === 'sand' && !ty.some(t => ['roca', 'tierra', 'acero'].includes(t)) && a !== 'Velo Arena') abIndirect(f, f.max * ABX.chip * dt);
+    if(k === 'sand' && !ty.some(t => ['roca', 'tierra', 'acero'].includes(t)) && !['Velo Arena', 'Ímpetu Arena'].includes(a)) abIndirect(f, f.max * ABX.chip * dt);
     if(k === 'hail' && !ty.includes('hielo') && !['Manto Níveo', 'Cuerpo Gélido'].includes(a)) abIndirect(f, f.max * ABX.chip * dt);
     if(k === 'rain' && (a === 'Cura Lluvia' || a === 'Piel Seca')) f.hp = Math.min(f.max, f.hp + f.max * ABX.heal * dt);
     if(k === 'hail' && a === 'Cuerpo Gélido') f.hp = Math.min(f.max, f.hp + f.max * ABX.heal * dt);
@@ -246,6 +247,7 @@ function abSpeed(f){                                                            
   const a = f.ab;
   if(a === 'Clorofila' && wxIs('sun')) k *= ABX.clima;
   if(a === 'Nado Rápido' && wxIs('rain')) k *= ABX.clima;
+  if(a === 'Ímpetu Arena' && wxIs('sand')) k *= ABX.impetuArena;
   if(a === 'Impulso' && f.ax) k *= 1 + Math.min(ABX.impulsoMax, f.ax.t * ABX.impulso);
   if(a === 'Liviano' && f.ax && f.ax.light) k *= 1.5;
   return k;
@@ -388,6 +390,7 @@ Object.assign(ABIL_DESC, {
   'Intrépido': 'Normal y Lucha le dan a los Fantasma.',
   'Manto Níveo': 'Esquiva el 25 % de los golpes con granizo y no sufre el granizo.',
   'Velo Arena': 'Esquiva el 25 % de los golpes en tormenta de arena y no la sufre.',
+  'Ímpetu Arena': 'Con tormenta de arena duplica su Velocidad y no la sufre.',
   'Poder Solar': 'Con sol pega un 30 % más, pero pierde vida cada segundo.',
   'Don Floral': 'Con sol pega y aguanta un 20 % más.',
   'Cuerpo Gélido': 'Recupera vida cuando graniza y no sufre el granizo.',

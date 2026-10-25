@@ -23,7 +23,7 @@ const MOVE_DESC = {
   'Puño Trueno':'Un puñetazo cargado de electricidad que puede paralizar.', 'Puño Bala':'Dos puñetazos rapidísimos, duros como balas de acero.',
   'Puño Sombra':'Un puño hecho de sombra que sale de la nada y golpea al rival.',
   // ---- Disparos a distancia (clic derecho) ----
-  'Hidropulso':'Lanza una onda de agua que puede confundir.', 'Pistola Agua':'Dispara un chorro de agua a presión.',
+  'Hidropulso':'Lanza una onda de agua que puede confundir.', 'Pistola Agua':'Dispara un chorro de agua a presión.', 'Shuriken de Agua':'Lanza shuriken de agua que giran y dan varios golpes seguidos.',
   'Pin Misil':'Lanza agujas afiladas que dan varios golpes seguidos.', 'Zumbido':'Un zumbido que hace daño con ondas de sonido.',
   'Dragoaliento':'Echa un aliento de dragón que puede paralizar.', 'Pulso Dragón':'Lanza una onda de energía de dragón.',
   'Impactrueno':'Una descarga eléctrica pequeña que puede paralizar.', 'Rayo':'Un potente rayo eléctrico.',

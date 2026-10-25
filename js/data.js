@@ -130,6 +130,7 @@ const NATURES = [
 ];
 // Descripción y habilidad de cada Pokémon: rellénalas por número, p. ej. LORE[25] = '...'; ABILITIES[25] = 'Elec. Estática'
 const LORE = {}, ABILITIES = {};
+ABILITIES[529] = ABILITIES[530] = ['Ímpetu Arena', 'Cuerpo Puro'];   // Drilbur y Excadrill: Ímpetu Arena (Sand Rush) dobla la Velocidad en tormenta de arena
 const STAT_NAMES = {hp:'PS', atk:'Ataque', def:'Defensa', spa:'At. Esp.', spd:'Def. Esp.', spe:'Velocidad'};
 
 // Historia de Kanto: 8 líderes + Alto Mando (4) + Campeón. 'id' es el nombre de su imagen (ver LEADER_PATHS).
