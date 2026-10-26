@@ -204,6 +204,9 @@ const BANNERS = Object.fromEntries(Object.keys(REGION_DEX).map(r => [r, r]));   
 // Probabilidad de cada rareza en una tirada. El resto de Pokémon sale "Común". Shiny es aparte.
 const GACHA_RATES = {legendary:.01, epic:.04, rare:.15, uncommon:.30, common:.50};
 const SHINY_RATE = .01;
+// AMULETO ARCOÍRIS: al completar la Pokédex de una región (logro «Pokédex de ...») te dan el Amuleto Arcoíris de esa región. Mientras lo tengas, las tiradas del
+// Gachapon de ESA región sacan shiny con CHARM_RATE en vez de SHINY_RATE (3 % en vez de 1 %: el triple, como en los juegos). Se guarda en save.charms {Región:true}.
+const CHARM_RATE = .03, CHARM_IMG = 'objetos/amuleto/Amuleto_Iris.png';
 const PITY_MAX = 70;          // tiradas sin legendaria: a la nº 70 sale una sí o sí
 const DUP_BP = {common:5, uncommon:10, rare:25, epic:60, legendary:150};   // monedas (PB) por un repetido
 

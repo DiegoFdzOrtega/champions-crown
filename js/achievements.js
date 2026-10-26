@@ -14,7 +14,9 @@
       "reward":{"bp":200,"tickets":0}}   recompensa: Puntos de Batalla y/o tickets de Gachapon
 
    MÉTRICAS (ACH_METRICS): leaders · elite · champion (combates de la Historia ya superados, por región o en total) ·
-   campo_wins (victorias totales en el Campo) · campo_tier (dificultad superada, 0/1) · pokemon_owned · shiny_owned.
+   campo_wins (victorias totales en el Campo) · campo_tier (dificultad superada, 0/1) · pokemon_owned · shiny_owned ·
+   dex_region (Pokémon que tienes de la Pokédex de una región; parámetro "region" con el nombre del Gachapon: Kanto, Johto...).
+   La recompensa también puede llevar "charm":"Kanto": entrega el AMULETO ARCOÍRIS de esa región (shiny más probable en su Gachapon; ver CHARM_RATE en data.js).
    Para añadir una métrica nueva: una línea en ACH_METRICS que devuelva un número.
 
    CÓMO SE COBRA (hay que RECLAMAR a mano)
@@ -88,7 +90,8 @@ const ACH_METRICS = {
   campo_wins:    () => Math.max(save.stats.campo || 0, Object.keys(save.campoWins).length),          // victorias totales (repetidas incluidas)
   campo_tier:    d => (typeof campoCleared === 'function' && campoCleared(d.tier)) ? 1 : 0,           // 1 = dificultad del Campo superada
   pokemon_owned: () => new Set(save.box).size,
-  shiny_owned:   () => new Set(save.shiny).size
+  shiny_owned:   () => new Set(save.shiny).size,
+  dex_region:    d => ownedIn(d.region)                                                                // Pokémon que tienes de esa región (sin contar los que aún no tienen sprite)
 };
 
 // ---- Registro y consulta ----
@@ -98,6 +101,11 @@ function registerAchievement(def){
   ACHIEVEMENTS.push(Object.assign({name:def.id, desc:'', icon:'trophy', cat:'historia', goal:0, reward:{bp:0, tickets:0}}, def));
 }
 ACHIEVEMENT_DATA.forEach(registerAchievement);
+// Un logro «Pokédex de <región>» por cada región del Gachapon: te da BP, tickets y el AMULETO ARCOÍRIS de esa región. El objetivo es el nº de Pokémon de la región que
+// ya tienen sprite (regionSize, data.js): al añadir sprites nuevos el objetivo sube solo.
+REGIONS_DEX.filter(r => regionSize(r.a, r.b) > 0).forEach(r => registerAchievement({id:'dex_' + r.n.toLowerCase(), cat:'coleccion', name:'Pokédex de ' + r.n,
+  desc:`Consigue todos los Pokémon de ${r.n}. Te dan su Amuleto Arcoíris: más shiny en el Gachapon de ${r.n}.`, icon:'dex', metric:'dex_region', region:r.n, goal:regionSize(r.a, r.b),
+  reward:{bp:1500, tickets:10, charm:r.n}}));
 const achDef = id => ACHIEVEMENTS.find(a => a.id === id);
 function achGet(id){                                // estado de un logro (no modifica nada). Las partidas antiguas ya tenían "date" = cobrado
   const s = save.ach[id], d = achDef(id), claimed = !!(s && s.date);
@@ -105,13 +113,14 @@ function achGet(id){                                // estado de un logro (no mo
 }
 const achClaimedCount = () => ACHIEVEMENTS.filter(a => achGet(a.id).claimed).length;
 const achReadyCount = () => ACHIEVEMENTS.filter(a => { const s = achGet(a.id); return s.done && !s.claimed; }).length;
-const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : ''].filter(Boolean).join(' + ') : '';
+const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : ''].filter(Boolean).join(' + ') : '';
 
 // ---- Recompensa: Puntos de Batalla y/o tickets de Gachapon ----
 function achGrant(r){
   if(!r) return;
   if(r.bp) save.bp += r.bp;
   if(r.tickets) save.tickets += r.tickets;
+  if(r.charm) save.charms[r.charm] = true;
   if(typeof refreshHud === 'function') refreshHud();
 }
 function achComplete(id){                           // marca el logro como completado (NO da la recompensa: hay que reclamarla)
@@ -193,6 +202,7 @@ function achRender(){
         const n = document.createElement('small'); n.textContent = `${s.done ? a.goal : Math.min(s.progress, a.goal)} / ${a.goal}`; t.appendChild(n);
       }
       const rw = document.createElement('span'); rw.className = 'arw'; rw.textContent = (s.claimed ? '✓ Recibido: ' : 'Recompensa: ') + achRewardText(a.reward); t.appendChild(rw);
+      if(a.reward && a.reward.charm){ const im = new Image(); im.className = 'acharm'; im.alt = 'Amuleto Arcoíris'; im.src = CHARM_IMG; t.appendChild(im); }
       if(s.done && !s.claimed){                                                      // completado: botón para reclamar
         const bt = document.createElement('button'); bt.className = 'main aclaim'; bt.textContent = 'Reclamar';
         bt.onclick = () => { achClaim(a.id); achRender(); }; t.appendChild(bt);

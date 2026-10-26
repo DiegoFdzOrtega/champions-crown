@@ -78,12 +78,13 @@ function renderGacha(){
   $('gcRight').style.setProperty('--c', col);
   $('gcRight').innerHTML = `<h3>Probabilidades</h3>
     <table class="ptbl"><tr><th>Rareza</th><th>Prob.</th><th>Tienes</th></tr>${RARITIES.map(row).join('')}
-      <tr style="--c:#fff"><td>⭐ Shiny</td><td class="pc">${(SHINY_RATE * 100).toFixed(0)}%</td><td>${shinyIn(reg)}/${total}</td></tr></table>
+      <tr style="--c:#fff"><td>⭐ Shiny</td><td class="pc">${(shinyRate(reg) * 100).toFixed(0)}%${save.charms[reg] ? ' 🌈' : ''}</td><td>${shinyIn(reg)}/${total}</td></tr></table>
     <h3>Reglas</h3>
     <ul class="rules">
       <li>La tirada <b>x10 especial</b> garantiza una <b>Legendaria</b>.</li>
       <li><b>Pity:</b> a las ${PITY_MAX} tiradas sin legendaria, la siguiente lo es (se cuenta por región).</li>
       <li>El <b>shiny</b> puede salir con cualquier rareza.</li>
+      <li>${save.charms[reg] ? `🌈 Tienes el <b>Amuleto Arcoíris de ${reg}</b>: shiny al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.` : `🌈 Completa la Pokédex de ${reg} y ganarás su <b>Amuleto Arcoíris</b>: el shiny sube del ${(SHINY_RATE * 100).toFixed(0)}% al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.`}</li>
       <li>Los <b>repetidos</b> te dan monedas (PB): ${RARITIES.map(r => r.ic + ' ' + DUP_BP[r.id]).join(' · ')}.</li>
       <li>Los tickets se consiguen <b>jugando</b>: la primera vez que vences a cada líder te dan uno. También puedes comprarlos en la tienda.</li>
     </ul>`;

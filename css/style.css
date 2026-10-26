@@ -468,6 +468,7 @@ button.leg:disabled{box-shadow:none}
 .abar{height:.9rem;background:#0d1117;border:2px solid #2d3748;margin:.4rem 0}
 .abar i{display:block;height:100%;background:#3ea6ff}
 .ach small{font-size:.7rem;color:#8b98ad}
+.ach .acharm{width:2.8rem;height:2.8rem;image-rendering:pixelated;margin-left:.6rem;vertical-align:middle}
 .ast{display:block;font-size:.7rem;margin-top:.5rem;color:#6d7899}
 .ach.done .ast{color:#ffcc33}
 

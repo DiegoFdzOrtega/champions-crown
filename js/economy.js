@@ -39,11 +39,12 @@ function rollRarity(){
   for(const id of ['legendary','epic','rare','uncommon']){ if((r -= GACHA_RATES[id]) < 0) return id; }
   return 'common';
 }
+const shinyRate = reg => (save.charms && save.charms[reg]) ? CHARM_RATE : SHINY_RATE;      // probabilidad de shiny en las tiradas de esa región (sube con su Amuleto Arcoíris)
 // Una tirada: rareza -> Pokémon de la región -> ¿shiny?
 function rollOne(reg, rar){
   const list = pool(reg, rar || rollRarity());
   const dex = rnd(list.length ? list : pool(reg, 'common'));
-  return {dex, rarity: DEX[dex-1].rar, shiny: Math.random() < SHINY_RATE};
+  return {dex, rarity: DEX[dex-1].rar, shiny: Math.random() < shinyRate(reg)};
 }
 // Cuántos tickets cuesta cada modo: x1 = 1 normal, x10 = 10 normales, special = 1 legendario (x10 con legendaria)
 const GACHA_COST = {one:{n:1, l:0, pulls:1}, ten:{n:10, l:0, pulls:10}, special:{n:0, l:1, pulls:10}};

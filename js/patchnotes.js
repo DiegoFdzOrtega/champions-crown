@@ -6,6 +6,12 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Amuleto Arcoíris', date:'26 oct 2026', sections:[
+    {t:'Colección', i:[
+      'Nuevos logros «Pokédex de Kanto, Johto, Hoenn...»: completa la Pokédex de una región y, al reclamar el logro, te dan el Amuleto Arcoíris de esa región (más 1500 BP y 10 tickets).',
+      'Con el amuleto, el shiny sale al 3% en vez del 1% en el Gachapon de esa región. Cada región tiene el suyo.',
+      'Lo ves en la Mochila, en el logro y en la tabla de probabilidades del Gachapon.']}
+  ]},
   {v:'Teselia: la quinta Liga', date:'26 oct 2026', sections:[
     {t:'Historia', i:[
       'Llega Teselia (Unova): 10 combates de gimnasio, Alto Mando de 4 y el Campeón Mirto, 15 combates con 6 Pokémon cada uno. Se abre al ser Campeona de Sinnoh.',

@@ -11,6 +11,8 @@ function bagSections(){
   const tk = [['ticket_n', 'Ticket Gachapon', save.tickets, 'Se gasta en el Gachapon para conseguir Pokémon.'], ['ticket_l', 'Ticket Legendario', save.ticketsL, 'Se gasta en el Gachapon para intentar un Pokémon legendario.']]
     .filter(([, n, c]) => c > 0 && has(n)).map(([id, n, c, d]) => ({id, n, c, d, tk: id === 'ticket_l' ? '#ffcc33' : '#ff3ea5'}));
   if(tk.length) out.push({t:'Tickets', list:tk});
+  const ch = REGIONS_DEX.filter(r => save.charms[r.n] && has('Amuleto Arcoíris de ' + r.n)).map(r => ({id:'charm_' + r.n, n:'Amuleto Arcoíris de ' + r.n, c:1, d:`Mientras lo tengas, el shiny sale al ${(CHARM_RATE * 100).toFixed(0)}% (en vez del ${(SHINY_RATE * 100).toFixed(0)}%) en el Gachapon de ${r.n}. Lo ganaste al completar su Pokédex.`, img:CHARM_IMG}));
+  if(ch.length) out.push({t:'Amuletos', list:ch});
   const up = Object.keys(CONS).filter(id => held(id) > 0 && has(CONS[id].n)).map(id => ({id, n:CONS[id].n, c:held(id), d:CONS[id].d, img:CONS[id].icon}));
   if(up.length) out.push({t:'Mejoras', list:up, note:'Se usan en Equipo Pokémon › Ver datos.'});
   const mt = Object.keys(MT_ID).filter(id => held(id) > 0 && has(itemName(id))).sort((a, b) => itemName(a).localeCompare(itemName(b), 'es'))

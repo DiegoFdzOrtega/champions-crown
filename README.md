@@ -443,6 +443,14 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 - Los entrenadores con `opt:true` (por ejemplo Cazabichos, que solo sale si existe su imagen) no cuentan.
 - Si prefieres que baste con vencer a UNO de cada dificultad, pon `CAMPO_BASTA_UNO = true` al principio de la sección "COMBATE Y RECOMPENSA" de `js/campo.js`.
 
+## Amuleto Arcoíris (shiny más probable): `CHARM_RATE` en js/data.js
+- **Cómo se consigue:** al completar la Pokédex de una región sale el logro **«Pokédex de <región>»** (Kanto 151, Johto 100, Hoenn 135, Sinnoh 107, Teselia 142, Kalos 71, Alola 84, Galar 89, Paldea 99: son los Pokémon de cada región que ya tienen sprite). Al **reclamarlo** recibes 1500 BP + 10 tickets + el **Amuleto Arcoíris de esa región**.
+- **Qué hace:** en el Gachapon **de esa región** el shiny sale al **3 %** en vez del 1 % (el triple, como en los juegos). Cada región tiene su propio amuleto; el de Kanto no afecta al Gachapon de Johto. Para cambiar el porcentaje: `CHARM_RATE` (y `SHINY_RATE` es el normal) en data.js.
+- **Dónde se ve:** en el logro (con su imagen), en la **Mochila › Amuletos** y en el Gachapon de esa región (tabla de probabilidades con 🌈 y una línea en Reglas). Se guarda en `save.charms` (`{Kanto:true}`) y sale en el JSON de la partida.
+- **Imagen:** `objetos/amuleto/Amuleto_Iris.png` (la misma para todas las regiones).
+- **Código:** la recompensa de un logro puede llevar `charm:'Kanto'` (achievements.js: `achGrant` lo guarda, `achRewardText` lo escribe); la métrica nueva es `dex_region`; la probabilidad la da `shinyRate(región)` (economy.js), que usa `rollOne`.
+- Si más adelante añades sprites a una región, su objetivo sube solo; quien ya reclamó el amuleto lo conserva.
+
 ## Shinys en el perfil y Pokémon de tu equipo en el menú
 - **Perfil › Pokémon favoritos**: al elegir un favorito que tengas en versión shiny (⭐ en su tarjeta) salen los botones **Normal / ⭐ Shiny**. Al elegir uno nuevo se marca la versión que usas en tu equipo (Equipo Pokémon). El favorito shiny se ve con su sprite shiny y el marco dorado. Solo se puede mostrar shiny si lo has conseguido. Se guarda en `save.profileSh` (`1` por cada favorito shiny; las partidas antiguas siguen valiendo).
 - **Menú principal**: los 3 Pokémon que dan vueltas por la torre (`menuMon()` en `js/background.js`) son los 3 de tu equipo, en el mismo orden. Si usas la versión shiny de alguno, sale shiny con brillo y destellos dorados (los demás tienen brillo azul). Si tu equipo está incompleto, se rellena con Dragonite, Charizard y Gengar.
@@ -464,7 +472,7 @@ Los combates de la Historia **ya no dan BP** (se quitaron los BP por combate y e
 {"id":"campo_10", "cat":"campo", "name":"Aprendiz", "desc":"Vence a 10 entrenadores en el Campo de Entrenamiento.",
  "icon":"campo", "metric":"campo_wins", "goal":10, "reward":{"bp":200, "tickets":0}}
 ```
-Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`, `campo_tier`, `pokemon_owned`, `shiny_owned`; con `region` o `tier` como parámetro) y `goal` = cuántos hacen falta. **Los logros se reclaman a mano.** `achSync()` recalcula todos y marca como **completados** los que se cumplan (se llama tras cada combate ganado, tras cada tirada del Gachapon, al abrir Logros y al arrancar; también cuenta lo que ya habías conseguido), pero **no da nada**: avisa con «Logro completado… ¡Reclama la recompensa en Logros!», la tarjeta se pone en verde con un botón **Reclamar** (y arriba **Reclamar todo**), y la miga «Logros» muestra un circulito rojo con cuántos tienes pendientes. `achClaim(id)` entrega la recompensa (`achGrant({bp, tickets})`) una sola vez. Se guarda en `save.ach[id] = {progress, done, date}`: `done` = fecha en que se completó y `date` = fecha en que se reclamó (las partidas antiguas, que solo tenían `date`, cuentan como ya reclamadas). Se cuentan las victorias totales del Campo en `save.stats.campo`.
+Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`, `campo_tier`, `pokemon_owned`, `shiny_owned`, `dex_region`; con `region` o `tier` como parámetro) y `goal` = cuántos hacen falta. **Los logros se reclaman a mano.** `achSync()` recalcula todos y marca como **completados** los que se cumplan (se llama tras cada combate ganado, tras cada tirada del Gachapon, al abrir Logros y al arrancar; también cuenta lo que ya habías conseguido), pero **no da nada**: avisa con «Logro completado… ¡Reclama la recompensa en Logros!», la tarjeta se pone en verde con un botón **Reclamar** (y arriba **Reclamar todo**), y la miga «Logros» muestra un circulito rojo con cuántos tienes pendientes. `achClaim(id)` entrega la recompensa (`achGrant({bp, tickets})`) una sola vez. Se guarda en `save.ach[id] = {progress, done, date}`: `done` = fecha en que se completó y `date` = fecha en que se reclamó (las partidas antiguas, que solo tenían `date`, cuentan como ya reclamadas). Se cuentan las victorias totales del Campo en `save.stats.campo`.
 | Logro | Qué hay que hacer | Recompensa |
 |---|---|---|
 | Primer gimnasio | Vencer a 1 líder | 100 BP + 1 ticket |
@@ -482,6 +490,7 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | Campo: Fácil / Media / Difícil superada | Vencer a todos los de esa dificultad | 300 · 500 + 3 · 800 + 6 (BP + tickets) |
 | Colección: 10 / 25 / 50 / 100 / 250 Pokémon | Pokémon diferentes | 100 · 200 + 1 · 300 + 3 · 600 + 5 · 1500 + 15 (BP + tickets) |
 | Shiny: 1 / 5 / 10 | Shinys diferentes | 500 + 5 · 1000 + 10 · 2000 + 20 (BP + tickets) |
+| Pokédex de cada región (9 logros) | Tener todos los Pokémon de esa región | 1500 BP + 10 tickets + **Amuleto Arcoíris** de esa región |
 Para añadir un logro: una línea nueva en `ACHIEVEMENT_DATA`. Para una condición nueva: una línea en `ACH_METRICS`.
 
 **Ajustes** (`openSettings` en `js/menu.js`) ahora solo tiene dos bloques, y se han quitado el nombre, los botones de prueba, la lista de música y el texto de controles:
