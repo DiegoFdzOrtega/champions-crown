@@ -34,7 +34,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/arenashoenn.js: los 13 fondos de combate de Hoenn
 - js/sinnoh.js: la **Historia de Sinnoh** (8 líderes, Alto Mando de 4 y Campeona Cintia, con sus equipos de Pokémon Platino y recompensas)
 - js/arenassinnoh.js: los 13 fondos de combate de Sinnoh
-- js/teselia.js: la **Historia de Teselia / Unova** (8 gimnasios —Gres con los 3 hermanos—, Alto Mando de 4 y Campeón Mirto, con sus equipos de Pokémon Blanco 2 / Negro 2 y recompensas)
+- js/teselia.js: la **Historia de Teselia / Unova** (10 combates de gimnasio —Gres son tres: Zeo, Maíz y Millo—, Alto Mando de 4 y Campeón Mirto, con sus equipos de Pokémon Blanco 2 / Negro 2 y recompensas)
 - js/arenasteselia.js: los 14 fondos de combate de Teselia (el de Caolín tiene dos versiones: Blanco y Negro)
 - js/campo.js: el **Campo de Entrenamiento** (30 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
 - js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate); cada MT tiene «Enseñar a un Pokémon» (mismas reglas que Ver datos)
@@ -340,38 +340,42 @@ Sinnoh usa **el mismo sistema que Johto y Hoenn** (`FLOORS` con `region:'Sinnoh'
 - Cintia: templo antiguo de la Liga con columnas colosales acanaladas con capiteles dorados, escalinata, portal de luz, friso con relieves, ventanales con haces de luz dorada, suelo de mármol negro con juntas de oro, emblema ancestral, símbolos tallados y braseros.
 
 ## Historia de Teselia / Unova (js/teselia.js, js/arenasteselia.js)
-Teselia usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Unova / Teselia'`, `floorsOf(...)`, `save.prog`, `save.champ`). Se abre al ser **Campeona de Sinnoh** (vencer a Cintia). Son **13 combates** (8 gimnasios, Alto Mando de 4 y el Campeón) y salen como "misteriosos" hasta que vences al anterior.
+Teselia usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Unova / Teselia'`, `floorsOf(...)`, `save.prog`, `save.champ`). Se abre al ser **Campeona de Sinnoh** (vencer a Cintia). Son **15 combates** (10 de gimnasio —Zeo, Maíz y Millo son tres combates seguidos en Ciudad Gres—, Alto Mando de 4 y el Campeón) y salen como "misteriosos" hasta que vences al anterior.
 
 **Versión de referencia:** Pokémon Blanco 2 / Negro 2 y el torneo de Líderes del Mundo, mezclando juego y anime. ⚠️ Los equipos de **Camila, Yakón, Gerania, Junco e Iris** están en parte aproximados (no pude leer su tabla completa): si no coinciden con tu juego, edita `TEAMS` en teselia.js. Todos llevan IVs 31, EVs (máx. 252 y 510 en total), naturaleza, habilidad, objeto y 4 movimientos; el último Pokémon de cada equipo es el As.
 
 | # | Entrenador | Tipo | Lugar | Equipo (objeto) |
 |---|---|---|---|---|
-| 1 | **Zeo, Maíz y Millo** (te toca uno al azar en cada intento) | Agua · Fuego · Planta | Ciudad Gres | Zeo: Crawdaunt, Samurott, Azumarill, Slowking, Seismitoad, Simipour · Maíz: Heatmor, Darmanitan, Arcanine, Camerupt, Emboar, Simisear · Millo: Ferrothorn, Serperior, Jumpluff, Whimsicott, Lilligant, Simisage |
-| 2 | Aloe | Normal | Ciudad Esmalte | Braviary, Cinccino, Kangaskhan, Sawsbuck, Lickilicky, Watchog |
-| 3 | Camus | Bicho | Ciudad Porcelana | Vespiquen, Crustle, Heracross, Accelgor, Durant, Leavanny |
-| 4 | Camila | Eléctrico | Ciudad Mayólica | Emolga, Galvantula, Ampharos, Eelektross, Jolteon, Zebstrika |
-| 5 | Yakón | Tierra | Ciudad Fayenza | Sandslash, Seismitoad, Krookodile, Hippowdon, Rhyperior, **Excadrill** (Ímpetu Arena) |
-| 6 | Gerania | Volador | Ciudad Loza | Swoobat, Unfezant, Skarmory, Sigilyph, Mandibuzz, Swanna |
-| 7 | Junco | Hielo | Ciudad Teja | Cryogonal, Vanilluxe, Glalie, Weavile, Mamoswine, Beartic |
-| 8 | Iris (tú le llamas Lirio) | Dragón | Ciudad Caolín | Druddigon, Archeops, Lapras, Aggron, Hydreigon, Haxorus (gimnasio **Blanco o Negro al azar**) |
-| 9 | Anís | Fantasma | Liga Pokémon | Cofagrigus, Drifblim, Golurk, Jellicent, Gengar, Chandelure |
-| 10 | Aza | Lucha | Liga Pokémon | Mienshao, Throh, Sawk, Lucario, Machamp, Conkeldurr |
-| 11 | Lotto | Siniestro | Liga Pokémon | Liepard, Mandibuzz, Houndoom, Scrafty, Krookodile, Bisharp |
-| 12 | Catleya | Psíquico | Liga Pokémon | Sigilyph, Musharna, Espeon, Gardevoir, Reuniclus, Gothitelle |
-| 13 | **Mirto** (Campeón) | Campeón | Liga Pokémon | Accelgor, Bouffalant, Druddigon, Vanilluxe, Escavalier, Volcarona |
+| 1 | Zeo | Fuego | Ciudad Gres | Heatmor, Darmanitan, Arcanine, Camerupt, Emboar, Magmortar |
+| 2 | Maíz | Agua | Ciudad Gres | Crawdaunt, Samurott, Azumarill, Slowking, Seismitoad, Starmie |
+| 3 | Millo | Planta | Ciudad Gres | Ferrothorn, Serperior, Jumpluff, Whimsicott, Lilligant, Simisage |
+| 4 | Aloe | Normal | Ciudad Esmalte | Braviary, Cinccino, Kangaskhan, Sawsbuck, Lickilicky, Watchog |
+| 5 | Camus | Bicho | Ciudad Porcelana | Vespiquen, Pinsir, Heracross, Accelgor, Durant, Leavanny |
+| 6 | Camila | Eléctrico | Ciudad Mayólica | Emolga, Galvantula, Ampharos, Eelektross, Jolteon, Manectric |
+| 7 | Yakón | Tierra | Ciudad Fayenza | Sandslash, Seismitoad, Krookodile, Hippowdon, Rhyperior, **Excadrill** (Ímpetu Arena) |
+| 8 | Gerania | Volador | Ciudad Loza | Swoobat, Unfezant, Skarmory, Sigilyph, Mandibuzz, Swanna |
+| 9 | Junco | Hielo | Ciudad Teja | Cryogonal, Vanilluxe, Glalie, Weavile, Mamoswine, Beartic |
+| 10 | Iris (tú le llamas Lirio) | Dragón | Ciudad Caolín | Druddigon, Archeops, Lapras, Aggron, Hydreigon, Haxorus (gimnasio **Blanco o Negro al azar**) |
+| 11 | Anís | Fantasma | Liga Pokémon | Cofagrigus, Drifblim, Golurk, Mismagius, Gengar, Chandelure |
+| 12 | Aza | Lucha | Liga Pokémon | Mienshao, Hariyama, Sawk, Lucario, Machamp, Conkeldurr |
+| 13 | Lotto | Siniestro | Liga Pokémon | Liepard, Mandibuzz, Houndoom, Scrafty, Krookodile, Bisharp |
+| 14 | Catleya | Psíquico | Liga Pokémon | Sigilyph, Musharna, Espeon, Gardevoir, Reuniclus, Gothitelle |
+| 15 | **Mirto** (Campeón) | Campeón | Liga Pokémon | Accelgor, Snorlax, Druddigon, Vanilluxe, Escavalier, Volcarona |
 
 **Cosas especiales**
-- **Gres (Zeo, Maíz y Millo):** es un solo combate con tres posibles rivales. `FLOORS` lleva `trio:[{id,leader,tag}, ...]` y `floorFight()` (modes.js) elige uno al azar cada vez; el título de victoria/derrota usa su nombre (`o.leaderName`). El retrato del menú es el de Millo.
+- **Sin sprite:** Simipour, Simisear, Crustle, Zebstrika, Jellicent, Throh y Bouffalant están en `NO_SPRITE` (data.js) y en el menú salen como un círculo, así que en Teselia se sustituyeron por Starmie, Magmortar, Pinsir, Manectric, Mismagius, Hariyama y Snorlax. Cuando añadas sus sprites, bórralos de `NO_SPRITE` y vuelve a ponerlos en `teselia.js`.
+- **Gres (Zeo, Maíz y Millo):** son **tres combates seguidos** (hay que vencer a uno para pasar al siguiente) que comparten el fondo del restaurante (`arena:'gres'`).
+- **Menú:** el número de líderes de cada región se cuenta con `floorsOf(región)` (menu.js), así que Teselia muestra 10 casillas y el Alto Mando se abre al vencer a los 10.
 - **Caolín (Iris):** `arenas:['iris','iris_negro']`; `floorFight()` elige al azar el gimnasio oriental (Blanco) o el tecnológico (Negro) en cada intento.
 - **Rivales rápidos:** el Excadrill de Yakón usa Ímpetu Arena, pero la velocidad extra de los rivales tiene tope ×1,35 (`ENEMY_SPEED_BUFF_CAP`).
 - Las regiones con nombre largo usan `REGION_DIR` (data.js) para la carpeta de retratos: `lideres/Unova/<Nombre>.png` (Zeo, Maiz, Millo —o Cilan—, Aloe, Camus, Camila, Yakon, Gerania, Junco, Iris —o Lirio—, Anis, Aza, Lotto, Catleya, Mirto).
 
-**Dificultad:** `lvl` y `dn` en teselia.js. Gimnasios: nivel 144-151 y dn 8-15. Alto Mando: nivel 152-155 y dn 15-18. Mirto: nivel 162 y dn 20 (el más duro hasta ahora).
+**Dificultad:** `lvl` y `dn` en teselia.js. Gimnasios: nivel 143-151 y dn 7-15. Alto Mando: nivel 152-155 y dn 15-18. Mirto: nivel 162 y dn 20 (el más duro hasta ahora).
 **Recompensa:** `REWARD_REGION['Unova / Teselia']` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por victoria.
 **Música:** ver la tabla de pistas (`lider_teselia`, `alto_teselia`, `campeon_mirto`).
 
 **Fondos de combate (js/arenasteselia.js)**, dibujados con código como los de las otras regiones (centro del suelo libre, laterales y luces animadas):
-- Gres (Zeo, Maíz y Millo): restaurante con suelo ajedrezado, tres cortinas de colores (verde, roja y azul), mesas con mantel y velas, mostrador con cocina, ollas con vapor y lámparas.
+- Gres (Zeo, Maíz y Millo, los tres combates): restaurante con suelo ajedrezado, tres cortinas de colores (verde, roja y azul), mesas con mantel y velas, mostrador con cocina, ollas con vapor y lámparas.
 - Aloe (Esmalte): museo-biblioteca con estanterías, vitrinas con fósiles, columnas de piedra y mosaico espiral.
 - Camus (Porcelana): sala blanca con paneles y suelo de panal, cortinas translúcidas, telas de araña y columnas de panal.
 - Camila (Mayólica): parque de atracciones cubierto con raíl de montaña rusa (los vagones circulan), guirnaldas de bombillas que parpadean y plataformas metálicas con franjas amarillas.
@@ -405,7 +409,7 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 | `campeon_lance` | Campeón Lance (Johto) |
 | `campeon_plubio` | Campeón Plubio (Hoenn, usa `jefe.ogg`) |
 | `campeon_cintia` | Campeona Cintia (Sinnoh, usa `jefe.ogg`) |
-| `lider_teselia` | Los 8 gimnasios de Teselia (Zeo, Maíz y Millo, Aloe, Camus, Camila, Yakón, Gerania, Junco e Iris; música generada hasta que añadas `musica/lider_teselia.ogg`) |
+| `lider_teselia` | Los 10 gimnasios de Teselia (Zeo, Maíz, Millo, Aloe, Camus, Camila, Yakón, Gerania, Junco e Iris; música generada hasta que añadas `musica/lider_teselia.ogg`) |
 | `alto_teselia` | Anís, Aza, Lotto, Catleya (usa `alto.ogg`) |
 | `campeon_mirto` | Campeón Mirto (Teselia, usa `jefe.ogg`) |
 | `campo` | Campo de Entrenamiento |
@@ -471,7 +475,7 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | Líderes / Alto Mando / Campeón de Hoenn | Los 8 líderes · los 4 del Alto Mando · vencer a Plubio | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
 | Líderes / Alto Mando / Campeona de Sinnoh | Los 8 líderes · los 4 del Alto Mando · vencer a Cintia | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
 | Maestro de tres Ligas | Campeón de Kanto, Johto y Hoenn | 3000 BP + 20 tickets |
-| Líderes / Alto Mando / Campeón de Teselia | Los 8 gimnasios · los 4 del Alto Mando · vencer a Mirto | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
+| Líderes / Alto Mando / Campeón de Teselia | Los 10 gimnasios · los 4 del Alto Mando · vencer a Mirto | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
 | Maestro de cuatro Ligas | Campeón de Kanto, Johto, Hoenn y Sinnoh | 4000 BP + 25 tickets |
 | Maestro de cinco Ligas | Campeón de Kanto, Johto, Hoenn, Sinnoh y Teselia | 5000 BP + 30 tickets |
 | Campo: 1 / 10 / 25 / 50 / 100 victorias | Vencer entrenadores del Campo | 50 · 200 · 300 + 2 · 500 + 5 · 1000 + 10 (BP + tickets) |
@@ -546,7 +550,7 @@ Ocultos ahora mismo: 514, 516, 520, 522, 523, 538, 558, 564, 565, 591, 592, 593,
 
 ## Modo ver (temporal): abrir una región entera sin tocar tu progreso — `PREVIEW` en js/data.js
 
-`const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false};` (ahora está **apagado**; cambia `'Unova / Teselia': false` a `true` para ver los 13 combates de Teselia sin tocar tu partida) abre la región de Sinnoh en el menú de Historia y deja ver/combatir **los 13 combates** (8 líderes, 4 del Alto Mando y el Campeón) como si ya los hubieras superado. **No toca tu partida:** no cambia `save.prog`, `save.champ` ni nada guardado, y al ganar en una región en modo ver no se guardan progreso, EVs, trofeo ni recompensas (sale la etiqueta «MODO VER»). Para quitarlo: `Sinnoh: false` (y la región vuelve a abrirse solo cuando seas Campeón de Hoenn). Se puede poner otra región, p. ej. `{Sinnoh: true, Galar: true}`. Código: `buildRegions()`/`buildStory()` (js/menu.js) y `endBattle()` (js/modes.js). Ojo: al entrar en una región el juego guarda `save.region` (la región del Gachapon); si luego apagas el modo ver y la partida se queda en esa región, vuelve al menú y elige otra.
+`const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false};` (ahora está **apagado**; cambia `'Unova / Teselia': false` a `true` para ver los 15 combates de Teselia sin tocar tu partida) abre la región de Sinnoh en el menú de Historia y deja ver/combatir **los 13 combates** (8 líderes, 4 del Alto Mando y el Campeón) como si ya los hubieras superado. **No toca tu partida:** no cambia `save.prog`, `save.champ` ni nada guardado, y al ganar en una región en modo ver no se guardan progreso, EVs, trofeo ni recompensas (sale la etiqueta «MODO VER»). Para quitarlo: `Sinnoh: false` (y la región vuelve a abrirse solo cuando seas Campeón de Hoenn). Se puede poner otra región, p. ej. `{Sinnoh: true, Galar: true}`. Código: `buildRegions()`/`buildStory()` (js/menu.js) y `endBattle()` (js/modes.js). Ojo: al entrar en una región el juego guarda `save.region` (la región del Gachapon); si luego apagas el modo ver y la partida se queda en esa región, vuelve al menú y elige otra.
 
 ## Pantalla de victoria (js/victoria.js, final de css/style.css)
 Al ganar un combate de la Historia o del Campo de Entrenamiento, la pantalla de resultado enseña: el **retrato del rival vencido**, el cartel «★ VICTORIA ★», el título y **una tarjeta por cada recompensa** (Tiradas de Gachapon, Puntos de Batalla, Chapas Doradas, Chapas Plateadas) con su icono pequeño, la cantidad que sube contando («+10») y lo que tienes ahora. Si es la primera victoria del día, la tarjeta de tiradas lleva la etiqueta «¡PRIMERA DEL DÍA! ×2». Debajo salen etiquetas con lo demás: EVs, trofeo de la Liga, siguiente rival, dificultad del Campo superada... Las recompensas son exactamente las de siempre (`REWARD` y `REWARD_REGION` en js/teams.js): `giveReward()` las concede y las deja en `lastReward`, y `victoryScreen()` las dibuja. En la derrota se ve la pantalla sencilla de antes. Para un tipo de recompensa nuevo: nómbralo en `REWARD_NAMES` (teams.js) y dale color e icono en `RW_LOOK` (victoria.js).

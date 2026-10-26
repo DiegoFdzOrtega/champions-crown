@@ -114,19 +114,20 @@ function buildRegions(){
   REGIONS.forEach((n,i)=>{
     const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
     const open = playable && (i === 0 || !!save.champ[prev] || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
-    const rec = PREVIEW[n] ? 12 : progOf(n), done = open ? Math.min(8, rec) : 0, elite = open && rec >= 8;
+    const nL = floorsOf(n).filter(F => F.kind === 'lider').length || 8;                              // nº de líderes de la región (8 en casi todas; Teselia tiene 10)
+    const rec = PREVIEW[n] ? 99 : progOf(n), done = open ? Math.min(nL, rec) : 0, elite = open && rec >= nL;
     const d = document.createElement('div'); d.className = 'rcard' + (open ? ' open' : ' lock');
     d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
-    let pips = ''; for(let k=0;k<8;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
-    d.innerHTML = `<small>${i+1}</small><h3>${n}</h3><div class="pips">${pips}</div>` +
+    let pips = ''; for(let k=0;k<nL;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
+    d.innerHTML = `<small>${i+1}</small><h3>${n}</h3><div class="pips${nL > 8 ? ' many' : ''}">${pips}</div>` +
       `<div class="elite${elite ? ' ready' : ''}">ALTO MANDO · ${elite ? 'LISTO' : 'BLOQUEADO'}</div>` +
-      (open ? `<p>${done}/8 líderes${rec > 8 ? ' · Liga ' + (rec - 8) + '/5' : ''}${save.champ[n] ? ' · 🏆 Campeón' : ''}</p>` : `<p class="lk">${playable ? 'Vence la Liga de ' + prev : 'Próximamente'}</p>`);
+      (open ? `<p>${done}/${nL} líderes${rec > nL ? ' · Liga ' + Math.min(5, rec - nL) + '/5' : ''}${save.champ[n] ? ' · 🏆 Campeón' : ''}</p>` : `<p class="lk">${playable ? 'Vence la Liga de ' + prev : 'Próximamente'}</p>`);
     if(open){
       d.tabIndex = 0;
       const go = ()=>{ save.region = n; persist(); goStory(); };          // la región elegida es la del Gachapon
       d.onclick = e => {
         if(e.target.closest('.elite') && elite){ toast('Alto Mando de ' + n + ': ¡adelante!'); go(); }
-        else if(e.target.closest('.elite')) toast('Vence a los 8 líderes para desafiar al Alto Mando.');
+        else if(e.target.closest('.elite')) toast('Vence a los ' + nL + ' líderes para desafiar al Alto Mando.');
         else go();
       };
       d.onkeydown = e => { if(e.code === 'Enter') go(); };
@@ -140,7 +141,7 @@ const TYPE_OF_TAG = Object.fromEntries(Object.entries(TYPE_ES).map(([k, v]) => [
 const tagColor = F => F.kind === 'campeon' ? '#ffcc33' : (TC[TYPE_OF_TAG[F.tag]] || '#8fb3e8');
 function buildStory(){
   const R = save.region, fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === R);
-  const rec = PREVIEW[R] ? 12 : progOf(R);                                // modo ver (data.js): todos los combates abiertos
+  const rec = PREVIEW[R] ? 99 : progOf(R);                                // modo ver (data.js): todos los combates abiertos
   const cnt = k => fls.filter(x => x.F.kind === k).length, doneK = k => fls.filter(x => x.F.kind === k && x.F.idx < rec).length;
   const champDone = !!save.champ[R];
   // ---- banner de la región: imagen de fondo, título y contadores ----

@@ -211,7 +211,7 @@ const rewardText = F => rewardOf(F) ? Object.entries(rewardOf(F)).map(([id, n]) 
 // ---------------------------------------------------------------------
 function validateTeams(){
   const bad = [], keys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-  const lists = FLOORS.map(F => [F.id, TEAMS[F.id], [6]]).concat(FLOORS.flatMap(F => (F.trio || []).map(v => [v.id, TEAMS[v.id], [6]]))).concat(typeof CAMPO !== 'undefined' ? CAMPO.map(T => ['campo/' + T.id, T.team, [3, 4]]) : []);   // líderes: 6 Pokémon · Campo de Entrenamiento: 3 o 4
+  const lists = FLOORS.map(F => [F.id, TEAMS[F.id], [6]]).concat(typeof CAMPO !== 'undefined' ? CAMPO.map(T => ['campo/' + T.id, T.team, [3, 4]]) : []);   // líderes: 6 Pokémon · Campo de Entrenamiento: 3 o 4
   lists.forEach(([id, t, sizes]) => {
     if(!t){ bad.push(`${id}: sin plantilla`); return; }
     if(!sizes.includes(t.length)) bad.push(`${id}: tiene ${t.length} Pokémon (deben ser ${sizes.join(' o ')})`);

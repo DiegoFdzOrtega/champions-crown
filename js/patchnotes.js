@@ -8,8 +8,8 @@
 const PATCHES = [
   {v:'Teselia: la quinta Liga', date:'26 oct 2026', sections:[
     {t:'Historia', i:[
-      'Llega Teselia (Unova): 8 gimnasios, Alto Mando de 4 y el Campeón Mirto, 13 combates con 6 Pokémon cada uno. Se abre al ser Campeona de Sinnoh.',
-      'En Ciudad Gres te toca al azar uno de los tres hermanos: Zeo (agua), Maíz (fuego) o Millo (planta).',
+      'Llega Teselia (Unova): 10 combates de gimnasio, Alto Mando de 4 y el Campeón Mirto, 15 combates con 6 Pokémon cada uno. Se abre al ser Campeona de Sinnoh.',
+      'En Ciudad Gres vences a los tres hermanos, uno detrás de otro: Zeo (fuego), Maíz (agua) y Millo (planta).',
       'El gimnasio de Iris en Ciudad Caolín sale al azar en su versión Blanco (oriental) o Negro (tecnológica).',
       'Cada uno tiene su fondo propio: restaurante, museo, panal, parque de atracciones, mina, hangar, cueva helada, dojo, casino y más. Recompensa: 5 Chapas Doradas + 5 Plateadas + 10 tiradas.']},
     {t:'Logros', i:[

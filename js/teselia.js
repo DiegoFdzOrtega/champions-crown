@@ -15,7 +15,9 @@
      es siempre el As.
        OJO: los de Camila, Yakón, Gerania, Junco e Iris no pude comprobarlos entero (el torneo no estaba disponible). Llevan los Pokémon de sus combates
        oficiales y los demás son los que más usan en los juegos y el anime. Si no coincide con tu juego, cámbialos aquí en TEAMS.
-   - GRES: tiene TRES líderes (hermanos). Como en los juegos, te toca uno de los tres (al azar en cada intento): Zeo (agua), Maíz (fuego) o Millo (planta).
+   - SIN SPRITE: los Pokémon de NO_SPRITE (data.js) no se ven en el menú (salen como un círculo). Por eso Simipour, Simisear, Crustle, Zebstrika, Jellicent, Throh y Bouffalant
+     se han sustituido por Starmie, Magmortar, Pinsir, Manectric, Mismagius, Hariyama y Snorlax. Cuando tengas sus sprites, quítalos de NO_SPRITE y vuelve a ponerlos.
+   - GRES: tiene TRES líderes (hermanos). Como en los juegos, van los tres, uno detrás de otro: Zeo (fuego), Maíz (agua) o Millo (planta).
    - CAOLÍN: hay dos versiones del gimnasio (Blanco: tradicional oriental · Negro: moderno y tecnológico). Cada intento sale una al azar.
    - ALTO MANDO Y CAMPEÓN: los 4-6 Pokémon oficiales de Negro/Blanco/Negro 2/Blanco 2 de cada uno, más 1-2 que usan en el anime o en otros juegos.
    - Especies repetidas entre equipos son normales; dentro de un mismo equipo no se repite ninguna.
@@ -27,21 +29,21 @@
    ===================================================================== */
 Object.assign(TEAMS, {
   // ---------------- GRES: los tres hermanos (te toca uno) ----------------
-  zeo: [      // Agua · Cress. Torneo de Líderes: Crawdaunt, Samurott, Azumarill, Slowking, Seismitoad + Simipour (su Pokémon de siempre, siempre abre con él)
+  maiz: [     // Agua · Cress (Maíz). Torneo de Líderes: Crawdaunt, Samurott, Azumarill, Slowking, Seismitoad + Simipour (su Pokémon de siempre, siempre abre con él)
     P(342, 'Alegre',  'Armadura Batalla','panuelo',  {atk:252, spe:252, hp:4}, ['Mordisco',      'Hidropulso',  'Danza Espada',  'Hidrobomba']),    // Crawdaunt: Pañuelo Elección
     P(503, 'Firme',   'Torrente',        'restos',   {hp:252, atk:252, def:4}, ['Acua Cola',     'Hidropulso',  'Danza Espada',  'Megacuerno']),    // Samurott: Concha Filo + Megacuerno
     P(184, 'Firme',   'Sebo',            'cintaelec',{atk:252, hp:252, def:4}, ['Acua Cola',     'Voz Cautivadora','Corpulencia','Hidrobomba']),   // Azumarill: Banda Elección
     P(199, 'Modesta', 'Ritmo Propio',    'gafasesp', {hp:252, spa:252, def:4}, ['Cabezazo Zen',  'Rayo Hielo',  'Maquinación',   'Psíquico']),      // Slowking
     P(537, 'Modesta', 'Nado Rápido',     'restos',   {hp:252, spa:252, def:4}, ['Puya Nociva',   'Disparo Lodo','Danza Lluvia',  'Hidrobomba']),    // Seismitoad: lluvia
-    P(516, 'Modesta', 'Torrente',        'vidasfera',{spa:252, spe:252, hp:4}, ['Mordisco',      'Hidropulso',  'Danza Lluvia',  'Hidrobomba'])     // Simipour: As (Gema Agua)
+    P(121, 'Modesta', 'Absorbe Agua',    'vidasfera',{spa:252, spe:252, hp:4}, ['Acua Cola',     'Psicorrayo',  'Danza Lluvia',  'Hidrobomba'])     // Starmie: As (en vez de Simipour, que aún no tiene sprite)
   ],
-  maiz: [     // Fuego · Chili. Torneo de Líderes: Heatmor, Darmanitan, Arcanine, Camerupt, Emboar + Simisear
+  zeo: [      // Fuego · Chili (Zeo). Torneo de Líderes: Heatmor, Darmanitan, Arcanine, Camerupt, Emboar + Simisear
     P(631, 'Modesta', 'Absorbe Fuego',   'aguante',  {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas', 'Día Soleado',   'Llamarada']),     // Heatmor: Banda Aguante
     P(555, 'Alegre',  'Mar Llamas',      'vidasfera',{atk:252, spe:252, hp:4}, ['Puño Fuego',    'Lanzarrocas', 'Danza Espada',  'Envite Ígneo']),  // Darmanitan: Vidasfera
     P( 59, 'Modesta', 'Intimidación',    'gafasesp', {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Pulso Dragón','Día Soleado',   'Llamarada']),     // Arcanine
     P(323, 'Modesta', 'Roca Sólida',     'chaleco',  {hp:252, spa:252, def:4}, ['Tumba Rocas',   'Lanzallamas', 'Día Soleado',   'Terremoto']),     // Camerupt
     P(500, 'Firme',   'Mar Llamas',      'cintaelec',{atk:252, hp:252, def:4}, ['Puño Fuego',    'Rayo',        'Corpulencia',   'Envite Ígneo']),  // Emboar: Cinturón Experto
-    P(514, 'Modesta', 'Mar Llamas',      'vidasfera',{spa:252, spe:252, hp:4}, ['Mordisco',      'Lanzallamas', 'Maquinación',   'Llamarada'])      // Simisear: As (Gema Fuego)
+    P(467, 'Modesta', 'Cuerpo Llama',    'vidasfera',{spa:252, hp:252, def:4}, ['Puño Fuego',    'Lanzallamas', 'Día Soleado',   'Llamarada'])      // Magmortar: As (en vez de Simisear, que aún no tiene sprite)
   ],
   millo: [    // Planta · Cilan. Torneo de Líderes: Ferrothorn, Serperior, Jumpluff, Whimsicott, Lilligant + Simisage
     P(598, 'Firme',   'Piel Tosca',      'casco',    {hp:252, atk:252, def:4}, ['Látigo Cepa',   'Bomba Imán',  'Defensa Férrea','Terremoto']),    // Ferrothorn: Espinas de Hierro
@@ -62,7 +64,7 @@ Object.assign(TEAMS, {
   ],
   camus: [    // Bicho · Ciudad Porcelana (Burgh). Torneo de Líderes: Vespiquen, Crustle, Heracross, Accelgor, Durant + Leavanny
     P(416, 'Osada',   'Presión',         'restos',   {hp:252, def:252, spd:4}, ['Tijera X',      'Zumbido',     'Danza Aleteo',  'Megacuerno']),    // Vespiquen
-    P(558, 'Firme',   'Robustez',        'vidasfera',{hp:252, atk:252, def:4}, ['Tijera X',      'Lanzarrocas', 'Danza Espada',  'Terremoto']),     // Crustle: Rompecoraza
+    P(127, 'Firme',   'Ojo Compuesto',   'vidasfera',{hp:252, atk:252, def:4}, ['Tijera X',      'Zumbido',     'Danza Aleteo',  'Megacuerno']),    // Pinsir (en vez de Crustle, sin sprite)
     P(214, 'Alegre',  'Agallas',         'panuelo',  {atk:252, spe:252, hp:4}, ['Garra Umbría',  'Lanzarrocas', 'Corpulencia',   'Megacuerno']),    // Heracross: Pañuelo Elección
     P(617, 'Miedosa', 'Viscosidad',      'gafasesp', {spa:252, spe:252, hp:4}, ['Ataque Rápido', 'Zumbido',     'Agilidad',      'Onda Certera']),  // Accelgor
     P(632, 'Alegre',  'Enjambre',        'cintaelec',{atk:252, spe:252, hp:4}, ['Garra Metal',   'Pin Misil',   'Danza Espada',  'Megacuerno']),    // Durant
@@ -74,7 +76,7 @@ Object.assign(TEAMS, {
     P(181, 'Modesta', 'Pararrayos',      'restos',   {hp:252, spa:252, def:4}, ['Puño Trueno',   'Rayo',        'Carga',         'Trueno']),        // Ampharos (su Flaaffy de Negro 2/Blanco 2)
     P(604, 'Modesta', 'Levitación',      'vidasfera',{hp:252, spa:252, def:4}, ['Colmillo Rayo', 'Lanzallamas', 'Carga',         'Trueno']),        // Eelektross
     P(135, 'Miedosa', 'Absorbe Elec.',   'gafaselec',{spa:252, spe:252, hp:4}, ['Colmillo Rayo', 'Rayo',        'Carga',         'Trueno']),        // Jolteon
-    P(523, 'Alegre',  'Electromotor',    'vidasfera',{atk:252, spe:252, hp:4}, ['Colmillo Rayo', 'Rayo',        'Carga',         'Trueno'])         // Zebstrika: As
+    P(310, 'Modesta', 'Electromotor',    'vidasfera',{spa:252, spe:252, hp:4}, ['Colmillo Rayo', 'Rayo',        'Carga',         'Trueno'])         // Manectric: As (en vez de Zebstrika, sin sprite)
   ],
   yakon: [    // Tierra · Ciudad Fayenza (Clay). Negro/Blanco: Krokorok, Palpitoad, Excadrill (+ Sandslash en las secuelas) · extra: Hippowdon
     P( 28, 'Firme',   'Velo Arena',      'chaleco',  {hp:252, atk:252, def:4}, ['Excavar',       'Disparo Lodo','Danza Espada',  'Terremoto']),     // Sandslash
@@ -113,13 +115,13 @@ Object.assign(TEAMS, {
     P(563, 'Osada',   'Presión',         'restos',   {hp:252, def:252, spd:4}, ['Garra Umbría',  'Pulso Umbrío','Maldición',     'Bola Sombra']),   // Cofagrigus
     P(426, 'Modesta', 'Liviano',         'restos',   {hp:252, spa:252, def:4}, ['Lengüetazo',    'Tornado',     'Maldición',     'Bola Sombra']),   // Drifblim
     P(623, 'Firme',   'Puño Férreo',     'vidasfera',{hp:252, atk:252, def:4}, ['Puño Sombra',   'Disparo Lodo','Corpulencia',   'Terremoto']),     // Golurk
-    P(593, 'Modesta', 'Cuerpo Maldito',  'restos',   {hp:252, spa:252, def:4}, ['Lengüetazo',    'Hidropulso',  'Amnesia',       'Bola Sombra']),   // Jellicent
+    P(429, 'Modesta', 'Levitación',      'restos',   {spa:252, spe:252, hp:4}, ['Garra Umbría',  'Tinieblas',   'Maldición',     'Bola Sombra']),   // Mismagius (en vez de Jellicent, sin sprite)
     P( 94, 'Miedosa', 'Cuerpo Maldito',  'vidasfera',{spa:252, spe:252, hp:4}, ['Lengüetazo',    'Bomba Lodo',  'Maquinación',   'Bola Sombra']),   // Gengar (extra)
     P(609, 'Miedosa', 'Absorbe Fuego',   'gafaselec',{spa:252, spe:252, hp:4}, ['Lengüetazo',    'Lanzallamas', 'Maquinación',   'Bola Sombra'])    // Chandelure: As
   ],
   aza: [      // Lucha (Marshal). Negro/Blanco: Throh, Sawk, Conkeldurr, Mienshao · extras: Lucario, Machamp
     P(620, 'Alegre',  'Foco Interno',    'panuelo',  {atk:252, spe:252, hp:4}, ['Golpe Roca',    'Esfera Aural','Corpulencia',   'Onda Certera']),  // Mienshao
-    P(538, 'Firme',   'Impasible',       'casco',    {hp:252, atk:252, def:4}, ['Golpe Roca',    'Lanzarrocas', 'Corpulencia',   'Onda Certera']),  // Throh
+    P(297, 'Firme',   'Agallas',         'casco',    {hp:252, atk:252, def:4}, ['Golpe Roca',    'Esfera Aural','Corpulencia',   'Onda Certera']),  // Hariyama (en vez de Throh, sin sprite)
     P(539, 'Alegre',  'Foco Interno',    'cintaelec',{atk:252, spe:252, hp:4}, ['Puño Hielo',    'Esfera Aural','Corpulencia',   'Onda Certera']),  // Sawk
     P(448, 'Alegre',  'Justiciero',      'cinturon', {atk:252, spe:252, hp:4}, ['Puño Bala',     'Esfera Aural','Danza Espada',  'Onda Certera']),  // Lucario (extra)
     P( 68, 'Firme',   'Sin Guarda',      'chaleco',  {hp:252, atk:252, def:4}, ['Puño Trueno',   'Lanzarrocas', 'Corpulencia',   'Onda Certera']),  // Machamp (extra)
@@ -144,7 +146,7 @@ Object.assign(TEAMS, {
   // ---------------- CAMPEÓN ----------------
   mirto: [    // Campeón de Teselia (Alder, Negro/Blanco): Accelgor, Bouffalant, Druddigon, Vanilluxe, Escavalier, Volcarona
     P(617, 'Miedosa', 'Viscosidad',      'gafaselec',{spa:252, spe:252, hp:4}, ['Ataque Rápido', 'Zumbido',     'Danza Aleteo',  'Onda Certera']),  // Accelgor
-    P(626, 'Firme',   'Cabeza Roca',     'vidasfera',{atk:252, hp:252, def:4}, ['Cabezazo',      'Doble Filo',  'Danza Espada',  'Megacuerno']),    // Bouffalant
+    P(143, 'Firme',   'Intimidación',    'vidasfera',{atk:252, hp:252, def:4}, ['Golpe Cuerpo',  'Doble Filo',  'Amnesia',       'Terremoto']),     // Snorlax (en vez de Bouffalant, sin sprite)
     P(621, 'Firme',   'Piel Tosca',      'casco',    {hp:252, atk:252, def:4}, ['Garra Dragón',  'Dragoaliento','Danza Espada',  'Terremoto']),     // Druddigon
     P(584, 'Modesta', 'Nevada',          'gafasesp', {hp:252, spa:252, def:4}, ['Colmillo Hielo','Rayo Hielo',  'Armadura Ácida','Ventisca']),      // Vanilluxe
     P(589, 'Firme',   'Enjambre',        'chaleco',  {hp:252, atk:252, def:4}, ['Tijera X',      'Bomba Imán',  'Danza Espada',  'Megacuerno']),    // Escavalier
@@ -161,8 +163,10 @@ const TESELIA = 'Unova / Teselia';
 const TF = (id, leader, tag, kind, lvl, dn, place, extra) =>
   Object.assign({id, leader, tag, kind, lvl, diff: kind === 'lider' ? 'dificil' : 'muy_dificil', teams: TEAMS[id], region: TESELIA, idx: 0, dn, place}, extra);
 FLOORS.push(
-  TF('millo',   'Zeo, Maíz y Millo', 'Agua · Fuego · Planta', 'lider', 144, 8, 'Ciudad Gres', {
-    arena: 'gres', trio: [{id:'zeo', leader:'Zeo', tag:'Agua'}, {id:'maiz', leader:'Maíz', tag:'Fuego'}, {id:'millo', leader:'Millo', tag:'Planta'}]}),
+  // Ciudad Gres: los tres hermanos, tres combates seguidos (comparten el fondo del restaurante)
+  TF('zeo',     'Zeo',      'Fuego',     'lider', 143, 7,  'Ciudad Gres', {arena: 'gres'}),
+  TF('maiz',    'Maíz',     'Agua',      'lider', 143, 8,  'Ciudad Gres', {arena: 'gres'}),
+  TF('millo',   'Millo',    'Planta',    'lider', 144, 8,  'Ciudad Gres', {arena: 'gres'}),
   TF('aloe',    'Aloe',     'Normal',    'lider', 145, 9,  'Ciudad Esmalte'),
   TF('camus',   'Camus',    'Bicho',     'lider', 146, 10, 'Ciudad Porcelana'),
   TF('camila',  'Camila',   'Eléctrico', 'lider', 147, 11, 'Ciudad Mayólica'),

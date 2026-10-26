@@ -4,13 +4,12 @@
    ===================================================================== */
 function floorFight(n){                          // n = 0 es el primer líder
   const F = FLOORS[n], S = floorStats(n);
-  const V = F.trio ? F.trio[Math.floor(Math.random() * F.trio.length)] : null;                 // Gres (Teselia): te toca uno de los tres hermanos, al azar
-  const arena = F.arenas ? F.arenas[Math.floor(Math.random() * F.arenas.length)] : F.arena;    // arena propia del combate (Gres) o una de las dos versiones del gimnasio de Caolín
-  const who = V || F;
+  const arena = F.arenas ? F.arenas[Math.floor(Math.random() * F.arenas.length)] : F.arena;    // arena propia del combate (F.arena) o una de las dos versiones del gimnasio de Caolín
+  const who = F;
   startBattle({
     floor:F.idx+1, n, leader:who.id, boss:F.kind,                    // floor = nº de combate dentro de su región · n = posición en FLOORS
     sub: `${who.leader.toUpperCase()} · ${who.tag.toUpperCase()}`,
-    enemies: V ? TEAMS[V.id] : F.teams,                // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
+    enemies: F.teams,                // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
     hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl,
     arena, leaderName:who.leader                       // arena (opcional) y nombre de quien te toca (para la pantalla final)
   });
