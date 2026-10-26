@@ -4,11 +4,15 @@
    ===================================================================== */
 function floorFight(n){                          // n = 0 es el primer líder
   const F = FLOORS[n], S = floorStats(n);
+  const V = F.trio ? F.trio[Math.floor(Math.random() * F.trio.length)] : null;                 // Gres (Teselia): te toca uno de los tres hermanos, al azar
+  const arena = F.arenas ? F.arenas[Math.floor(Math.random() * F.arenas.length)] : F.arena;    // arena propia del combate (Gres) o una de las dos versiones del gimnasio de Caolín
+  const who = V || F;
   startBattle({
-    floor:F.idx+1, n, leader:F.id, boss:F.kind,                      // floor = nº de combate dentro de su región · n = posición en FLOORS
-    sub: `${F.leader.toUpperCase()} · ${F.tag.toUpperCase()}`,
-    enemies: F.teams,                                  // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
-    hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
+    floor:F.idx+1, n, leader:who.id, boss:F.kind,                    // floor = nº de combate dentro de su región · n = posición en FLOORS
+    sub: `${who.leader.toUpperCase()} · ${who.tag.toUpperCase()}`,
+    enemies: V ? TEAMS[V.id] : F.teams,                // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
+    hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl,
+    arena, leaderName:who.leader                       // arena (opcional) y nombre de quien te toca (para la pantalla final)
   });
 }
 
@@ -59,10 +63,10 @@ function endBattle(won){
     persist(); achSync();                                                              // logros: comprueba si esta victoria desbloquea alguno (achievements.js)
     const nx = FLOORS[o.n+1], next = nx && nx.region === R ? nx : null;               // el siguiente de la MISMA región (tras el Campeón no hay más)
     if(next) chips.push({t:`Siguiente: ${next.leader}`, c:'#4ccf6a'});
-    victoryScreen({title:`¡Has vencido a ${F.leader}!`, sub: F.kind === 'campeon' ? `¡Eres el Campeón de ${R}!` : '', rewards:lastReward, chips, leader:o.leader, path:o.portrait});
+    victoryScreen({title:`¡Has vencido a ${o.leaderName || F.leader}!`, sub: F.kind === 'campeon' ? `¡Eres el Campeón de ${R}!` : '', rewards:lastReward, chips, leader:o.leader, path:o.portrait});
     if(next) add(next.kind === 'lider' ? 'Siguiente líder' : next.kind === 'alto' ? 'Siguiente: Alto Mando' : 'Combate final: Campeón', ()=>floorFight(o.n+1), true);
   }else{
-    set(`${F.leader} ha ganado esta vez`, 'Cambia el equipo o los objetos e inténtalo otra vez.');
+    set(`${o.leaderName || F.leader} ha ganado esta vez`, 'Cambia el equipo o los objetos e inténtalo otra vez.');
     add('Reintentar', ()=>floorFight(o.n), true);
   }
   add('Menú', ()=>{ g = null; goMain(); });

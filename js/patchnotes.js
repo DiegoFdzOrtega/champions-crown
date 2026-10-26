@@ -6,6 +6,15 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Teselia: la quinta Liga', date:'26 oct 2026', sections:[
+    {t:'Historia', i:[
+      'Llega Teselia (Unova): 8 gimnasios, Alto Mando de 4 y el Campeón Mirto, 13 combates con 6 Pokémon cada uno. Se abre al ser Campeona de Sinnoh.',
+      'En Ciudad Gres te toca al azar uno de los tres hermanos: Zeo (agua), Maíz (fuego) o Millo (planta).',
+      'El gimnasio de Iris en Ciudad Caolín sale al azar en su versión Blanco (oriental) o Negro (tecnológica).',
+      'Cada uno tiene su fondo propio: restaurante, museo, panal, parque de atracciones, mina, hangar, cueva helada, dojo, casino y más. Recompensa: 5 Chapas Doradas + 5 Plateadas + 10 tiradas.']},
+    {t:'Logros', i:[
+      'Nuevos logros: Líderes, Alto Mando y Campeón de Teselia, y Maestro de cinco Ligas (5000 BP + 30 tickets).']}
+  ]},
   {v:'Rivales rápidos, más justos', date:'26 oct 2026', sections:[
     {t:'Combate', i:[
       'Los rivales que sumaban Agilidad y Pañuelo Elección (como el Aerodactyl de Lance o el de Hoenn) iban más de dos veces más rápidos y no había manera de alcanzarlos.',

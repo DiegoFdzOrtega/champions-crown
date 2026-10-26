@@ -189,7 +189,8 @@ const REWARD_CAMPO = {1:{bp:50, chapaplata:5, chapa:5}, 2:{bp:100, chapaplata:10
 const REWARD_REGION = {
   Johto: {chapa:5, chapaplata:5, tickets:10},
   Hoenn: {chapa:5, chapaplata:5, tickets:10},
-  Sinnoh: {chapa:5, chapaplata:5, tickets:10}
+  Sinnoh: {chapa:5, chapaplata:5, tickets:10},
+  'Unova / Teselia': {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]) : REWARD_REGION[F.region] || REWARD[F.kind];
@@ -210,7 +211,7 @@ const rewardText = F => rewardOf(F) ? Object.entries(rewardOf(F)).map(([id, n]) 
 // ---------------------------------------------------------------------
 function validateTeams(){
   const bad = [], keys = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-  const lists = FLOORS.map(F => [F.id, TEAMS[F.id], [6]]).concat(typeof CAMPO !== 'undefined' ? CAMPO.map(T => ['campo/' + T.id, T.team, [3, 4]]) : []);   // líderes: 6 Pokémon · Campo de Entrenamiento: 3 o 4
+  const lists = FLOORS.map(F => [F.id, TEAMS[F.id], [6]]).concat(FLOORS.flatMap(F => (F.trio || []).map(v => [v.id, TEAMS[v.id], [6]]))).concat(typeof CAMPO !== 'undefined' ? CAMPO.map(T => ['campo/' + T.id, T.team, [3, 4]]) : []);   // líderes: 6 Pokémon · Campo de Entrenamiento: 3 o 4
   lists.forEach(([id, t, sizes]) => {
     if(!t){ bad.push(`${id}: sin plantilla`); return; }
     if(!sizes.includes(t.length)) bad.push(`${id}: tiene ${t.length} Pokémon (deben ser ${sizes.join(' o ')})`);

@@ -65,6 +65,12 @@ const MUSIC_TRACKS = {
                  synth:{seed:34, bpm:168, root:55, scale:'minor',    prog:[0,3,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
   campeon_cintia:{name:'Campeona Cintia (Sinnoh)', file:'jefe', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:44, bpm:178, root:56, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
+  lider_teselia:{name:'Líderes de Teselia',          ref:'"Battle! Gym Leader" de Teselia (Negro/Blanco)',
+                 synth:{seed:25, bpm:160, root:61, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
+  alto_teselia: {name:'Alto Mando de Teselia', file:'alto',     ref:'"Battle! Elite Four" de Teselia (Negro/Blanco)',
+                 synth:{seed:35, bpm:170, root:56, scale:'harmonic', prog:[0,6,3,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.84}},
+  campeon_mirto:{name:'Campeón Mirto (Teselia)', file:'jefe',   ref:'"Battle! Champion" de Teselia (Negro/Blanco)',
+                 synth:{seed:45, bpm:180, root:58, scale:'minor',    prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.94}},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -89,7 +95,11 @@ const MUSIC_BY_TRAINER = {
   // Sinnoh: 8 líderes, Alto Mando (4) y Campeona
   roco:'lider_sinnoh', gardenia:'lider_sinnoh', fantina:'lider_sinnoh', brega:'lider_sinnoh', mananti:'lider_sinnoh', aceron:'lider_sinnoh', inverna:'lider_sinnoh', lectro:'lider_sinnoh',
   alecran:'alto_sinnoh', gaia:'alto_sinnoh', fausto:'alto_sinnoh', delos:'alto_sinnoh',
-  cintia:'campeon_cintia'
+  cintia:'campeon_cintia',
+  // Teselia: 8 líderes (Gres son tres hermanos: Zeo, Maíz y Millo), Alto Mando (4) y Campeón
+  zeo:'lider_teselia', maiz:'lider_teselia', millo:'lider_teselia', aloe:'lider_teselia', camus:'lider_teselia', camila:'lider_teselia', yakon:'lider_teselia', gerania:'lider_teselia', junco:'lider_teselia', iris:'lider_teselia',
+  anis:'alto_teselia', aza:'alto_teselia', lotto:'alto_teselia', catleya:'alto_teselia',
+  mirto:'campeon_mirto'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){

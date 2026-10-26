@@ -116,7 +116,7 @@ function drawFrame(c, dex, anim, t, dir, x, y, sc, fit, shiny){
 // Retratos de los líderes, Alto Mando y Campeón: se prueba cada ruta de LEADER_PATHS hasta que una cargue
 const leaders = {};
 function leaderPaths(id){
-  const reg = (typeof save !== 'undefined' && save.region) || 'Kanto';                     // carpeta de la región
+  const reg0 = (typeof save !== 'undefined' && save.region) || 'Kanto', reg = (typeof REGION_DIR !== 'undefined' && REGION_DIR[reg0]) || reg0;   // carpeta de la región (lideres/Unova para Teselia)
   const cap = n => n.charAt(0).toUpperCase() + n.slice(1);                             // azul -> Azul
   const cap2 = n => n.split('_').map(cap).join('_');                                   // lt_surge -> Lt_Surge
   const names = [id, ...((typeof LEADER_FILE !== 'undefined' && LEADER_FILE[id]) || [])];   // nombres de archivo posibles (LEADER_FILE en data.js)

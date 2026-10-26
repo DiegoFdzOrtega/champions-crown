@@ -164,7 +164,7 @@ FLOORS.forEach((F, i) => { F.region = 'Kanto'; F.idx = i; F.dn = i; });
 const floorsOf = region => FLOORS.filter(F => F.region === region);                    // combates de una región, en orden
 /* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
    Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
-const PREVIEW = {Sinnoh: false};
+const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false};
 const progOf = region => region === 'Kanto' ? save.record : ((save.prog && save.prog[region]) || 0);      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
 const setProg = (region, n) => { if(region === 'Kanto') save.record = n; else save.prog[region] = n; };
 const progTotal = () => REGIONS_PLAYED().reduce((a, r) => a + progOf(r), 0);
@@ -193,7 +193,11 @@ const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], mort
                      // Hoenn: los archivos llevan tilde y el de Vito y Leti es un solo retrato (lideres/Hoenn/Vito_y_Leti.png)
                      fatima:['fátima'], nivea:['nívea'], dracon:['dracón'], vitoleti:['Vito_y_Leti'],
                      // Sinnoh: los de Acerón y Alecrán llevan tilde (lideres/Sinnoh/Acerón.png, lideres/Sinnoh/Alecrán.png)
-                     aceron:['acerón'], alecran:['alecrán']};
+                     aceron:['acerón'], alecran:['alecrán'],
+                     // Teselia: Anís, Maíz y Yakón llevan tilde (lideres/Unova/Anís.png, Maíz.png, Yakón.png)
+                     anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio']};
+// Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es lideres/Unova)
+const REGION_DIR = {'Unova / Teselia':'Unova'};
 
 // Gachapon: cada región tiene su banner. Los Pokémon que salen son los de su rango de Pokédex.
 const BANNERS = Object.fromEntries(Object.keys(REGION_DEX).map(r => [r, r]));   // el banner solo lleva el nombre de la región
