@@ -182,3 +182,12 @@ FLOORS.push(
   TF('mirto',   'Mirto',    'Campeón',   'campeon', 162, 20, 'Liga Pokémon')
 );
 floorsOf(TESELIA).forEach((F, i) => F.idx = i);                          // posición dentro de Teselia (0 = Gres)
+
+// ---- Partidas ya terminadas: si una región tiene un combate nuevo (como cuando Gres pasó de 1 a 3 combates), quien ya es Campeón de ella la sigue teniendo completa ----
+// El progreso se guarda como un NÚMERO de combates superados, así que al añadir combates el número viejo se quedaba corto y parecía que se reiniciaba la región.
+// Ser Campeón (save.champ) significa que venciste a todos, así que el progreso se sube al total. Funciona para todas las regiones y para los combates que añadamos en el futuro.
+(function healProgress(){
+  let fixed = false;
+  Object.keys(save.champ || {}).forEach(R => { const n = floorsOf(R).length; if(save.champ[R] && n && progOf(R) < n){ setProg(R, n); fixed = true; } });
+  if(fixed) persist();
+})();

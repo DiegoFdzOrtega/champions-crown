@@ -370,6 +370,7 @@ Teselia usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Uno
 - **Rivales rápidos:** el Excadrill de Yakón usa Ímpetu Arena, pero la velocidad extra de los rivales tiene tope ×1,35 (`ENEMY_SPEED_BUFF_CAP`).
 - Las regiones con nombre largo usan `REGION_DIR` (data.js) para la carpeta de retratos: `lideres/Unova/<Nombre>.png` (Zeo, Maiz, Millo —o Cilan—, Aloe, Camus, Camila, Yakon, Gerania, Junco, Iris —o Lirio—, Anis, Aza, Lotto, Catleya, Mirto).
 
+**Progreso al añadir combates:** el progreso de cada región es un número (combates superados). Al final de teselia.js, `healProgress()` sube ese número al total a quien ya es Campeón de la región, para que añadir combates nuevos no «reinicie» una región que ya terminó (pasó al separar a Zeo, Maíz y Millo: de 13 a 15 combates). Quien iba a medias conserva su número, que ahora apunta a un combate distinto.
 **Dificultad:** `lvl` y `dn` en teselia.js. Gimnasios: nivel 143-151 y dn 7-15. Alto Mando: nivel 152-155 y dn 15-18. Mirto: nivel 162 y dn 20 (el más duro hasta ahora).
 **Recompensa:** `REWARD_REGION['Unova / Teselia']` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por victoria.
 **Música:** ver la tabla de pistas (`lider_teselia`, `alto_teselia`, `campeon_mirto`).
