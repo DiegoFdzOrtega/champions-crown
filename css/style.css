@@ -1043,8 +1043,8 @@ button.leg:disabled{box-shadow:none}
 .lc-sub{display:flex;align-items:center;gap:.6em;flex-wrap:wrap;margin:0 0 .6rem!important;font-size:.8rem!important;color:#8fb3e8}
 .lc-sub .tb{font-size:.9em;padding:.2em .7em}
 .lc-hint{margin:0!important;font-size:.75rem!important;color:#6d7899}
-.lc-mini{display:flex;gap:.3rem;margin:.1rem 0 .5rem}
-.lc-mini canvas{width:3rem;height:3rem;image-rendering:pixelated}
+.lc-mini{display:flex;flex-wrap:wrap;gap:.2rem;margin:.1rem 0 .5rem}
+.lc-mini canvas{width:5rem;height:5rem;image-rendering:pixelated}
 .lc-rw{display:flex;gap:.5rem;flex-wrap:wrap}
 .rwm{display:inline-flex;align-items:center;gap:.25em;padding:.15em .6em .15em .3em;border-radius:2em;background:#0b1224cc;border:1px solid #2d4a7c;font-size:.8rem;color:#fff}
 .rwm .ico{width:1.4rem;height:1.4rem;display:flex;align-items:center;justify-content:center}
