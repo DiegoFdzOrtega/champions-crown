@@ -9,7 +9,7 @@
    (p. ej. Live Server o python -m http.server) aparece sola; si no, añade su nombre a AVATAR_FILES.
    ===================================================================== */
 const AVATAR_DIR = 'avatares/';
-const AVATAR_FILES = ['Blastoise.png', 'Charizard.png', 'Dragonite.png', 'Gengar.png', 'Gyarados.png', 'Mewtwo.png', 'Pikachu.png', 'Venasaur.png'];   // lista de respaldo
+const AVATAR_FILES = ['Aerodactyl.png', 'Arcanine.png', 'Blastoise.png', 'Charizard.png', 'Dragonite.png', 'Garchomp.png', 'Gengar.png', 'Gyarados.png', 'Mew.png', 'Mewtwo.png', 'Pikachu.png', 'Venasaur.png'];   // lista de respaldo
 const AVATAR_EXT = /\.(png|webp|jpe?g|gif)$/i;
 const AVATAR_ALIAS = {venasaur: 'venusaur'};                 // nombres de archivo con otra ortografía que el Pokémon
 
