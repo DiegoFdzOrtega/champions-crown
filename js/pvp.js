@@ -16,8 +16,10 @@
    - Canal de Supabase Realtime: «match:<id>» (el id sale del desafío). Mensajes: hs (saludo y equipo), inp (pulsaciones), chk (huella), bye (abandono).
    Cuando cambies CUALQUIER cosa del cálculo del combate (combat.js, abilities.js, status.js, qmoves.js, swap.js, mega.js...), sube PVP_VER:
    así dos jugadores con versiones distintas del juego no pueden jugar entre ellos (se descuadrarían).
+   REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
+   porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '1';
+const PVP_VER = '2';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido y descuadraban los combates)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
 const PVP_DELAY = 5, PVP_DMAX = 18;                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,

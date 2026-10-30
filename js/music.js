@@ -195,8 +195,16 @@ const Music = (() => {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + (atk || .005)); g.gain.setValueAtTime(peak, t + Math.max(atk || .005, dur - (rel || .04))); g.gain.linearRampToValueAtTime(0, t + dur + .02);
     o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + .05);
   }
+  // Ruido blanco de 1 s. OJO: NO usa Math.random. En el combate online (js/pvp.js) Math.random se cambia por el azar compartido mientras se calcula cada paso, y los golpes
+  // suenan dentro de ese paso: si el ruido se creara con Math.random, el primer golpe gastaría números del azar compartido solo en el ordenador que aún no lo tuviera creado y los dos combates se descuadrarían.
+  function getNoise(){
+    if(noiseBuf) return noiseBuf;
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); let a = 123456789;
+    for(let i = 0; i < d.length; i++){ a ^= a << 13; a ^= a >>> 17; a ^= a << 5; d[i] = ((a >>> 0) / 4294967296) * 2 - 1; }
+    return noiseBuf;
+  }
   function noise(out, t, dur, peak, hp){
-    if(!noiseBuf){ noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    getNoise();
     const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noiseBuf; s.loop = true; f.type = 'highpass'; f.frequency.value = hp;
     g.gain.setValueAtTime(peak, t); g.gain.exponentialRampToValueAtTime(.001, t + dur); s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t + dur + .02);
   }
@@ -340,7 +348,7 @@ const Music = (() => {
     notes.forEach(n => {
       const g = ctx.createGain(), a = t0 + n.at, e = a + n.d; let src;
       if(n.n){                                                                       // ruido filtrado (golpes, crujidos, 'fiu')
-        if(!noiseBuf){ noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+        getNoise();
         src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
         const fl = ctx.createBiquadFilter(); fl.type = n.ft || 'lowpass'; fl.Q.value = n.q || 1; fl.frequency.setValueAtTime(n.f, a);
         if(n.to) fl.frequency.exponentialRampToValueAtTime(n.to, e);

@@ -30,6 +30,8 @@ const PATCHES = [
       'La lista de equipos tiene buscador y filtros (Todos, Favoritos, Completos, Vacíos). Sigues teniendo hasta 18 equipos, con nombre, favorito y borrar.',
       'El objeto de cada Pokémon se cambia directamente en su hueco del equipo. La ficha de la derecha enseña habilidad, naturaleza, ataques y estadísticas (más claras y sin amontonarse), y «Ver datos» abre el entrenamiento de siempre.',
       'Todo es más grande y se adapta al tamaño de la ventana; en la lista de equipos los sprites son grandes para reconocer cada equipo.']},
+    {t:'Combate online', i:[
+      'Arreglado el aviso «Combate cancelado: los dos combates se han descuadrado»: lo causaban los nuevos sonidos de golpe. Los dos jugadores tenéis que recargar la página (Ctrl+F5) para tener la versión nueva; con versiones distintas el juego no deja jugar.']},
     {t:'Gachapón', i:[
       'Resumen de las 10 tiradas rediseñado: cartas más grandes con la bola de su rareza arriba, sprites mucho más grandes y nítidos (y animados), sombra en el suelo, naturaleza si es nuevo y brillo en las raras y shiny.']},
     {t:'Panel VS', i:[
