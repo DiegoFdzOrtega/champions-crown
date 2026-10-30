@@ -35,7 +35,12 @@ let pvp = null;                                         // estado del combate on
 function pvpRng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function pvpHash(str){ let h = 2166136261; for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function pvpSeeded(fn){ const R = Math.random; Math.random = pvp.rng; try{ return fn(); } finally{ Math.random = R; } }
-function pvpSend(ev, payload){ if(pvp && pvp.ch){ try{ pvp.ch.send({type: 'broadcast', event: ev, payload}); }catch(e){} } }
+const PVP_FAST = {inp: 1, chk: 1, bye: 1};                // mensajes que también van por la conexión directa (WebRTC), si está abierta
+function pvpSend(ev, payload){                            // siempre por el canal de Supabase; además, por la conexión directa si ya existe (gana el que llegue antes; lo repetido se ignora)
+  const P = pvp; if(!P) return;
+  if(P.ch){ try{ P.ch.send({type: 'broadcast', event: ev, payload}); }catch(e){} }
+  if(P.dcOk && PVP_FAST[ev]){ try{ P.dc.send(JSON.stringify({e: ev, p: payload})); }catch(e){} }
+}
 const pvpOk = n => typeof n === 'number' && isFinite(n);
 const pvpName = () => pvp && pvp.opp ? pvp.opp.name : (pvp ? pvp.match.opp.name : '');
 
@@ -90,6 +95,7 @@ function pvpStart(match){
     .on('broadcast', {event: 'inp'}, m => pvpOnInp(m.payload))
     .on('broadcast', {event: 'chk'}, m => pvpOnChk(m.payload))
     .on('broadcast', {event: 'bye'}, m => pvpOnBye(m.payload))
+    .on('broadcast', {event: 'rtc'}, m => pvpOnRtc(m.payload))
     .subscribe(st => { if(st === 'SUBSCRIBED' && pvp && pvp.ch === ch){ pvp.subscribed = true; pvpHs(); } });
   pvp.ch = ch;
   pvp.hsT = setInterval(pvpHs, 500);
@@ -101,6 +107,7 @@ function pvpLeave(){                                     // cierra el canal y de
   const P = pvp; if(!P) return;
   clearInterval(P.hsT); clearTimeout(P.limit);
   if(P.ch){ try{ cloud.sb.removeChannel(P.ch); }catch(e){} }
+  try{ if(P.dc) P.dc.close(); if(P.pc) P.pc.close(); }catch(e){}
   pvp = null; cloud.match = null; pvpOverlay('');
   if(g && g.pvp && !g.over){ g = null; goMain(); }
   if(typeof cloudChalUi === 'function') cloudChalUi();
@@ -121,6 +128,7 @@ function pvpOnHs(p){
   if(!P.opp){
     if(!pvpDescOk(p.team)){ pvpSend('bye', {from: cloud.user.id, why: 'team'}); pvpFail('El equipo de ' + P.match.opp.name + ' no es válido.'); return; }
     P.opp = {name: String(p.name || P.match.opp.name).slice(0, 24), team: p.team}; pvpBuild();
+    if(P.me === 'p') pvpRtcInit();                                                                   // el anfitrión empieza a preparar la conexión directa
     pvpOverlay('');
     pvpHs();                                                                                          // contesta enseguida con tu equipo
   }
@@ -255,6 +263,48 @@ function pvpCheck(){
   const P = pvp, t = P.tick, h = pvpHash(pvpState());
   P.chkL[t] = h; pvpSend('chk', {t, h}); pvpCmp(t);
 }
+// ---------------------------------------------------------------------
+// Conexión directa entre los dos navegadores (WebRTC): sin pasar por el servidor de Irlanda, el camino es mucho más corto.
+// Supabase solo sirve de «teléfono» para ponerse de acuerdo (mensajes rtc: oferta, respuesta y candidatos ICE). Si no se consigue conectar
+// (router, empresa, red móvil...), todo sigue funcionando por Supabase como antes. Mientras la directa está abierta, inp/chk/bye van por las dos.
+// ---------------------------------------------------------------------
+const PVP_ICE = [{urls: 'stun:stun.l.google.com:19302'}, {urls: 'stun:stun1.l.google.com:19302'}];
+function pvpRtcInit(){
+  const P = pvp; if(!P || P.pc || typeof RTCPeerConnection === 'undefined') return;
+  try{
+    const pc = new RTCPeerConnection({iceServers: window.PVP_ICE_OVERRIDE || PVP_ICE}); P.pc = pc; P.iceQ = [];
+    pc.onicecandidate = e => { if(e.candidate) pvpSend('rtc', {from: cloud.user.id, k: 'ice', d: e.candidate.toJSON()}); };
+    if(P.me === 'p'){
+      pvpRtcDc(pc.createDataChannel('pvp', {ordered: true}));
+      pc.createOffer().then(o => pc.setLocalDescription(o)).then(() => pvpSend('rtc', {from: cloud.user.id, k: 'offer', d: {type: pc.localDescription.type, sdp: pc.localDescription.sdp}})).catch(e => console.warn('[pvp] rtc oferta', e));
+    }else pc.ondatachannel = e => pvpRtcDc(e.channel);
+  }catch(e){ console.warn('[pvp] WebRTC no disponible', e); P.pc = null; }
+}
+function pvpRtcDc(dc){
+  const P = pvp; if(!P) return; P.dc = dc;
+  dc.onopen = () => { if(pvp === P){ P.dcOk = true; console.info('[pvp] conexión directa abierta'); } };
+  dc.onclose = dc.onerror = () => { if(pvp === P) P.dcOk = false; };
+  dc.onmessage = ev => {
+    if(pvp !== P) return; let m; try{ m = JSON.parse(ev.data); }catch(e){ return; }
+    if(!m || !m.p) return;
+    if(m.e === 'inp') pvpOnInp(m.p); else if(m.e === 'chk') pvpOnChk(m.p); else if(m.e === 'bye') pvpOnBye(m.p);
+  };
+}
+async function pvpOnRtc(p){
+  const P = pvp; if(!P || !p || p.from !== P.match.opp.uid) return;
+  try{
+    if(!P.pc) pvpRtcInit(); const pc = P.pc; if(!pc) return;
+    if(p.k === 'offer' && P.me === 'e'){
+      await pc.setRemoteDescription(p.d); const a = await pc.createAnswer(); await pc.setLocalDescription(a);
+      pvpSend('rtc', {from: cloud.user.id, k: 'answer', d: {type: pc.localDescription.type, sdp: pc.localDescription.sdp}});
+      P.iceQ.splice(0).forEach(c => pc.addIceCandidate(c).catch(() => {}));
+    }else if(p.k === 'answer' && P.me === 'p'){
+      await pc.setRemoteDescription(p.d); P.iceQ.splice(0).forEach(c => pc.addIceCandidate(c).catch(() => {}));
+    }else if(p.k === 'ice'){
+      if(pc.remoteDescription) pc.addIceCandidate(p.d).catch(() => {}); else P.iceQ.push(p.d);
+    }
+  }catch(e){ console.warn('[pvp] rtc', e); }
+}
 function pvpOnChk(p){ const P = pvp; if(!P || !p || !pvpOk(p.t)) return; P.chkR[p.t] = p.h; pvpCmp(p.t); }
 function pvpCmp(t){
   const P = pvp, a = P.chkL[t], b = P.chkR[t]; if(a === undefined || b === undefined) return;
@@ -307,6 +357,6 @@ addEventListener('pagehide', () => { if(pvp && !pvp.finished && pvp.running) pvp
 function pvpDraw(){
   const P = pvp; if(!P) return;
   if(!P.running){ textO(P.opp ? 'CARGANDO EL COMBATE...' : 'CONECTANDO...', W / 2, H / 2 + 22, 14, '#ffcc33', 'center'); return; }
-  text(`RETRASO ${Math.round(P.D * 1000 / 60)} ms`, 14, H - 12, 6, '#6d7899');
+  text(`RETRASO ${Math.round(P.D * 1000 / 60)} ms · ${P.dcOk ? 'CONEXIÓN DIRECTA' : 'POR SERVIDOR'}`, 14, H - 12, 6, '#6d7899');
   if(P.wait > .5) textO(`ESPERANDO A ${pvpName().toUpperCase()}... ${Math.floor(P.wait)} s`, W / 2, H / 2 + 22, 12, '#ff9a3a', 'center');
 }

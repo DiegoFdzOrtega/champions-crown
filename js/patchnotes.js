@@ -21,6 +21,7 @@ const PATCHES = [
       'Verás qué amigos están en línea (punto verde) y podrás desafiarlos. Te avisa una ventana con Aceptar o Rechazar en cualquier pantalla del juego (el desafío caduca a los 30 segundos).',
       '¡Combate online en tiempo real! Cuando un amigo acepta tu desafío, los dos entráis a la arena con vuestros equipos de 3 Pokémon (hace falta un equipo completo). Cada uno controla el suyo con sus teclas de siempre, incluidos el cambio de Pokémon (1·2·3) y la megaevolución (R).',
       'Es un combate amistoso: no da recompensas ni toca tu progreso. Con Esc puedes abandonar (el combate no se pausa) y al terminar tienes un botón de Revancha.',
+      'El combate online intenta una conexión directa entre los dos jugadores para que haya menos retraso. Abajo a la izquierda se ve el retraso y si va por «conexión directa» o «por servidor».',
       'Los dos jugadores deben tener la misma versión del juego: si no coincide, el juego te lo dice y basta con recargar la página (Ctrl+F5).']},
     {t:'Ver datos', i:[
       'Los IVs y los EVs se suben con barras que arrastras (antes eran botones +5 / +10). Cada paso gasta una Chapa Dorada (+5 IV) o Plateada (+10 EV).',
