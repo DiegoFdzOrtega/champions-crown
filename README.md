@@ -18,6 +18,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/data.js: tipos, rareza, naturalezas, equipos de los líderes, objetos, tienda y reglas del Gachapon (lo que más vas a editar). Aquí puedes rellenar LORE[nº] y ABILITIES[nº] para la Pokédex
 - js/sprites.js: carga las hojas y detecta solo el tamaño de cada cuadro; retratos de líderes (si dos cuadros seguidos se leen como uno y el Pokémon sale duplicado, como Dreepy o Dugtrio, `analyze()` lo corrige solo comparando las dos mitades de cada cuadro; afectaba a 19 Pokémon)
 - js/state.js: tamaño del lienzo, partida guardada (save) y creación de combates
+- js/friendprofile.js: perfil de amigos (tarjeta pública de cada jugador, pantalla para verla y botón en Amigos; ver «Perfil de amigos»)
 - js/combat.js: movimiento, ataques, daño, efectos de los objetos y cambio de Pokémon (la IA del rival se llama desde aquí)
 - js/status.js: estados (paralizado, envenenado, quemado, dormido, confuso, enamorado) y los 7 ataques que los ponen; los números están en `STX`
 - js/abilities.js: las habilidades en combate (las ~100 que usan tus Pokémon y los rivales) y el clima; los números están en `ABX`
@@ -561,6 +562,8 @@ Los combates de la Historia **ya no dan BP** (se quitaron los BP por combate y e
  "icon":"campo", "metric":"campo_wins", "goal":10, "reward":{"bp":200, "tickets":0}}
 ```
 Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`, `campo_tier`, `pokemon_owned`, `shiny_owned`, `dex_region`; con `region` o `tier` como parámetro) y `goal` = cuántos hacen falta. **Los logros se reclaman a mano.** `achSync()` recalcula todos y marca como **completados** los que se cumplan (se llama tras cada combate ganado, tras cada tirada del Gachapon, al abrir Logros y al arrancar; también cuenta lo que ya habías conseguido), pero **no da nada**: avisa con «Logro completado… ¡Reclama la recompensa en Logros!», la tarjeta se pone en verde con un botón **Reclamar** (y arriba **Reclamar todo**), y la miga «Logros» muestra un circulito rojo con cuántos tienes pendientes. `achClaim(id)` entrega la recompensa (`achGrant({bp, tickets})`) una sola vez. Se guarda en `save.ach[id] = {progress, done, date}`: `done` = fecha en que se completó y `date` = fecha en que se reclamó (las partidas antiguas, que solo tenían `date`, cuentan como ya reclamadas). Se cuentan las victorias totales del Campo en `save.stats.campo`.
+**Pantalla de Logros** (`achRender` en `js/achievements.js`; estilos al final de `css/style.css`): lista compacta, una fila por logro (`achRow`): icono (medalla de pixel art, `achMedal`), nombre y descripción, barra de progreso, fichas de recompensa y botón «Reclamar». Arriba, el total reclamado con barra, «Reclamar todo» y «Ocultar reclamados»; pestañas Todos · Historia · Campo · Colección · Secretos (con globo rojo si hay algo listo); los logros listos se fijan en una sección «Listos para reclamar» y el resto se agrupa por región o tipo (`achGroups`). **Logros secretos**: entradas con `secret:true`, `hint` y categoría `secreto`; se muestran como «???» con la pista hasta reclamarlos. **Recompensas especiales**: una recompensa puede llevar `title` (texto) y/o `frame` (id de `ACH_FRAMES`); se desbloquean al reclamar el logro (no hay datos extra guardados) y se eligen en Perfil › «Título y marco» (`save.title` = id del logro, `save.frame` = id del marco). El título sale bajo el nombre (`.utitle`) y el marco es la clase CSS `afr-<id>` sobre el avatar. Para un marco nuevo: una línea en `ACH_FRAMES` y un logro con `frame`.
+
 | Logro | Qué hay que hacer | Recompensa |
 |---|---|---|
 | Primer gimnasio | Vencer a 1 líder | 100 BP + 1 ticket |
@@ -967,6 +970,30 @@ Enlaces y detalle en `musica/LEEME.txt`. Los efectos de sonido (`Sfx`) también 
 
 **Código:** original de Diego, escrito desde cero con ayuda de Claude (Anthropic) como proyecto de aprendizaje; no copia código de otros proyectos.
 
+
+
+## Perfil de amigos (js/friendprofile.js, tabla `cards` de Supabase, final de css/style.css bajo «Perfil de amigos»)
+- **Qué es:** cada jugador publica una **tarjeta** (un resumen pequeño de datos) y sus amigos aceptados pueden abrirla desde Amigos › botón «Perfil». La tarjeta NO lleva la partida: solo avatar, marco, título, nombre de entrenador, nº de Pokémon, shinies, logros reclamados, Ligas superadas, victorias del Campo, los 3 favoritos (con su versión shiny) y hasta 8 logros destacados (los secretos primero, luego por BP).
+- **Mi tarjeta:** `fpCard()` la construye a partir de `save`. `fpPublish()` la sube a `cards` (upsert) **solo si ha cambiado** desde la última vez (`cloud.cardKey`); la llaman `cloudPush` (después de cada subida de la partida) y `cloudAfterLogin` (al iniciar sesión). Con `save.pubProfile = false` (interruptor en Perfil › «Perfil para amigos») se borra la fila y nadie la ve. Si la tabla aún no existe, el fallo es silencioso (`cloud.cardErr`) y la partida se sigue guardando igual.
+- **Ver la de un amigo:** `fpLoad(uid)` + `openFriendProfile(f)` (`fpView` dibuja, `fpPaint` pone sprites y medallas). «Ver cómo lo ven mis amigos» en Perfil abre `openMyCardPreview()`. Cada cifra lleva al lado la tuya («Tú: n»).
+- **Seguridad:** la tarjeta de otro jugador es **dato no fiable**: se limita el largo de los textos, los números se fuerzan a enteros, y el avatar, el marco, el título, los logros, las regiones y los Pokémon solo se aceptan si existen en el juego; todo lo demás se escapa (`cloudEsc`). Probado con una tarjeta con etiquetas `<img onerror>`: sale como texto y no se ejecuta nada. El permiso real lo da la base de datos (RLS): solo lees la tarjeta de quien es tu amigo aceptado.
+- **SQL (se ejecuta una vez en Supabase › SQL Editor):**
+```sql
+create table if not exists public.cards (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  card jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table public.cards enable row level security;
+drop policy if exists "mi tarjeta" on public.cards;
+drop policy if exists "tarjeta de mis amigos" on public.cards;
+create policy "mi tarjeta" on public.cards for all to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "tarjeta de mis amigos" on public.cards for select to authenticated
+  using (exists (select 1 from public.friendships f where f.status = 'accepted'
+    and ((f.requester = auth.uid() and f.addressee = cards.user_id) or (f.addressee = auth.uid() and f.requester = cards.user_id))));
+```
+- **Para añadir algo a la tarjeta:** un campo en `fpCard()` (js/friendprofile.js), su validación y dibujo en `fpView()`, y listo: no hay que tocar la base de datos (`card` es JSON libre). Si cambias el significado de un campo, sube `FP_VER`.
 
 ## Cuentas y guardado en la nube (js/cloud.js, js/cloudui.js, Supabase)
 - **Qué es:** cuentas opcionales y copia de tu partida en internet. Sin cuenta el juego va igual que siempre (la partida vive en `localStorage`, clave `arena2d_v2`). Es el primer paso para amigos y combates online (ver «Plan online»).

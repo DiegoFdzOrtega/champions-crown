@@ -59,7 +59,7 @@ async function cloudLoadProfile(){
 }
 async function cloudAfterLogin(){
   cloud.err = ''; await cloudLoadProfile();
-  if(!cloud.needName){ await cloudSync(); cloudFriendsLoad().then(() => { cloudRtStart(); cloudRefresh(); }); }
+  if(!cloud.needName){ await cloudSync(); cloudFriendsLoad().then(() => { cloudRtStart(); cloudRefresh(); }); if(typeof fpPublish === 'function') fpPublish(); }
   cloudRefresh();
 }
 
@@ -104,7 +104,7 @@ async function cloudSignOut(){
   clearTimeout(cloud.timer); cloudRtStop();
   if(cloud.user && !cloud.needName) await cloudPush().catch(() => {});                              // última subida antes de salir
   await cloud.sb.auth.signOut();
-  cloud.user = null; cloud.name = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
+  cloud.user = null; cloud.name = ''; cloud.cardKey = ''; cloud.cardErr = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
   cloud.fr = {loaded:false, loading:false, friends:[], incoming:[], outgoing:[], err:''};
   try{ localStorage.removeItem(CLOUD_META); }catch(e){}
   cloudRefresh();
@@ -123,7 +123,9 @@ async function cloudPush(){
     const at = new Date().toISOString();
     const {error} = await cloud.sb.from('saves').upsert({user_id: cloud.user.id, data: cloudPayload(), updated_at: at});
     if(error){ cloud.err = 'No se pudo guardar en la nube: ' + error.message; cloudRefresh(); return false; }
-    cloudSetMeta({uid: cloud.user.id, at, dirty: false}); cloud.lastPush = Date.now(); cloud.err = ''; cloudRefresh(); return true;
+    cloudSetMeta({uid: cloud.user.id, at, dirty: false}); cloud.lastPush = Date.now(); cloud.err = ''; cloudRefresh();
+    if(typeof fpPublish === 'function') fpPublish();                                                // tarjeta de perfil para los amigos (js/friendprofile.js)
+    return true;
   }catch(e){ cloud.err = cloudErr(e); cloudRefresh(); return false; }
   finally{ cloud.pushing = false; }
 }

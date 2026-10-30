@@ -13,6 +13,16 @@ const PATCHES = [
       'Se pueden cambiar movimiento, Carrera, Golpe, Disparo, Mejora, Ataque fuerte, Megaevolución y el cambio de Pokémon 1 · 2 · 3. Si eliges una tecla que ya usa otra acción, se intercambian. Retroceso vacía un hueco, Esc cancela.',
       'Esc (pausa) y M (silenciar) siguen siendo fijas. «Restablecer controles» vuelve a las de siempre.',
       'La barra de ataques, los cuadritos del equipo y el aviso de megaevolución enseñan tus teclas. Tus controles se guardan también en tu cuenta. En los combates online cada jugador usa los suyos.']},
+    {t:'Logros', i:[
+      'Pantalla de Logros nueva, en lista compacta: cada logro es una fila fina con su icono, el nombre, la descripción, la barra de progreso y el botón de reclamar a la derecha. Caben muchos a la vez.',
+      'Arriba ves cuántos llevas, una barra de progreso, «Reclamar todo» y «Ocultar reclamados». Los que ya puedes reclamar salen juntos en una sección verde al principio.',
+      'Pestañas: Todos, Historia, Campo, Colección y Secretos. Los de Historia se agrupan por región.',
+      'Logros secretos: hay 8 que salen como «???» con una pista. Hasta que los consigas no se sabe qué piden ni qué dan.',
+      'Recompensas especiales: algunos logros dan un título (aparece bajo tu nombre) o un marco para tu avatar. Se desbloquean al reclamar el logro y los eliges en Perfil › Título y marco.']},
+    {t:'Perfil de amigos', i:[
+      'Ahora puedes abrir el perfil de tus amigos: en Amigos, junto a cada uno, hay un botón «Perfil». Ves su avatar con marco, su título, cuántos Pokémon y shinies tiene, sus logros, las Ligas que ha superado, sus 3 Pokémon favoritos y sus logros más destacados.',
+      'Al lado de cada cifra sale la tuya («Tú: ...») para comparar. Si está en línea, también puedes desafiarle desde su perfil.',
+      'Solo lo ven tus amigos aceptados. No se ve tu partida ni tus BP o tickets. En Perfil › «Perfil para amigos» puedes ocultarlo y ver cómo lo ven los demás.']},
     {t:'Combate online', i:[
       'Estadio nuevo para el PvP: el Coliseo. Es de noche, con focos que barren el campo, una grada llena de público (azul a la izquierda, rojo a la derecha) que hace la ola, agita barras de luz y saca flashes, y una gran Poké Ball pintada en el centro.',
       'El suelo se tiñe de azul a la izquierda y de rojo a la derecha, con líneas de neón y un círculo de salida para cada bando.']}

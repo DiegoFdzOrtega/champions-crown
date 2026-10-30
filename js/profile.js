@@ -29,12 +29,20 @@ function renderProfile(){
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
     <div class="av-grid" id="avGrid"></div>
     <div class="pf-btns"><button id="avSave" class="main">Guardar / Seleccionar avatar activo</button></div>
+    <h2>Título y marco</h2>
+    <p class="help">Son recompensas especiales de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.</p>
+    <label>Título<br><select id="titSel"></select></label>
+    <div class="frames" id="frameRow"></div>
     <h2>Pokémon favoritos</h2>
     <p class="help">Elige 3 Pokémon distintos. Si tienes su versión shiny, puedes enseñarla en tu perfil. Son solo para tu perfil: no cambian tu equipo de combate.</p>
     <div class="pf-slots" id="pfSlots"></div>
     <p id="pfMsg" class="warn"></p>
-    <div class="pf-btns"><button id="pfSave" class="main">Guardar perfil</button><button id="pfCancel">Cancelar cambios</button></div>`);
-  $('pfName').textContent = save.name; renderAvatarGrid();
+    <div class="pf-btns"><button id="pfSave" class="main">Guardar perfil</button><button id="pfCancel">Cancelar cambios</button></div>
+    <h2>Perfil para amigos</h2>
+    <p class="help">Tus amigos pueden abrir tu perfil desde Amigos: ven tu avatar, marco, título, cifras, favoritos y logros destacados. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
+    <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>
+    <div class="pf-btns"><button id="pubPrev">Ver cómo lo ven mis amigos</button></div>`);
+  $('pfName').textContent = save.name; renderAvatarGrid(); renderTitleFrame();
   $('nameIn').value = save.name;
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
     setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', (save.gender || 'm') === b.dataset.g);
@@ -61,6 +69,9 @@ function renderProfile(){
     save.profileFav = pfDraft.slice(); save.profileSh = pfDraft.map((d, i) => pfDraftS[i] && save.shiny.includes(d) ? 1 : 0); persist(); toast('Perfil guardado'); refreshHud(); renderProfile();
   };
   $('pfCancel').onclick = ()=>{ pfDraft = favSaved(); pfDraftS = favShinySaved(); renderProfile(); };
+  $('pubChk').checked = save.pubProfile !== false;
+  $('pubChk').onchange = e => { save.pubProfile = e.target.checked; persist(); if(typeof fpPublish === 'function') fpPublish(); toast(save.pubProfile ? 'Tus amigos pueden ver tu perfil.' : 'Tu perfil está oculto para tus amigos.'); };
+  $('pubPrev').onclick = () => { if(typeof openMyCardPreview === 'function') openMyCardPreview(); };
 }
 
 // Cuadrícula para elegir el Pokémon de un espacio
@@ -99,6 +110,25 @@ function openFavPicker(slot){
   $('pfOk').onclick = ()=>{ if(sel && !used(sel)){ pfDraft[slot] = sel; pfDraftS[slot] = hasSh(sel) && selS ? 1 : 0; renderProfile(); } };
   $('pfNo').onclick = renderProfile;
   draw();
+}
+
+// ---- Título y marco (recompensas de logros, js/achievements.js): se eligen aquí y se aplican al instante ----
+function renderTitleFrame(){
+  const sel = $('titSel'), row = $('frameRow'); if(!sel || !row) return;
+  const titles = achTitlesUnlocked(), unlocked = achFramesUnlocked(), curT = achActiveTitle() ? save.title : '', curF = achActiveFrame();
+  sel.innerHTML = `<option value="">Sin título</option>` + titles.map(t => `<option value="${esc(t.id)}"${t.id === curT ? ' selected' : ''}>${esc(t.text)}</option>`).join('');
+  if(!titles.length) sel.title = 'Aún no tienes ninguno: reclama logros con título.';
+  sel.onchange = () => { save.title = sel.value; persist(); refreshUserTitle(); };
+  row.innerHTML = `<button type="button" class="frb${curF ? '' : ' on'}" data-f="" title="Sin marco"><i></i><span>Ninguno</span></button>` + Object.entries(ACH_FRAMES).map(([id, f]) => {
+    const ok = unlocked.includes(id);
+    return `<button type="button" class="frb${id === curF ? ' on' : ''}${ok ? '' : ' lock'}" data-f="${id}" title="${ok ? 'Marco ' + f.n : 'Bloqueado: se consigue con ' + esc(achFrameSource(id))}"><i class="afr-${id}"></i><span>${f.n}</span>${ok ? '' : '<u>🔒</u>'}</button>`;
+  }).join('');
+  row.onclick = e => {
+    const b = e.target.closest('.frb'); if(!b) return;
+    if(b.classList.contains('lock')){ toast(b.title); return; }
+    save.frame = b.dataset.f; persist(); refreshAvatars(); renderTitleFrame();
+  };
+  const pv = $('pfAv'); if(pv) pv.className = (pv.className.replace(/\s*\bafr-\S+/g, '') + (curF ? ' afr-' + curF : '')).trim();
 }
 
 // ---- Selector de avatar: cuadrícula con las imágenes de avatares/ (los bloqueados salen apagados con candado) ----

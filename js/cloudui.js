@@ -91,7 +91,7 @@ function cloudRenderFriends(){
     h += `<p class="warn">${cloudEsc(why)}</p>`;
   }
   if(fr.incoming.length) h += `<h3>Solicitudes recibidas (${fr.incoming.length})</h3>` + fr.incoming.map(f => row(f, btn('accept', f.id, 'Aceptar', true) + btn('remove', f.id, 'Rechazar'))).join('');
-  h += `<h3>Tus amigos (${fr.friends.length})</h3>` + (fr.friends.length ? fr.friends.slice().sort((a, b) => on(b) - on(a)).map(f => row(f, (on(f) ? btn('chal', f.uid, 'Desafiar', true) : '') + btn('remove', f.id, 'Quitar'), true)).join('') : '<p class="help">Todavía no tienes amigos. Escribe arriba el nombre de un jugador para enviarle una solicitud.</p>');
+  h += `<h3>Tus amigos (${fr.friends.length})</h3>` + (fr.friends.length ? fr.friends.slice().sort((a, b) => on(b) - on(a)).map(f => row(f, btn('view', f.uid, 'Perfil') + (on(f) ? btn('chal', f.uid, 'Desafiar', true) : '') + btn('remove', f.id, 'Quitar'), true)).join('') : '<p class="help">Todavía no tienes amigos. Escribe arriba el nombre de un jugador para enviarle una solicitud.</p>');
   if(fr.outgoing.length) h += `<h3>Solicitudes enviadas</h3>` + fr.outgoing.map(f => row(f, '<small>Esperando respuesta</small>' + btn('remove', f.id, 'Cancelar'))).join('');
   h += `<button id="frRefresh" class="sec">Actualizar lista</button>`;
   el.innerHTML = h;
@@ -99,6 +99,7 @@ function cloudRenderFriends(){
     const b = e.target.closest('button'); if(!b) return;
     if(b.id === 'frRefresh'){ b.disabled = true; await cloudFriendsLoad(); return cloudRenderFriends(); }
     if(!b.dataset.fr) return; const id = b.dataset.id, a = b.dataset.fr;
+    if(a === 'view'){ const f = fr.friends.find(x => x.uid === id); if(f) openFriendProfile(f); return; }
     if(a === 'chal'){ const f = fr.friends.find(x => x.uid === id); const e = f ? cloudChallenge(f) : ''; if(e) toast(e); return; }
     if(a === 'remove' && b.textContent === 'Quitar' && !(cloudArm.id === id && Date.now() - cloudArm.t < 3500)){ cloudArm.id = id; cloudArm.t = Date.now(); b.textContent = '¿Seguro?'; return; }
     b.disabled = true;
