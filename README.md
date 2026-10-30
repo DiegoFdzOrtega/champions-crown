@@ -963,3 +963,45 @@ Enlaces y detalle en `musica/LEEME.txt`. Los efectos de sonido (`Sfx`) también 
 **Licencia del código:** MIT (archivo `LICENSE`), © 2026 Diego Fernández Ortega. Cubre solo el código (`index.html`, `css/`, `js/`), no los sprites ni la música.
 
 **Código:** original de Diego, escrito desde cero con ayuda de Claude (Anthropic) como proyecto de aprendizaje; no copia código de otros proyectos.
+
+
+## Cuentas y guardado en la nube (js/cloud.js, js/cloudui.js, Supabase)
+- **Qué es:** cuentas opcionales y copia de tu partida en internet. Sin cuenta el juego va igual que siempre (la partida vive en `localStorage`, clave `arena2d_v2`). Es el primer paso para amigos y combates online (ver «Plan online»).
+- **Servicio:** Supabase (proyecto `champions-crown`, región Irlanda, plan gratis). El juego lo llama con `supabase-js` (se carga con una etiqueta `<script>` de jsDelivr en `index.html`; si no carga, `cloud.ok = false` y el juego sigue sin nube).
+- **Claves:** `CLOUD_URL` y `CLOUD_KEY` (al principio de `cloud.js`) son la URL y la clave **publishable**, que son públicas a propósito. La seguridad la da **Row Level Security** (reglas de la base de datos: cada jugador solo lee y escribe su propia fila). **Nunca** subas la clave `secret` / `service_role` ni la contraseña de la base de datos.
+- **Tablas** (se crearon una vez en Supabase › SQL Editor):
+```sql
+create table profiles (id uuid primary key references auth.users(id) on delete cascade, username text not null check (username ~ '^[A-Za-z0-9_]{3,16}$'), created_at timestamptz default now());
+create unique index profiles_username_unico on profiles (lower(username));
+create table saves (user_id uuid primary key references auth.users(id) on delete cascade, data jsonb not null, updated_at timestamptz default now());
+alter table profiles enable row level security;  alter table saves enable row level security;
+create policy "ver perfiles" on profiles for select to authenticated using (true);
+create policy "crear mi perfil" on profiles for insert to authenticated with check (auth.uid() = id);
+create policy "cambiar mi perfil" on profiles for update to authenticated using (auth.uid() = id);
+create policy "ver mi partida" on saves for select to authenticated using (auth.uid() = user_id);
+create policy "crear mi partida" on saves for insert to authenticated with check (auth.uid() = user_id);
+create policy "cambiar mi partida" on saves for update to authenticated using (auth.uid() = user_id);
+```
+- **Subida:** `persist()` (state.js) llama a `cloudDirty()`, que sube la partida 4 s después del último cambio (`cloudPush`, upsert en `saves`). También sube al ocultar la pestaña y al cerrar sesión. El meta de sincronización (`arena2d_cloud`: usuario, fecha de la última versión de la nube y si hay cambios sin subir) decide qué hacer al entrar (`cloudSync`).
+- **Al entrar:** si la cuenta no tiene partida, se sube la del navegador. Si la nube no ha cambiado, no pasa nada. Si se jugó en otro sitio y aquí no hay cambios sin subir, se descarga sola. Si este navegador está sin estrenar, se usa la de la nube. Si las dos tienen cambios, sale la pantalla «¿Qué partida quieres usar?» y **nunca se pisa nada sin que el jugador elija**. Al elegir la de la nube se guarda antes una copia en `localStorage` bajo `arena2d_backup` y se recarga la página.
+- **Nombre de jugador:** único sin distinguir mayúsculas (3-16 letras sin tilde, números o `_`). Si está cogido al registrarse, la cuenta se crea igual y se pide otro nombre.
+- **Pantalla:** Amigos (`openFriends` en cloudui.js) · `#cloudBox`: arriba la cuenta, debajo la lista de amigos (`#frList`, se actualiza sola cada 15 s mientras la pantalla está abierta).
+- **Amigos (tabla `friendships`):** una fila por pareja: `requester` pide, `addressee` acepta (`status` = `pending` o `accepted`). Hay un índice único para que no se repita la pareja en ningún sentido. Reglas (RLS): solo ves las filas en las que participas, solo puedes pedir amistad en tu nombre (`requester = tú`, `status = pending`), solo el que recibe puede aceptar (update) y cualquiera de los dos puede borrar (rechazar, cancelar o quitar). Funciones en cloud.js: `cloudFriendsLoad`, `cloudFriendAdd(nombre)` (busca con `ilike`, escapando `_` porque es comodín), `cloudFriendAccept`, `cloudFriendRemove`. Si la otra persona ya te había pedido amistad y tú le pides a ella, se acepta directamente. «Quitar» pide una segunda pulsación para confirmar.
+```sql
+create table friendships (
+  id uuid primary key default gen_random_uuid(),
+  requester uuid not null references auth.users(id) on delete cascade,
+  addressee uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'pending' check (status in ('pending','accepted')),
+  created_at timestamptz default now(),
+  check (requester <> addressee)
+);
+create unique index friendships_par on friendships (least(requester::text, addressee::text), greatest(requester::text, addressee::text));
+alter table friendships enable row level security;
+create policy "ver mis amistades" on friendships for select to authenticated using (auth.uid() = requester or auth.uid() = addressee);
+create policy "pedir amistad" on friendships for insert to authenticated with check (auth.uid() = requester and status = 'pending');
+create policy "aceptar amistad" on friendships for update to authenticated using (auth.uid() = addressee) with check (auth.uid() = addressee and status = 'accepted');
+create policy "borrar amistad" on friendships for delete to authenticated using (auth.uid() = requester or auth.uid() = addressee);
+```
+- **Ajuste en Supabase:** ahora «Confirm email» está **desactivado** (Authentication › Sign In / Providers › Email) para probar rápido. Antes de enseñarlo a más gente conviene volver a activarlo (el juego ya avisa de que hay que confirmar el correo).
+- **Si algo falla:** abre la consola del navegador (F12). Un error de red significa que no hay conexión con Supabase; «new row violates row-level security» significa que falta una política del SQL de arriba.

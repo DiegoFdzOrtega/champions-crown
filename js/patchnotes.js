@@ -14,6 +14,11 @@ const PATCHES = [
       'Los sprites se ven mucho más grandes, tanto en la lista de equipos como en las cajas del selector «Cambiar».',
       'Bajo cada trofeo de la estantería aparece el nombre de su región.',
       'Debajo se ven las debilidades y resistencias del equipo. Se sigue pudiendo arrastrar las tarjetas para ordenar.']},
+    {t:'Cuenta', i:[
+      'Nuevo: en Amigos puedes crear una cuenta (nombre de jugador, email y contraseña) para guardar tu partida en internet y jugarla desde otro ordenador. Es opcional.',
+      'Tu partida se sube sola unos segundos después de cada cambio. Si ya tenías partida y la cuenta tiene otra, el juego te pregunta cuál conservar (y guarda una copia de seguridad).',
+      'Lista de amigos: busca a un jugador por su nombre, envíale una solicitud y, cuando la acepte, aparecerá en tu lista. Las solicitudes recibidas se aceptan o se rechazan desde la misma pantalla.',
+      'Próximamente: combates contra tus amigos.']},
     {t:'Ver datos', i:[
       'Los IVs y los EVs se suben con barras que arrastras (antes eran botones +5 / +10). Cada paso gasta una Chapa Dorada (+5 IV) o Plateada (+10 EV).',
       'Los cambios se aplican con el botón «Aplicar cambios» (o «Deshacer» para soltarlos); no se gasta ninguna chapa hasta entonces.']}

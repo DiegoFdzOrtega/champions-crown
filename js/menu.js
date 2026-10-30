@@ -205,7 +205,7 @@ function openRank(){
     `<tr><td>1</td><td id="rkName"></td><td>${save.record}</td></tr>` + [2,3,4,5].map(n=>`<tr><td>${n}</td><td>---</td><td>---</td></tr>`).join('') + `</table>`);
   $('rkName').textContent = save.name;
 }
-function openFriends(){ panel(userBar('friends') + `<h1>Amigos</h1><p>Todavía no tienes contactos.</p><p class="help">Aquí irán tu lista de amigos, tu perfil y las funciones sociales.</p>`); }
+// openFriends() (Amigos y cuenta) está en js/cloudui.js
 // ---- AJUSTES: solo dos bloques, Pantalla completa y Audio (global, música, efectos y silenciar) ----
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
 function openSettings(){

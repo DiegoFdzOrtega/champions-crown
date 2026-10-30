@@ -71,7 +71,11 @@ function selectTeam(i){                                                         
   teamSync(); const T = save.teams[i];
   save.tsel = i; team = T.mons; save.equip = T.equip; persist();
 }
-function persist(){ try{ teamSync(); localStorage.setItem('arena2d_v2', JSON.stringify({team, ...save})); }catch(e){} }
+function persist(){
+  if(typeof cloud !== 'undefined' && cloud.lock) return;                                         // se está sustituyendo la partida por la de la nube: no escribir hasta recargar (js/cloud.js)
+  try{ teamSync(); localStorage.setItem('arena2d_v2', JSON.stringify({team, ...save})); }catch(e){}
+  if(typeof cloudDirty === 'function') cloudDirty();                                             // con sesión iniciada, programa la subida a la nube (js/cloud.js)
+}
 
 let g = null;                                    // combate en curso
 const keys = {}, mouse = {x:W/2, y:H/2, l:false, r:false};
