@@ -21,6 +21,9 @@ const PATCHES = [
       'Animación al estilo de Pokémon X e Y: hélice de luz, silueta blanca, destello y símbolo mega. Cambian sprite, tipos, habilidad, ataque y velocidad; los PS no.',
       'Los rivales también megaevolucionan: Lucario de Corelia, Alakazam y Gardevoir de Dianta.',
       'Cambio de teclas: R ya no cambia de Pokémon. Usa 1 · 2 · 3 o haz clic en sus cuadritos.']},
+    {t:'Habilidades de las megas', i:[
+      'Estadísticas y habilidades de las 22 megas comprobadas con Bulbapedia: todas coinciden con los juegos.',
+      'Nuevas habilidades que ya funcionan: Garra Dura, Amor Filial, Poder Arena, Potencia, Piel Feérica, Piel Helada y Rastro (copia la habilidad del rival). Las demás ya existían.']},
     {t:'Tienda', i:[
       'Nueva pestaña Megapiedras: 22 piedras a 3000 BP. Cada una solo se puede equipar en su Pokémon.',
       'Megas disponibles: Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Houndoom, Tyranitar, Gardevoir, Mawile, Manectric, Camerupt, Altaria, Banette, Glalie, Latias, Latios, Lopunny, Lucario, Gallade y Diancie.']}

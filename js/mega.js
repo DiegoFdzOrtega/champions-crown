@@ -34,7 +34,7 @@ function giveKey(id){                                   // entrega un objeto cla
 // ---- Tabla de megaevoluciones ----
 // clave = el valor de `mega` en las plantillas (kalos.js) · dex = Pokémon base · folder = carpeta en pokemon_mega/ · form = nombre de la forma
 // stone / img = nombre y archivo (objetos/megapiedras/) de su piedra · types = tipos de la forma mega · ab = su habilidad (las que hace el juego están en abilities.js)
-// base = [PS, Atq, Def, Atq.Esp, Def.Esp, Vel] de la forma mega. En combate cuentan: Atq/Atq.Esp (el mayor) y Vel; los PS no cambian y la defensa solo va por tipos.
+// base = [PS, Atq, Def, Atq.Esp, Def.Esp, Vel] de la forma mega (comprobadas con Bulbapedia). Todas las habilidades de esta tabla están hechas en abilities.js. En combate cuentan: Atq/Atq.Esp (el mayor) y Vel; los PS no cambian y la defensa solo va por tipos.
 const MG = (dex, folder, form, stone, img, types, ab, base) => ({dex, folder, form, stone, img, types, ab, base});
 const MEGA = {
   charizard_x: MG(6,   '6-mega-x',   'Mega-Charizard X', 'Charizardita X', 'charizardite-x', ['fuego', 'dragon'],     'Garra Dura',     [78, 130, 111, 130, 85, 100]),

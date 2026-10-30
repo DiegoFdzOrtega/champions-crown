@@ -32,9 +32,14 @@ const ABX = {
   francotirador: 1.5,                 // Francotirador: los críticos hacen ×1,5 más
   normalidad: 1.05,                   // Normalidad: sus ataques son Normal y pegan ×1,05
   encadenado: 1.3,                    // Encadenado: Pin Misil (ataque de varios golpes)
+  garraDura: 1.15,                    // Garra Dura (Mega-Charizard X, Mega-Aerodactyl): su golpe cuerpo a cuerpo, como Puño Férreo
+  amorFilial: 1.1,                    // Amor Filial (Mega-Kangaskhan): en los juegos pega dos veces (la 2ª a ¼); aquí todos sus ataques ×1,1
+  poderArena: 1.15,                   // Poder Arena (Mega-Steelix): con tormenta de arena, sus ataques de Roca, Tierra y Acero ×1,15 (y no sufre la arena)
+  potencia: 1.1,                      // Potencia (Mega-Mawile): en los juegos duplica el Ataque; aquí ×1,1, igual que Energía Pura
+  piel: 1.25, skin: 1.1,              // (piel = Piel Seca recibiendo fuego) · skin: Piel Feérica / Piel Helada: sus ataques Normales pasan a Hada / Hielo y pegan ×1,1
   intim: .93, intimMin: .8,           // Intimidación: baja un 7 % el daño del rival (mínimo ×0,8 si entra varias veces)
   // --- daño que recibes ---
-  superguardia: .75, cromolente: 1.5, ignorante: .5, sebo: .5, multiescala: .5, filtro: .75, escama: 1 / 1.5, piel: 1.25,
+  superguardia: .75, cromolente: 1.5, ignorante: .5, sebo: .5, multiescala: .5, filtro: .75, escama: 1 / 1.5,
   absorb: .2,                         // Absorbe Agua/Fuego/Elec., Piel Seca: curan este % de la vida máxima en vez de recibir daño
   pararrayos: .2, pararrayosMax: 3,   // Pararrayos: +20 % de daño por cada ataque eléctrico absorbido (máx. 3)
   electromotor: 1.4,                  // Electromotor: velocidad ×1,4 tras absorber un ataque eléctrico
@@ -66,6 +71,7 @@ const WX = {
   hail: {n: 'GRANIZO', c: '#cfeaff', msg: '¡Empieza a granizar!'},
   sand: {n: 'ARENA',   c: '#e0c07a', msg: '¡Se levanta una tormenta de arena!'}
 };
+const SKIN = {'Piel Feérica': 'hada', 'Piel Helada': 'hielo'};                           // los ataques Normales de quien la tiene cambian de tipo (se usa en use() de combat.js)
 const WX_OF = {'Sequía': 'sun', 'Llovizna': 'rain', 'Nevada': 'hail', 'Chorro Arena': 'sand'};
 
 // ---------- utilidades ----------
@@ -96,6 +102,10 @@ function abEnter(f){
   if(!g || !f || f.dead) return;
   f.ax = abAx();
   const T = abOpp(f), a = f.ab;
+  if(a === 'Rastro'){                                                                // Rastro (Mega-Alakazam): copia la habilidad del rival y la usa mientras está en el campo
+    if(T && !T.dead && T.ab && T.ab !== 'Rastro'){ f.abOrig = f.abOrig || 'Rastro'; f.ab = T.ab; abPop(f, 'RASTRO: ' + T.ab.toUpperCase(), '#c9a0ff'); return abEnter(f); }
+    return;
+  }
   if(WX_OF[a]) abWeather(WX_OF[a], f);
   if(a === 'Intimidación' && T && !T.dead){
     if(abBlockStats(T) && !abMold(f)){ abPop(f, 'INTIMIDACIÓN'); abPop(T, T.ab.toUpperCase() + ': no le afecta', '#c8c8d4'); }
@@ -110,6 +120,7 @@ function abEnter(f){
 function abExit(f){                                                                  // el Pokémon se retira (cambio): sus subidas y bajadas se pierden
   if(!f) return;
   if(f.ab === 'Regeneración' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max * ABX.regen);
+  if(f.abOrig){ f.ab = f.abOrig; f.abOrig = null; }                                  // Rastro: al irse recupera la suya
   f.ax = abAx(); f.truant = 0;
 }
 
@@ -175,6 +186,10 @@ function abHit(T, A, type, mult, close, big, mvn){
     if(aAb === 'Poder Solar' && wxIs('sun')) R.out *= ABX.poderSolar;
     if(aAb === 'Don Floral' && wxIs('sun')) R.out *= ABX.donFloral;
     if(aAb === 'Normalidad') R.out *= ABX.normalidad;
+    if(aAb === 'Garra Dura' && close) R.out *= ABX.garraDura;
+    if(aAb === 'Amor Filial') R.out *= ABX.amorFilial;
+    if(aAb === 'Potencia') R.out *= ABX.potencia;
+    if(aAb === 'Poder Arena' && wxIs('sand') && ['roca', 'tierra', 'acero'].includes(type)) R.out *= ABX.poderArena;
     if(aAb === 'Encadenado' && mvn === 'Pin Misil') R.out *= ABX.encadenado;
     if(aAb === 'Francotirador') R.critMul = ABX.francotirador;
     if(aAb === 'Cromolente' && R.mult > 0 && R.mult < 1) R.out *= ABX.cromolente;                  // «poco eficaz» pasa a normal
@@ -232,7 +247,7 @@ function abTick(f, dt){
   if(f.truant > 0) f.truant -= dt;
   if(g.wx){
     const k = g.wx.k, ty = f.m.types;
-    if(k === 'sand' && !ty.some(t => ['roca', 'tierra', 'acero'].includes(t)) && !['Velo Arena', 'Ímpetu Arena'].includes(a)) abIndirect(f, f.max * ABX.chip * dt);
+    if(k === 'sand' && !ty.some(t => ['roca', 'tierra', 'acero'].includes(t)) && !['Velo Arena', 'Ímpetu Arena', 'Poder Arena'].includes(a)) abIndirect(f, f.max * ABX.chip * dt);
     if(k === 'hail' && !ty.includes('hielo') && !['Manto Níveo', 'Cuerpo Gélido'].includes(a)) abIndirect(f, f.max * ABX.chip * dt);
     if(k === 'rain' && (a === 'Cura Lluvia' || a === 'Piel Seca')) f.hp = Math.min(f.max, f.hp + f.max * ABX.heal * dt);
     if(k === 'hail' && a === 'Cuerpo Gélido') f.hp = Math.min(f.max, f.hp + f.max * ABX.heal * dt);
@@ -391,6 +406,13 @@ Object.assign(ABIL_DESC, {
   'Manto Níveo': 'Esquiva el 25 % de los golpes con granizo y no sufre el granizo.',
   'Velo Arena': 'Esquiva el 25 % de los golpes en tormenta de arena y no la sufre.',
   'Ímpetu Arena': 'Con tormenta de arena duplica su Velocidad y no la sufre.',
+  'Garra Dura': 'Su golpe cuerpo a cuerpo pega un 15 % más.',
+  'Rastro': 'Al entrar copia la habilidad del rival y la usa mientras esté en el campo.',
+  'Amor Filial': 'Todos sus ataques pegan un 10 % más (en los juegos golpea dos veces).',
+  'Poder Arena': 'Con tormenta de arena, sus ataques de Roca, Tierra y Acero pegan un 15 % más y no sufre la arena.',
+  'Potencia': 'Sus ataques pegan un 10 % más (en los juegos duplica el Ataque).',
+  'Piel Feérica': 'Sus ataques Normales pasan a ser de tipo Hada y pegan un 10 % más.',
+  'Piel Helada': 'Sus ataques Normales pasan a ser de tipo Hielo y pegan un 10 % más.',
   'Poder Solar': 'Con sol pega un 30 % más, pero pierde vida cada segundo.',
   'Don Floral': 'Con sol pega y aguanta un 20 % más.',
   'Cuerpo Gélido': 'Recupera vida cuando graniza y no sufre el granizo.',
