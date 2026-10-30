@@ -86,6 +86,10 @@ function cloudRenderFriends(){
   const row = (f, btns, st) => `<div class="frRow"><b>${st ? `<i class="dot${on(f) ? ' on' : ''}"></i>` : ''}${cloudEsc(f.name)}${st ? `<small>${on(f) ? 'En línea' : 'Desconectado'}</small>` : ''}</b><span>${btns}</span></div>`;
   const btn = (a, id, t, main) => `<button data-fr="${a}" data-id="${id}"${main ? ' class="main"' : ''}>${t}</button>`;
   let h = '';
+  if(cloud.rtStatus && cloud.rtStatus !== 'SUBSCRIBED'){                                          // la conexión en línea no está lista: por eso todos salen «Desconectado»
+    const why = {CHANNEL_ERROR: 'No se ha podido abrir el canal en línea. En Supabase: Realtime › Settings › activa «Allow public access».', TIMED_OUT: 'La conexión en línea tarda demasiado. Recarga la página (Ctrl+F5).', CLOSED: 'La conexión en línea se ha cerrado. Recarga la página (Ctrl+F5).'}[cloud.rtStatus] || 'Conectando con el servidor en línea...';
+    h += `<p class="warn">${cloudEsc(why)}</p>`;
+  }
   if(fr.incoming.length) h += `<h3>Solicitudes recibidas (${fr.incoming.length})</h3>` + fr.incoming.map(f => row(f, btn('accept', f.id, 'Aceptar', true) + btn('remove', f.id, 'Rechazar'))).join('');
   h += `<h3>Tus amigos (${fr.friends.length})</h3>` + (fr.friends.length ? fr.friends.slice().sort((a, b) => on(b) - on(a)).map(f => row(f, (on(f) ? btn('chal', f.uid, 'Desafiar', true) : '') + btn('remove', f.id, 'Quitar'), true)).join('') : '<p class="help">Todavía no tienes amigos. Escribe arriba el nombre de un jugador para enviarle una solicitud.</p>');
   if(fr.outgoing.length) h += `<h3>Solicitudes enviadas</h3>` + fr.outgoing.map(f => row(f, '<small>Esperando respuesta</small>' + btn('remove', f.id, 'Cancelar'))).join('');

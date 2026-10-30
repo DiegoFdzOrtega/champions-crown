@@ -6,7 +6,7 @@
      de cada jugador (teclas, posición del ratón, cambio de Pokémon, megaevolución). Como las dos partidas reciben lo mismo, se ven igual,
      con todos los efectos, sin enviar la pantalla.
    - Para que sean IDÉNTICAS: el combate avanza en pasos fijos de 1/60 s (PVP_DT), el azar sale de un generador con una semilla común
-     (Math.random se cambia SOLO mientras se calcula un paso) y cada pulsación se aplica con un pequeño retraso (PVP_DELAY pasos),
+     (Math.random se cambia SOLO mientras se calcula un paso) y cada pulsación se aplica con un pequeño retraso (PVP_DELAY pasos, unos 0,08 s, que se ajusta solo),
      el justo para que le dé tiempo a llegar al otro jugador. Si la pulsación del rival aún no ha llegado, el combate espera un instante.
    - Cada segundo los dos comparan una «huella» del combate (posiciones, vida, energía). Si no coincide dos veces seguidas, se cancela el combate.
    - Quien lanzó el desafío es el bando 'p' (sale a la izquierda) y el invitado el bando 'e' (sale a la derecha). Cada uno ve su HUD a su lado:
@@ -19,8 +19,11 @@
    ===================================================================== */
 const PVP_VER = '1';
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
-const PVP_DELAY = 7;                                    // retraso de las pulsaciones, en pasos (7 pasos ≈ 0,12 s)
-const PVP_BATCH = 3;                                    // cuántos pasos se mandan juntos en cada mensaje (20 mensajes por segundo)
+const PVP_DELAY = 5, PVP_DMAX = 18;                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
+// Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
+// el combate solo avanza (D tuyo + D del rival) pasos cada T. Si la conexión es lenta, el combate iría a cámara lenta; por eso, si en 1 s se calculan
+// menos de 54 de los 60 pasos, cada jugador sube SU retraso un paso (hasta PVP_DMAX) y lo baja otra vez tras 40 s yendo bien (pvpFrame).
+const PVP_BATCH = 2;                                    // cuántos pasos se mandan juntos en cada mensaje (30 mensajes por segundo por jugador)
 const PVP_TIMEOUT = 12000;                              // ms esperando al rival antes de darlo por desconectado
 const PVP_ARENAS = ['azul', 'lance', 'giovanni', 'lorelei', 'bruno', 'agatha'];
 const PVP_EMPTY = {dx: 0, dy: 0, mx: 0, my: 0, l: 0, r: 0, sp: 0, q: 0, e: 0, sw: -1, mg: 0};
@@ -81,7 +84,7 @@ function pvpStart(match){
   if(!cloud.ok || !cloud.sb || !mine){ cloud.match = null; if(typeof toast === 'function') toast(mine ? 'Sin conexión en línea.' : 'Para jugar online necesitas un equipo de 3 Pokémon.'); if(typeof cloudChalUi === 'function') cloudChalUi(); return; }
   const me = match.host ? 'p' : 'e';
   pvp = {match, me, mine, opp: null, built: false, rdy: false, oppRdy: false, running: false, finished: false, tick: 0, acc: 0, wait: 0, lin: {}, rin: {}, out: [], outT: 0,
-         chkL: {}, chkR: {}, bad: 0, evSw: -1, evMg: 0, menu: false, gotInp: false, rng: pvpRng(pvpHash('cc:' + match.id)), desync: false};
+         chkL: {}, chkR: {}, bad: 0, evSw: -1, evMg: 0, D: PVP_DELAY, nextStamp: PVP_DELAY, winT: 0, winN: 0, calm: 0, menu: false, gotInp: false, rng: pvpRng(pvpHash('cc:' + match.id)), desync: false};
   const ch = cloud.sb.channel('match:' + match.id, {config: {broadcast: {self: false}}});
   ch.on('broadcast', {event: 'hs'}, m => pvpOnHs(m.payload))
     .on('broadcast', {event: 'inp'}, m => pvpOnInp(m.payload))
@@ -144,7 +147,7 @@ function pvpSheetsReady(){
 function pvpTryRun(){
   const P = pvp; if(!P || P.running || !P.rdy || !P.oppRdy) return;
   P.running = true; P.acc = 0; P.wait = 0;
-  for(let k = 0; k < PVP_DELAY; k++){ P.lin[k] = PVP_EMPTY; if(P.rin[k] === undefined) P.rin[k] = PVP_EMPTY; }
+  for(let k = 0; k < P.D; k++){ P.lin[k] = PVP_EMPTY; if(P.rin[k] === undefined) P.rin[k] = PVP_EMPTY; }
 }
 
 // ---------------------------------------------------------------------
@@ -183,16 +186,31 @@ function pvpFrame(dt){
   let stepped = false;
   while(P.acc >= PVP_DT && !g.over){
     if(P.rin[P.tick] === undefined) break;                                                            // aún no ha llegado la pulsación del rival: espera
-    pvpStep(); P.acc -= PVP_DT; stepped = true;
+    pvpStep(); P.acc -= PVP_DT; stepped = true; P.winN++;
+  }
+  const now = performance.now();                                                                      // velocidad real del combate (pasos por segundo) → ajusta el retraso
+  if(!P.winT || now - P.winT > 2500){ P.winT = now; P.winN = 0; }                                    // (pestaña en segundo plano o primer fotograma: no se mide)
+  else if(now - P.winT >= 1000){
+    const rate = P.winN * 1000 / (now - P.winT); P.winT = now; P.winN = 0;
+    if(rate < 54 && P.D < PVP_DMAX){ P.D++; P.calm = 0; }
+    else if(rate >= 59){ if(++P.calm >= 40 && P.D > PVP_DELAY){ P.D--; P.calm = 0; } }
+    else P.calm = 0;
   }
   if(stepped) P.wait = 0;
-  else if(P.acc >= PVP_DT){ P.wait += dt; pvpFlush(); if(P.wait * 1000 > PVP_TIMEOUT) pvpDisconnect(); }
+  else if(P.acc >= PVP_DT){
+    P.wait += dt; pvpFlush();                                                                         // esperando al rival (la conexión tarda más que el retraso): el combate sigue en cuanto llegue
+    if(P.wait * 1000 > PVP_TIMEOUT) pvpDisconnect();
+  }
 }
 function pvpStep(){
   const P = pvp, t = P.tick;
-  const mine = pvpSample(); P.lin[t + PVP_DELAY] = mine;                                              // lo que pulso ahora se aplicará en el paso t + PVP_DELAY (en los dos lados)
-  if(!P.out.length) P.outT = t + PVP_DELAY;
-  P.out.push(pvpEnc(mine)); if(P.out.length >= PVP_BATCH) pvpFlush();
+  const mine = pvpSample();                                                                           // lo que pulso ahora se aplicará en el paso t + D (en los dos lados)
+  const ns = P.nextStamp;
+  for(let k = ns; k <= t + P.D; k++){                                                        // si D ha subido, los pasos que faltan repiten la pulsación (sin cambios ni megas repetidos); si ha bajado, no se sella ninguno hasta alcanzar
+    const m = k === P.nextStamp ? mine : Object.assign({}, mine, {sw: -1, mg: 0});
+    P.lin[k] = m; if(!P.out.length) P.outT = k; P.out.push(pvpEnc(m)); P.nextStamp = k + 1; if(P.out.length >= PVP_BATCH) pvpFlush();
+  }
+  if(ns > t + P.D && (mine.sw >= 0 || mine.mg)){ P.evSw = mine.sw >= 0 ? mine.sw : P.evSw; P.evMg = mine.mg ? 1 : P.evMg; }   // (D bajó: esta pulsación no se pudo sellar; sus eventos se guardan para el siguiente paso)
   const a = P.lin[t], b = P.rin[t];
   g.inp = P.me === 'p' ? {p: a, e: b} : {p: b, e: a};
   pvpSeeded(() => update(PVP_DT));
@@ -289,5 +307,6 @@ addEventListener('pagehide', () => { if(pvp && !pvp.finished && pvp.running) pvp
 function pvpDraw(){
   const P = pvp; if(!P) return;
   if(!P.running){ textO(P.opp ? 'CARGANDO EL COMBATE...' : 'CONECTANDO...', W / 2, H / 2 + 22, 14, '#ffcc33', 'center'); return; }
+  text(`RETRASO ${Math.round(P.D * 1000 / 60)} ms`, 14, H - 12, 6, '#6d7899');
   if(P.wait > .5) textO(`ESPERANDO A ${pvpName().toUpperCase()}... ${Math.floor(P.wait)} s`, W / 2, H / 2 + 22, 12, '#ff9a3a', 'center');
 }

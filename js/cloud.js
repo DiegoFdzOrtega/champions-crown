@@ -221,13 +221,18 @@ function cloudRtStart(){
     .on('broadcast', {event: 'challenge'}, m => cloudOnChallenge(m.payload))
     .on('broadcast', {event: 'reply'}, m => cloudOnReply(m.payload))
     .on('broadcast', {event: 'cancel'}, m => cloudOnCancel(m.payload))
-    .subscribe(st => { if(st === 'SUBSCRIBED') ch.track({name: cloud.name, at: Date.now()}); });
+    .subscribe((st, err) => {
+      cloud.rtStatus = st; cloud.rtErr = (err && err.message) || '';                                  // para enseñar en Amigos si la conexión en línea falla
+      if(st !== 'SUBSCRIBED') console.warn('[cloud] canal «lobby»:', st, err || '');
+      if(st === 'SUBSCRIBED') ch.track({name: cloud.name, at: Date.now()});
+      if(typeof cloudRenderFriends === 'function') cloudRenderFriends();
+    });
   cloud.rt = ch;
 }
 function cloudRtStop(){
   if(cloud.chal) clearTimeout(cloud.chal.timer);
   if(cloud.rt){ try{ cloud.sb.removeChannel(cloud.rt); }catch(e){} }
-  cloud.rt = null; cloud.online = {}; cloud.chal = null; cloud.match = null; if(typeof cloudChalUi === 'function') cloudChalUi();
+  cloud.rt = null; cloud.rtStatus = ''; cloud.online = {}; cloud.chal = null; cloud.match = null; if(typeof cloudChalUi === 'function') cloudChalUi();
 }
 const cloudSend = (event, payload) => { if(cloud.rt) cloud.rt.send({type: 'broadcast', event, payload}); };
 const cloudBusy = () => (typeof g !== 'undefined' && g && !g.over) || !!cloud.match;               // ya hay un combate en marcha (o uno online preparándose)
