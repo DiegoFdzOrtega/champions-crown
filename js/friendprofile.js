@@ -12,6 +12,7 @@ const FP_VER = 1;
 const fpStr = (s, n) => String(s == null ? '' : s).slice(0, n);
 const fpNum = n => { n = +n; return isFinite(n) && n > 0 ? Math.min(Math.floor(n), 99999) : 0; };
 const fpTotalDex = () => DEX.filter(m => !hidden(m.dex)).length;
+const fpId = s => { let h = 7; for(const ch of String(s || 'x')) h = (h * 31 + ch.charCodeAt(0)) % 90000; return 10000 + h; };   // nº de entrenador (siempre el mismo para el mismo jugador)
 const fpRegions = () => Object.keys(ACH_REG_COL);                                    // las regiones que ya tienen Liga jugable
 
 // ---- Mi tarjeta ----
@@ -23,7 +24,7 @@ function fpCard(){
     v: FP_VER, nm: fpStr(save.name, 10), g: save.gender === 'f' ? 'f' : 'm',
     av: (() => { const a = save.avatar && avatarList().find(x => x.file === save.avatar); return a && avatarUnlocked(a) ? a.file : ''; })(),
     fr: achActiveFrame(), ti: achActiveTitle() ? save.title : '',
-    box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length,
+    box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length, sec: claimed.filter(a => a.secret).length,
     lg: REGIONS.filter(r => save.champ[r]), camp: fpNum(ACH_METRICS.campo_wins({})),
     top, fav: favSaved().map((d, i) => d ? [d, shV[i]] : null).filter(Boolean)
   };
@@ -55,29 +56,40 @@ function fpView(card, o){
   const av = (card.av && avatarList().find(x => x.file === fpStr(card.av, 80))) || null;
   const fr = ACH_FRAMES[card.fr] ? card.fr : '';
   const tiA = card.ti && achDef(fpStr(card.ti, 60)), title = tiA && tiA.reward && tiA.reward.title ? tiA.reward.title : '';
-  const box = fpNum(card.box), sh = fpNum(card.sh), ach = fpNum(card.ach), achT = fpNum(card.achT) || ACHIEVEMENTS.length, camp = fpNum(card.camp);
+  const box = fpNum(card.box), sh = fpNum(card.sh), ach = fpNum(card.ach), achT = fpNum(card.achT) || ACHIEVEMENTS.length, camp = fpNum(card.camp), sec = fpNum(card.sec), secT = ACHIEVEMENTS.filter(a => a.secret).length;
   const lg = Array.isArray(card.lg) ? card.lg.filter(r => REGIONS.includes(r)) : [];
   const top = (Array.isArray(card.top) ? card.top : []).map(id => achDef(fpStr(id, 60))).filter(Boolean).slice(0, 8);
   const fav = (Array.isArray(card.fav) ? card.fav : []).map(p => Array.isArray(p) ? [fpNum(p[0]), p[1] ? 1 : 0] : null).filter(p => p && p[0] && mon(p[0]) && !hidden(p[0])).slice(0, 3);
   const tile = (label, val, mine) => `<div class="fp-tile"><small>${label}</small><b>${val}</b>${self ? '' : `<em>Tú: ${mine}</em>`}</div>`;
   const online = !self && o.uid && cloud.online[o.uid] !== undefined;
-  const regPills = fpRegions().map(r => `<span class="fp-reg${lg.includes(r) ? ' on' : ''}" style="--c:${ACH_REG_COL[r]}">${cloudEsc(ACH_REG_NAME[r] || r)}</span>`).join('');
-  return `<div class="fp-head">
-      <img class="fp-av${fr ? ' afr-' + fr : ''}" alt="Avatar" src="${av ? avatarUrl(av.file) : defaultAvatar()}">
-      <div class="fp-who"><b>${cloudEsc(o.name)}</b>
-        <span>${card.nm ? 'Entrenador: ' + cloudEsc(fpStr(card.nm, 10)) : ''}</span>
+  const ac = fr ? ACH_FRAMES[fr].c : '#3ea6ff', anyShiny = fav.some(p => p[1]);
+  const badges = fpRegions().map(r => `<span class="fp-badge${lg.includes(r) ? ' on' : ''}" style="--c:${ACH_REG_COL[r]}" title="Liga de ${cloudEsc(ACH_REG_NAME[r] || r)}${lg.includes(r) ? ' superada' : ': sin superar'}"><i></i><small>${cloudEsc(ACH_REG_NAME[r] || r)}</small></span>`).join('');
+  return `<div class="fp-card${anyShiny ? ' foil' : ''}" style="--ac:${ac}">
+    <div class="fp-top"><span>TARJETA DE ENTRENADOR</span><span>Nº ${fpId(o.uid || (cloud.user && cloud.user.id) || o.name)}</span></div>
+    <div class="fp-main">
+      <div class="fp-left">
+        <img class="fp-av${fr ? ' afr-' + fr : ''}" alt="Avatar" src="${av ? avatarUrl(av.file) : defaultAvatar()}">
+        <b class="fp-name">${cloudEsc(o.name)}</b>
+        ${card.nm ? `<span class="fp-tn">Entrenador: ${cloudEsc(fpStr(card.nm, 10))}</span>` : ''}
         ${title ? `<small class="fp-title">${cloudEsc(title)}</small>` : ''}
-        ${self ? '' : `<span class="fp-st"><i class="dot${online ? ' on' : ''}"></i>${online ? 'En línea' : 'Desconectado'}</span>`}</div></div>
-    <div class="fp-tiles">${tile('Pokémon', box + ' / ' + fpTotalDex(), me.box)}${tile('Shiny ⭐', sh, me.sh)}${tile('Logros', ach + ' / ' + achT, me.ach)}${tile('Ligas', lg.length + ' / ' + REGIONS.length, me.lg.length)}${tile('Victorias Campo', camp, me.camp)}</div>
-    <h2>Ligas superadas</h2><div class="fp-regs">${regPills}</div>
-    <h2>Pokémon favoritos</h2>
-    ${fav.length ? `<div class="fp-favs">${fav.map(([d, s]) => `<div class="fp-fav${s ? ' shiny' : ''}"><canvas width="96" height="96" data-d="${d}" data-s="${s}"></canvas><b>${s ? '⭐ ' : ''}${cloudEsc(mon(d).name)}</b></div>`).join('')}</div>` : '<p class="help">No ha elegido favoritos.</p>'}
-    <h2>Logros destacados</h2>
-    ${top.length ? `<div class="fp-meds">${top.map(a => `<div class="fp-med" data-a="${cloudEsc(a.id)}"><span></span><b>${cloudEsc(a.name)}</b><small>${a.secret ? 'Secreto' : cloudEsc(ACH_CATS[a.cat] || '')}</small></div>`).join('')}</div>` : '<p class="help">Todavía no ha reclamado logros.</p>'}`;
+        ${self ? '' : `<span class="fp-st"><i class="dot${online ? ' on' : ''}"></i>${online ? 'En línea' : 'Desconectado'}</span>`}
+      </div>
+      <div class="fp-right">
+        <div class="fp-tiles">${tile('Pokémon', box, me.box)}${tile('Shiny ⭐', sh, me.sh)}${tile('Logros', ach + ' / ' + achT, me.ach)}${tile('Ligas', lg.length + ' / ' + REGIONS.length, me.lg.length)}${tile('Secretos', sec + ' / ' + secT, me.sec)}${tile('Victorias Campo', camp, me.camp)}</div>
+        <div class="fp-sub">Ligas superadas</div><div class="fp-badges">${badges}</div>
+      </div>
+    </div>
+    <div class="fp-bottom">
+      <div><div class="fp-sub">Pokémon favoritos</div>
+        ${fav.length ? `<div class="fp-favs">${fav.map(([d, s]) => `<div class="fp-fav${s ? ' shiny' : ''}"><canvas width="96" height="96" data-d="${d}" data-s="${s}"></canvas><b>${s ? '⭐ ' : ''}${cloudEsc(mon(d).name)}</b></div>`).join('')}</div>` : '<p class="help">No ha elegido favoritos.</p>'}</div>
+      <div><div class="fp-sub">Logros destacados</div>
+        ${top.length ? `<div class="fp-meds">${top.map(a => `<span class="fp-med" data-a="${cloudEsc(a.id)}" title="${cloudEsc(a.name)}${a.secret ? ' (secreto)' : ''}"></span>`).join('')}</div>` : '<p class="help">Todavía no ha reclamado logros.</p>'}
+        ${top.length ? `<p class="fp-medn">${top.slice(0, 2).map(a => cloudEsc(a.name)).join(' · ')}${top.length > 2 ? ' · …' : ''}</p>` : ''}</div>
+    </div></div>`;
 }
 function fpPaint(root){                                                   // sprites y medallas (necesitan el DOM ya puesto)
   root.querySelectorAll('canvas[data-d]').forEach(c => paintSprite(c, +c.dataset.d, {sc:5, fit:90, shiny: c.dataset.s === '1'}));
-  root.querySelectorAll('.fp-med').forEach(m => { const a = achDef(m.dataset.a); if(a) m.querySelector('span').appendChild(achMedal(a)); });
+  root.querySelectorAll('.fp-med').forEach(m => { const a = achDef(m.dataset.a); if(a) m.appendChild(achMedal(a)); });
   root.querySelectorAll('img.fp-av').forEach(im => { im.onerror = () => { im.onerror = null; im.src = defaultAvatar(); }; });
 }
 

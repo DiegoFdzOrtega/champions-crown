@@ -20,7 +20,7 @@ const PATCHES = [
       'Logros secretos: hay 8 que salen como «???» con una pista. Hasta que los consigas no se sabe qué piden ni qué dan.',
       'Recompensas especiales: algunos logros dan un título (aparece bajo tu nombre) o un marco para tu avatar. Se desbloquean al reclamar el logro y los eliges en Perfil › Título y marco.']},
     {t:'Perfil de amigos', i:[
-      'Ahora puedes abrir el perfil de tus amigos: en Amigos, junto a cada uno, hay un botón «Perfil». Ves su avatar con marco, su título, cuántos Pokémon y shinies tiene, sus logros, las Ligas que ha superado, sus 3 Pokémon favoritos y sus logros más destacados.',
+      'Ahora puedes abrir la tarjeta de entrenador de tus amigos: en Amigos, junto a cada uno, hay un botón «Perfil». La tarjeta tiene el color de su marco, un número de entrenador y enseña su avatar, su título, sus cifras (Pokémon, shinies, logros, secretos, Ligas y victorias del Campo), las Ligas superadas como insignias, sus 3 Pokémon favoritos y sus logros más destacados. Si tiene un favorito shiny, la tarjeta brilla.',
       'Al lado de cada cifra sale la tuya («Tú: ...») para comparar. Si está en línea, también puedes desafiarle desde su perfil.',
       'Solo lo ven tus amigos aceptados. No se ve tu partida ni tus BP o tickets. En Perfil › «Perfil para amigos» puedes ocultarlo y ver cómo lo ven los demás.']},
     {t:'Combate online', i:[
