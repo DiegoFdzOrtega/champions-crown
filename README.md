@@ -25,6 +25,7 @@ Carpetas de imágenes (junto a `index.html`):
 - js/moveinfo.js: la descripción de cada ataque (`MOVE_DESC`, una frase por ataque) y `moveInfo()`, que saca daño, energía y recarga de los números reales del juego.
 - js/qmoves.js: lo que hace cada ataque de la tecla Q (tabla `Q_FX`).
 - js/patchnotes.js: el botón «Notas del parche» (abajo a la izquierda del menú) y el texto de cada parche. Para añadir uno nuevo, copia un bloque de `PATCHES` y ponlo el primero
+- js/vspanel.js: el **panel VS** que sale antes de cada combate (tu personaje chico/chica sale de `avatares/RED Y LEAF.png`)
 - js/ai.js: la **IA del rival** (estilo melee / a distancia / mixto, esquiva, apunta con ventaja, gasta la energía con cabeza)
 - js/background.js: fondo pixel art del menú
 - js/teams.js: equipos competitivos de los 8 líderes, el Alto Mando y el Campeón (naturaleza, habilidad, objeto, IVs, EVs y movimientos) + la recompensa por vencer
@@ -36,6 +37,9 @@ Carpetas de imágenes (junto a `index.html`):
 - js/arenassinnoh.js: los 13 fondos de combate de Sinnoh
 - js/teselia.js: la **Historia de Teselia / Unova** (10 combates de gimnasio —Gres son tres: Zeo, Maíz y Millo—, Alto Mando de 4 y Campeón Mirto, con sus equipos de Pokémon Blanco 2 / Negro 2 y recompensas)
 - js/arenasteselia.js: los 14 fondos de combate de Teselia (el de Caolín tiene dos versiones: Blanco y Negro)
+- js/kalos.js: la **Historia de Kalos** (8 líderes, Alto Mando de 4 y Campeona Dianta, con sus equipos de Pokémon X e Y y recompensas)
+- js/arenaskalos.js: los 13 fondos de combate de Kalos (8 gimnasios + Alto Mando + Campeona)
+- js/mega.js: el **Mega-Aro** (objeto clave), la tabla `MEGA` (22 megaevoluciones), las **Megapiedras** de la Tienda y toda la **Megaevolución** en combate (tecla R, aviso, animación estilo X/Y e IA del rival)
 - js/campo.js: el **Campo de Entrenamiento** (30 entrenadores temáticos con equipos de 3-4 Pokémon; farmeo de chapas)
 - js/bag.js: la pantalla **Mochila** (lo que tienes: tickets, mejoras, MTs y objetos de combate); cada MT tiene «Enseñar a un Pokémon» (mismas reglas que Ver datos)
 - js/learnsets.js: qué Pokémon puede aprender cada movimiento (archivo generado por tools/gen_learnsets.py; ver «MTs y compatibilidad real de movimientos»)
@@ -391,36 +395,82 @@ Teselia usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Uno
 - Catleya (Psíquico): sala de cielo estrellado con luna, espejos de plata, esferas flotantes sobre cristales y runas.
 - Mirto (Campeón): gran salón de mármol con vidrieras de llamas, columnas estriadas, estandartes y braseros dorados con chispas.
 
-## Música dinámica (js/music.js, carpeta musica/)
-El juego cambia la música solo según el entrenador al que te enfrentas. La música oficial de Pokémon **no se incluye** (tiene derechos de autor): tú pones tus propios archivos en `musica/`. Si falta un archivo, suena una música **generada por el propio juego** (original), así que nunca hay silencio.
+## Historia de Kalos (js/kalos.js, js/arenaskalos.js)
+Kalos usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Kalos'`, `floorsOf('Kalos')`, `save.prog`, `save.champ`). Se abre al ser **Campeón de Teselia** (vencer a Mirto). Son **13 combates con 6 Pokémon cada uno**: 8 gimnasios, Alto Mando de 4 y la Campeona Dianta.
+**Versión de referencia:** Pokémon X e Y (equipos de WikiDex, Bulbapedia y Serebii). Los líderes llevan 2-3 Pokémon en los juegos: aquí tienen 6, con los de X e Y más otros del anime y de otros juegos.
+| # | Líder | Ciudad / gimnasio | Tipo |
+|---|---|---|---|
+| 1 | Violeta | Novarte | Bicho |
+| 2 | Lino | Relieve | Roca |
+| 3 | Corelia | Yantra | Lucha |
+| 4 | Amaro | Tiriópolis | Planta |
+| 5 | Lem | Luminalia | Eléctrico |
+| 6 | Valeria | Romantis | Hada |
+| 7 | Ástrid | Anistar | Psíquico |
+| 8 | Édel | Fractal | Hielo |
+Alto Mando: **Malva** (Fuego), **Narciso** (Roca/Agua), **Tileo** (Acero) y **Drácena** (Dragón). Campeona: **Dianta**.
+- **Retratos:** carpeta `lideres/kalos/` (en minúsculas; `LEADER_FILE` y `REGION_DIR` en data.js dicen qué archivo es de quién). El panel VS usa estos retratos normales. (Si algún día quieres arte VS grande, `VS_ART_REGIONS` en vspanel.js está vacío: ponle `['kalos']` y añade `lideres/kalos/VS_<Nombre>.webp`.)
+- **Sin sprite:** Pyroar (668) está en `NO_SPRITE`; Malva lleva a Houndoom en su lugar. Cuando tenga sprite, se cambia en kalos.js.
+- **Dificultad:** `lvl` 150-170 y `dn` 8-22 en kalos.js (Dianta es la más dura). **Recompensa:** `REWARD_REGION['Kalos']` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por victoria.
+- **Modo ver:** `PREVIEW.Kalos` en data.js está en `false`; ponlo en `true` para ver los 13 combates sin tocar tu partida.
+- **Megaevolución:** los Pokémon que megaevolucionan en X e Y (Lucario de Corelia, Alakazam y Gardevoir de Dianta) llevan el campo `mega` en su plantilla (`PM('lucario', 448, ...)`) y **megaevolucionan solos** unos segundos después de salir (ver «Mega-Aro y Megaevolución» más abajo).
 
-**Pistas (nombre de archivo = id)** — `musica/<id>.mp3`
+**Fondos de combate (js/arenaskalos.js)**, al estilo de los gimnasios dinámicos de Blanco y Negro (centro del suelo libre, laterales y luces animadas):
+- Violeta (Bicho): invernadero gigante de cristal con enredaderas, flores flotando y un haz de luz cenital.
+- Lino (Roca): rocódromo excavado en la roca con cascadas laterales y antorchas / neón.
+- Corelia (Lucha): pista de patinaje y dojo con suelo LED, barandillas, estatuas de Lucario y paneles de luz.
+- Amaro (Planta): estructura de madera en la copa de un árbol milenario, plataformas con cuerdas y hojas gigantes que se mecen.
+- Lem (Eléctrico): torre tecnológica con engranajes gigantes, pantallas holográficas y circuitos con corriente.
+- Valeria (Hada): pasarela de moda con celosías japonesas y cerezos; los pétalos de sakura caen durante el combate.
+- Ástrid (Psíquico): observatorio con suelo de cristal sobre el cosmos, planetario, galaxias y estrellas fugaces.
+- Édel (Hielo): laberinto ártico de hielo pulido que refleja, pinos nevados y ventisca en bucle.
+- Malva, Narciso, Tileo, Drácena y Dianta: salas de la Liga de Kalos (cada una con su tipo y su ambiente).
+
+**Música de Kalos:** carpeta `musica/Kalos/` (ver la sección de música).
+
+## Mega-Aro y Megaevolución (js/mega.js)
+- **Objetos clave:** `save.keys` guarda objetos únicos que no se gastan. Hoy solo existe el **Mega-Aro** (`KEY_ITEMS` en mega.js). Se ve en **Mochila › Objetos clave**. Sprites: `objetos/megapiedras/` (`mega-bracelet.png` es el Mega-Aro; el resto son las Piedras Activadoras, con el nombre en inglés: `lucarionite.png`, `alakazite.png`, `gardevoirite.png`...; la ruta está en `MEGA_DIR`, mega.js).
+- **Cómo se consigue:** el logro **«Mega-Aro»** se completa al ser **Campeón de Teselia** (vencer a Mirto). El anillo se entrega **solo, al completar el logro** (no hace falta reclamarlo; los 1000 BP + 10 tickets sí se reclaman en Logros). Si ya eras Campeón de Teselia, lo recibes al abrir el juego.
+- **Megapiedras (Tienda):** pestaña **Megapiedras**, 22 piedras a **3000 BP** (`MEGA_PRICE`). Se equipan en Equipo Pokémon como cualquier objeto, pero **solo en su Pokémon** (`itemFits`, mega.js, usada por el desplegable de team.js). Comprarlas y equiparlas no exige el Mega-Aro; **megaevolucionar sí**.
+- **En combate:** con la piedra equipada y el Mega-Aro, a la derecha de la barra de ataques sale el hueco **«R · MEGAEVOLUCIÓN»** (también al empezar sale el cartel «¡MEGAEVOLUCIÓN LISTA! (R)»). Pulsa **R** o haz clic en el hueco. **Solo una megaevolución por combate** para todo tu equipo (`megaUsed`, mega.js; el rival también tiene la suya): al usarla, el hueco de los demás Pokémon con piedra pasa a «YA USADA». Si llevas la piedra pero no tienes el Mega-Aro, el hueco dice «SIN MEGA-ARO» y R muestra «¡NECESITAS EL MEGA-ARO!». **R ya no cambia de Pokémon** (se cambia con 1 · 2 · 3 o clic en los cuadritos).
+- **Qué cambia al megaevolucionar** (`megaApply`): sprite (`pokemon_mega/<nº>-mega/`; si no existe usa el normal), tipos, habilidad, ataque (el mayor entre Atq y Atq. Esp. de la mega) y velocidad. Los PS no cambian. Los movimientos son los mismos.
+- **Animación (estilo X/Y):** el combate se detiene ~2,8 s: el escenario se oscurece, la piedra baja una hélice de luz arcoíris, el Pokémon se vuelve una silueta blanca, destello, símbolo mega, ondas arcoíris y cartel «¡X HA MEGAEVOLUCIONADO!». Constantes en `MEGA_T`; el sonido es `Sfx.play('mega')` (music.js).
+- **Rival:** el campo `mega:'<clave>'` de su plantilla (kalos.js, helper `PM`) hace que megaevolucione `MEGA_FOE_DELAY` (4) s después de salir al campo.
+- **Las 22 megas:** Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Houndoom, Tyranitar, Gardevoir, Mawile, Manectric, Camerupt, Altaria, Banette, Glalie, Latias, Latios, Lopunny, Lucario, Gallade y Diancie. Solo entraron las que tienen piedra y sprites completos. **Lucario y Gardevoir no tienen «Shoot»** y usan la animación de reposo al disparar hasta que la tengan.
+- **Habilidades de las megas:** algunas aún no están hechas en abilities.js y **no hacen nada** (Garra Dura, Rastro, Amor Filial, Poder Arena, Piel Feérica, Piel Helada, Potencia, Insomnio). Las que ya existen funcionan al megaevolucionar (se reaplica «al entrar»: Intimidación, Chorro Arena...).
+- **Añadir una mega:** carpeta `pokemon_mega/<nº>-mega/` + piedra en `objetos/megapiedras/` + una línea en `MEGA` (mega.js). La Tienda y el equipo la cogen solos.
+- **Créditos:** los sprites de `pokemon_mega/` son de PMD SpriteCollab (CC BY-NC 4.0).
+
+## Música dinámica (js/music.js, carpeta musica/)
+El juego cambia la música solo según el entrenador al que te enfrentas. La música está organizada en **una carpeta por región** (`musica/Kanto/`, `Johto/`, `Hoenn/`, `Sinnoh/`, `Unova/`, `Kalos/`) y cada archivo tiene un **nombre que dice para qué es** (`Combate Lideres`, `Combate Alto Mando`, `Combate Campeon`, `Victoria Lideres y Alto Mando`...). Si falta un archivo, suena una música **generada por el propio juego** (original), así que nunca hay silencio. El menú y el Campo de Entrenamiento usan siempre música generada.
+
+**Archivos por región** (`musica/<Región>/<archivo>.ogg`)
+| Región | Líderes | Alto Mando | Campeón | Victoria |
+|---|---|---|---|---|
+| Kanto | `Combate Lideres y Alto Mando` | (el mismo) | `Combate Campeon Azul` | `Victoria Lideres y Alto Mando` (Azul: jingle) |
+| Johto | `Combate Lideres y Alto Mando` | (el mismo) | `Combate Campeon` | `Victoria Lideres y Alto Mando` (Lance: jingle) |
+| Hoenn | `Combate Lideres` | `Combate Alto Mando` | `Combate Campeon` | `Victoria Lideres y Alto Mando` · `Victoria Campeon` |
+| Sinnoh | `Combate Lideres` | `Combate Alto Mando` | `Combate Campeona Cintia` | `Victoria Lideres y Alto Mando` · `Victoria Campeona` |
+| Unova (Teselia) | `Combate Lideres` | `Combate Alto Mando` | `Combate Campeon` | `Victoria Lideres y Alto Mando` · `Victoria Campeon` |
+| Kalos | `Combate Lideres` | `Combate Alto Mando` | `Combate Campeona` | `Victoria Lideres` · `Victoria Campeona` |
+
+**Pistas (ids de `MUSIC_TRACKS`)**
 | id | Cuándo suena |
 |---|---|
-| `menu` | Menús, equipo, tienda, ajustes (ambiente tranquilo) |
-| `lider_kanto` | Brock, Misty, Teniente Surge, Erika, Koga, Sabrina, Blaine, Giovanni |
-| `lider_johto` | Pegaso, Antón, Blanca, Moti, Aníbal, Yasmina, Fredo, Débora |
-| `alto_kanto` | Lorelei, Bruno, Agatha, Lance (Alto Mando de Kanto) |
-| `alto_johto` | Mento, Koga, Bruno, Karen (Alto Mando de Johto) |
-| `lider_hoenn` | Petra, Marcial, Erico, Candela, Norman, Alana, Vito y Leti, Galano (música generada hasta que añadas `musica/lider_hoenn.ogg`) |
-| `alto_hoenn` | Sixto, Fátima, Nívea, Dracón (usa `alto.ogg`) |
-| `lider_sinnoh` | Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro (música generada hasta que añadas `musica/lider_sinnoh.ogg`) |
-| `alto_sinnoh` | Alecrán, Gaia, Fausto, Delos (usa `alto.ogg`) |
-| `campeon_azul` | Campeón Azul (Kanto) |
-| `campeon_lance` | Campeón Lance (Johto) |
-| `campeon_plubio` | Campeón Plubio (Hoenn, usa `jefe.ogg`) |
-| `campeon_cintia` | Campeona Cintia (Sinnoh, usa `jefe.ogg`) |
-| `lider_teselia` | Los 10 gimnasios de Teselia (Zeo, Maíz, Millo, Aloe, Camus, Camila, Yakón, Gerania, Junco e Iris; música generada hasta que añadas `musica/lider_teselia.ogg`) |
-| `alto_teselia` | Anís, Aza, Lotto, Catleya (usa `alto.ogg`) |
-| `campeon_mirto` | Campeón Mirto (Teselia, usa `jefe.ogg`) |
-| `campo` | Campo de Entrenamiento |
+| `menu` | Menús, equipo, tienda, ajustes (música generada) |
+| `lider_<región>` | Los 8 líderes de la región (en Teselia, los 10 gimnasios) |
+| `alto_<región>` | Los 4 del Alto Mando de la región |
+| `campeon_azul`, `campeon_lance`, `campeon_plubio`, `campeon_cintia`, `campeon_mirto`, `campeon_dianta` | Los campeones de Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos |
+| `win_lider_<región>`, `win_campeon_<región>` | Tema de victoria: suena **una sola vez** al ganar. Si la pista no tiene tema de victoria (Azul y Lance) suena el jingle de siempre |
+| `campo` | Campo de Entrenamiento (música generada) |
+
+**Cómo se indica un archivo:** en `MUSIC_TRACKS` (music.js), `file:'Kalos/Combate Lideres'` = `musica/Kalos/Combate Lideres.ogg` (admite carpeta y espacios) y `win:'<id de la pista de victoria>'`. Las pistas con `once:true` suenan una vez, sin bucle. **Peso:** todo se recodificó a Ogg Vorbis ~92 kbps (los originales en `musica/Musica2/` pesaban ~120 MB; ahora son **~29 MB** las 6 regiones). Comando: `ffmpeg -i original.ogg -c:a libvorbis -q:a 2 "Combate Lideres.ogg"`. Los originales de `musica/Musica2/` no se suben a GitHub (`.gitignore`). Los archivos antiguos de la raíz (`lider_kanto.ogg`, `lider_johto.ogg`, `alto.ogg`, `jefe.ogg`) ya no se usan y se pueden borrar.
 
 **Cómo funciona**
 - `MUSIC_TRACKS`: lista de pistas (nombre, `loop:[inicio,fin]` opcional en segundos, receta de la música generada).
 - `MUSIC_BY_TRAINER`: id de entrenador → pista. Para añadir un entrenador nuevo, añade una línea ahí.
 - `MUSIC_EXT=['ogg','mp3']`: extensiones que se prueban en orden.
-- `file:'jefe'` en una pista: usa el archivo `musica/jefe.ogg` en vez de uno con el nombre de la pista. Ahora los dos Alto Mando comparten `alto` y los dos campeones comparten `jefe`.
-- Configuración actual: líderes de Kanto/Johto = pistas CC0 de Wolfgang_ (`lider_kanto`, `lider_johto`); Alto Mando = "Boss Battle #2 (8-bit)" de nene (CC0) como `alto`; campeones = "Boss Battle #1" de nene (CC0) como `jefe`; menú y Campo = música generada por el juego.
+- `file:` en una pista elige el archivo (con su carpeta); varias pistas pueden compartir el mismo (en Kanto y Johto, líderes y Alto Mando).
 - `Music.play(id)`, `Music.stop()`, `Music.battle(o)`, `Music.scene(vista)`, `Music.setVolume(0-100)`, `Music.setMute(bool)`, `Music.duck(bool)`.
 - Al empezar un combate (`startBattle`) se hace un fundido cruzado a la pista del entrenador; al salir al menú vuelve la música tranquila; en la pantalla de resultado se apaga suavemente.
 - Bucle sin cortes con Web Audio (`AudioBuffer`). Si abres con doble clic (`file://`) usa `<audio>`, que puede dejar un pequeño hueco en el bucle.
@@ -428,9 +478,9 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 
 **Controles**: tecla **M** = silenciar/activar; Ajustes → Audio (volumen general, música, efectos y silenciar; ver la sección de Ajustes más abajo). Para ver qué pistas usan tu archivo: `await Music.probe()` en la consola (F12); en la pausa (Esc) la música baja y hay botón "Música: sí/no". Volumen y silencio se guardan.
 
-**Aviso**: si publicas el juego en internet (GitHub Pages), no subas música de Nintendo: puede acarrear una reclamación. Usa música propia o con licencia libre. Mejor usar un servidor (o GitHub Pages) que doble clic.
+**Aviso**: la música de las 6 regiones es **oficial de Pokémon** (© Nintendo / Game Freak / The Pokémon Company), aportada por el autor para uso personal y educativo. Si el repositorio es público puede acarrear una reclamación, y no se puede monetizar: en ese caso, retírala y el juego usa música generada. Mejor usar un servidor (o GitHub Pages) que doble clic.
 
-**Créditos de la música** (todas CC0, de OpenGameArt.org): Wolfgang_ ("8-Bit Battle Loop" y "8-Bit RPG Battle/Encounter Theme") y nene ("Boss Battle #1" y "Boss Battle #2", 8-bit). Enlaces y detalle en `musica/LEEME.txt`. El menú y el Campo usan música generada por el propio juego.
+**Créditos de la música:** ver «Créditos y avisos legales» al final. El menú y el Campo usan música generada por el propio juego.
 
 ## Campo de Entrenamiento: estadio y desbloqueo de dificultades
 **Estadio (js/arenascampo.js, arena `campo`)**: todos los combates del Campo se juegan en el mismo estadio de entrenamiento, de día y dibujado con código: césped en franjas, líneas de tiza, círculo central con Poké Ball, dos zonas de tierra pisada para los Pokémon, grada con público (algunos animan), banderines que ondean, vallas con el emblema de Poké Ball, conos, vallas de salto, neumáticos, saco de golpeo y barreras acolchadas a los lados. El campo `arena` de cada entrenador en `campo.js` ya no se usa.
@@ -443,6 +493,13 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 - Las victorias se guardan en `save.campoWins` (`{id:1}`). Las partidas antiguas empiezan con 0 victorias (la Fácil está abierta).
 - Los entrenadores con `opt:true` (por ejemplo Cazabichos, que solo sale si existe su imagen) no cuentan.
 - Si prefieres que baste con vencer a UNO de cada dificultad, pon `CAMPO_BASTA_UNO = true` al principio de la sección "COMBATE Y RECOMPENSA" de `js/campo.js`.
+
+## Panel VS antes del combate (js/vspanel.js, final de css/style.css bajo `#vs`)
+- Sale antes de **cada combate de Historia** (`floorFight`, js/modes.js) y del **Campo de Entrenamiento** (`campoFight`, js/campo.js). Reiniciar desde la pausa **no** lo vuelve a enseñar.
+- Mitad **roja** (tú): tu nombre de entrenador, tu personaje y tus Pokémon de equipo. Mitad **azul** (rival): su nombre, su retrato (`lideres/...` o `entrenadores/...`) y sus 6 Pokémon. En el centro el **VS** y abajo la etiqueta «3 vs 6 · Región · Líder / Alto Mando / Campeón».
+- Se cierra solo a los 4,6 s (`VS_AUTO_MS`). **Clic / Enter / Espacio** lo salta (no se puede saltar en los primeros 0,7 s: `VS_MIN_MS`). **Esc** lo cancela y vuelves al menú sin empezar el combate.
+- **Tu personaje (chico / chica):** sale de una sola imagen, **`avatares/RED Y LEAF.png`**, que trae a Red (izquierda = chico) y a Leaf (derecha = chica); el juego enseña una mitad u otra (clase `.skin` en css/style.css). Se elige en **Perfil › Personaje** (`save.gender`: `'m'` chico, `'f'` chica; por defecto chico). Esa imagen **no sale en la lista de avatares**. Si falta se usa el avatar clásico. Si algún día quieres un sprite por separado, basta con cambiar `setPlayerSkin` en js/vspanel.js.
+- Uso desde el código: `vsIntro({name, id, path, label, enemies, go})` (`go` es la función que empieza el combate).
 
 ## Amuleto Arcoíris (shiny más probable): `CHARM_RATE` en js/data.js
 - **Cómo se consigue:** al completar la Pokédex de una región sale el logro **«Pokédex de <región>»** (Kanto 151, Johto 100, Hoenn 135, Sinnoh 107, Teselia 142, Kalos 71, Alola 84, Galar 89, Paldea 99: son los Pokémon de cada región que ya tienen sprite). Al **reclamarlo** recibes 1500 BP + 10 tickets + el **Amuleto Arcoíris de esa región**.
@@ -487,6 +544,9 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | Líderes / Alto Mando / Campeón de Teselia | Los 10 gimnasios · los 4 del Alto Mando · vencer a Mirto | 500 BP + 5 · 400 BP + 3 · 1000 BP + 10 (tickets) |
 | Maestro de cuatro Ligas | Campeón de Kanto, Johto, Hoenn y Sinnoh | 4000 BP + 25 tickets |
 | Maestro de cinco Ligas | Campeón de Kanto, Johto, Hoenn, Sinnoh y Teselia | 5000 BP + 30 tickets |
+| **Mega-Aro** | Ser Campeón de Teselia (entrega el Mega-Aro al completarlo) | 1000 BP + 10 tickets + Mega-Aro |
+| Líderes / Alto Mando / Campeona de Kalos | Los 8 gimnasios · los 4 del Alto Mando · vencer a Dianta | 600 BP + 6 · 500 BP + 4 · 1200 BP + 12 (tickets) |
+| Maestro de seis Ligas | Campeón de Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos | 6000 BP + 35 tickets |
 | Campo: 1 / 10 / 25 / 50 / 100 victorias | Vencer entrenadores del Campo | 50 · 200 · 300 + 2 · 500 + 5 · 1000 + 10 (BP + tickets) |
 | Campo: Fácil / Media / Difícil superada | Vencer a todos los de esa dificultad | 300 · 500 + 3 · 800 + 6 (BP + tickets) |
 | Colección: 10 / 25 / 50 / 100 / 250 Pokémon | Pokémon diferentes | 100 · 200 + 1 · 300 + 3 · 600 + 5 · 1500 + 15 (BP + tickets) |
@@ -516,7 +576,7 @@ En la pantalla de cada región solo ves a los rivales que ya has vencido y **al 
 Cada tarjeta de la pantalla **Historia** muestra el mapa de su región de fondo, con un degradado oscuro para que se lean los textos. Las imágenes originales están en `region/` (`Kanto.webp`, `Johto.webp`...) y las que usa el juego son versiones **recortadas en panorámico (16:9) y más ligeras** en `region/tarjetas/` (50-90 KB cada una). Para cambiar una, sustituye su archivo de `region/tarjetas/` (mismo nombre, mejor proporción 16:9). Se cargan con la variable `--map` que pone `buildRegions()` en `js/menu.js` (`REGION_IMG` solo hace falta si el archivo se llama distinto a la región, como `Unova` para «Unova / Teselia»). Los estilos están en `.rcard` de `css/style.css`: bloqueadas en gris, abiertas a todo color y con un pequeño zoom al pasar el ratón.
 
 ## Animación de cambio de Pokémon (js/swap.js)
-Al cambiar de Pokémon con **1, 2 o 3** (o **R**, que pasa al siguiente) o haciendo **clic en sus cuadritos** se ve la animación del anime. Las teclas no han cambiado: `switchMon()` en `js/combat.js` sigue decidiendo qué Pokémon entra y ahora llama a `swapStart()`.
+Al cambiar de Pokémon con **1, 2 o 3** (antes también con R, que ahora es la Megaevolución) o haciendo **clic en sus cuadritos** se ve la animación del anime. Las teclas no han cambiado: `switchMon()` en `js/combat.js` sigue decidiendo qué Pokémon entra y ahora llama a `swapStart()`.
 
 1. **Retirada:** sale un rayo rojo de una Poké Ball (esquina de abajo a la izquierda; la del rival, arriba a la derecha), alcanza al Pokémon, lo vuelve luz roja y lo absorbe hacia la bola.
 2. **Lanzamiento:** la Poké Ball del nuevo Pokémon vuela en arco hasta el suelo. Su color depende de su rareza, igual que en el Gachapon (Común = Poké Ball, Poco común = Superball, Rara = Ultra Ball, Épica = Honor Ball, Legendaria = Master Ball, shiny = bola dorada).
@@ -539,7 +599,7 @@ Reglas: mientras dura (unos 2 segundos, `SWAP` al principio de `js/swap.js`) el 
 - Nota de equilibrio: contra un jugador que se mueve, la IA lista hace aproximadamente el doble de daño por segundo que la sencilla; subir o bajar `agg` cambia poco, porque el límite lo ponen la energía y los enfriamientos.
 
 ## Cambiar de Pokémon en combate: clic y espera de 5 s (js/combat.js, js/render.js, js/ui.js)
-- Además de las teclas **1, 2, 3** y **R**, ahora puedes **hacer clic en los cuadritos pequeños** de tu equipo (debajo de tu tarjeta, arriba a la izquierda). El clic en un cuadrito **no dispara**. Al pasar el ratón por encima el cuadrito se marca en verde, el cursor se convierte en una manita y debajo sale «CAMBIAR A …».
+- Además de las teclas **1, 2, 3**, ahora puedes **hacer clic en los cuadritos pequeños** de tu equipo (debajo de tu tarjeta, arriba a la izquierda). El clic en un cuadrito **no dispara**. Al pasar el ratón por encima el cuadrito se marca en verde, el cursor se convierte en una manita y debajo sale «CAMBIAR A …».
 - **Espera de 5 segundos:** después de cada cambio tuyo hay que esperar `SWITCH_CD` (5 s, al principio de `switchMon()` en `js/combat.js`) para poder volver a cambiar. Cuenta desde que el Pokémon nuevo ya ha salido de la bola. Mientras esperas, los cuadritos se oscurecen y muestran los segundos que faltan, con una barrita que se vacía; si intentas cambiar antes (con clic o con teclas) aparece «ESPERA X s PARA CAMBIAR» y no pasa nada.
 - **Sin espera** cuando tu Pokémon se debilita: el siguiente entra solo y se puede cambiar enseguida. La espera no avanza con el juego en pausa y empieza en 0 en cada combate (`g.swCd` en `js/state.js`).
 - En los primeros 8 segundos del combate sale una pista pequeña: «CLIC EN UN CUADRO O TECLAS 1 · 2 · 3 PARA CAMBIAR».
@@ -848,13 +908,14 @@ Para que el inicio sea menos lento hay tres ayudas con tickets (la tabla `DAILY`
 ## Créditos y avisos legales
 **Champions Crown es un proyecto de fans, sin ánimo de lucro y hecho para aprender (DAM).** Pokémon, los nombres de los Pokémon, líderes y regiones son marcas y propiedad de Nintendo, Game Freak y Creatures Inc. Este proyecto no está afiliado ni respaldado por ellas.
 
-**Música** (todas CC0 1.0 = dominio público, de [OpenGameArt.org](https://opengameart.org); no obliga a dar crédito, pero se agradece):
-| Uso | Pista | Autor |
+**Música:** ⚠️ la de los combates de las 6 regiones es **música oficial de Pokémon** (© Nintendo / Game Freak / The Pokémon Company), aportada por el autor para uso personal y educativo; **no es CC0** y no se puede monetizar. Si el repositorio es público, retírala (el juego pasa a música generada).
+| Uso | Pista | Origen |
 |---|---|---|
-| Líderes de Kanto | "8-Bit Battle Loop" | Wolfgang_ |
-| Líderes de Johto | "8-Bit RPG Battle/Encounter Theme" | Wolfgang_ |
-| Alto Mando | "Boss Battle #2 [8-bit Re-upload]" | nene |
-| Campeones | "Boss Battle #1 [8-bit re-upload]" | nene |
+| Kanto | Combate de líderes y Alto Mando, victoria y Campeón Azul | Pokémon (juegos de Kanto/Johto) |
+| Johto | Combate de líderes y Alto Mando, victoria y Campeón | Pokémon HGSS y otros |
+| Hoenn | Líderes, Alto Mando, Campeón y sus victorias | Pokémon Rubí/Zafiro/Esmeralda |
+| Sinnoh y Teselia | Líderes, Alto Mando, Campeón/a y victorias | Pokémon Blanco/Negro y Diamante/Perla/Platino |
+| Kalos | Líderes, Alto Mando, Campeona y victorias | Pokémon X/Y |
 | Menú y Campo de Entrenamiento | Música original generada por el propio juego (`js/music.js`) | — |
 
 Enlaces y detalle en `musica/LEEME.txt`. Los efectos de sonido (`Sfx`) también los genera el juego con código.

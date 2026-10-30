@@ -18,7 +18,7 @@
      (Mejor abrirlo con un servidor local o con GitHub Pages.)
    - Volumen (Ajustes › Audio): save.vol = GLOBAL, save.volMusic = música, save.volSfx = efectos (0-100 cada uno) y save.mute = silenciar todo (tecla M).
      Volumen final de la música = global x música · de los efectos = global x efectos. Pausa (Esc): la música baja de volumen.
-   - EFECTOS DE SONIDO (Sfx): pitidos cortos generados por código, sin archivos: 'click' (botones), 'win', 'lose' (resultado del combate) y 'logro'.
+   - EFECTOS DE SONIDO (Sfx): pitidos cortos generados por código, sin archivos: 'click' (botones), 'win', 'lose' (resultado del combate), 'logro' y 'mega' (megaevolución).
      Sfx.play('click'). Para añadir uno: una línea en SFX (lista de notas: f = frecuencia, at = cuándo, d = duración, w = onda, v = volumen, to = frecuencia final).
 
    PARA EL PROGRAMADOR
@@ -33,7 +33,8 @@ const MUSIC_EXT = ['ogg', 'mp3'];     // extensiones que se buscan, en orden. A�
 
 // ---------------------------------------------------------------------
 // PISTAS. name = cómo se muestra · ref = qué tema oficial encaja (orientativo, para que sepas qué buscar)
-// file: nombre del archivo (sin extensión) si no quieres que se llame como la pista; así varias pistas pueden compartir el mismo archivo
+// file: nombre del archivo (sin extensión) si no quieres que se llame como la pista; así varias pistas pueden compartir el mismo archivo. Puede llevar carpeta: 'Kalos/Combate Lideres' = musica/Kalos/Combate Lideres.ogg (una carpeta por región)
+// win: id de la pista de victoria que suena (una vez) al ganar · once:true = esa pista no se repite
 // loop: [inicio, fin] en segundos, si la pista tiene una intro que no debe repetirse (si no, repite entera)
 // synth = receta de la música generada cuando no hay archivo: bpm, tónica (nº MIDI), escala, acordes (grados), ritmo, sonido...
 // ---------------------------------------------------------------------
@@ -41,36 +42,54 @@ const SCALES = {major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], dorian:[0,2,3,5,
 const MUSIC_TRACKS = {
   menu:         {name:'Menú y gestión del equipo', ref:'Música tranquila de menús (p. ej. un Centro Pokémon o un pueblo de HGSS)',
                  synth:{seed:11, bpm:78,  root:60, scale:'major',    prog:[0,5,3,4],      bass:'calm',  lead:'calm',  pad:true, arp:false, drums:'none',   density:.45}},
-  lider_kanto:  {name:'Líderes de Kanto',          ref:'"Battle! Gym Leader" de Kanto (Corazón de Oro/Alma de Plata o Rojo Fuego/Verde Hoja)',
+  lider_kanto:  {name:'Líderes de Kanto', file:'Kanto/Combate Lideres y Alto Mando', win:'win_lider_kanto',          ref:'"Battle! Gym Leader" de Kanto (Corazón de Oro/Alma de Plata o Rojo Fuego/Verde Hoja)',
                  synth:{seed:21, bpm:148, root:57, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}},
-  lider_johto:  {name:'Líderes de Johto',          ref:'"Battle! Gym Leader" de Johto (Corazón de Oro/Alma de Plata)',
+  lider_johto:  {name:'Líderes de Johto', file:'Johto/Combate Lideres y Alto Mando', win:'win_lider_johto',          ref:'"Battle! Gym Leader" de Johto (Corazón de Oro/Alma de Plata)',
                  synth:{seed:22, bpm:152, root:62, scale:'dorian',   prog:[0,3,6,4],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.75}},
-  alto_kanto:   {name:'Alto Mando de Kanto', file:'alto',       ref:'"Battle! Elite Four" (Rojo Fuego/Verde Hoja o Corazón de Oro/Alma de Plata)',
+  alto_kanto:   {name:'Alto Mando de Kanto', file:'Kanto/Combate Lideres y Alto Mando', win:'win_lider_kanto',       ref:'"Battle! Elite Four" (Rojo Fuego/Verde Hoja o Corazón de Oro/Alma de Plata)',
                  synth:{seed:31, bpm:160, root:52, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.8}},
-  alto_johto:   {name:'Alto Mando de Johto', file:'alto',       ref:'"Battle! Elite Four" (Corazón de Oro/Alma de Plata)',
+  alto_johto:   {name:'Alto Mando de Johto', file:'Johto/Combate Lideres y Alto Mando', win:'win_lider_johto',       ref:'"Battle! Elite Four" (Corazón de Oro/Alma de Plata)',
                  synth:{seed:32, bpm:164, root:54, scale:'phrygian', prog:[0,1,5,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.8}},
-  campeon_azul: {name:'Campeón Azul (Kanto)', file:'jefe',      ref:'"Battle! Champion" / Rival de Kanto (Rojo Fuego/Verde Hoja o Corazón de Oro/Alma de Plata)',
+  campeon_azul: {name:'Campeón Azul (Kanto)', file:'Kanto/Combate Campeon Azul',      ref:'"Battle! Champion" / Rival de Kanto (Rojo Fuego/Verde Hoja o Corazón de Oro/Alma de Plata)',
                  synth:{seed:41, bpm:172, root:55, scale:'minor',    prog:[0,5,2,6],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.85}},
-  campeon_lance:{name:'Campeón Lance (Johto)', file:'jefe',     ref:'"Battle! Champion" de Lance (Oro/Plata/Cristal o Corazón de Oro/Alma de Plata)',
+  campeon_lance:{name:'Campeón Lance (Johto)', file:'Johto/Combate Campeon',     ref:'"Battle! Champion" de Lance (Oro/Plata/Cristal o Corazón de Oro/Alma de Plata)',
                  synth:{seed:42, bpm:176, root:58, scale:'harmonic', prog:[0,5,3,6],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.9}},
-  lider_hoenn:  {name:'Líderes de Hoenn',          ref:'"Battle! Gym Leader" de Hoenn (Rubí/Zafiro/Esmeralda)',
+  lider_hoenn:  {name:'Líderes de Hoenn', file:'Hoenn/Combate Lideres', win:'win_lider_hoenn',          ref:'"Battle! Gym Leader" de Hoenn (Rubí/Zafiro/Esmeralda)',
                  synth:{seed:23, bpm:156, root:60, scale:'major',    prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.78}},
-  alto_hoenn:   {name:'Alto Mando de Hoenn', file:'alto',       ref:'"Battle! Elite Four" de Hoenn (Rubí/Zafiro/Esmeralda)',
+  alto_hoenn:   {name:'Alto Mando de Hoenn', file:'Hoenn/Combate Alto Mando', win:'win_lider_hoenn',       ref:'"Battle! Elite Four" de Hoenn (Rubí/Zafiro/Esmeralda)',
                  synth:{seed:33, bpm:166, root:53, scale:'harmonic', prog:[0,6,5,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
-  campeon_plubio:{name:'Campeón Plubio (Hoenn)', file:'jefe',  ref:'"Battle! Champion" de Hoenn (Esmeralda)',
+  campeon_plubio:{name:'Campeón Plubio (Hoenn)', file:'Hoenn/Combate Campeon', win:'win_campeon_hoenn',  ref:'"Battle! Champion" de Hoenn (Esmeralda)',
                  synth:{seed:43, bpm:174, root:57, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.9}},
-  lider_sinnoh: {name:'Líderes de Sinnoh',          ref:'"Battle! Gym Leader" de Sinnoh (Diamante/Perla/Platino)',
+  lider_sinnoh: {name:'Líderes de Sinnoh', file:'Sinnoh/Combate Lideres', win:'win_lider_sinnoh',          ref:'"Battle! Gym Leader" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:24, bpm:150, root:59, scale:'dorian',   prog:[0,5,4,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.78}},
-  alto_sinnoh:  {name:'Alto Mando de Sinnoh', file:'alto',      ref:'"Battle! Elite Four" de Sinnoh (Diamante/Perla/Platino)',
+  alto_sinnoh:  {name:'Alto Mando de Sinnoh', file:'Sinnoh/Combate Alto Mando', win:'win_lider_sinnoh',      ref:'"Battle! Elite Four" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:34, bpm:168, root:55, scale:'minor',    prog:[0,3,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
-  campeon_cintia:{name:'Campeona Cintia (Sinnoh)', file:'jefe', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
+  campeon_cintia:{name:'Campeona Cintia (Sinnoh)', file:'Sinnoh/Combate Campeona Cintia', win:'win_campeon_sinnoh', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:44, bpm:178, root:56, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
-  lider_teselia:{name:'Líderes de Teselia',          ref:'"Battle! Gym Leader" de Teselia (Negro/Blanco)',
+  lider_teselia:{name:'Líderes de Teselia', file:'Unova/Combate Lideres', win:'win_lider_teselia',          ref:'"Battle! Gym Leader" de Teselia (Negro/Blanco)',
                  synth:{seed:25, bpm:160, root:61, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
-  alto_teselia: {name:'Alto Mando de Teselia', file:'alto',     ref:'"Battle! Elite Four" de Teselia (Negro/Blanco)',
+  alto_teselia: {name:'Alto Mando de Teselia', file:'Unova/Combate Alto Mando', win:'win_lider_teselia',     ref:'"Battle! Elite Four" de Teselia (Negro/Blanco)',
                  synth:{seed:35, bpm:170, root:56, scale:'harmonic', prog:[0,6,3,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.84}},
-  campeon_mirto:{name:'Campeón Mirto (Teselia)', file:'jefe',   ref:'"Battle! Champion" de Teselia (Negro/Blanco)',
+  campeon_mirto:{name:'Campeón Mirto (Teselia)', file:'Unova/Combate Campeon', win:'win_campeon_teselia',   ref:'"Battle! Champion" de Teselia (Negro/Blanco)',
                  synth:{seed:45, bpm:180, root:58, scale:'minor',    prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.94}},
+  // Temas de victoria (suenan UNA vez al ganar). Los que no tienen (Azul y Lance) usan el jingle de siempre
+  win_lider_kanto:   {name:'Victoria: Líderes y Alto Mando de Kanto',   file:'Kanto/Victoria Lideres y Alto Mando',  once:true, ref:'"Victory! Gym Leader" de Kanto'},
+  win_lider_johto:   {name:'Victoria: Líderes y Alto Mando de Johto',   file:'Johto/Victoria Lideres y Alto Mando',  once:true, ref:'"Victory! Gym Leader" de Johto'},
+  win_lider_hoenn:   {name:'Victoria: Líderes y Alto Mando de Hoenn',   file:'Hoenn/Victoria Lideres y Alto Mando',  once:true, ref:'"Victory! Gym Leader" de Hoenn'},
+  win_campeon_hoenn: {name:'Victoria: Campeón de Hoenn',                file:'Hoenn/Victoria Campeon',               once:true, ref:'"Victory! Champion" de Hoenn'},
+  win_lider_sinnoh:  {name:'Victoria: Líderes y Alto Mando de Sinnoh',  file:'Sinnoh/Victoria Lideres y Alto Mando', once:true, ref:'"Victory! Gym Leader" (usada en Sinnoh)'},
+  win_campeon_sinnoh:{name:'Victoria: Campeona de Sinnoh',              file:'Sinnoh/Victoria Campeona',             once:true, ref:'"Victory! Champion" de Sinnoh'},
+  win_lider_teselia: {name:'Victoria: Líderes y Alto Mando de Teselia', file:'Unova/Victoria Lideres y Alto Mando',  once:true, ref:'"Victory! Gym Leader" de Teselia'},
+  win_campeon_teselia:{name:'Victoria: Campeón de Teselia',             file:'Unova/Victoria Campeon',               once:true, ref:'"Victory! Champion" de Teselia'},
+  // Kalos: los archivos están en la carpeta musica/Kalos/ (una carpeta por región) con nombres que dicen para qué son. win = el tema de victoria que suena al ganar (once = suena una vez, sin repetir)
+  lider_kalos:  {name:'Líderes de Kalos', file:'Kalos/Combate Lideres', win:'win_lider_kalos',          ref:'"Battle! Gym Leader" de Kalos (X/Y)',
+                 synth:{seed:26, bpm:158, root:62, scale:'major',    prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
+  alto_kalos:   {name:'Alto Mando de Kalos', file:'Kalos/Combate Alto Mando', win:'win_lider_kalos',  ref:'"Battle! Elite Four" de Kalos (X/Y)',
+                 synth:{seed:36, bpm:168, root:57, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.84}},
+  campeon_dianta:{name:'Campeona Dianta (Kalos)', file:'Kalos/Combate Campeona', win:'win_campeon_kalos', ref:'"Battle! Champion" de Kalos (X/Y)',
+                 synth:{seed:46, bpm:178, root:59, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
+  win_lider_kalos:  {name:'Victoria: Líderes y Alto Mando de Kalos', file:'Kalos/Victoria Lideres',  once:true, ref:'"Victory! Gym Leader" de Kalos (X/Y)'},
+  win_campeon_kalos:{name:'Victoria: Campeona de Kalos',            file:'Kalos/Victoria Campeona', once:true, ref:'"Victory! Champion" de Kalos (X/Y)'},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -99,7 +118,11 @@ const MUSIC_BY_TRAINER = {
   // Teselia: 8 líderes (Gres son tres hermanos: Zeo, Maíz y Millo), Alto Mando (4) y Campeón
   zeo:'lider_teselia', maiz:'lider_teselia', millo:'lider_teselia', aloe:'lider_teselia', camus:'lider_teselia', camila:'lider_teselia', yakon:'lider_teselia', gerania:'lider_teselia', junco:'lider_teselia', iris:'lider_teselia',
   anis:'alto_teselia', aza:'alto_teselia', lotto:'alto_teselia', catleya:'alto_teselia',
-  mirto:'campeon_mirto'
+  mirto:'campeon_mirto',
+  // Kalos: 8 líderes, Alto Mando (4) y Campeona
+  violeta:'lider_kalos', lino:'lider_kalos', corelia:'lider_kalos', amaro:'lider_kalos', lem:'lider_kalos', valeria:'lider_kalos', astrid:'lider_kalos', edel:'lider_kalos',
+  malva:'alto_kalos', narciso:'alto_kalos', tileo:'alto_kalos', dracena:'alto_kalos',
+  dianta:'campeon_dianta'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){
@@ -136,13 +159,13 @@ const Music = (() => {
   function rampNode(g, to, secs){ const t = ctx.currentTime; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(to, t + Math.max(.01, secs)); }
   function makeBuffer(id, src){
     const g = ctx.createGain(); g.gain.value = 0; g.connect(master);
-    const s = ctx.createBufferSource(); s.buffer = src.buf; s.loop = true;                                       // bucle sin cortes
+    const s = ctx.createBufferSource(); s.buffer = src.buf; s.loop = !MUSIC_TRACKS[id].once;                                       // bucle sin cortes
     const lp = MUSIC_TRACKS[id].loop; if(lp){ s.loopStart = lp[0]; s.loopEnd = lp[1]; }
     s.connect(g); s.start();
     return {id, kind:'file', ramp:(to, secs) => rampNode(g, to, secs), stop(){ try{ s.stop(); }catch(e){} g.disconnect(); }};
   }
   function makeElement(id, src){
-    const el = new Audio(src.url); el.loop = true; el.volume = 0; const h = {id, kind:'file', el, level:0, timer:0};
+    const el = new Audio(src.url); el.loop = !(MUSIC_TRACKS[id] && MUSIC_TRACKS[id].once); el.volume = 0; const h = {id, kind:'file', el, level:0, timer:0};
     els.add(h); el.play().catch(() => {});
     h.ramp = (to, secs) => { clearInterval(h.timer); const from = h.level, t0 = performance.now();
       h.timer = setInterval(() => { const k = Math.min(1, (performance.now() - t0) / (Math.max(.01, secs) * 1000)); h.level = from + (to - from) * k; applyVol(); if(k >= 1) clearInterval(h.timer); }, 40); };
@@ -223,7 +246,7 @@ const Music = (() => {
   function load(id){
     return cache[id] || (cache[id] = (async () => {
       for(const ext of MUSIC_EXT){
-        const url = MUSIC_DIR + ((MUSIC_TRACKS[id] && MUSIC_TRACKS[id].file) || id) + '.' + ext;
+        const url = encodeURI(MUSIC_DIR + ((MUSIC_TRACKS[id] && MUSIC_TRACKS[id].file) || id) + '.' + ext);          // (file puede llevar carpeta y espacios: 'Kalos/Combate Lideres')
         try{
           if(location.protocol === 'file:'){ if(await probeElement(url)) return {kind:'element', url}; continue; }      // file://: fetch no puede leer archivos locales
           const r = await fetch(url); if(!r.ok) continue;
@@ -248,6 +271,15 @@ const Music = (() => {
   }
   function stop(secs){ want = null; token++; if(cur){ fadeOut(cur, secs ?? FADE); cur = null; } }
   function battle(o){ play(musicTrackFor(o), .8); }
+  function win(o){                                                                  // tema de victoria (una vez) del combate o; devuelve una promesa: true si suena, false si no tiene (entonces suena el jingle)
+    const t = MUSIC_TRACKS[musicTrackFor(o)], id = t && t.win;
+    if(!id || !MUSIC_TRACKS[id] || !unlocked || !ensureCtx()) return Promise.resolve(false);
+    const my = ++token;
+    return load(id).then(src => {
+      if(my !== token || src.kind === 'synth') return false;                        // se pidió otra cosa o no hay archivo
+      const old = cur, h = make(id, src); cur = h; want = null; h.ramp(1, .4); fadeOut(old, .4); return true;
+    });
+  }
   function scene(w){                                                                // lo llama show(): 'none' = combate, 'result' = pantalla final, el resto = menús
     if(w === 'none') return;
     if(w === 'result'){ stop(1.6); return; }
@@ -265,6 +297,9 @@ const Music = (() => {
     win:   [{f:523, at:0, d:.14, w:'square', v:.5}, {f:659, at:.14, d:.14, w:'square', v:.5}, {f:784, at:.28, d:.14, w:'square', v:.5}, {f:1047, at:.42, d:.5, w:'square', v:.55}],
     recall:[{f:1500, at:0, d:.38, w:'sawtooth', v:.28, to:260}, {f:900, at:.05, d:.3, w:'square', v:.12, to:200}],
     sendout:[{f:500, at:0, d:.1, w:'triangle', v:.5, to:900}, {f:1200, at:.08, d:.25, w:'triangle', v:.5, to:1800}, {f:1800, at:.2, d:.3, w:'sine', v:.35}],
+    mega:  [{f:180, at:0, d:1.5, w:'sawtooth', v:.2, to:900}, {f:360, at:0, d:1.5, w:'triangle', v:.22, to:1800},                                          // subida de energía hasta el destello (1,5 s)
+            ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ({f:1200 + i * 150, at:.3 + i * .12, d:.1, w:'sine', v:.18})),                                       // brillos
+            {f:523, at:1.5, d:1.1, w:'triangle', v:.55}, {f:659, at:1.5, d:1.1, w:'triangle', v:.5}, {f:784, at:1.5, d:1.1, w:'triangle', v:.5}, {f:1047, at:1.55, d:1.2, w:'square', v:.28}],   // acorde final
     lose:  [{f:392, at:0, d:.22, w:'sawtooth', v:.4}, {f:330, at:.22, d:.22, w:'sawtooth', v:.4}, {f:262, at:.44, d:.5, w:'sawtooth', v:.4, to:200}]
   };
   function sfx(name){
@@ -293,6 +328,6 @@ const Music = (() => {
     if(want) play(want);
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, unlock, {passive: true}));
-  return {play, stop, battle, scene, setVolume, setMusicVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
+  return {play, stop, battle, win, scene, setVolume, setMusicVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
 })();
 const Sfx = {play: name => Music.sfx(name)};

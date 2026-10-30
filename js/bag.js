@@ -11,6 +11,8 @@ function bagSections(){
   const tk = [['ticket_n', 'Ticket Gachapon', save.tickets, 'Se gasta en el Gachapon para conseguir Pokémon.'], ['ticket_l', 'Ticket Legendario', save.ticketsL, 'Se gasta en el Gachapon para intentar un Pokémon legendario.']]
     .filter(([, n, c]) => c > 0 && has(n)).map(([id, n, c, d]) => ({id, n, c, d, tk: id === 'ticket_l' ? '#ffcc33' : '#ff3ea5'}));
   if(tk.length) out.push({t:'Tickets', list:tk});
+  const ky = typeof KEY_ITEMS === 'undefined' ? [] : Object.keys(KEY_ITEMS).filter(id => hasKey(id) && has(KEY_ITEMS[id].n)).map(id => ({id, n:KEY_ITEMS[id].n, c:1, d:KEY_ITEMS[id].d, img:KEY_ITEMS[id].img, key:true}));
+  if(ky.length) out.push({t:'Objetos clave', list:ky});
   const ch = REGIONS_DEX.filter(r => save.charms[r.n] && has('Amuleto Arcoíris de ' + r.n)).map(r => ({id:'charm_' + r.n, n:'Amuleto Arcoíris de ' + r.n, c:1, d:`Mientras lo tengas, el shiny sale al ${(CHARM_RATE * 100).toFixed(0)}% (en vez del ${(SHINY_RATE * 100).toFixed(0)}%) en el Gachapon de ${r.n}. Lo ganaste al completar su Pokédex.`, img:CHARM_IMG}));
   if(ch.length) out.push({t:'Amuletos', list:ch});
   const up = Object.keys(CONS).filter(id => held(id) > 0 && has(CONS[id].n)).map(id => ({id, n:CONS[id].n, c:held(id), d:CONS[id].d, img:CONS[id].icon}));
@@ -20,7 +22,7 @@ function bagSections(){
   if(mt.length) out.push({t:'MTs', list:mt});
   for(const cat of Object.keys(ITEM_CATS)){
     const l = Object.keys(ITEMS).filter(id => ITEMS[id].cat === cat && held(id) > 0 && has(ITEMS[id].n)).map(id => ({id, n:ITEMS[id].n, c:held(id), eq:used(id), d:ITEMS[id].d, og:ITEMS[id].og, img:imgOf(id)}));
-    if(l.length) out.push({t:'Objetos de ' + ITEM_CATS[cat].toLowerCase(), list:l});
+    if(l.length) out.push({t:cat === 'mega' ? 'Megapiedras' : 'Objetos de ' + ITEM_CATS[cat].toLowerCase(), list:l});
   }
   return out;
 }
@@ -52,7 +54,7 @@ function drawBag(){
       const pic = document.createElement('div'); pic.className = 'bag-img';
       if(it.tk){ const c = document.createElement('canvas'); bitmap(c, ICONS.ticket, it.tk); pic.appendChild(c); }
       else { const im = new Image(); im.alt = it.n; im.src = it.img; pic.appendChild(im); }
-      const n = document.createElement('b'); n.className = 'bag-n'; n.textContent = '×' + it.c; pic.appendChild(n);
+      if(!it.key){ const n = document.createElement('b'); n.className = 'bag-n'; n.textContent = '×' + it.c; pic.appendChild(n); }
       const info = document.createElement('div'); info.className = 'bag-info';
       const h3 = document.createElement('h3'); h3.textContent = it.n; info.appendChild(h3);
       if(it.tags){ const t = document.createElement('div'); t.className = 'sc-tags'; it.tags.forEach(([x, col]) => { const sp = document.createElement('span'); sp.className = 'sc-tag' + (col ? ' ty' : ''); if(col) sp.style.background = col; sp.textContent = x; t.appendChild(sp); }); info.appendChild(t); }

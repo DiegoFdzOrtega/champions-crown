@@ -6,6 +6,34 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Megaevolución', date:'30 oct 2026', sections:[
+    {t:'Combate', i:[
+      'Ya puedes megaevolucionar: equipa la Megapiedra de tu Pokémon, ten el Mega-Aro y pulsa R (o haz clic en el hueco MEGA que sale junto a tus ataques). Solo una megaevolución por combate (para todo tu equipo).',
+      'Animación al estilo de Pokémon X e Y: hélice de luz, silueta blanca, destello y símbolo mega. Cambian sprite, tipos, habilidad, ataque y velocidad; los PS no.',
+      'Los rivales también megaevolucionan: Lucario de Corelia, Alakazam y Gardevoir de Dianta.',
+      'Cambio de teclas: R ya no cambia de Pokémon. Usa 1 · 2 · 3 o haz clic en sus cuadritos.']},
+    {t:'Tienda', i:[
+      'Nueva pestaña Megapiedras: 22 piedras a 3000 BP. Cada una solo se puede equipar en su Pokémon.',
+      'Megas disponibles: Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Houndoom, Tyranitar, Gardevoir, Mawile, Manectric, Camerupt, Altaria, Banette, Glalie, Latias, Latios, Lopunny, Lucario, Gallade y Diancie.']}
+  ]},
+  {v:'Kalos: la sexta Liga', date:'30 oct 2026', sections:[
+    {t:'Historia', i:[
+      'Llega Kalos: 8 gimnasios (Violeta, Lino, Corelia, Amaro, Lem, Valeria, Ástrid y Édel), Alto Mando de 4 (Malva, Narciso, Tileo y Drácena) y la Campeona Dianta. 13 combates con 6 Pokémon cada uno. Se abre al ser Campeón de Teselia.',
+      'Cada gimnasio tiene su fondo animado: invernadero, rocódromo con cascadas, pista de patinaje y dojo, casa del árbol, torre tecnológica, pasarela con sakuras, observatorio sobre el cosmos y laberinto de hielo con ventisca.',
+      'Recompensa: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por victoria.']},
+    {t:'Música', i:[
+      'Música por regiones: Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos tienen su carpeta con la música de sus líderes, su Alto Mando y su Campeón, y su tema de victoria al ganar.']},
+    {t:'Mega-Aro', i:[
+      'Nuevo logro «Mega-Aro»: al ser Campeón de Teselia recibes el Mega-Aro (se guarda en Mochila › Objetos clave). Con él puedes megaevolucionar en combate.',
+      'Nuevos logros: Líderes, Alto Mando y Campeona de Kalos, y Maestro de seis Ligas (6000 BP + 35 tickets).']}
+  ]},
+  {v:'Panel VS', date:'30 oct 2026', sections:[
+    {t:'Combate', i:[
+      'Antes de cada combate de Historia y del Campo de Entrenamiento sale el panel VS: tú en rojo a la izquierda y el rival en azul a la derecha, con sus nombres, sus retratos y los Pokémon de cada equipo.',
+      'Se cierra solo a los pocos segundos. Clic o Enter lo salta, y Esc lo cancela y vuelves al menú.']},
+    {t:'Perfil', i:[
+      'Nuevo apartado «Personaje»: elige si sales como chico o como chica en el panel VS.']}
+  ]},
   {v:'Amuleto Arcoíris', date:'26 oct 2026', sections:[
     {t:'Colección', i:[
       'Nuevos logros «Pokédex de Kanto, Johto, Hoenn...»: completa la Pokédex de una región y, al reclamar el logro, te dan el Amuleto Arcoíris de esa región (más 1500 BP y 10 tickets).',

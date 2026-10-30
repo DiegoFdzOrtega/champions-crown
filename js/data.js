@@ -164,7 +164,7 @@ FLOORS.forEach((F, i) => { F.region = 'Kanto'; F.idx = i; F.dn = i; });
 const floorsOf = region => FLOORS.filter(F => F.region === region);                    // combates de una región, en orden
 /* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
    Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
-const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false};
+const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false, Kalos: false};
 const progOf = region => region === 'Kanto' ? save.record : ((save.prog && save.prog[region]) || 0);      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
 const setProg = (region, n) => { if(region === 'Kanto') save.record = n; else save.prog[region] = n; };
 const progTotal = () => REGIONS_PLAYED().reduce((a, r) => a + progOf(r), 0);
@@ -184,7 +184,7 @@ function floorStats(n){
 
 // Dónde buscar los retratos de líderes, Alto Mando y Campeón. Se prueba cada ruta en orden; {id} es el 'id' de arriba
 // (p. ej. lorelei). Añade aquí la ruta de tu carpeta de sprites si es otra.
-const LEADER_PATHS = ['lideres/{Region}/{Id2}.png', 'lideres/{Region}/{Id}.png', 'lideres/{id}.png',
+const LEADER_PATHS = ['lideres/{Region}/{Id2}.png', 'lideres/{Region}/{Id}.png', 'lideres/{Region}/{id}.png', 'lideres/{id}.png',
                       'sprites/kanto/{Id}.png', 'sprites/kanto/{id}.png', 'Torre Batalla/sprites/kanto/{Id}.png',
                       'lideres/Kanto/{Id2}.png'];            // último recurso: el retrato de Kanto (sirve para Koga, Bruno y Lance, que también están en Johto)
 // Nombre de archivo del retrato cuando no coincide con el id (Koga, Bruno y Lance de Johto tienen id propio para no chocar con los de Kanto).
@@ -195,9 +195,12 @@ const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], mort
                      // Sinnoh: los de Acerón y Alecrán llevan tilde (lideres/Sinnoh/Acerón.png, lideres/Sinnoh/Alecrán.png)
                      aceron:['acerón'], alecran:['alecrán'],
                      // Teselia: Anís, Maíz y Yakón llevan tilde (lideres/Unova/Anís.png, Maíz.png, Yakón.png)
-                     anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio']};
+                     anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio'],
+                     // Kalos: los archivos están en minúsculas con el nombre inglés (lideres/kalos/viola.png...) · Ástrid y Édel llevan tilde en el juego pero no en el archivo
+                     violeta:['viola'], lino:['grant'], corelia:['korrina'], amaro:['ramos'], lem:['clemont'], valeria:['valerie'], astrid:['olympia'], edel:['wulfric'],
+                     narciso:['siebold'], tileo:['wikstrom'], dracena:['drasna'], dianta:['diantha']};
 // Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es lideres/Unova)
-const REGION_DIR = {'Unova / Teselia':'Unova'};
+const REGION_DIR = {'Unova / Teselia':'Unova', Kalos:'kalos'};
 
 // Gachapon: cada región tiene su banner. Los Pokémon que salen son los de su rango de Pokédex.
 const BANNERS = Object.fromEntries(Object.keys(REGION_DEX).map(r => [r, r]));   // el banner solo lleva el nombre de la región

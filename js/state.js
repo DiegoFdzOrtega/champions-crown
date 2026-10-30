@@ -19,7 +19,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
 const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
-              profileFav:[], profileSh:[], ach:{}, charms:{}, shinyOff:[], avatar:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
+              profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', welcome:0, login:{streak:0, last:''}, firstWin:'',
               iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
@@ -36,8 +36,9 @@ try{
     save.volSfx = s.volSfx ?? save.volSfx; save.patchSeen = typeof s.patchSeen === 'string' ? s.patchSeen : '';
     save.shinyOff = Array.isArray(s.shinyOff) ? s.shinyOff : [];                    // shinys que tienes pero eliges NO usar (por defecto se usan)
     save.avatar = typeof s.avatar === 'string' ? s.avatar : '';
+    save.gender = s.gender === 'f' ? 'f' : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
     const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
-    save.charms = obj(s.charms); save.iv = obj(s.iv); save.ev = obj(s.ev); save.ivBase = obj(s.ivBase); save.evCap = obj(s.evCap); save.capUsed = obj(s.capUsed); save.abil = obj(s.abil); save.mv = obj(s.mv); save.mvHist = obj(s.mvHist); save.mtV = s.mtV || 1;
+    save.charms = obj(s.charms); save.keys = obj(s.keys); save.iv = obj(s.iv); save.ev = obj(s.ev); save.ivBase = obj(s.ivBase); save.evCap = obj(s.evCap); save.capUsed = obj(s.capUsed); save.abil = obj(s.abil); save.mv = obj(s.mv); save.mvHist = obj(s.mvHist); save.mtV = s.mtV || 1;
     if((s.trainV || 1) < 2){                                                        // v2: todos los Pokémon vuelven a IV 0 y EV 0 y se devuelven las chapas gastadas
       Object.values(save.capUsed).forEach(c => { save.items.chapa = (save.items.chapa || 0) + (c.gold || 0); save.items.chapaplata = (save.items.chapaplata || 0) + (c.silver || 0); });
       save.iv = {}; save.ivBase = {}; save.ev = {}; save.evCap = {}; save.capUsed = {};
@@ -94,8 +95,8 @@ function enemyMon(e){
 function startBattle(o, again){
   if(!team.length){ toast('Tu equipo está vacío: añade Pokémon en Equipo Pokémon.'); return; }                // por seguridad (los botones de combate ya se desactivan si no hay 3)                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
   if(!again){ team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist(); }                 // para ordenar por "más usados"
-  const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; f.ab = abilityOf(id); return f; }),   // IVs, EVs, naturaleza, ataques de MT y habilidad
-         e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; f.ab = (s && s.ab) || ''; return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)
+  const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; f.ab = abilityOf(id); megaSetup(f, 'p'); return f; }),   // IVs, EVs, naturaleza, ataques de MT y habilidad
+         e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; f.ab = (s && s.ab) || ''; megaSetup(f, 'e', s); return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)
   p.forEach(f=>{ f.x = W*.25; f.y = H/2 + 10; f.dir = 2; });
   e.forEach(f=>{ f.x = W*.75; f.y = H/2 + 10; f.dir = 6; f.lvl = o.lvl; });
   g = {o, p, e, pi:0, ei:0, shots:[], pops:[], t:0, clock:0, count:3, over:false, sw:[], swCd:0, swNote:0};     // sw = cambios de Pokémon en curso (js/swap.js) · swCd = segundos que faltan para poder volver a cambiar · swNote = tiempo que se ve el aviso "ESPERA"

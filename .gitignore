@@ -10,3 +10,9 @@ desktop.ini
 *.tmp
 *.bak
 *~
+
+# Vídeos y material de promoción (no forman parte del juego)
+trailer/
+
+# Música original sin comprimir (pesa mucho): solo se sube la de musica/<Región>/ ya optimizada
+musica/Musica2/

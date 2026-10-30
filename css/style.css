@@ -1262,3 +1262,43 @@ button.leg:disabled{box-shadow:none}
 .sa-buy b{font-weight:normal}.sa-buy:disabled{background:#2a3350!important;color:#ff9a9a!important;border-color:#4a5675!important;box-shadow:none;opacity:1}
 @media(max-width:1100px){.sa-body{grid-template-columns:11rem minmax(0,1fr)}.sa-det{grid-column:1 / -1;position:static}}
 @media(max-width:700px){.sa-body{grid-template-columns:1fr}.sa-cats{flex-direction:row;flex-wrap:wrap}.sa-sign{font-size:1rem;padding:.5rem 1rem}.sa-bal{position:static;margin:.4rem 0}}
+
+/* ---- PERFIL › Personaje (chico / chica del panel VS) ---- */
+.gen-row{display:flex;gap:1rem;margin:.8rem 0 1.2rem}
+.gen-row button{display:flex;flex-direction:column;align-items:center;gap:.4rem;width:8rem;padding:.7rem .5rem;background:#0d1117;border:2px solid #2d4a7c;border-radius:.8rem;color:var(--text);cursor:pointer}
+.gen-row button .skin{height:5.5rem}
+.gen-row button.on{border-color:var(--acc);box-shadow:0 0 1rem #ffcc3344}
+
+/* ---- PANEL VS: pantalla previa al combate (js/vspanel.js) · izquierda roja = tú · derecha azul = el rival ---- */
+#vs{position:fixed;inset:0;z-index:80;display:flex;overflow:hidden;background:#0a0e18;cursor:pointer;user-select:none}
+#vs.hide{display:none}                                   /* (sin esto #vs{display:flex} gana a .hide y el panel taparía siempre el juego) */
+#vs .vs-side{position:relative;flex:1 1 50%;display:flex;justify-content:center;align-items:flex-start;padding:4vh 2vw 12vh;overflow:hidden}
+#vs .vs-side::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg at 50% 60%,#ffffff14 0 6deg,#0000 6deg 14deg);animation:vsSpin 40s linear infinite}   /* rayos giratorios del fondo */
+#vs .vs-side::after{content:"";position:absolute;inset:0;background:radial-gradient(#0003 1.2px,#0000 1.6px) 0 0/14px 14px;opacity:.5}                    /* trama de puntos */
+#vs .vs-me{background:linear-gradient(165deg,#ff6b5e,#d02a33 55%,#8e1822);animation:vsInL .55s cubic-bezier(.2,.9,.25,1) both}
+#vs .vs-foe{background:linear-gradient(195deg,#58b4ff,#1f6fd6 55%,#12408f);animation:vsInR .55s cubic-bezier(.2,.9,.25,1) both;border-left:.35vw solid #fff}
+#vs .vs-in{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:2.4vh;max-width:100%}
+#vs .vs-name{font:italic 900 clamp(2rem,6.2vw,5rem)/1 Impact,"Arial Black",sans-serif;color:#fff;text-transform:uppercase;letter-spacing:.02em;-webkit-text-stroke:.14em #14213a;paint-order:stroke fill;text-shadow:0 .08em 0 #0006;padding:0 .3em .08em .1em;overflow:visible;max-width:100%;white-space:nowrap;animation:vsDrop .5s .35s cubic-bezier(.2,1.4,.4,1) both}
+#vs .vs-name.long{font-size:clamp(1.3rem,3.4vw,2.8rem)}
+#vs .vs-pic{width:clamp(8rem,21vw,16rem);aspect-ratio:1/1.08;background:linear-gradient(180deg,#e3f2ff,#9ccbf5);border:.35rem solid #14213a;border-radius:.6rem;box-shadow:0 .6rem 1.6rem #0008;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;animation:vsPop .45s .45s both}
+#vs .vs-pic .skin{height:100%}
+.skin{display:block;aspect-ratio:74/125;background:0 100%/200% 100% no-repeat;image-rendering:pixelated}   /* la imagen trae a Red (mitad izquierda) y a Leaf (mitad derecha) */
+.skin[data-g=f]{background-position:100% 100%}
+.skin.fb{aspect-ratio:1;background-size:contain;background-position:center}
+#vs .vs-pic.art{width:clamp(11rem,30vw,22rem);aspect-ratio:5/3;align-items:center}
+#vs .vs-pic.art img{object-fit:cover;object-position:center top;image-rendering:auto}
+#vs .vs-pic img{width:100%;height:100%;object-fit:contain;object-position:center bottom;image-rendering:pixelated}
+#vs .vs-mons{display:grid;grid-template-columns:repeat(3,clamp(3.6rem,8.6vw,7rem));gap:.4vh .6vw;justify-content:center}
+#vs .vs-mons canvas{width:100%;aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 .25rem 0 #0005);animation:vsPop .4s calc(.75s + var(--i) * .09s) both}
+#vs .vs-vs{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);z-index:3;font:italic 900 clamp(4.5rem,14vw,11rem)/1 Impact,"Arial Black",sans-serif;color:#e8302d;-webkit-text-stroke:.1em #fff;paint-order:stroke fill;text-shadow:0 .06em 0 #14213a,0 .12em .3em #0009;animation:vsStamp .5s .3s cubic-bezier(.2,1.5,.4,1) both;pointer-events:none}
+#vs .vs-foot{position:absolute;left:50%;bottom:4.5vh;transform:translateX(-50%);z-index:3;padding:.7rem 2rem;background:#0b0f18;border:2px solid #fff3;border-radius:999px;color:#fff;font:700 clamp(.6rem,1.1vw,.85rem)/1.4 "Press Start 2P","Courier New",monospace;white-space:nowrap;box-shadow:0 .4rem 1rem #000a;animation:vsRise .4s .9s both}
+#vs .vs-hint{position:absolute;right:1.6vw;bottom:1.6vh;z-index:3;font-size:.6rem;color:#ffffffb3;animation:vsBlink 1.2s 1.2s infinite both}
+@keyframes vsInL{from{transform:translateX(-100%)}to{transform:none}}
+@keyframes vsInR{from{transform:translateX(100%)}to{transform:none}}
+@keyframes vsSpin{to{transform:rotate(360deg)}}
+@keyframes vsDrop{from{transform:translateY(-1.5em) scale(1.4);opacity:0}to{transform:none;opacity:1}}
+@keyframes vsPop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+@keyframes vsStamp{from{transform:translate(-50%,-50%) scale(3) rotate(-14deg);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}
+@keyframes vsRise{from{transform:translate(-50%,2rem);opacity:0}to{transform:translateX(-50%);opacity:1}}
+@keyframes vsBlink{0%,100%{opacity:.25}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){#vs *,#vs{animation-duration:.01s!important;animation-delay:0s!important}}

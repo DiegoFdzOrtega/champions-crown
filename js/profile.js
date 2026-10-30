@@ -22,6 +22,9 @@ function renderProfile(){
     <div class="pf-top"><img id="pfAv" alt="Vista previa del avatar">
       <div><b id="pfName"></b><p>Pokémon en tu colección: ${boxCount()}</p></div></div>
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
+    <h2>Personaje</h2>
+    <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
+    <div class="gen-row" id="genRow"><button type="button" data-g="m"><img alt=""><span>Chico</span></button><button type="button" data-g="f"><img alt=""><span>Chica</span></button></div>
     <h2>Avatar</h2>
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
     <div class="av-grid" id="avGrid"></div>
@@ -33,6 +36,10 @@ function renderProfile(){
     <div class="pf-btns"><button id="pfSave" class="main">Guardar perfil</button><button id="pfCancel">Cancelar cambios</button></div>`);
   $('pfName').textContent = save.name; renderAvatarGrid();
   $('nameIn').value = save.name;
+  document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
+    setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', (save.gender || 'm') === b.dataset.g);
+    b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); };
+  });
   $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; $('pfName').textContent = save.name; persist(); refreshHud(); };
   const box = $('pfSlots');
   pfDraft.forEach((dex, i) => {

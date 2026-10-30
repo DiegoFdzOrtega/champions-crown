@@ -16,6 +16,7 @@
    MÉTRICAS (ACH_METRICS): leaders · elite · champion (combates de la Historia ya superados, por región o en total) ·
    campo_wins (victorias totales en el Campo) · campo_tier (dificultad superada, 0/1) · pokemon_owned · shiny_owned ·
    dex_region (Pokémon que tienes de la Pokédex de una región; parámetro "region" con el nombre del Gachapon: Kanto, Johto...).
+   La recompensa también puede llevar "key":"mega_aro": un OBJETO CLAVE (KEY_ITEMS en mega.js) que se entrega solo al completar el logro, sin reclamar (Mochila › Objetos clave).
    La recompensa también puede llevar "charm":"Kanto": entrega el AMULETO ARCOÍRIS de esa región (shiny más probable en su Gachapon; ver CHARM_RATE en data.js).
    Para añadir una métrica nueva: una línea en ACH_METRICS que devuelva un número.
 
@@ -58,6 +59,11 @@ const ACHIEVEMENT_DATA = [
   {"id":"campeon_teselia",  "cat":"historia", "name":"Campeón de Teselia",  "desc":"Derrota a Mirto y conviértete en el Campeón de Teselia.",       "icon":"trophy", "metric":"champion", "region":"Unova / Teselia", "goal":1, "reward":{"bp":1000,"tickets":10}},
   {"id":"cuatro_campeon",  "cat":"historia", "name":"Maestro de cuatro Ligas","desc":"Sé el Campeón de las cuatro Ligas: Kanto, Johto, Hoenn y Sinnoh.","icon":"trophy", "metric":"champion", "goal":4,  "reward":{"bp":4000, "tickets":25}},
   {"id":"cinco_campeon",   "cat":"historia", "name":"Maestro de cinco Ligas","desc":"Sé el Campeón de las cinco Ligas: Kanto, Johto, Hoenn, Sinnoh y Teselia.","icon":"trophy", "metric":"champion", "goal":5,  "reward":{"bp":5000, "tickets":30}},
+  {"id":"mega_aro",         "cat":"historia", "name":"Mega-Aro",           "desc":"Completa la Liga de Teselia: al ser Campeón recibirás el Mega-Aro, el brazalete de la Megaevolución, y el viaje a Kalos.","icon":"trophy","metric":"champion","region":"Unova / Teselia","goal":1,"reward":{"bp":1000,"tickets":10,"key":"mega_aro"}},
+  {"id":"lideres_kalos",    "cat":"historia", "name":"Líderes de Kalos",   "desc":"Derrota a los 8 Líderes de Gimnasio de Kalos.",                "icon":"story",  "metric":"leaders",  "region":"Kalos", "goal":8, "reward":{"bp":600, "tickets":6}},
+  {"id":"alto_kalos",      "cat":"historia", "name":"Alto Mando de Kalos","desc":"Derrota a los 4 miembros del Alto Mando de Kalos.",            "icon":"tower",  "metric":"elite",    "region":"Kalos", "goal":4, "reward":{"bp":500, "tickets":4}},
+  {"id":"campeon_kalos",   "cat":"historia", "name":"Campeona de Kalos",  "desc":"Derrota a Dianta y conviértete en la Campeona de Kalos.",       "icon":"trophy", "metric":"champion", "region":"Kalos", "goal":1, "reward":{"bp":1200,"tickets":12}},
+  {"id":"seis_campeon",    "cat":"historia", "name":"Maestro de seis Ligas","desc":"Sé el Campeón de las seis Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos.","icon":"trophy", "metric":"champion", "goal":6,  "reward":{"bp":6000, "tickets":35}},
 
   // ---------- CAMPO DE ENTRENAMIENTO ----------
   {"id":"campo_1",         "cat":"campo",    "name":"Primer entrenamiento","desc":"Vence a un entrenador del Campo de Entrenamiento.",           "icon":"campo",  "metric":"campo_wins", "goal":1,   "reward":{"bp":50,   "tickets":0}},
@@ -113,7 +119,7 @@ function achGet(id){                                // estado de un logro (no mo
 }
 const achClaimedCount = () => ACHIEVEMENTS.filter(a => achGet(a.id).claimed).length;
 const achReadyCount = () => ACHIEVEMENTS.filter(a => { const s = achGet(a.id); return s.done && !s.claimed; }).length;
-const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : ''].filter(Boolean).join(' + ') : '';
+const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : '', r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key] ? KEY_ITEMS[r.key].n : ''].filter(Boolean).join(' + ') : '';
 
 // ---- Recompensa: Puntos de Batalla y/o tickets de Gachapon ----
 function achGrant(r){
@@ -125,7 +131,9 @@ function achGrant(r){
 }
 function achComplete(id){                           // marca el logro como completado (NO da la recompensa: hay que reclamarla)
   const d = achDef(id); if(!d || achGet(id).done) return false;
-  save.ach[id] = {progress:d.goal || 1, done:Date.now(), date:null}; persist(); return true;
+  save.ach[id] = {progress:d.goal || 1, done:Date.now(), date:null};
+  if(d.reward && d.reward.key && typeof giveKey === 'function') giveKey(d.reward.key);               // objetos clave (Mega-Aro): se entregan AL COMPLETAR el logro, sin tener que reclamar (mega.js)
+  persist(); return true;
 }
 function achClaim(id, quiet){                       // RECLAMAR: entrega la recompensa de un logro completado, una sola vez
   const d = achDef(id), s = achGet(id); if(!d || !s.done || s.claimed) return false;
@@ -152,7 +160,8 @@ const achAdd = (id, n = 1) => achProgress(id, achGet(id).progress + n);
 // ---- Sincroniza TODOS los logros con el estado del juego (completa los cumplidos; las recompensas se reclaman aparte) ----
 const announce = list => {                                                          // un solo aviso con todo lo completado
   if(!list.length) return;
-  toast(`🏆 ${list.length > 1 ? 'Logros completados' : 'Logro completado'}: ${list.map(d => d.name).join(', ')} · ¡Reclama la recompensa en Logros!`);
+  const keys = list.filter(d => d.reward && d.reward.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[d.reward.key]).map(d => KEY_ITEMS[d.reward.key].n);
+  toast(`🏆 ${list.length > 1 ? 'Logros completados' : 'Logro completado'}: ${list.map(d => d.name).join(', ')} · ¡Reclama la recompensa en Logros!` + (keys.length ? ` · ¡Has recibido: ${keys.join(', ')}! (Mochila)` : ''));
   if(typeof Sfx !== 'undefined') Sfx.play('logro');
   if(typeof refreshHud === 'function') refreshHud();
 };

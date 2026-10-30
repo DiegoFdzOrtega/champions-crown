@@ -46,7 +46,7 @@ async function loadAvatars(){
     const doc = new DOMParser().parseFromString(await r.text(), 'text/html'), found = [];
     doc.querySelectorAll('a[href]').forEach(a => {
       let f = a.getAttribute('href').split('?')[0].split('/').pop(); try{ f = decodeURIComponent(f); }catch(e){}
-      if(AVATAR_EXT.test(f)) found.push(f);
+      if(AVATAR_EXT.test(f) && f !== VS_SKIN_FILE) found.push(f);          // (la imagen de Red y Leaf es del panel VS, no un avatar)
     });
     const have = new Set(avatarFiles.map(f => f.toLowerCase()));
     found.forEach(f => { if(!have.has(f.toLowerCase())){ avatarFiles.push(f); have.add(f.toLowerCase()); } });

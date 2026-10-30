@@ -11,7 +11,7 @@ function sheet(dex, a, shiny){                    // shiny = usa la carpeta poke
     const im = new Image(); im.ok = false; im.bad = false;
     im.onload = ()=>{ im.info = analyze(im, a); im.ok = true; };
     im.onerror = ()=>{ im.bad = true; };
-    im.src = `${CARPETA}/${dex}/${sd}${a}.png`;
+    im.src = `${typeof dex === 'string' ? MEGA_SPR : CARPETA}/${dex}/${sd}${a}.png`;      // dex en texto ('448-mega') = forma mega, carpeta pokemon_mega/ (mega.js)
     sheets[k] = im;
   }
   return sheets[k];
@@ -80,6 +80,7 @@ function dirOf(ang){ return ((Math.round((Math.PI/2 - ang) / (Math.PI/4)) % 8) +
 
 const singles = {};
 function single(dex){
+  if(typeof dex === 'string') dex = parseInt(dex);          // forma mega ('448-mega'): usa el retrato del Pokémon base
   if(!singles[dex]){ const im = new Image(); im.onload = ()=> im.ok = true; im.src = `${CARPETA}/${dex}.png`; singles[dex] = im; }
   return singles[dex];
 }

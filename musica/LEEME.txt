@@ -1,43 +1,34 @@
 CARPETA DE MUSICA
 =================
-Pon aqui los archivos de audio con EXACTAMENTE estos nombres (el juego los encuentra solo).
-Formatos: .ogg o .mp3 (se prueban en ese orden; cambia MUSIC_EXT en js/music.js si usas otro).
+La musica va en UNA CARPETA POR REGION y cada archivo tiene un nombre que dice para que sirve:
 
-  lider_kanto.ogg   Lideres de Kanto      -> "8-Bit Battle Loop" (Wolfgang_, CC0)
-  lider_johto.ogg   Lideres de Johto      -> "8-Bit RPG Battle/Encounter Theme" (Wolfgang_, CC0)
-  alto.ogg          Alto Mando (Kanto y Johto)
-                                          -> "Boss Battle #2 [8-bit re-upload]" (nene, CC0), la version V1
-  jefe.ogg          Campeones (Azul y Lance)
-                                          -> "Boss Battle #1 [8-bit]" (nene, CC0), la version V1
-  menu.ogg          (opcional) Menus. Si no existe, suena la musica original que genera el juego.
-  campo.ogg         (opcional) Campo de Entrenamiento. Si no existe, suena musica generada.
+  Kanto/   Combate Lideres y Alto Mando, Victoria Lideres y Alto Mando, Combate Campeon Azul
+  Johto/   Combate Lideres y Alto Mando, Victoria Lideres y Alto Mando, Combate Campeon
+  Hoenn/   Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres y Alto Mando, Victoria Campeon
+  Sinnoh/  Combate Lideres, Combate Alto Mando, Combate Campeona Cintia, Victoria Lideres y Alto Mando, Victoria Campeona
+  Unova/   Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres y Alto Mando, Victoria Campeon
+  Kalos/   Combate Lideres, Combate Alto Mando, Combate Campeona, Victoria Lideres, Victoria Campeona
 
-Enlaces (todos CC0 = dominio publico, sin obligacion de dar credito):
+Formato: .ogg (Ogg Vorbis ~92 kbps, optimizado para la web; tambien se prueba .mp3). Ver js/music.js (MUSIC_TRACKS y MUSIC_BY_TRAINER)
+y la seccion "Musica dinamica" del README para saber que pista usa cada entrenador.
+
+- menu.ogg y campo.ogg (en esta carpeta) son opcionales: si no existen, suena musica original generada por el juego.
+- Si falta cualquier archivo, suena una musica original generada por el juego (nunca hay silencio).
+- Los victoria suenan UNA vez al ganar; Azul y Lance no tienen tema de victoria (suena el jingle de siempre).
+- Cada pista de combate se repite en bucle sin cortes (si tiene una intro que no quieres repetir, mira "loop" en js/music.js).
+- Para ver cuales detecta el juego: consola del navegador (F12) y await Music.probe() ('archivo' o 'generada' por pista).
+- Abre el juego con un servidor (GitHub Pages, Live Server de VS Code...) y no con doble clic: asi el bucle es perfecto.
+- musica/Musica2/ guarda los originales sin comprimir (pesan mucho): no se sube a GitHub (.gitignore).
+
+AVISO LEGAL
+===========
+Esta musica es OFICIAL de Pokemon (Nintendo / Game Freak / The Pokemon Company), aportada por el autor para uso personal y educativo.
+NO es de dominio publico y no se puede monetizar. Si el repositorio es publico puede acarrear una reclamacion: en ese caso, quitala
+y el juego usara la musica generada.
+
+Archivos antiguos de esta carpeta (lider_kanto.ogg, lider_johto.ogg, alto.ogg, jefe.ogg): eran pistas CC0 de OpenGameArt
+(Wolfgang_ y nene) y ya no se usan; se pueden borrar. Si algun dia quieres volver a musica libre, son estas:
   https://opengameart.org/content/8-bit-battle-loop
   https://opengameart.org/content/8-bit-rpg-battleencounter-theme
   https://opengameart.org/content/boss-battle-1-8-bit-re-upload
   https://opengameart.org/content/boss-battle-2-8-bit-re-upload
-
-- Si falta algun archivo, suena una musica original generada por el juego.
-- Si quieres que un entrenador tenga su propio archivo, quita "file:'alto'" o "file:'jefe'" de su pista en js/music.js y llama al archivo como la pista (por ejemplo campeon_azul.ogg).
-- Cada pista se repite en bucle sin cortes. Si tiene una intro que no quieres repetir, mira "loop" en js/music.js.
-- Para ver cuales detecta el juego: abre la consola del navegador (F12) y escribe await Music.probe() ('archivo' o 'generada' por pista). Ajustes ya solo tiene volumen y silencio.
-- Abre el juego con un servidor (GitHub Pages, Live Server de VS Code...) y no con doble clic: asi el bucle es perfecto.
-- Los temas oficiales de Pokemon son de Nintendo / Game Freak: no los subas a internet. Usa musica con licencia libre.
-
-CREDITOS DE LA MUSICA
-=====================
-Todas las pistas son CC0 1.0 (dominio publico): se pueden usar gratis, tambien en proyectos de pago, sin obligacion de dar credito.
-Aun asi, se agradece a sus autores. Las pistas se han descargado de OpenGameArt.org.
-
-  lider_kanto.ogg   "8-Bit Battle Loop"                  - Wolfgang_ (acreditado tambien como Theodore Kerr)
-                    https://opengameart.org/content/8-bit-battle-loop
-  lider_johto.ogg   "8-Bit RPG Battle/Encounter Theme"   - Wolfgang_ (Ted Kerr)
-                    https://opengameart.org/content/8-bit-rpg-battleencounter-theme
-  alto.ogg          "Boss Battle #2 [8-bit Re-upload]"   - nene
-                    https://opengameart.org/content/boss-battle-2-8-bit-re-upload
-  jefe.ogg          "Boss Battle #1 [8-bit re-upload]"   - nene
-                    https://opengameart.org/content/boss-battle-1-8-bit-re-upload
-  menu / campo      Musica original generada por el propio juego (js/music.js), sin archivo.
-
-Licencia CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/

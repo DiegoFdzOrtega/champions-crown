@@ -119,7 +119,7 @@ function setItem(dex, id){ if(id) save.equip[dex] = id; else delete save.equip[d
 
 // ---- Desplegable de objetos (estilizado, con icono y descripción de cada objeto) ----
 function itemDd(dex){
-  const it = save.equip[dex], ids = Object.keys(ITEMS).filter(id => free(id) > 0 || it === id);
+  const it = save.equip[dex], ids = Object.keys(ITEMS).filter(id => (free(id) > 0 || it === id) && itemFits(dex, id));
   const img = id => `<img class="iimg" src="${imgOf(id)}" alt="" onerror="this.style.visibility='hidden'">`;
   const row = id => id
     ? `<li role="option" tabindex="-1" data-id="${id}"${id === it ? ' aria-selected="true"' : ''}>${img(id)}<div><b>${esc(ITEMS[id].n)}</b><small>${esc(ITEMS[id].d)}</small></div><em>×${held(id)}</em></li>`

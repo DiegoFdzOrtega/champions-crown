@@ -5,14 +5,16 @@
 function floorFight(n){                          // n = 0 es el primer líder
   const F = FLOORS[n], S = floorStats(n);
   const arena = F.arenas ? F.arenas[Math.floor(Math.random() * F.arenas.length)] : F.arena;    // arena propia del combate (F.arena) o una de las dos versiones del gimnasio de Caolín
-  const who = F;
-  startBattle({
+  const who = F, o = {
     floor:F.idx+1, n, leader:who.id, boss:F.kind,                    // floor = nº de combate dentro de su región · n = posición en FLOORS
     sub: `${who.leader.toUpperCase()} · ${who.tag.toUpperCase()}`,
     enemies: F.teams,                // equipo fijo de 6; sus estadísticas salen de FLOORS (lvl) y DIFF (dificultad)
     hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl,
     arena, leaderName:who.leader                       // arena (opcional) y nombre de quien te toca (para la pantalla final)
-  });
+  };
+  if(!team.length){ startBattle(o); return; }                                              // (startBattle avisa de que el equipo está vacío)
+  const kind = {lider:'Líder', alto:'Alto Mando', campeon:'Campeón'}[F.kind] || '', reg = String(F.region || '').split(' / ').pop();
+  vsIntro({name:who.leader, id:who.id, enemies:F.teams, label:[reg, kind].filter(Boolean).join(' · ').toUpperCase(), go:() => startBattle(o)});   // panel VS y, al terminar, empieza el combate
 }
 
 // ---- PAUSA (Esc en mitad de un combate): detiene el combate y deja continuar, reiniciar o salir ----
@@ -52,7 +54,7 @@ function endBattle(won){
   if(won){
     const R = F.region, chips = [];
     const view = !!PREVIEW[R];                                                         // modo ver (data.js): no se guarda nada de esta victoria
-    if(!view) gainEVs(g.e.map(f => f.m.dex));                                          // EVs para tu equipo
+    if(!view) gainEVs(g.e.map(f => f.m.baseDex || f.m.dex));                                          // EVs para tu equipo
     const first = o.floor > progOf(R);
     if(first && !view) setProg(R, o.floor);                                            // progreso de la región (solo avanza la primera vez)
     if(F.kind === 'campeon' && !view) save.champ[R] = 1;                               // trofeo del Equipo Pokémon (room.js) y progreso hacia la Torre Batalla
@@ -69,5 +71,5 @@ function endBattle(won){
     add('Reintentar', ()=>floorFight(o.n), true);
   }
   add('Menú', ()=>{ g = null; goMain(); });
-  setTimeout(()=>{ show('result'); Sfx.play(won ? 'win' : 'lose'); }, 900);
+  setTimeout(()=>{ show('result'); if(won) Music.win(o).then(ok => { if(!ok) Sfx.play('win'); }); else Sfx.play('lose'); }, 900);     // al ganar suena el tema de victoria de la región (music.js) y, si no lo hay, el jingle
 }

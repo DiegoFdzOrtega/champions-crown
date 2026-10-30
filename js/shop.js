@@ -6,12 +6,13 @@
    moveInfo() (moveinfo.js) y los MTs de training.js. Los estilos están al final de css/style.css (clases sa-...).
    ===================================================================== */
 const shopSt = {cat:'todo', sort:'reco', qty:{}, q:'', slot:'', type:'', sel:''};   // q = texto buscado · slot/type = filtros de MTs · sel = objeto elegido
-const SHOP_TABS = [['todo','Todo'], ['ticket','Tickets'], ['ataque','Ataque'], ['defensa','Defensa'], ['tipo','Tipos'], ['util','Utilidad'], ['mejora','Mejoras'], ['mt','MTs']];
+const SHOP_TABS = [['todo','Todo'], ['ticket','Tickets'], ['ataque','Ataque'], ['defensa','Defensa'], ['tipo','Tipos'], ['util','Utilidad'], ['mejora','Mejoras'], ['mega','Megapiedras'], ['mt','MTs']];
 const tierOf = p => p >= 500 ? 'leg' : p >= 120 ? 't4' : p >= 100 ? 't3' : p >= 80 ? 't2' : 't1';   // rareza según el precio
 const TIER_COL = {t1:'#9aa6b8', t2:'#3ea6ff', t3:'#a56bff', t4:'#ffcc33', leg:'#ffcc33', tk:'#ff3ea5'};
 const ownOf = id => id === 'ticket_n' ? save.tickets : id === 'ticket_l' ? save.ticketsL : held(id);
 const shopCol = it => it.cat === 'mt' ? TC[MOVES[it.mv].t] : (ITEMS[it.id] && ITEMS[it.id].type) ? TC[ITEMS[it.id].type] : it.id === 'ticket_n' ? TIER_COL.tk : TIER_COL[tierOf(it.p)];
 const shopNote = {
+  mega:'Piedras Activadoras: cada una solo sirve a su Pokémon. Para megaevolucionar en combate (tecla R) también necesitas el Mega-Aro (logro: Campeón de Teselia).',
   mt:'Todos los MTs, siempre a la venta y sin límite. Se usan en Equipo Pokémon > Ver datos.',
   mejora:'Las mejoras se gastan en Equipo Pokémon > Ver datos.',
   tipo:'Los objetos de tipo potencian un 20 % los ataques de ese tipo.',

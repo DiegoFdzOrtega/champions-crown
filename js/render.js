@@ -47,7 +47,7 @@ function arenaFallback(){
 function arena(){ drawArena(g && g.o ? (g.o.arena || g.o.leader) : '', g ? g.t : 0); }
 
 function drawF(f, col){
-  if(f.ghost) return;                              // en pleno cambio: lo dibuja la animación (swap.js)
+  if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
   const I = idleInfo(f.m.dex);
   const hid = f.hide > 0, lg = fxLunge(f);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
@@ -75,7 +75,7 @@ function hud(x, y, list, idx, col){
   ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
   drawFrame(ctx, f.m.dex, 'Idle', 0, 0, x+36, y+38, 2, 50, f.shiny);
   if(hasStatus(f)) statusChips(f, x+8, y+55, 27, 11, 6);                    // estado en el retrato
-  text(f.m.name.toUpperCase(), x+74, y+24, 10);
+  text(f.m.name.toUpperCase(), x+74, y+24, f.m.name.length > 9 ? 8 : 10);                 // nombres largos (Mega-Charizard X...) un poco más pequeños para no tapar los tipos
   f.m.types.forEach((t,j)=>{
     const tx = x + w - 8 - 64*(f.m.types.length - j);
     ctx.fillStyle = TC[t]; ctx.fillRect(tx, y+12, 60, 12);
@@ -134,6 +134,7 @@ function draw(){
   });
   fxDraw();                                        // impactos, golpes, polvo y partículas
   swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
+  megaDraw();                                      // animación de megaevolución (js/mega.js)
   abDrawWeather();                                 // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
   if(!P.dead){                                                               // cruz de puntería
@@ -196,6 +197,8 @@ function draw(){
     }
   });
   ctx.restore();
+  megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
+  megaTop();                                       // destello y cartel de la megaevolución, encima de todo
 }
 
 let last = performance.now();

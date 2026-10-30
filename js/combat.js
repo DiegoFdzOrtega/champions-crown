@@ -97,8 +97,10 @@ function update(dt){
   if(g.over || g.paused) return;                              // en pausa (Esc) nada se mueve
   g.t += dt;
   if(g.count > 0){ g.count -= dt; return; }
+  if(g.mega){ megaTick(dt); return; }                        // megaevolución en marcha (js/mega.js): el combate se detiene hasta que acaba la animación
   g.clock += dt;
   const P = g.p[g.pi], E = g.e[g.ei];
+  megaHint(P);                                               // aviso «MEGAEVOLUCIÓN LISTA»
 
   if(!P.dead && !P.ghost){                       // ghost = en pleno cambio de Pokémon: sin controles hasta que termine la animación
     const dx = (keys.KeyD||keys.ArrowRight?1:0) - (keys.KeyA||keys.ArrowLeft?1:0);
@@ -111,7 +113,7 @@ function update(dt){
     if(keys.KeyQ) use(P,3,aim,true);
     if(keys.KeyE) use(P,4,aim,true);
   }
-  if(!E.dead && !E.ghost){ if(aiSmart()) enemyAI(E, P, dt); else enemyBasic(E, P, dt); }       // IA del rival (js/ai.js): estilo de combate, distancias, esquiva y uso inteligente de Q/E (no actúa mientras su Pokémon entra con la animación de cambio)
+  if(!E.dead && !E.ghost){ if(aiSmart()) enemyAI(E, P, dt); else enemyBasic(E, P, dt); megaAI(E, dt); }       // IA del rival (js/ai.js): estilo de combate, distancias, esquiva y uso inteligente de Q/E (no actúa mientras su Pokémon entra con la animación de cambio)
   for(const f of [P,E]){                         // tiempos de cada uno
     for(let i=0;i<5;i++) f.cd[i] = Math.max(0, f.cd[i]-dt);
     if(f.item === 'restos' && !f.dead) f.hp = Math.min(f.max, f.hp + f.max*IFX.restos*dt);   // Restos (IFX.restos en data.js)

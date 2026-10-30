@@ -226,11 +226,13 @@ const campoOpen = tier => tier <= 1 || campoCleared(tier - 1);                  
 function campoFight(id){
   const T = campoById(id), S = campoStats(T);
   if(!campoOpen(T.tier)){ toast('Esta dificultad está bloqueada: supera antes la anterior.'); return; }
-  startBattle({
+  const o = {
     campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:'campo', portrait:'entrenadores/' + T.file,
     title:'CAMPO DE ENTRENAMIENTO', sub:`${T.name.toUpperCase()} · ${CAMPO_TIER[T.tier].nombre.toUpperCase()}`,
     enemies:T.team, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
-  });
+  };
+  if(!team.length){ startBattle(o); return; }
+  vsIntro({name:T.name, path:'entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), go:() => startBattle(o)});   // panel VS antes del combate
 }
 function campoEnd(won){                                    // lo llama endBattle (modes.js) cuando el combate es del Campo de Entrenamiento
   g.over = true;
