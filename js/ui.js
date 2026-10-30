@@ -26,19 +26,25 @@ addEventListener('keydown', e=>{
   if(e.code === 'KeyM' && !(e.target && (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && /^(text|search|number|email|password|url|tel)$/i.test(e.target.type))))){ Music.toggleMute(); toast(save.mute ? 'Sonido silenciado (M)' : 'Sonido activado (M)'); const mu = $('mute'); if(mu) mu.checked = !!save.mute; }   // M: silenciar / activar
   if(!$('main').classList.contains('hide')) mainKey(e);
   if(e.code === 'Escape'){ if(!g) back(); else if(!g.over) pauseBattle(!g.paused); }   // Esc: menú atrás · en combate: pausa / continuar
-  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code) && g) e.preventDefault();
-  if(e.code==='KeyR' && g) megaPlayer();                       // R = megaevolucionar (js/mega.js). Cambiar de Pokémon: 1 · 2 · 3 o clic en su cuadrito
-  if(e.code==='Digit1') switchMon(0); if(e.code==='Digit2') switchMon(1); if(e.code==='Digit3') switchMon(2);
+  if(g && (/^(Space|Arrow(Up|Down|Left|Right)|Tab)$/.test(e.code) || ctlAny(e.code))) e.preventDefault();      // en combate las teclas del juego no desplazan la página
+  if(g && !e.repeat){                                          // (teclas configurables: js/controls.js)
+    if(ctlIs('mega', e.code)) megaPlayer();                    // megaevolucionar (js/mega.js)
+    if(ctlIs('sw1', e.code)) switchMon(0); if(ctlIs('sw2', e.code)) switchMon(1); if(ctlIs('sw3', e.code)) switchMon(2);      // cambiar de Pokémon (o clic en su cuadrito)
+  }
 });
 addEventListener('keyup', e=> keys[e.code] = false);
-addEventListener('blur', ()=>{ for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; });
+addEventListener('blur', ()=>{ for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; mouse.b = {}; });
 function setMouse(e){ const r = cv.getBoundingClientRect(); mouse.x = (e.clientX-r.left)*W/r.width; mouse.y = (e.clientY-r.top)*H/r.height; }
 cv.addEventListener('mousemove', e=>{ setMouse(e); const k = g && !g.paused ? hudIconAt(mouse.x, mouse.y) : -1; cv.style.cursor = k >= 0 && !myList()[k].dead && k !== myIdx() ? 'pointer' : ''; });   // manita sobre los cuadritos del equipo
 cv.addEventListener('mousedown', e=>{ setMouse(e);
   if(e.button===0 && g && !g.over && !g.paused && megaBadgeAt(mouse.x, mouse.y)){ megaPlayer(); return; }     // clic en el hueco de megaevolución
   if(e.button===0 && g && !g.over && !g.paused){ const k = hudIconAt(mouse.x, mouse.y); if(k >= 0){ switchMon(k); return; } }     // clic en un cuadrito del equipo = cambiar de Pokémon (no dispara)
-  if(e.button===0) mouse.l = true; if(e.button===2) mouse.r = true; });
-addEventListener('mouseup', e=>{ if(e.button===0) mouse.l = false; if(e.button===2) mouse.r = false; });
+  const c = 'Mouse' + e.button;
+  if(e.button===0) mouse.l = true; else if(e.button===2) mouse.r = true; else mouse.b[c] = true;       // rueda / botones laterales (si están asignados)
+  if(g && !g.over && !g.paused){                                // megaevolución y cambio de Pokémon también pueden ir en un botón del ratón
+    if(e.button > 2) e.preventDefault();
+    if(ctlIs('mega', c)) megaPlayer(); [0, 1, 2].forEach(i => { if(ctlIs('sw' + (i + 1), c)) switchMon(i); }); } });
+addEventListener('mouseup', e=>{ if(e.button===0) mouse.l = false; else if(e.button===2) mouse.r = false; else mouse.b['Mouse' + e.button] = false; });
 cv.addEventListener('contextmenu', e=>e.preventDefault());
 addEventListener('resize', resize);
 

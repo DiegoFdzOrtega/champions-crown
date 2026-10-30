@@ -6,6 +6,17 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Controles y música', date:'31 oct 2026', sections:[
+    {t:'Ajustes', i:[
+      'Música separada: ahora tienes un volumen para la música del menú y otro para la música de combate (y de victoria), además del volumen general y el de efectos. Se pueden subir más que antes.',
+      'Controles editables: en Ajustes › Controles pulsa un recuadro y luego la tecla (o el botón del ratón, incluida la rueda y los botones laterales) que quieras para cada acción. Cada acción tiene dos huecos.',
+      'Se pueden cambiar movimiento, Carrera, Golpe, Disparo, Mejora, Ataque fuerte, Megaevolución y el cambio de Pokémon 1 · 2 · 3. Si eliges una tecla que ya usa otra acción, se intercambian. Retroceso vacía un hueco, Esc cancela.',
+      'Esc (pausa) y M (silenciar) siguen siendo fijas. «Restablecer controles» vuelve a las de siempre.',
+      'La barra de ataques, los cuadritos del equipo y el aviso de megaevolución enseñan tus teclas. Tus controles se guardan también en tu cuenta. En los combates online cada jugador usa los suyos.']},
+    {t:'Combate online', i:[
+      'Estadio nuevo para el PvP: el Coliseo. Es de noche, con focos que barren el campo, una grada llena de público (azul a la izquierda, rojo a la derecha) que hace la ola, agita barras de luz y saca flashes, y una gran Poké Ball pintada en el centro.',
+      'El suelo se tiñe de azul a la izquierda y de rojo a la derecha, con líneas de neón y un círculo de salida para cada bando.']}
+  ]},
   {v:'Barras de IV y EV', date:'31 oct 2026', sections:[
     {t:'Equipo Pokémon', i:[
       'Pantalla nueva y más cómoda: arriba tienes la barra con el buscador, el orden, el filtro por tipo y el botón «+ Nuevo equipo».',

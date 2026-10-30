@@ -1596,3 +1596,9 @@ button.leg:disabled{box-shadow:none}
 .cloudbox .frRow b{display:flex;align-items:center;gap:.6rem}.cloudbox .frRow b small{color:#8fb3e8;font-size:.75rem}
 .cloudbox .dot{width:.8rem;height:.8rem;border-radius:50%;background:#4a5470;flex:none}.cloudbox .dot.on{background:#4ccf6a;box-shadow:0 0 .6rem #4ccf6a}
 #chalOv{z-index:90}.chalBox{max-width:34rem}.chalBox h2{font-size:1.5rem}.chalBox p{line-height:1.8;margin:1rem 0}
+/* Ajustes › Controles (js/controls.js) */
+#ctlGrid{display:grid;grid-template-columns:minmax(0,1fr) 7.5rem 7.5rem;gap:.5rem .6rem;align-items:center;margin:.8rem 0 1rem;max-width:34rem}
+#ctlGrid .ctlN{font-size:.85rem;line-height:1.4}
+#ctlGrid .ctlB{padding:.5rem .3rem;font-size:.8rem;min-height:2.2rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ctlGrid .ctlB.empty{opacity:.55}
+#ctlGrid .ctlB.cap{border-color:var(--acc);background:#2a2410;color:var(--acc);box-shadow:0 0 10px #ffcc3377}

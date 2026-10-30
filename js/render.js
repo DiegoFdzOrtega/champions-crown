@@ -120,14 +120,14 @@ function hud(x, y, list, idx, col){
         text(String(Math.ceil(myCd())), px+23, py+30, 16, '#ffcc33', 'center');
       }
       if(hov && can){ ctx.strokeStyle = wait ? '#ff9a3a' : '#7dffa0'; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, 44, 44); }
-      text(String(i + 1), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
+      text(ctlShort('sw' + (i + 1)).slice(0, 3), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
     }
   });
   if(list === myList()){                                                          // mensajes bajo los cuadritos
     const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 + 12;
     if(g.swNote > 0) text(`ESPERA ${Math.ceil(myCd())} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
     else if(hv >= 0 && hv !== idx && !list[hv].dead) text(myCd() > 0 ? `ESPERA ${Math.ceil(myCd())} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
-    else if(g.clock < 8 && g.count <= 0 && !g.over) text('CLIC EN UN CUADRO O TECLAS 1 · 2 · 3 PARA CAMBIAR', x, ty, 6, 'rgba(201,214,245,.75)');
+    else if(g.clock < 8 && g.count <= 0 && !g.over) text(`CLIC EN UN CUADRO O TECLAS ${ctlShort('sw1')} · ${ctlShort('sw2')} · ${ctlShort('sw3')} PARA CAMBIAR`, x, ty, 6, 'rgba(201,214,245,.75)');
   }
 }
 
@@ -187,7 +187,7 @@ function draw(){
     hudBox(x0, ey, tw, 34, '#4fb3ff');
     text('ENERGÍA', x0 + 12, by + 8, 7, '#4fb3ff');
     bar(bx, by, bwid, bh, M.en, 100, '#4fb3ff');
-    [[3, 'Q'], [4, 'E']].forEach(([i, k]) => {
+    [3, 4].forEach(i => { const k = ctlKey(i).slice(0, 4);
       const need = Math.round(enCost(M, i)), mx = bx + 1 + (bwid - 2) * need / 100, ready = M.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
       ctx.fillStyle = col; ctx.fillRect(Math.round(mx) - 1, by - 3, 2, bh + 6);
       const wait = Math.max(0, (need - M.en) / EN_REGEN);
@@ -202,8 +202,9 @@ function draw(){
     const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(M, i)];
     ctx.fillStyle = '#161c2c'; ctx.fillRect(x, y, bw, h);
     ctx.strokeStyle = ok ? col : '#2c3550'; ctx.lineWidth = 2; ctx.strokeRect(x+1, y+1, bw-2, h-2);
-    ctx.fillStyle = ok ? col : '#2c3550'; ctx.fillRect(x+4, y+4, m.key.length*6 + 6, 10);      // tecla
-    text(m.key, x+7, y+12, 6, '#10141e');
+    const kl = ctlKey(i).slice(0, 7);                                                          // tecla de ese ataque (configurable: Ajustes › Controles)
+    ctx.fillStyle = ok ? col : '#2c3550'; ctx.fillRect(x+4, y+4, kl.length*6 + 6, 10);      // tecla
+    text(kl, x+7, y+12, 6, '#10141e');
     const nm = mvName(M, i).toUpperCase();
     text(nm, x+bw/2, y+32, nm.length > 10 ? 7 : 8, ok ? '#fff' : '#6d7899', 'center');
     if(m.en) text('EN ' + cost, x+bw-5, y+14, 6, M.en >= cost ? '#4fb3ff' : '#e8493a', 'right');

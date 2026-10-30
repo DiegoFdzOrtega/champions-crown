@@ -125,7 +125,7 @@ function megaAI(E, dt){
 }
 // Aviso al empezar el combate: «¡MEGAEVOLUCIÓN LISTA!» sobre tu Pokémon (una vez por Pokémon)
 function megaHint(P){
-  if(P.megaKey && !P.megaDone && !megaUsed(megaSide(P)) && !P.megaHinted && !P.dead && !P.ghost && !g.mega){ P.megaHinted = true; g.pops.push({x:P.x, y:P.y - 150, txt:'¡MEGAEVOLUCIÓN LISTA! (R)', t:2.4, c:'#ff9ae8', s:10}); }
+  if(P.megaKey && !P.megaDone && !megaUsed(megaSide(P)) && !P.megaHinted && !P.dead && !P.ghost && !g.mega){ P.megaHinted = true; g.pops.push({x:P.x, y:P.y - 150, txt:`¡MEGAEVOLUCIÓN LISTA! (${ctlShort('mega')})`, t:2.4, c:'#ff9ae8', s:10}); }
 }
 
 // ---------------------------------------------------------------------
@@ -261,8 +261,9 @@ function megaHud(){                                                             
   hudAt(W / 2, H, () => {
     hudBox(r.lx, r.ly, r.lw, r.lh, ok ? hue(t * 180, .6 + .4 * Math.sin(t * 6)) : '#2c3550');
     if(hov && ok){ ctx.fillStyle = 'rgba(255,154,232,.12)'; ctx.fillRect(r.lx + 2, r.ly + 2, r.lw - 4, r.lh - 4); }
-    ctx.fillStyle = ok ? '#ffcc33' : '#2c3550'; ctx.fillRect(r.lx + 8, r.ly + 8, 12, 12);                       // tecla R
-    text('R', r.lx + 10, r.ly + 18, 7, '#10141e');
+    const mk = ctlShort('mega').slice(0, 4);                                                                       // tecla de megaevolución (configurable; de serie R)
+    ctx.fillStyle = ok ? '#ffcc33' : '#2c3550'; ctx.fillRect(r.lx + 8, r.ly + 8, Math.max(12, mk.length * 6 + 6), 12);
+    text(mk, r.lx + 10, r.ly + 18, 7, '#10141e');
     const im = itemImg(P.item);
     if(im && im.ok){ ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = ok ? 1 : .35; ctx.drawImage(im, r.lx + r.lw / 2 - 17, r.ly + 12, 34, 34); ctx.restore(); }
     text('MEGA', r.lx + r.lw / 2, r.ly + 58, 8, ok ? '#ffd9fb' : '#6d7899', 'center');

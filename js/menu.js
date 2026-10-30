@@ -206,7 +206,7 @@ function openRank(){
   $('rkName').textContent = save.name;
 }
 // openFriends() (Amigos y cuenta) está en js/cloudui.js
-// ---- AJUSTES: solo dos bloques, Pantalla completa y Audio (global, música, efectos y silenciar) ----
+// ---- AJUSTES: Pantalla completa, Audio (general, música del menú, música de combate, efectos y silenciar) y Controles (js/controls.js) ----
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
 function openSettings(){
   const canFs = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -216,13 +216,17 @@ function openSettings(){
     ${canFs ? '' : '<p class="help">Tu navegador no permite la pantalla completa en esta página.</p>'}
     <h2>Audio</h2>
     <label>Volumen general: <b id="volN"></b><br><input id="vol" type="range" min="0" max="100" value="${save.vol}"></label>
-    <label>Música: <b id="volMN"></b><br><input id="volM" type="range" min="0" max="100" value="${save.volMusic}"></label>
+    <label>Música del menú: <b id="volMN"></b><br><input id="volM" type="range" min="0" max="100" value="${save.volMenu}"></label>
+    <label>Música de combate: <b id="volBN"></b><br><input id="volB" type="range" min="0" max="100" value="${save.volBattle}"></label>
     <label>Efectos de sonido: <b id="volSN"></b><br><input id="volS" type="range" min="0" max="100" value="${save.volSfx}"></label>
-    <label class="chk"><input id="mute" type="checkbox"${save.mute ? ' checked' : ''}> Silenciar todo el audio (tecla M)</label>`);
+    <label class="chk"><input id="mute" type="checkbox"${save.mute ? ' checked' : ''}> Silenciar todo el audio (tecla M)</label>
+    ${ctlSettingsHtml()}`);
   const pct = (id, v) => { $(id).textContent = v + '%'; };
-  pct('volN', save.vol); pct('volMN', save.volMusic); pct('volSN', save.volSfx);
+  pct('volN', save.vol); pct('volMN', save.volMenu); pct('volBN', save.volBattle); pct('volSN', save.volSfx);
   $('vol').oninput  = e => { Music.setVolume(e.target.value); pct('volN', save.vol); };
-  $('volM').oninput = e => { Music.setMusicVolume(e.target.value); pct('volMN', save.volMusic); };
+  $('volM').oninput = e => { Music.setMenuVolume(e.target.value); pct('volMN', save.volMenu); };
+  $('volB').oninput = e => { Music.setBattleVolume(e.target.value); pct('volBN', save.volBattle); };
+  ctlSettingsBind();
   $('volS').oninput = e => { Music.setSfxVolume(e.target.value); pct('volSN', save.volSfx); };
   $('volS').onchange = () => Sfx.play('click');                                      // al soltar el deslizador de efectos se oye cómo suenan
   $('mute').onchange = e => Music.setMute(e.target.checked);

@@ -16,14 +16,14 @@
    - Los navegadores no dejan sonar nada hasta que el jugador hace clic o pulsa una tecla; la música empieza en ese primer gesto.
    - Si abres index.html con doble clic (file://) el navegador no deja leer los archivos con fetch(); entonces se usa un <audio> normal.
      (Mejor abrirlo con un servidor local o con GitHub Pages.)
-   - Volumen (Ajustes › Audio): save.vol = GLOBAL, save.volMusic = música, save.volSfx = efectos (0-100 cada uno) y save.mute = silenciar todo (tecla M).
-     Volumen final de la música = global x música · de los efectos = global x efectos. Pausa (Esc): la música baja de volumen.
+   - Volumen (Ajustes › Audio): save.vol = GLOBAL, save.volMenu = música del menú, save.volBattle = música de combate, save.volSfx = efectos (0-100 cada uno) y save.mute = silenciar todo (tecla M).
+     Volumen final de la música del menú = global x menú · de la de combate = global x combate · de los efectos = global x efectos. Pausa (Esc): la música baja de volumen.
    - EFECTOS DE SONIDO (Sfx): pitidos cortos generados por código, sin archivos: 'click' (botones), 'win', 'lose' (resultado del combate), 'logro' y 'mega' (megaevolución).
      Sfx.play('click'). Para añadir uno: una línea en SFX (lista de notas: f = frecuencia, at = cuándo, d = duración, w = onda, v = volumen, to = frecuencia final).
 
    PARA EL PROGRAMADOR
      Music.play('menu')     Music.battle(o)  (lo llama startBattle)     Music.scene('main')  (lo llama show())
-     Music.stop(seg)        Music.setVolume(0-100) = global   Music.setMusicVolume(0-100)   Music.setSfxVolume(0-100)
+     Music.stop(seg)        Music.setVolume(0-100) = global   Music.setMenuVolume(0-100)   Music.setBattleVolume(0-100)   Music.setSfxVolume(0-100)
      Music.setMute(bool)    Music.toggleMute()   Music.duck(true/false)   Sfx.play(nombre)
      Music.probe([ids])     promesa: para cada pista dice si usa 'archivo' o 'generada'
    ===================================================================== */
@@ -137,10 +137,14 @@ const Music = (() => {
   let ctx = null, master = null, analyser = null, cur = null, want = null, token = 0, ducked = false, unlocked = false, noiseBuf = null;
   const cache = {};                                              // id -> promesa de {kind:'buffer'|'element'|'synth', ...}
   const els = new Set();                                         // pistas que usan <audio> (se ajusta su volumen a mano)
+  const live = new Set();                                        // pistas WebAudio que están sonando (buffer o generadas)
   const clamp01 = v => Math.max(0, Math.min(1, v));
   // Volumen final. Curva suave (el oído no es lineal) y un tope para que la música no tape los efectos.
   const curve = v => Math.pow(clamp01((+v) / 100), 1.6);
-  const vol = () => (save.mute ? 0 : curve(save.vol ?? 100) * curve(save.volMusic ?? 70) * .6) * (ducked ? .35 : 1);     // música = global x música
+  // Música = general x (menú o combate) . Cada pista lleva su propio volumen: 'menu' usa save.volMenu; todas las demás (combates y victorias) usan save.volBattle.
+  const gv = () => (save.mute ? 0 : curve(save.vol ?? 100)) * (ducked ? .35 : 1);                                    // parte común a todas las pistas
+  const tv = id => curve(id === 'menu' ? (save.volMenu ?? 70) : (save.volBattle ?? 70));                              // parte de cada pista
+  const vol = () => gv() * .9;                                                                                       // ganancia del canal maestro (.9 deja un poco de margen para que la música generada no sature)
   const sfxVol = () => save.mute ? 0 : curve(save.vol ?? 100) * curve(save.volSfx ?? 80) * .5;                       // efectos = global x efectos
 
   function ensureCtx(){
@@ -152,7 +156,8 @@ const Music = (() => {
   }
   function applyVol(){
     if(master){ const t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(vol(), t, .05); }
-    els.forEach(h => { h.el.volume = clamp01(h.level * vol() / .6); });
+    els.forEach(h => { h.el.volume = clamp01(h.level * tv(h.id) * gv()); });
+    live.forEach(h => { if(h.setLevel) h.setLevel(); });                                  // pistas WebAudio: reajusta su volumen propio (menú / combate)
   }
 
   // ---- Un "manejador" por pista que suena: {id, kind, ramp(a, seg), stop()} ----
@@ -162,7 +167,15 @@ const Music = (() => {
     const s = ctx.createBufferSource(); s.buffer = src.buf; s.loop = !MUSIC_TRACKS[id].once;                                       // bucle sin cortes
     const lp = MUSIC_TRACKS[id].loop; if(lp){ s.loopStart = lp[0]; s.loopEnd = lp[1]; }
     s.connect(g); s.start();
-    return {id, kind:'file', ramp:(to, secs) => rampNode(g, to, secs), stop(){ try{ s.stop(); }catch(e){} g.disconnect(); }};
+    return webaudioHandle({id, kind:'file', stop(){ try{ s.stop(); }catch(e){} g.disconnect(); }}, g);
+  }
+  // Pista WebAudio con volumen propio: ramp(a, seg) sube/baja el nivel relativo (0-1) y el volumen de su tipo (menú / combate) se multiplica aparte
+  function webaudioHandle(h, g){
+    h.rel = 0;
+    h.ramp = (to, secs) => { h.rel = to; rampNode(g, to * tv(h.id), secs); };
+    h.setLevel = () => { const t = ctx.currentTime; g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(h.rel * tv(h.id), t, .05); };
+    const st = h.stop; h.stop = () => { live.delete(h); st(); }; live.add(h);
+    return h;
   }
   function makeElement(id, src){
     const el = new Audio(src.url); el.loop = !(MUSIC_TRACKS[id] && MUSIC_TRACKS[id].once); el.volume = 0; const h = {id, kind:'file', el, level:0, timer:0};
@@ -237,7 +250,7 @@ const Music = (() => {
         step++; next += spb;
       }
     }, 120);
-    return {id, kind:'generada', ramp:(to, secs) => rampNode(g, to, secs), stop(){ clearInterval(timer); g.disconnect(); }};
+    return webaudioHandle({id, kind:'generada', stop(){ clearInterval(timer); g.disconnect(); }}, g);
   }
 
   // ---- Carga: archivo de musica/ si existe; si no, música generada ----
@@ -287,7 +300,8 @@ const Music = (() => {
   }
   const pct = v => Math.max(0, Math.min(100, Math.round(+v || 0)));
   function setVolume(v){ save.vol = pct(v); persist(); applyVol(); }                // volumen GLOBAL
-  function setMusicVolume(v){ save.volMusic = pct(v); persist(); applyVol(); }
+  function setMenuVolume(v){ save.volMenu = pct(v); persist(); applyVol(); }          // música del menú
+  function setBattleVolume(v){ save.volBattle = pct(v); persist(); applyVol(); }      // música de combate (y de victoria)
   function setSfxVolume(v){ save.volSfx = pct(v); persist(); }
 
   // ---- Efectos de sonido: notas sueltas con osciladores (sin archivos) ----
@@ -328,6 +342,6 @@ const Music = (() => {
     if(want) play(want);
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, unlock, {passive: true}));
-  return {play, stop, battle, win, scene, setVolume, setMusicVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
+  return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
 })();
 const Sfx = {play: name => Music.sfx(name)};

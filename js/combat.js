@@ -111,15 +111,15 @@ function update(dt){
   if(g.pvp){ pvpControl(P, 'p', dt); pvpControl(E, 'e', dt); }          // combate online: cada bando lo mueven las pulsaciones de su jugador (js/pvp.js)
   else{
   if(!P.dead && !P.ghost){                       // ghost = en pleno cambio de Pokémon: sin controles hasta que termine la animación
-    const dx = (keys.KeyD||keys.ArrowRight?1:0) - (keys.KeyA||keys.ArrowLeft?1:0);
-    const dy = (keys.KeyS||keys.ArrowDown?1:0) - (keys.KeyW||keys.ArrowUp?1:0);
+    const dx = (ctlHeld('right')?1:0) - (ctlHeld('left')?1:0);            // teclas configurables (Ajustes › Controles, js/controls.js)
+    const dy = (ctlHeld('down')?1:0) - (ctlHeld('up')?1:0);
     const aim = Math.atan2(mouse.y-P.y, mouse.x-P.x);
     move(P, dx, dy, dt, 1); P.dir = dirOf(aim);
-    if(mouse.l) use(P,1,aim,true);
-    if(mouse.r) use(P,2,aim,true);
-    if(keys.Space) use(P,0, (dx||dy) ? Math.atan2(dy,dx) : aim, true);
-    if(keys.KeyQ) use(P,3,aim,true);
-    if(keys.KeyE) use(P,4,aim,true);
+    if(ctlHeld('melee')) use(P,1,aim,true);
+    if(ctlHeld('shot')) use(P,2,aim,true);
+    if(ctlHeld('dash')) use(P,0, (dx||dy) ? Math.atan2(dy,dx) : aim, true);
+    if(ctlHeld('buff')) use(P,3,aim,true);
+    if(ctlHeld('strong')) use(P,4,aim,true);
   }
   if(!E.dead && !E.ghost){ if(aiSmart()) enemyAI(E, P, dt); else enemyBasic(E, P, dt); megaAI(E, dt); }
   }       // IA del rival (js/ai.js): estilo de combate, distancias, esquiva y uso inteligente de Q/E (no actúa mientras su Pokémon entra con la animación de cambio)

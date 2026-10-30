@@ -25,7 +25,7 @@ const PVP_DELAY = 5, PVP_DMAX = 18;                     // retraso de las pulsac
 // menos de 54 de los 60 pasos, cada jugador sube SU retraso un paso (hasta PVP_DMAX) y lo baja otra vez tras 40 s yendo bien (pvpFrame).
 const PVP_BATCH = 2;                                    // cuántos pasos se mandan juntos en cada mensaje (30 mensajes por segundo por jugador)
 const PVP_TIMEOUT = 12000;                              // ms esperando al rival antes de darlo por desconectado
-const PVP_ARENAS = ['azul', 'lance', 'giovanni', 'lorelei', 'bruno', 'agatha'];
+const PVP_ARENAS = ['coliseo'];                          // el estadio del combate online (js/arenaspvp.js). Si algún día hay más, el id del combate elige una (igual en los dos lados)
 const PVP_EMPTY = {dx: 0, dy: 0, mx: 0, my: 0, l: 0, r: 0, sp: 0, q: 0, e: 0, sw: -1, mg: 0};
 let pvp = null;                                         // estado del combate online en curso (o null)
 
@@ -166,9 +166,9 @@ function pvpEvent(kind, i){                              // cambio de Pokémon (
   if(kind === 'sw') P.evSw = i; else P.evMg = 1;
 }
 function pvpSample(){
-  const P = pvp, k = keys, z = P.menu;
-  const i = {dx: z ? 0 : ((k.KeyD || k.ArrowRight ? 1 : 0) - (k.KeyA || k.ArrowLeft ? 1 : 0)), dy: z ? 0 : ((k.KeyS || k.ArrowDown ? 1 : 0) - (k.KeyW || k.ArrowUp ? 1 : 0)),
-    mx: Math.round(mouse.x), my: Math.round(mouse.y), l: !z && mouse.l ? 1 : 0, r: !z && mouse.r ? 1 : 0, sp: !z && k.Space ? 1 : 0, q: !z && k.KeyQ ? 1 : 0, e: !z && k.KeyE ? 1 : 0, sw: P.evSw, mg: P.evMg};
+  const P = pvp, z = P.menu, h = id => !z && ctlHeld(id) ? 1 : 0;           // teclas configurables de cada jugador (js/controls.js): al rival solo le llega el resultado (dx, dy, l, r...), no tus teclas
+  const i = {dx: h('right') - h('left'), dy: h('down') - h('up'),
+    mx: Math.round(mouse.x), my: Math.round(mouse.y), l: h('melee'), r: h('shot'), sp: h('dash'), q: h('buff'), e: h('strong'), sw: P.evSw, mg: P.evMg};
   P.evSw = -1; P.evMg = 0; return i;
 }
 const pvpEnc = i => [i.dx, i.dy, i.mx, i.my, i.l | (i.r << 1) | (i.sp << 2) | (i.q << 3) | (i.e << 4), i.sw, i.mg];

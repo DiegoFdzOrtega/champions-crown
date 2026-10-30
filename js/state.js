@@ -20,7 +20,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', welcome:0, login:{streak:0, last:''}, firstWin:'',
-              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMusic:70, volSfx:80, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
+              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){
@@ -31,9 +31,12 @@ try{
     save.pity = s.pity || {}; save.used = s.used || {}; save.gachaRegion = s.gachaRegion || 'Kanto';
     save.record = s.record || 0; save.bp = s.bp || 0; save.tickets = s.tickets || 0;
     save.name = s.name || save.name; save.mute = !!s.mute;
-    // Volúmenes: vol = GLOBAL (0-100), volMusic = música, volSfx = efectos. Las partidas antiguas guardaban solo 'vol' (el de la música): pasa a volMusic y el global queda al 100.
-    if(s.volMusic === undefined){ save.volMusic = s.vol ?? save.volMusic; save.vol = 100; } else { save.vol = s.vol ?? 100; save.volMusic = s.volMusic; }
-    save.volSfx = s.volSfx ?? save.volSfx; save.patchSeen = typeof s.patchSeen === 'string' ? s.patchSeen : '';
+    // Volúmenes: vol = GLOBAL (0-100), volMenu = música del menú, volBattle = música de combate, volSfx = efectos. Las partidas antiguas guardaban 'volMusic' (una sola música) o solo 'vol': ese valor pasa a las dos músicas.
+    const okv = v => typeof v === 'number' && v >= 0 && v <= 100;
+    if(s.volMusic === undefined && s.volMenu === undefined && s.volBattle === undefined){ save.volMenu = save.volBattle = okv(s.vol) ? s.vol : save.volMenu; save.vol = 100; }
+    else{ save.vol = okv(s.vol) ? s.vol : 100; const old = okv(s.volMusic) ? s.volMusic : 70; save.volMenu = okv(s.volMenu) ? s.volMenu : old; save.volBattle = okv(s.volBattle) ? s.volBattle : old; }
+    save.volSfx = s.volSfx ?? save.volSfx;
+    save.controls = s.controls && typeof s.controls === 'object' && !Array.isArray(s.controls) ? s.controls : {};         // controles personalizados (js/controls.js); vacío = los de serie save.patchSeen = typeof s.patchSeen === 'string' ? s.patchSeen : '';
     save.shinyOff = Array.isArray(s.shinyOff) ? s.shinyOff : [];                    // shinys que tienes pero eliges NO usar (por defecto se usan)
     save.avatar = typeof s.avatar === 'string' ? s.avatar : '';
     save.gender = s.gender === 'f' ? 'f' : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
@@ -78,7 +81,7 @@ function persist(){
 }
 
 let g = null;                                    // combate en curso
-const keys = {}, mouse = {x:W/2, y:H/2, l:false, r:false};
+const keys = {}, mouse = {x:W/2, y:H/2, l:false, r:false, b:{}};       // b = botones extra del ratón (rueda, laterales) por si se usan como control (js/controls.js)
 const clamp = (v,a,b)=> Math.max(a, Math.min(b, v));
 const rnd = a => a[Math.floor(Math.random()*a.length)];
 
