@@ -37,7 +37,7 @@ function bitmap(c, rows, col, pal){
 
 // Botones del menú, en orden. 'lock' = cerrado.
 const NAV = [
-  {k:'story',   n:'HISTORIA',        c:'#ffcc33', d:'Recorre las regiones y vence a los líderes de gimnasio y al Alto Mando.', f:()=>`Combates de la Liga: ${progTotal()} / ${FLOORS.length}`},
+  {k:'story',   n:'HISTORIA',        c:'#ffcc33', d:'Recorre las regiones y vence a los líderes de gimnasio y al Alto Mando.', f:()=>`Combates de la Liga (${save.storyMode === 'facil' ? 'Fácil' : 'Difícil'}): ${progTotal()} / ${FLOORS.length}`},
   {k:'campo',   n:'CAMPO DE ENTRENAMIENTO', c:'#4ccf6a', d:`Vence a entrenadores todas las veces que quieras y gana 1 tirada de Gachapon + de ${REWARD_CAMPO[1].bp} a ${REWARD_CAMPO[3].bp} BP + de ${REWARD_CAMPO[1].chapa} a ${REWARD_CAMPO[3].chapa} Chapas Plateadas y Doradas (según la dificultad) por cada victoria.`, f:()=>`Chapas: ${held('chapaplata')} plateadas · ${held('chapa')} doradas`},
   {k:'team',    n:'EQUIPO POKÉMON',  c:'#3ea6ff', d:'Elige 3 Pokémon y equípales un objeto de combate.',                       f:()=>`Equipo: ${team.length} / 3`},
   {k:'shop',    n:'TIENDA',          c:'#ffcc33', d:'Compra tickets de Gachapon y objetos con tus Puntos de Batalla.',         f:()=>`Puntos de Batalla: ${save.bp}`},
@@ -107,13 +107,14 @@ function card(m, extra){                           // tarjeta de Pokémon con mi
 // ---- HISTORIA: regiones ----
 const REGIONS = ['Kanto','Johto','Hoenn','Sinnoh','Unova / Teselia','Kalos','Alola','Galar','Paldea'];
 const REGION_IMG = {'Unova / Teselia':'Unova'};                        // mapa de cada región: region/tarjetas/<nombre>.webp (recortado para la tarjeta). Solo hace falta si el archivo se llama distinto
-const leaguesWon = () => REGIONS.filter(r => save.champ[r]).length;      // Ligas superadas (save.champ). Con las 9 se desbloquea la Torre Batalla
+const leaguesWon = () => REGIONS.filter(champAny).length;      // Ligas superadas (save.champ). Con las 9 se desbloquea la Torre Batalla
 function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
+  storyToggle($('rMode'), buildRegions);                                                            // botón Fácil / Difícil, cada una con su avance (js/dificultad.js)
   $('rTower').textContent = leaguesWon() < REGIONS.length ? `Torre Batalla: se desbloquea al derrotar a los Campeones de todas las Ligas (${leaguesWon()}/${REGIONS.length} superadas).` : 'Torre Batalla: ¡has superado todas las Ligas!';
   REGIONS.forEach((n,i)=>{
     const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
-    const open = playable && (i === 0 || !!save.champ[prev] || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
+    const open = playable && (i === 0 || champOf(prev) || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
     const nL = floorsOf(n).filter(F => F.kind === 'lider').length || 8;                              // nº de líderes de la región (8 en casi todas; Teselia tiene 10)
     const rec = PREVIEW[n] ? 99 : progOf(n), done = open ? Math.min(nL, rec) : 0, elite = open && rec >= nL;
     const d = document.createElement('div'); d.className = 'rcard' + (open ? ' open' : ' lock');
@@ -121,7 +122,7 @@ function buildRegions(){
     let pips = ''; for(let k=0;k<nL;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
     d.innerHTML = `<small>${i+1}</small><h3>${n}</h3><div class="pips${nL > 8 ? ' many' : ''}">${pips}</div>` +
       `<div class="elite${elite ? ' ready' : ''}">ALTO MANDO · ${elite ? 'LISTO' : 'BLOQUEADO'}</div>` +
-      (open ? `<p>${done}/${nL} líderes${rec > nL ? ' · Liga ' + Math.min(5, rec - nL) + '/5' : ''}${save.champ[n] ? ' · 🏆 Campeón' : ''}</p>` : `<p class="lk">${playable ? 'Vence la Liga de ' + prev : 'Próximamente'}</p>`);
+      (open ? `<p>${done}/${nL} líderes${rec > nL ? ' · Liga ' + Math.min(5, rec - nL) + '/5' : ''}${champOf(n) ? ' · 🏆 Campeón' : ''}</p>` : `<p class="lk">${playable ? 'Vence la Liga de ' + prev : 'Próximamente'}</p>`);
     if(open){
       d.tabIndex = 0;
       const go = ()=>{ save.region = n; persist(); goStory(); };          // la región elegida es la del Gachapon
@@ -143,9 +144,9 @@ function buildStory(){
   const R = save.region, fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === R);
   const rec = PREVIEW[R] ? 99 : progOf(R);                                // modo ver (data.js): todos los combates abiertos
   const cnt = k => fls.filter(x => x.F.kind === k).length, doneK = k => fls.filter(x => x.F.kind === k && x.F.idx < rec).length;
-  const champDone = !!save.champ[R];
+  const champDone = champOf(R);
   // ---- banner de la región: imagen de fondo, título y contadores ----
-  $('stTitle').textContent = 'Historia · ' + R;
+  $('stTitle').textContent = 'Historia · ' + R + ' · ' + (save.storyMode === 'facil' ? 'Fácil' : 'Difícil');
   $('stBanner').style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[R] || R}.webp")`);
   $('stChips').innerHTML =
     `<span class="stc"><b>★ ${doneK('lider')}/${cnt('lider')}</b> líderes</span><span class="stc"><b>${doneK('alto')}/${cnt('alto')}</b> Alto Mando</span><span class="stc${champDone ? ' gold' : ''}"><b>${champDone ? '🏆' : '0/1'}</b> Campeón</span>`;

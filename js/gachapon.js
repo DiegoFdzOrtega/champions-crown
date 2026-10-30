@@ -469,16 +469,26 @@ const tagOf = r => r.newShiny ? '⭐ ¡Shiny nuevo!' : r.isNew ? '✨ ¡Nuevo en
 // El sprite grande se anima mientras se ve el resultado
 setInterval(() => {
   const ov = $('gOv'), c = $('gSpr');
+  if(!ov.classList.contains('hide') && ov.dataset.stage === 'summary'){                      // resumen de tiradas: los sprites se mueven (reposo) como en el resto del juego
+    const t = (performance.now() - gx.t0) / 1000;
+    $('gSum').querySelectorAll('canvas').forEach(k => { const x = k.getContext('2d'); x.clearRect(0, 0, k.width, k.height); drawFrame(x, +k.dataset.d, 'Idle', t, 0, k.width / 2, k.height / 2 + 6, 5, 150, k.dataset.s === '1'); });
+    return;
+  }
   if(ov.classList.contains('hide') || ov.dataset.stage !== 'reveal' || !c) return;
   const x = c.getContext('2d'), t = (performance.now() - gx.t0) / 1000;
   x.clearRect(0, 0, 256, 256); drawFrame(x, gx.dex, 'Idle', t, 0, 128, 130, 6, 230, gx.shiny);
 }, 120);
 
 function showSummary(){
-  showStage('summary');
-  $('gSum').innerHTML = gx.res.map(r => `<div class="sc" style="--c:${RAR[r.rarity].col}"><canvas width="64" height="64" data-d="${r.dex}" data-s="${r.shiny ? 1 : 0}"></canvas>
-    <b>${esc(DEX[r.dex - 1].name)}</b><small>${r.shiny ? '⭐ ' : ''}${r.newShiny || r.isNew ? '¡NUEVO!' : '+' + r.bp + ' PB'}</small></div>`).join('');
-  $('gSum').querySelectorAll('canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:2, fit:56, shiny: c.dataset.s === '1'}));
+  showStage('summary'); gx.t0 = performance.now();
+  // Una carta por tirada: bola de su rareza, el sprite grande (con sombra y animado), nombre y premio. Las raras y las brillantes (shiny) brillan más.
+  $('gSum').innerHTML = gx.res.map((r, i) => {
+    const rr = RAR[r.rarity], nw = r.newShiny || r.isNew, nat = r.isNew && save.nat[r.dex] != null && NATURES[save.nat[r.dex]] ? NATURES[save.nat[r.dex]][0] : '';
+    return `<div class="sc${rr.rank <= 1 || r.shiny ? ' hi' : ''}${nw ? ' nw' : ''}" style="--c:${r.shiny ? '#ffd23a' : rr.col};--i:${i}"><img class="sb" alt="" src="${ballURL(r.shiny ? 'shiny' : r.rarity)}">
+      <div class="sp"><canvas width="160" height="160" data-d="${r.dex}" data-s="${r.shiny ? 1 : 0}"></canvas></div>
+      <b>${esc(DEX[r.dex - 1].name)}</b><em>${nat || '&nbsp;'}</em>
+      <small>${nw ? (r.shiny ? '⭐ ' : '') + '¡NUEVO!' : 'Repetido · 🪙 +' + r.bp}</small></div>`; }).join('');
+  $('gSum').querySelectorAll('canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:5, fit:150, shiny: c.dataset.s === '1'}));
 }
 function closeOverlay(){
   gx.timers.forEach(clearTimeout); gx.timers = []; stopEngine(); gx.anim = false;

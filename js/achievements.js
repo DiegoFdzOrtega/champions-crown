@@ -96,16 +96,17 @@ const ACHIEVEMENT_DATA = [
   {"id":"sec_dragones",  "cat":"secreto", "secret":true, "name":"Domador de dragones",     "hint":"Empieza como una serpiente de agua y acaba volando.",    "desc":"Consigue a Dratini, Dragonair y Dragonite.",            "icon":"dex",   "metric":"owns", "dex":[147, 148, 149], "goal":3, "reward":{"bp":700, "tickets":3, "title":"Domador de dragones"}},
   {"id":"sec_fosiles",   "cat":"secreto", "secret":true, "name":"Paleontólogo",            "hint":"Vienen de piedras muy, muy antiguas.",                   "desc":"Consigue a Omanyte, Kabuto y Aerodactyl.",              "icon":"dex",   "metric":"owns", "dex":[138, 140, 142], "goal":3, "reward":{"bp":600, "tickets":2, "title":"Paleontólogo"}},
   {"id":"sec_pikachu",   "cat":"secreto", "secret":true, "name":"Rayo dorado",             "hint":"Un ratón eléctrico de otro color.",                      "desc":"Consigue a Pikachu shiny.",                             "icon":"gacha", "metric":"shiny_dex", "dex":[25], "goal":1, "reward":{"bp":800, "tickets":4, "title":"Rayo dorado", "frame":"brillo"}},
+  {"id":"sec_mewtwo_sh", "cat":"secreto", "secret":true, "name":"Clon esmeralda",         "hint":"Un clon creado en un laboratorio, pero de otro color.",  "desc":"Consigue a Mewtwo shiny.",                              "icon":"gacha", "metric":"shiny_dex", "dex":[150], "goal":1, "reward":{"bp":1500, "tickets":8, "title":"Clon esmeralda", "frame":"mewtwo"}},
   {"id":"sec_campo_250", "cat":"secreto", "secret":true, "name":"Incansable",              "hint":"Entrenar, entrenar y entrenar un poco más.",             "desc":"Vence a 250 entrenadores en el Campo de Entrenamiento.", "icon":"campo", "metric":"campo_wins", "goal":250, "reward":{"bp":2500, "tickets":15, "title":"Incansable", "frame":"campo"}},
 ];
 const ACH_CATS = {historia:'Historia', campo:'Campo de Entrenamiento', coleccion:'Colección', secreto:'Secretos'};
 
 // ---- Métricas: cada una devuelve el número actual que se compara con "goal" ----
-const ACH_PROG = (kind, region) => FLOORS.filter(F => F.kind === kind && (!region || F.region === region) && F.idx < progOf(F.region)).length;   // combates de la Historia ya superados
+const ACH_PROG = (kind, region) => FLOORS.filter(F => F.kind === kind && (!region || F.region === region) && F.idx < progAny(F.region)).length;   // combates de la Historia ya superados
 const ACH_METRICS = {
   leaders:       d => ACH_PROG('lider', d.region),
   elite:         d => ACH_PROG('alto', d.region),
-  champion:      d => d.region ? (save.champ[d.region] ? 1 : 0) : Object.values(save.champ).filter(Boolean).length,
+  champion:      d => d.region ? (champAny(d.region) ? 1 : 0) : new Set([...Object.keys(save.champ).filter(k => save.champ[k]), ...Object.keys(save.easy.champ).filter(k => save.easy.champ[k])]).size,
   campo_wins:    () => Math.max(save.stats.campo || 0, Object.keys(save.campoWins).length),          // victorias totales (repetidas incluidas)
   campo_tier:    d => (typeof campoCleared === 'function' && campoCleared(d.tier)) ? 1 : 0,           // 1 = dificultad del Campo superada
   pokemon_owned: () => new Set(save.box).size,
@@ -211,7 +212,7 @@ let achTab = 'all', achHideDone = false; const achJust = new Set();             
 // ---- Marcos de avatar y títulos de perfil: son recompensas especiales de algunos logros (reward.frame / reward.title) y se eligen en Perfil ----
 const ACH_FRAMES = {bronce:{n:'Bronce', c:'#cd7f32'}, plata:{n:'Plata', c:'#d5dcec'}, oro:{n:'Oro', c:'#ffcc33'}, kanto:{n:'Kanto', c:'#e23b3b'}, johto:{n:'Johto', c:'#f0b429'},
   hoenn:{n:'Hoenn', c:'#2bb3a3'}, sinnoh:{n:'Sinnoh', c:'#7b8cff'}, teselia:{n:'Teselia', c:'#b4bdd2'}, kalos:{n:'Kalos', c:'#ff7ab8'}, campo:{n:'Campo', c:'#4ccf6a'},
-  brillo:{n:'Brillo', c:'#ffe26a'}, arcoiris:{n:'Arcoíris', c:'#ff7ad9'}};                  // el aspecto de cada uno está en css/style.css (.av.fr-<id>)
+  brillo:{n:'Brillo', c:'#ffe26a'}, arcoiris:{n:'Arcoíris', c:'#ff7ad9'}, mewtwo:{n:'Mewtwo shiny', c:'#4af0a8'}};                  // el aspecto de cada uno está en css/style.css (.av.fr-<id>)
 const achFramesUnlocked = () => Object.keys(ACH_FRAMES).filter(f => ACHIEVEMENTS.some(a => a.reward && a.reward.frame === f && achGet(a.id).claimed));
 const achTitlesUnlocked = () => ACHIEVEMENTS.filter(a => a.reward && a.reward.title && achGet(a.id).claimed).map(a => ({id:a.id, text:a.reward.title}));
 const achActiveTitle = () => { const a = save.title && achDef(save.title); return a && a.reward && a.reward.title && achGet(a.id).claimed ? a.reward.title : ''; };

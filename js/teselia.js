@@ -188,6 +188,6 @@ floorsOf(TESELIA).forEach((F, i) => F.idx = i);                          // posi
 // Ser Campeón (save.champ) significa que venciste a todos, así que el progreso se sube al total. Funciona para todas las regiones y para los combates que añadamos en el futuro.
 (function healProgress(){
   let fixed = false;
-  Object.keys(save.champ || {}).forEach(R => { const n = floorsOf(R).length; if(save.champ[R] && n && progOf(R) < n){ setProg(R, n); fixed = true; } });
+  ['dificil', 'facil'].forEach(m => Object.keys(trk(m).champ || {}).forEach(R => { const n = floorsOf(R).length; if(trk(m).champ[R] && n && progOf(R, m) < n){ setProg(R, n, m); fixed = true; } }));      // las dos dificultades
   if(fixed) persist();
 })();

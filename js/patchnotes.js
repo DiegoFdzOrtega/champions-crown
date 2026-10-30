@@ -17,12 +17,38 @@ const PATCHES = [
       'Pantalla de Logros nueva, en lista compacta: cada logro es una fila fina con su icono, el nombre, la descripción, la barra de progreso y el botón de reclamar a la derecha. Caben muchos a la vez.',
       'Arriba ves cuántos llevas, una barra de progreso, «Reclamar todo» y «Ocultar reclamados». Los que ya puedes reclamar salen juntos en una sección verde al principio.',
       'Pestañas: Todos, Historia, Campo, Colección y Secretos. Los de Historia se agrupan por región.',
-      'Logros secretos: hay 8 que salen como «???» con una pista. Hasta que los consigas no se sabe qué piden ni qué dan.',
+      'Logros secretos: hay 9 que salen como «???» con una pista. Hasta que los consigas no se sabe qué piden ni qué dan.',
       'Recompensas especiales: algunos logros dan un título (aparece bajo tu nombre) o un marco para tu avatar. Se desbloquean al reclamar el logro y los eliges en Perfil › Título y marco.']},
     {t:'Perfil de amigos', i:[
-      'Ahora puedes abrir la tarjeta de entrenador de tus amigos: en Amigos, junto a cada uno, hay un botón «Perfil». La tarjeta tiene el color de su marco, un número de entrenador y enseña su avatar, su título, sus cifras (Pokémon, shinies, logros, secretos, Ligas y victorias del Campo), las Ligas superadas como insignias, sus 3 Pokémon favoritos y sus logros más destacados. Si tiene un favorito shiny, la tarjeta brilla.',
+      'Ahora puedes abrir la tarjeta de entrenador de tus amigos: en Amigos, junto a cada uno, hay un botón «Perfil». La tarjeta tiene el color de su marco, un número de entrenador y enseña su avatar, su título, sus cifras (Pokémon, shinies, logros, secretos, Ligas y victorias del Campo), los trofeos de las 9 Ligas en una estantería (los que no has ganado salen apagados), sus 3 Pokémon favoritos y sus logros más destacados. Si tiene un favorito shiny, la tarjeta brilla.',
       'Al lado de cada cifra sale la tuya («Tú: ...») para comparar. Si está en línea, también puedes desafiarle desde su perfil.',
-      'Solo lo ven tus amigos aceptados. No se ve tu partida ni tus BP o tickets. En Perfil › «Perfil para amigos» puedes ocultarlo y ver cómo lo ven los demás.']},
+      'Tu propia tarjeta sale arriba de la pantalla Perfil y se actualiza sola al cambiar el avatar, el marco, el título, el nombre o los favoritos. Solo la ven tus amigos aceptados; no se ve tu partida ni tus BP o tickets. Abajo del Perfil puedes ocultarla.']},
+    {t:'Equipo Pokémon', i:[
+      'Pantalla rehecha con estilo PC de Pokémon, sobre un fondo oscuro liso: a la izquierda tus equipos, en el centro el equipo activo (3 huecos) y debajo toda tu Caja, y a la derecha la ficha del Pokémon que marques.',
+      'La Caja es una rejilla con buscador (nombre o número), tipo, rareza, región, orden (número, nombre, rareza, más usados, favoritos) y filtros de favoritos y shiny. Los que ya llevas en el equipo salen en verde con su número.',
+      'Para armar el equipo: pulsa un Pokémon de la Caja y usa «Añadir al equipo» o «Sustituir a...», haz doble clic para añadirlo directo, o arrástralo a un hueco. Arrastrando los huecos entre sí cambias el orden.',
+      'La lista de equipos tiene buscador y filtros (Todos, Favoritos, Completos, Vacíos). Sigues teniendo hasta 18 equipos, con nombre, favorito y borrar.',
+      'El objeto de cada Pokémon se cambia directamente en su hueco del equipo. La ficha de la derecha enseña habilidad, naturaleza, ataques y estadísticas (más claras y sin amontonarse), y «Ver datos» abre el entrenamiento de siempre.',
+      'Todo es más grande y se adapta al tamaño de la ventana; en la lista de equipos los sprites son grandes para reconocer cada equipo.']},
+    {t:'Gachapón', i:[
+      'Resumen de las 10 tiradas rediseñado: cartas más grandes con la bola de su rareza arriba, sprites mucho más grandes y nítidos (y animados), sombra en el suelo, naturaleza si es nuevo y brillo en las raras y shiny.']},
+    {t:'Panel VS', i:[
+      'Pantalla VS rediseñada: corte en diagonal, retratos grandes recortados como pegatinas, nombres en placas inclinadas y destello al aparecer el VS.',
+      'El fondo del rival toma el color de su tipo cuando es un líder (Brock en tonos roca, Misty en agua...). Tus Pokémon y los del rival salen en aros del color de su tipo.']},
+    {t:'Sonidos de combate', i:[
+      'Los golpes ahora suenan según la eficacia: golpe normal seco, «¡Muy eficaz!» más fuerte y crujiente con doble impacto, «Poco eficaz» sordo y flojo, y casi silencio cuando «Sin efecto».',
+      'También suenan la carrera (dash), el golpe crítico (una chispa extra), la esquiva y cuando un Pokémon se debilita. Se controlan con el volumen de Efectos de sonido y se silencian con la tecla M.']},
+    {t:'Música', i:[
+      'La música del combate empieza a sonar ya en la pantalla VS (líderes, Alto Mando, Campeones y Campo de Entrenamiento), sin esperar a que empiece la pelea. Si cancelas con Esc, vuelve la del menú.']},
+    {t:'Dificultad de la Historia', i:[
+      'La Historia tiene ahora dos dificultades, Fácil y Difícil, con un botón arriba de la pantalla Historia. Cada una tiene su propio avance: puedes cambiar cuando quieras y sigues donde lo dejaste en esa.',
+      'En Fácil los rivales tienen bastante menos vida, hacen menos daño y reaccionan más despacio. En Difícil todo es como siempre.',
+      'Las partidas que ya llevaban progreso están en Difícil, con su avance intacto. Las partidas nuevas empiezan en Fácil.',
+      'Lo que superas en Difícil cuenta también en Fácil, así que si ya habías avanzado en Difícil lo tienes hecho en Fácil. Al revés no: lo que haces en Fácil no adelanta Difícil.',
+      'Una Liga superada en cualquiera de las dos cuenta para los trofeos, la Torre Batalla, los logros y tu perfil. Las recompensas de cada combate solo se dan la primera vez que lo superas.']},
+    {t:'Marcos', i:[
+      'Marco nuevo «Mewtwo shiny»: cambia de verde esmeralda a morado psíquico. Se desbloquea con un logro secreto: consigue a Mewtwo shiny.',
+      'Los marcos que se mueven (Brillo, Arcoíris y el nuevo) ahora cambian de color de forma suave.']},
     {t:'Combate online', i:[
       'Estadio nuevo para el PvP: el Coliseo. Es de noche, con focos que barren el campo, una grada llena de público (azul a la izquierda, rojo a la derecha) que hace la ola, agita barras de luz y saca flashes, y una gran Poké Ball pintada en el centro.',
       'El suelo se tiñe de azul a la izquierda y de rojo a la derecha, con líneas de neón y un círculo de salida para cada bando.']}

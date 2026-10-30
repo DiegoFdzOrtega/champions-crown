@@ -12,11 +12,18 @@ const myCd = () => meSide() === 'p' ? g.swCd : (g.swCdE || 0);                  
 const rad = f => Math.max(26, idleInfo(f.m.dex).fw * ESCALA * .3);   // tamaño para recibir golpes
 function setAct(f, name, dur){ f.act = name; f.at = 0; f.lock = dur; }
 
+// Sonido del golpe según la eficacia (js/music.js: hit, hit_super, hit_weak, hit_none) + chispa si es crítico + caída si se debilita
+function hitSfx(mult, crit, dead){
+  Sfx.play(mult === 0 ? 'hit_none' : mult >= 2 ? 'hit_super' : mult < 1 ? 'hit_weak' : 'hit');
+  if(crit) Sfx.play('crit');
+  if(dead) setTimeout(() => Sfx.play('faint'), 230);
+}
 function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · close = golpe cuerpo a cuerpo · mvn = nombre del movimiento (solo para el efecto visual)
   if(T.dead || T.ghost) return;                       // ghost: está entrando o saliendo con la animación de cambio (swap.js): no recibe golpes
   const R = abHit(T, A, type, eff(type, T.m.types), close, big, mvn);                                     // habilidades (js/abilities.js): inmunidades, daño que haces y recibes, esquivar
   if(R.imm || R.dodge){                                                                                   // la habilidad lo ha parado
     if(!R.heal) g.pops.push({x:T.x, y:T.y-110, txt: R.dodge ? '¡Esquivó!' : 'Sin efecto', t:.9});
+    Sfx.play(R.dodge ? 'dodge' : 'hit_none');
     abPop(T, (R.imm || R.dodge).toUpperCase()); fxBurst(T.x, T.y - 20, ['#ffffff', '#c8c8d4'], 6, 70); return;
   }
   const mult = R.mult;
@@ -45,6 +52,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
     fxBurst(T.x, T.y-30, ['#ffe066', '#ffffff', '#ff9a3a'], 14, 200); fx.shake = Math.max(fx.shake, 7);
   }
   fxHit(T, mvn, type, mult, big, close, A);                                                          // efecto visual del impacto
+  hitSfx(mult, crit, T.hp <= 0);                                                                       // sonido del impacto
   if(T.hp <= 0){ T.hp = 0; T.dead = true; T.dt = 0; setAct(T, 'Faint', 99); }
   else if(mult > 0) setAct(T, 'Hurt', .3);
   abAfter(T, A, dealt, type, close, crit, big);                                                       // habilidades: efectos al contacto, venganzas, Autoestima...
@@ -78,7 +86,7 @@ function use(f, i, ang, mine){
   const d = f.dmg * qAtk(f) * (skin ? ABX.skin : 1) * (it === 'vidasfera' ? 1.3 : 1) * boost
           * (it === 'cintaelec' && i === 1 ? IFX.cinta : 1) * (it === 'gafaselec' && shotMv ? IFX.gafaselec : 1) * (it === 'gafasesp' && shotMv ? IFX.gafasesp : 1);
   if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4) && f.ab !== 'Cabeza Roca' && f.ab !== 'Muro Mágico') f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
-  if(i === 0){ f.dash = .25; f.da = ang; }
+  if(i === 0){ f.dash = .25; f.da = ang; Sfx.play('dash'); }
   if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
   if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño

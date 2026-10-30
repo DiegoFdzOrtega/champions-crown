@@ -4,10 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Champions Crown</title>
+<link rel="icon" type="image/svg+xml" href="icono.svg">
+<link rel="icon" type="image/png" sizes="64x64" href="icono.png">
+<link rel="apple-touch-icon" href="icono-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261103">
+<link rel="stylesheet" href="css/style.css?v=20261114">
 </head>
 <body>
 <canvas id="c"></canvas>
@@ -38,6 +41,7 @@
   <div class="inner wide">
     <button id="btnBack2">← Menú</button>
     <h1>Historia</h1>
+    <div id="rMode"></div>
     <p>Elige región. Cada una tiene sus líderes de gimnasio (8; en Teselia, 10) y un Alto Mando que se abre al vencerlos.</p>
     <div id="rgrid" class="rgrid"></div>
     <p id="rTower" class="help"></p>
@@ -112,70 +116,71 @@
   </div>
 </div>
 
-<script src="js/pokedata.js?v=20261103"></script>
-<script src="js/data.js?v=20261103"></script>
-<script src="js/learnsets.js?v=20261103"></script>
-<script src="js/moves.js?v=20261103"></script>
-<script src="js/sprites.js?v=20261103"></script>
-<script src="js/state.js?v=20261103"></script>
-<script src="js/controls.js?v=20261103"></script>
-<script src="js/mega.js?v=20261103"></script>
-<script src="js/combat.js?v=20261103"></script>
-<script src="js/status.js?v=20261103"></script>
-<script src="js/ai.js?v=20261103"></script>
-<script src="js/background.js?v=20261103"></script>
-<script src="js/arenas.js?v=20261103"></script>
-<script src="js/arenasjohto.js?v=20261103"></script>
-<script src="js/arenashoenn.js?v=20261103"></script>
-<script src="js/arenassinnoh.js?v=20261103"></script>
-<script src="js/arenasteselia.js?v=20261103"></script>
-<script src="js/arenaskalos.js?v=20261103"></script>
-<script src="js/arenascampo.js?v=20261103"></script>
-<script src="js/arenaspvp.js?v=20261103"></script>
-<script src="js/render.js?v=20261103"></script>
-<script src="js/fx.js?v=20261103"></script>
-<script src="js/fxlib.js?v=20261103"></script>
-<script src="js/fxmelee.js?v=20261103"></script>
-<script src="js/fxpunch.js?v=20261103"></script>
-<script src="js/fxshots.js?v=20261103"></script>
-<script src="js/fxextra.js?v=20261103"></script>
-<script src="js/fxshuriken.js?v=20261103"></script>
-<script src="js/fxstatus.js?v=20261103"></script>
-<script src="js/swap.js?v=20261103"></script>
-<script src="js/vspanel.js?v=20261103"></script>
-<script src="js/modes.js?v=20261103"></script>
-<script src="js/victoria.js?v=20261103"></script>
-<script src="js/economy.js?v=20261103"></script>
-<script src="js/training.js?v=20261103"></script>
-<script src="js/teams.js?v=20261103"></script>
-<script src="js/johto.js?v=20261103"></script>
-<script src="js/hoenn.js?v=20261103"></script>
-<script src="js/sinnoh.js?v=20261103"></script>
-<script src="js/teselia.js?v=20261103"></script>
-<script src="js/kalos.js?v=20261103"></script>
-<script src="js/abilities.js?v=20261103"></script>
-<script src="js/qmoves.js?v=20261103"></script>
-<script src="js/campo.js?v=20261103"></script>
-<script src="js/room.js?v=20261103"></script>
-<script src="js/casa.js?v=20261103"></script>
-<script src="js/menu.js?v=20261103"></script>
-<script src="js/pokedex.js?v=20261103"></script>
-<script src="js/gachapon.js?v=20261103"></script>
-<script src="js/team.js?v=20261103"></script>
-<script src="js/teamdata.js?v=20261103"></script>
-<script src="js/moveinfo.js?v=20261103"></script>
-<script src="js/shop.js?v=20261103"></script>
-<script src="js/bag.js?v=20261103"></script>
-<script src="js/profile.js?v=20261103"></script>
-<script src="js/avatars.js?v=20261103"></script>
-<script src="js/achievements.js?v=20261103"></script>
-<script src="js/daily.js?v=20261103"></script>
-<script src="js/patchnotes.js?v=20261103"></script>
-<script src="js/cloud.js?v=20261103"></script>
-<script src="js/cloudui.js?v=20261103"></script>
-<script src="js/friendprofile.js?v=20261103"></script>
-<script src="js/pvp.js?v=20261103"></script>
-<script src="js/music.js?v=20261103"></script>
-<script src="js/ui.js?v=20261103"></script>
+<script src="js/pokedata.js?v=20261114"></script>
+<script src="js/data.js?v=20261114"></script>
+<script src="js/learnsets.js?v=20261114"></script>
+<script src="js/moves.js?v=20261114"></script>
+<script src="js/sprites.js?v=20261114"></script>
+<script src="js/state.js?v=20261114"></script>
+<script src="js/controls.js?v=20261114"></script>
+<script src="js/mega.js?v=20261114"></script>
+<script src="js/combat.js?v=20261114"></script>
+<script src="js/status.js?v=20261114"></script>
+<script src="js/ai.js?v=20261114"></script>
+<script src="js/background.js?v=20261114"></script>
+<script src="js/arenas.js?v=20261114"></script>
+<script src="js/arenasjohto.js?v=20261114"></script>
+<script src="js/arenashoenn.js?v=20261114"></script>
+<script src="js/arenassinnoh.js?v=20261114"></script>
+<script src="js/arenasteselia.js?v=20261114"></script>
+<script src="js/arenaskalos.js?v=20261114"></script>
+<script src="js/arenascampo.js?v=20261114"></script>
+<script src="js/arenaspvp.js?v=20261114"></script>
+<script src="js/render.js?v=20261114"></script>
+<script src="js/fx.js?v=20261114"></script>
+<script src="js/fxlib.js?v=20261114"></script>
+<script src="js/fxmelee.js?v=20261114"></script>
+<script src="js/fxpunch.js?v=20261114"></script>
+<script src="js/fxshots.js?v=20261114"></script>
+<script src="js/fxextra.js?v=20261114"></script>
+<script src="js/fxshuriken.js?v=20261114"></script>
+<script src="js/fxstatus.js?v=20261114"></script>
+<script src="js/swap.js?v=20261114"></script>
+<script src="js/vspanel.js?v=20261114"></script>
+<script src="js/dificultad.js?v=20261114"></script>
+<script src="js/modes.js?v=20261114"></script>
+<script src="js/victoria.js?v=20261114"></script>
+<script src="js/economy.js?v=20261114"></script>
+<script src="js/training.js?v=20261114"></script>
+<script src="js/teams.js?v=20261114"></script>
+<script src="js/johto.js?v=20261114"></script>
+<script src="js/hoenn.js?v=20261114"></script>
+<script src="js/sinnoh.js?v=20261114"></script>
+<script src="js/teselia.js?v=20261114"></script>
+<script src="js/kalos.js?v=20261114"></script>
+<script src="js/abilities.js?v=20261114"></script>
+<script src="js/qmoves.js?v=20261114"></script>
+<script src="js/campo.js?v=20261114"></script>
+<script src="js/room.js?v=20261114"></script>
+<script src="js/casa.js?v=20261114"></script>
+<script src="js/menu.js?v=20261114"></script>
+<script src="js/pokedex.js?v=20261114"></script>
+<script src="js/gachapon.js?v=20261114"></script>
+<script src="js/team.js?v=20261114"></script>
+<script src="js/teamdata.js?v=20261114"></script>
+<script src="js/moveinfo.js?v=20261114"></script>
+<script src="js/shop.js?v=20261114"></script>
+<script src="js/bag.js?v=20261114"></script>
+<script src="js/profile.js?v=20261114"></script>
+<script src="js/avatars.js?v=20261114"></script>
+<script src="js/achievements.js?v=20261114"></script>
+<script src="js/daily.js?v=20261114"></script>
+<script src="js/patchnotes.js?v=20261114"></script>
+<script src="js/cloud.js?v=20261114"></script>
+<script src="js/cloudui.js?v=20261114"></script>
+<script src="js/friendprofile.js?v=20261114"></script>
+<script src="js/pvp.js?v=20261114"></script>
+<script src="js/music.js?v=20261114"></script>
+<script src="js/ui.js?v=20261114"></script>
 </body>
 </html>

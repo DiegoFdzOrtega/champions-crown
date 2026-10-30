@@ -27,7 +27,7 @@ function cloudMeta(){ try{ return JSON.parse(localStorage.getItem(CLOUD_META) ||
 function cloudSetMeta(m){ try{ localStorage.setItem(CLOUD_META, JSON.stringify(m)); }catch(e){} }
 function cloudPayload(){ teamSync(); return JSON.parse(JSON.stringify({team, ...save})); }          // la misma forma que escribe persist()
 function cloudFresh(){                                                                             // ¿partida sin estrenar (nada que perder)?
-  return save.record === 0 && save.bp === 0 && save.tickets === 0 && save.ticketsL === 0 && save.box.length <= 3 && !Object.keys(save.prog || {}).length && !Object.keys(save.champ || {}).length && !Object.keys(save.ach || {}).length;
+  return save.record === 0 && save.bp === 0 && save.tickets === 0 && save.ticketsL === 0 && save.box.length <= 3 && !Object.keys(save.prog || {}).length && !Object.keys(save.champ || {}).length && !(save.easy && (save.easy.record || Object.keys(save.easy.prog).length || Object.keys(save.easy.champ).length)) && !Object.keys(save.ach || {}).length;
 }
 function cloudRefresh(){ if(typeof cloudRender === 'function') cloudRender(); }
 

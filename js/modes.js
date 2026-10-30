@@ -14,7 +14,7 @@ function floorFight(n){                          // n = 0 es el primer líder
   };
   if(!team.length){ startBattle(o); return; }                                              // (startBattle avisa de que el equipo está vacío)
   const kind = {lider:'Líder', alto:'Alto Mando', campeon:'Campeón'}[F.kind] || '', reg = String(F.region || '').split(' / ').pop();
-  vsIntro({name:who.leader, id:who.id, enemies:F.teams, label:[reg, kind].filter(Boolean).join(' · ').toUpperCase(), go:() => startBattle(o)});   // panel VS y, al terminar, empieza el combate
+  vsIntro({name:who.leader, id:who.id, enemies:F.teams, label:[reg, kind].filter(Boolean).join(' · ').toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS y, al terminar, empieza el combate
 }
 
 // ---- PAUSA (Esc en mitad de un combate): detiene el combate y deja continuar, reiniciar o salir ----
@@ -57,9 +57,9 @@ function endBattle(won){
     const R = F.region, chips = [];
     const view = !!PREVIEW[R];                                                         // modo ver (data.js): no se guarda nada de esta victoria
     if(!view) gainEVs(g.e.map(f => f.m.baseDex || f.m.dex));                                          // EVs para tu equipo
-    const first = o.floor > progOf(R);
-    if(first && !view) setProg(R, o.floor);                                            // progreso de la región (solo avanza la primera vez)
-    if(F.kind === 'campeon' && !view) save.champ[R] = 1;                               // trofeo del Equipo Pokémon (room.js) y progreso hacia la Torre Batalla
+    const first = o.floor > progAny(R);                                                // recompensa: solo la primera vez que superas ese combate en cualquiera de las dos dificultades
+    if(o.floor > progOf(R) && !view) setProg(R, o.floor);                              // progreso de la región en la dificultad activa (solo avanza la primera vez)
+    if(F.kind === 'campeon' && !view) trk().champ[R] = 1;                               // trofeo del Equipo Pokémon (room.js) y progreso hacia la Torre Batalla
     if(view){ lastReward = null; chips.push({t:'MODO VER: no se guarda progreso ni recompensas', c:'#ff9a3a'}); } else giveReward(F, first);                                                              // recompensa fija: 10 tiradas de Gachapon (+ chapas), SIN BP (REWARD y REWARD_REGION en teams.js) · la pantalla de victoria (victoria.js) la enseña con iconos
     if(TRAIN.evPerFoe > 0) chips.push({t:'+EVs para tu equipo', c:'#3ea6ff'});
     if(F.kind === 'campeon' && !view) chips.push({t:'Trofeo de la Liga en tu habitación', c:'#ffcc33'});

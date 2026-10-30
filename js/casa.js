@@ -60,7 +60,7 @@ function houseStart(canvas){
   const H = HOUSE; if(!canvas) return;
   if(H.failed){ $('teamv').classList.remove('casa'); roomStart(canvas); return; }                                 // la imagen no existe: diseño antiguo
   H.cv = canvas; canvas.width = H.W; canvas.height = H.H; H.x = canvas.getContext('2d');
-  H.won = ROOM_LEAGUES.map(([n]) => !!(save.champ && save.champ[n]));                                            // Ligas superadas = trofeos en la vitrina
+  H.won = ROOM_LEAGUES.map(([n]) => champAny(n));                                            // Ligas superadas = trofeos en la vitrina
   const fav = favSaved(), fsh = favShinySaved();
   H.pets = fav.map((d, i) => ({d, sh: !!fsh[i], x: H.pos[i][0], y: H.pos[i][1]})).filter(p => p.d);
   H.pets.forEach(p => preloadSheets(p.d, p.sh));

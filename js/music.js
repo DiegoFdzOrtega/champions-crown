@@ -20,6 +20,8 @@
      Volumen final de la música del menú = global x menú · de la de combate = global x combate · de los efectos = global x efectos. Pausa (Esc): la música baja de volumen.
    - EFECTOS DE SONIDO (Sfx): pitidos cortos generados por código, sin archivos: 'click' (botones), 'win', 'lose' (resultado del combate), 'logro' y 'mega' (megaevolución).
      Sfx.play('click'). Para añadir uno: una línea en SFX (lista de notas: f = frecuencia, at = cuándo, d = duración, w = onda, v = volumen, to = frecuencia final).
+     GOLPES DE COMBATE (los lanza hit() en js/combat.js según la eficacia del tipo): 'hit' (normal), 'hit_super' (muy eficaz: más fuerte, crujido y doble impacto), 'hit_weak' (poco eficaz: sordo y flojo),
+     'hit_none' (sin efecto/inmune), 'crit' (chispa extra del crítico), 'dodge' (esquiva), 'dash' (carrera con Espacio), 'faint' (se debilita). Además de notas con osciladores, una nota puede ser ruido filtrado (n:1, ft = filtro, f/to = frecuencia, q) y x:1 hace que el tono baje en curva.
 
    PARA EL PROGRAMADOR
      Music.play('menu')     Music.battle(o)  (lo llama startBattle)     Music.scene('main')  (lo llama show())
@@ -314,18 +316,42 @@ const Music = (() => {
     mega:  [{f:180, at:0, d:1.5, w:'sawtooth', v:.2, to:900}, {f:360, at:0, d:1.5, w:'triangle', v:.22, to:1800},                                          // subida de energía hasta el destello (1,5 s)
             ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => ({f:1200 + i * 150, at:.3 + i * .12, d:.1, w:'sine', v:.18})),                                       // brillos
             {f:523, at:1.5, d:1.1, w:'triangle', v:.55}, {f:659, at:1.5, d:1.1, w:'triangle', v:.5}, {f:784, at:1.5, d:1.1, w:'triangle', v:.5}, {f:1047, at:1.55, d:1.2, w:'square', v:.28}],   // acorde final
-    lose:  [{f:392, at:0, d:.22, w:'sawtooth', v:.4}, {f:330, at:.22, d:.22, w:'sawtooth', v:.4}, {f:262, at:.44, d:.5, w:'sawtooth', v:.4, to:200}]
+    lose:  [{f:392, at:0, d:.22, w:'sawtooth', v:.4}, {f:330, at:.22, d:.22, w:'sawtooth', v:.4}, {f:262, at:.44, d:.5, w:'sawtooth', v:.4, to:200}],
+    // ---- Golpes de combate (como en los juegos: seco, fuerte y crujiente, o sordo y flojo). n:1 = ruido con filtro (ft = tipo, f = frecuencia, to = frecuencia final, q = resonancia); x:1 = el tono baja en curva (golpe de verdad) ----
+    hit:      [{f:190, to:55, x:1, at:0, d:.15, w:'sine', v:.95},                                                        // 'tump' medio
+               {n:1, ft:'bandpass', f:1900, to:900, q:.8, at:0, d:.08, v:.6}, {n:1, ft:'lowpass', f:900, to:300, at:0, d:.13, v:.45}],
+    hit_super:[{f:240, to:45, x:1, at:0, d:.24, w:'sine', v:1}, {f:95, to:60, x:1, at:0, d:.14, w:'square', v:.3},       // golpe fuerte y pesado...
+               {n:1, ft:'highpass', f:1300, at:0, d:.18, v:.85}, {n:1, ft:'bandpass', f:5200, to:1600, q:1.2, at:0, d:.22, v:.55},   // ...con crujido agudo...
+               {f:170, to:40, x:1, at:.075, d:.22, w:'sine', v:.85}, {n:1, ft:'bandpass', f:3200, to:1400, q:1, at:.075, d:.12, v:.5}],   // ...y un segundo impacto encima
+    hit_weak: [{f:120, to:62, x:1, at:0, d:.13, w:'sine', v:.5}, {n:1, ft:'lowpass', f:520, to:220, at:0, d:.11, v:.32}],    // flojo y apagado
+    hit_none: [{n:1, ft:'bandpass', f:420, to:260, q:.7, at:0, d:.09, v:.16}, {f:95, to:70, x:1, at:0, d:.08, w:'sine', v:.14}],   // casi nada: no le hace daño
+    crit:     [{n:1, ft:'highpass', f:2600, at:0, d:.07, v:.55}, {f:1760, at:.01, d:.09, w:'triangle', v:.28}, {f:2349, at:.07, d:.14, w:'triangle', v:.25}],   // se suma al golpe
+    dash:     [{n:1, ft:'bandpass', f:500, to:2600, q:1.1, at:0, d:.2, v:1.1}, {n:1, ft:'lowpass', f:900, to:250, at:0, d:.16, v:.35}],   // carrera: 'fuuush' corto y rápido
+    dodge:    [{n:1, ft:'bandpass', f:600, to:3200, q:1.5, at:0, d:.22, v:1.2}],                                          // 'fiuuu' de esquiva
+    faint:    [{f:640, to:70, x:1, at:0, d:.5, w:'triangle', v:.55}, {f:320, to:50, x:1, at:0, d:.55, w:'sine', v:.5}, {n:1, ft:'lowpass', f:1200, to:150, at:0, d:.35, v:.25}]   // se debilita: baja y se apaga
   };
+  const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
   function sfx(name){
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;
     const lvl = sfxVol(); if(lvl <= 0) return;
     if(ctx.state === 'suspended') ctx.resume().catch(() => {});
     const t0 = ctx.currentTime + .005;
+    const now = ctx.currentTime; if(sfxLast[name] && now - sfxLast[name] < .045) return; sfxLast[name] = now;
     notes.forEach(n => {
-      const o = ctx.createOscillator(), g = ctx.createGain(); o.type = n.w; o.frequency.setValueAtTime(n.f, t0 + n.at);
-      if(n.to) o.frequency.linearRampToValueAtTime(n.to, t0 + n.at + n.d);
-      g.gain.setValueAtTime(.0001, t0 + n.at); g.gain.linearRampToValueAtTime(n.v * lvl, t0 + n.at + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + n.at + n.d);
-      o.connect(g); g.connect(analyser); o.start(t0 + n.at); o.stop(t0 + n.at + n.d + .05);
+      const g = ctx.createGain(), a = t0 + n.at, e = a + n.d; let src;
+      if(n.n){                                                                       // ruido filtrado (golpes, crujidos, 'fiu')
+        if(!noiseBuf){ noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = noiseBuf.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+        src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+        const fl = ctx.createBiquadFilter(); fl.type = n.ft || 'lowpass'; fl.Q.value = n.q || 1; fl.frequency.setValueAtTime(n.f, a);
+        if(n.to) fl.frequency.exponentialRampToValueAtTime(n.to, e);
+        src.connect(fl); fl.connect(g);
+      }else{
+        src = ctx.createOscillator(); src.type = n.w; src.frequency.setValueAtTime(n.f, a);
+        if(n.to) n.x ? src.frequency.exponentialRampToValueAtTime(n.to, e) : src.frequency.linearRampToValueAtTime(n.to, e);
+        src.connect(g);
+      }
+      g.gain.setValueAtTime(.0001, a); g.gain.linearRampToValueAtTime(n.v * lvl, a + (n.n || n.x ? .004 : .01)); g.gain.exponentialRampToValueAtTime(.0001, e);
+      g.connect(analyser); src.start(a); src.stop(e + .05);
     });
   }
   function setMute(m){ save.mute = !!m; persist(); applyVol(); }

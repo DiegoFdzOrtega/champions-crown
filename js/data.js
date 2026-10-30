@@ -165,8 +165,17 @@ const floorsOf = region => FLOORS.filter(F => F.region === region);             
 /* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
    Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
 const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false, Kalos: false};
-const progOf = region => region === 'Kanto' ? save.record : ((save.prog && save.prog[region]) || 0);      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
-const setProg = (region, n) => { if(region === 'Kanto') save.record = n; else save.prog[region] = n; };
+// HISTORIA CON DOS AVANCES (js/dificultad.js): cada dificultad ('facil' / 'dificil') tiene su propio progreso y sus propias Ligas superadas.
+// Difícil usa los campos de siempre (save.record, save.prog, save.champ: así las partidas antiguas siguen intactas) y Fácil usa save.easy = {record, prog, champ}.
+// trk(m) devuelve el objeto de la dificultad m (por defecto, la que tienes activa en save.storyMode): trk().record · trk().prog · trk().champ
+const trk = m => (m || save.storyMode) === 'facil' ? save.easy : save;
+// Lo que superas en DIFÍCIL cuenta también en FÁCIL (no al revés): el avance de Fácil es el mejor de los dos, así quien ya iba en Difícil lo tiene todo hecho en Fácil.
+const champOf = (region, m) => { const f = (m || save.storyMode) === 'facil'; return !!trk(m).champ[region] || (f && !!save.champ[region]); };      // ¿eres Campeón de esa región en esa dificultad?
+const champAny = region => champOf(region, 'facil') || champOf(region, 'dificil');                   // en cualquiera de las dos: lo usan trofeos, Torre Batalla, logros y el perfil
+const progRaw = (T, region) => region === 'Kanto' ? T.record : ((T.prog && T.prog[region]) || 0);
+const progOf = (region, m) => { const f = (m || save.storyMode) === 'facil', v = progRaw(trk(m), region); return f ? Math.max(v, progRaw(save, region)) : v; };      // combates ya superados en esa región (Kanto usa record, así no se pierde ninguna partida). En Fácil cuenta también lo de Difícil
+const progAny = region => Math.max(progOf(region, 'facil'), progOf(region, 'dificil'));              // el mejor de los dos avances      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
+const setProg = (region, n, m) => { const T = trk(m); if(region === 'Kanto') T.record = n; else T.prog[region] = n; };
 const progTotal = () => REGIONS_PLAYED().reduce((a, r) => a + progOf(r), 0);
 const REGIONS_PLAYED = () => [...new Set(FLOORS.map(F => F.region))];
 
@@ -177,9 +186,13 @@ const DIFF = {
   dificil:     {n:'DIFÍCIL',     hm:n => .70 + n*.06,       dm:n => .85 + n*.04,       skill:n => Math.min(1, .60 + n*.05)},
   muy_dificil: {n:'MUY DIFÍCIL', hm:n => 1.15 + (n-8)*.04,  dm:n => 1.20 + (n-8)*.04,  skill:n => 1}
 };
+// Dificultad FÁCIL de la Historia (save.storyMode === 'facil', se alterna con el botón de la pantalla Historia; ver js/dificultad.js): multiplicadores que se aplican ENCIMA de la dificultad normal.
+// hm = vida del rival · dm = daño del rival · skill = lo rápido y bien que reacciona · spdm = su velocidad. Para equilibrarlo basta con tocar estos cuatro números (1 = igual que en Difícil).
+const EASY = {hm:.60, dm:.50, skill:.70, spdm:.90};
 function floorStats(n){
   const F = FLOORS[n], D = DIFF[F.diff], k = F.lvl / 100, d = F.dn ?? n;                // d = índice de dificultad del combate (F.dn)
-  return {lvl:F.lvl, hm:D.hm(d)*k, dm:D.dm(d)*k, skill:D.skill(d), spdm:1 + (k-1)*.4};
+  const E = (typeof save !== 'undefined' && save.storyMode === 'facil') ? EASY : {hm:1, dm:1, skill:1, spdm:1};
+  return {lvl:F.lvl, hm:D.hm(d)*k*E.hm, dm:D.dm(d)*k*E.dm, skill:D.skill(d)*E.skill, spdm:(1 + (k-1)*.4)*E.spdm};
 }
 
 // Dónde buscar los retratos de líderes, Alto Mando y Campeón. Se prueba cada ruta en orden; {id} es el 'id' de arriba

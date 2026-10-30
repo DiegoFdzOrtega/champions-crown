@@ -5,7 +5,7 @@
    - Se guarda en la tabla «cards» de Supabase (fila = user_id). Reglas (RLS): solo tú la escribes, y solo la leen tú y tus AMIGOS ACEPTADOS (SQL en el README).
    - fpCard()      construye MI tarjeta a partir de save.
    - fpPublish()   la sube si ha cambiado (la llama cloudPush y también al iniciar sesión). Con save.pubProfile = false borra la fila (nadie la ve).
-   - fpLoad(uid)   lee la tarjeta de un amigo.  openFriendProfile(f) / openMyCardPreview() abren la pantalla.
+   - fpLoad(uid)   lee la tarjeta de un amigo.  openFriendProfile(f) abre la pantalla de un amigo. Tu propia tarjeta sale arriba del Perfil (renderMyCard en js/profile.js).
    - La tarjeta de otro jugador es DATO NO FIABLE: todo se valida y se escapa antes de dibujarlo (fpStr, fpNum, listas de avatares, logros, marcos y regiones que existen aquí).
    ===================================================================== */
 const FP_VER = 1;
@@ -13,7 +13,7 @@ const fpStr = (s, n) => String(s == null ? '' : s).slice(0, n);
 const fpNum = n => { n = +n; return isFinite(n) && n > 0 ? Math.min(Math.floor(n), 99999) : 0; };
 const fpTotalDex = () => DEX.filter(m => !hidden(m.dex)).length;
 const fpId = s => { let h = 7; for(const ch of String(s || 'x')) h = (h * 31 + ch.charCodeAt(0)) % 90000; return 10000 + h; };   // nº de entrenador (siempre el mismo para el mismo jugador)
-const fpRegions = () => Object.keys(ACH_REG_COL);                                    // las regiones que ya tienen Liga jugable
+const fpRegions = () => ROOM_LEAGUES.map(r => r[0]);                                 // todas las regiones, con su trofeo (js/room.js)
 
 // ---- Mi tarjeta ----
 function fpCard(){
@@ -25,7 +25,7 @@ function fpCard(){
     av: (() => { const a = save.avatar && avatarList().find(x => x.file === save.avatar); return a && avatarUnlocked(a) ? a.file : ''; })(),
     fr: achActiveFrame(), ti: achActiveTitle() ? save.title : '',
     box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length, sec: claimed.filter(a => a.secret).length,
-    lg: REGIONS.filter(r => save.champ[r]), camp: fpNum(ACH_METRICS.campo_wins({})),
+    lg: REGIONS.filter(champAny), camp: fpNum(ACH_METRICS.campo_wins({})),
     top, fav: favSaved().map((d, i) => d ? [d, shV[i]] : null).filter(Boolean)
   };
 }
@@ -63,22 +63,22 @@ function fpView(card, o){
   const tile = (label, val, mine) => `<div class="fp-tile"><small>${label}</small><b>${val}</b>${self ? '' : `<em>Tú: ${mine}</em>`}</div>`;
   const online = !self && o.uid && cloud.online[o.uid] !== undefined;
   const ac = fr ? ACH_FRAMES[fr].c : '#3ea6ff', anyShiny = fav.some(p => p[1]);
-  const badges = fpRegions().map(r => `<span class="fp-badge${lg.includes(r) ? ' on' : ''}" style="--c:${ACH_REG_COL[r]}" title="Liga de ${cloudEsc(ACH_REG_NAME[r] || r)}${lg.includes(r) ? ' superada' : ': sin superar'}"><i></i><small>${cloudEsc(ACH_REG_NAME[r] || r)}</small></span>`).join('');
+  const cups = ROOM_LEAGUES.map(([r, col]) => { const won = lg.includes(r); return `<div class="fp-cup${won ? ' on' : ''}" style="--c:${col}" title="Liga de ${cloudEsc(ROOM_LABEL[r] || r)}${won ? ' superada' : ': sin superar'}"><canvas width="26" height="26" data-cup="${col}" data-won="${won ? 1 : 0}"></canvas><small>${cloudEsc(ROOM_LABEL[r] || r)}</small></div>`; }).join('');
   return `<div class="fp-card${anyShiny ? ' foil' : ''}" style="--ac:${ac}">
     <div class="fp-top"><span>TARJETA DE ENTRENADOR</span><span>Nº ${fpId(o.uid || (cloud.user && cloud.user.id) || o.name)}</span></div>
     <div class="fp-main">
       <div class="fp-left">
         <img class="fp-av${fr ? ' afr-' + fr : ''}" alt="Avatar" src="${av ? avatarUrl(av.file) : defaultAvatar()}">
         <b class="fp-name">${cloudEsc(o.name)}</b>
-        ${card.nm ? `<span class="fp-tn">Entrenador: ${cloudEsc(fpStr(card.nm, 10))}</span>` : ''}
+        ${card.nm && fpStr(card.nm, 10).toLowerCase() !== String(o.name).toLowerCase() ? `<span class="fp-tn">Entrenador: ${cloudEsc(fpStr(card.nm, 10))}</span>` : ''}
         ${title ? `<small class="fp-title">${cloudEsc(title)}</small>` : ''}
         ${self ? '' : `<span class="fp-st"><i class="dot${online ? ' on' : ''}"></i>${online ? 'En línea' : 'Desconectado'}</span>`}
       </div>
       <div class="fp-right">
         <div class="fp-tiles">${tile('Pokémon', box, me.box)}${tile('Shiny ⭐', sh, me.sh)}${tile('Logros', ach + ' / ' + achT, me.ach)}${tile('Ligas', lg.length + ' / ' + REGIONS.length, me.lg.length)}${tile('Secretos', sec + ' / ' + secT, me.sec)}${tile('Victorias Campo', camp, me.camp)}</div>
-        <div class="fp-sub">Ligas superadas</div><div class="fp-badges">${badges}</div>
       </div>
     </div>
+    <div class="fp-shelf"><div class="fp-sub">Trofeos de las Ligas · ${lg.length} / ${ROOM_LEAGUES.length}</div><div class="fp-cups">${cups}</div></div>
     <div class="fp-bottom">
       <div><div class="fp-sub">Pokémon favoritos</div>
         ${fav.length ? `<div class="fp-favs">${fav.map(([d, s]) => `<div class="fp-fav${s ? ' shiny' : ''}"><canvas width="96" height="96" data-d="${d}" data-s="${s}"></canvas><b>${s ? '⭐ ' : ''}${cloudEsc(mon(d).name)}</b></div>`).join('')}</div>` : '<p class="help">No ha elegido favoritos.</p>'}</div>
@@ -87,7 +87,11 @@ function fpView(card, o){
         ${top.length ? `<p class="fp-medn">${top.slice(0, 2).map(a => cloudEsc(a.name)).join(' · ')}${top.length > 2 ? ' · …' : ''}</p>` : ''}</div>
     </div></div>`;
 }
-function fpPaint(root){                                                   // sprites y medallas (necesitan el DOM ya puesto)
+function fpPaint(root){                                                   // sprites, trofeos y medallas (necesitan el DOM ya puesto)
+  root.querySelectorAll('canvas[data-cup]').forEach(c => {                   // trofeo de pixel art de la estantería del Equipo Pokémon (rmTrophy, js/room.js): apagado si no se ha superado esa Liga
+    const x = c.getContext('2d'); x.clearRect(0, 0, 26, 26); rmTrophy(x, 13, 22, c.dataset.cup, c.dataset.won === '1');
+    x.fillStyle = '#2a1a10'; x.fillRect(5, 22, 17, 3); x.fillStyle = '#5a3a22'; x.fillRect(5, 22, 17, 1);
+  });
   root.querySelectorAll('canvas[data-d]').forEach(c => paintSprite(c, +c.dataset.d, {sc:5, fit:90, shiny: c.dataset.s === '1'}));
   root.querySelectorAll('.fp-med').forEach(m => { const a = achDef(m.dataset.a); if(a) m.appendChild(achMedal(a)); });
   root.querySelectorAll('img.fp-av').forEach(im => { im.onerror = () => { im.onerror = null; im.src = defaultAvatar(); }; });
@@ -110,10 +114,4 @@ async function openFriendProfile(f){                                       // f 
     const b = document.createElement('button'); b.className = 'main'; b.textContent = 'Desafiar'; b.onclick = () => { const e = cloudChallenge(f); if(e) toast(e); };
     $('fpBtns').appendChild(b);
   }
-}
-function openMyCardPreview(){                                              // «Así te ven tus amigos» (desde Perfil)
-  const body = fpScreen('Así te ven tus amigos', openProfile, '← Volver a Perfil');
-  const off = save.pubProfile === false;
-  body.innerHTML = (off ? '<p class="warn">Ahora mismo tu perfil está oculto: tus amigos no lo ven. Actívalo en Perfil › «Perfil para amigos».</p>' : '') + fpView(fpCard(), {name: cloud.name || save.name, self: true});
-  fpPaint(body);
 }

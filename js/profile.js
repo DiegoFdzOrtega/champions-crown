@@ -13,14 +13,20 @@ const plain = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCas
 let pfDraft = [0,0,0], pfDraftS = [0,0,0];     // favoritos que estás editando y si cada uno va en versión shiny (hasta pulsar "Guardar perfil")
 let avDraft = '';                              // avatar que tienes marcado en la cuadrícula (hasta pulsar "Guardar / Seleccionar avatar activo")
 
+// Tu tarjeta de entrenador (la misma que ven tus amigos, js/friendprofile.js): arriba del Perfil, se repinta al cambiar algo
+function renderMyCard(){
+  const el = $('myCard'); if(!el || typeof fpView !== 'function') return;
+  el.innerHTML = (save.pubProfile === false ? '<p class="warn">Tu perfil está oculto: tus amigos no ven esta tarjeta.</p>' : '') + fpView(fpCard(), {name: (cloud && cloud.name) || save.name, self: true});
+  fpPaint(el);
+}
 function openProfile(){ pfDraft = favSaved(); pfDraftS = favShinySaved(); avDraft = save.avatar || ''; renderProfile(); }
 
 function renderProfile(){
   const saved = favSaved();
   const savedS = favShinySaved(), dirty = pfDraft.some((d,i) => d !== saved[i] || pfDraftS[i] !== savedS[i]);
   panel(userBar('profile') + `<h1>Perfil</h1>
-    <div class="pf-top"><img id="pfAv" alt="Vista previa del avatar">
-      <div><b id="pfName"></b><p>Pokémon en tu colección: ${boxCount()}</p></div></div>
+    <div id="myCard" class="fpBody"></div>
+    <p class="help">Esta es tu tarjeta de entrenador: la ven tus amigos desde Amigos (puedes ocultarla abajo). Se actualiza sola cuando cambias algo.</p>
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
     <h2>Personaje</h2>
     <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
@@ -39,16 +45,15 @@ function renderProfile(){
     <p id="pfMsg" class="warn"></p>
     <div class="pf-btns"><button id="pfSave" class="main">Guardar perfil</button><button id="pfCancel">Cancelar cambios</button></div>
     <h2>Perfil para amigos</h2>
-    <p class="help">Tus amigos pueden abrir tu perfil desde Amigos: ven tu avatar, marco, título, cifras, favoritos y logros destacados. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
-    <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>
-    <div class="pf-btns"><button id="pubPrev">Ver cómo lo ven mis amigos</button></div>`);
-  $('pfName').textContent = save.name; renderAvatarGrid(); renderTitleFrame();
+    <p class="help">Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
+    <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>`);
+  renderAvatarGrid(); renderTitleFrame(); renderMyCard();
   $('nameIn').value = save.name;
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
     setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', (save.gender || 'm') === b.dataset.g);
     b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); };
   });
-  $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; $('pfName').textContent = save.name; persist(); refreshHud(); };
+  $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };
   const box = $('pfSlots');
   pfDraft.forEach((dex, i) => {
     const sh = !!(dex && pfDraftS[i] && save.shiny.includes(dex));
@@ -70,8 +75,7 @@ function renderProfile(){
   };
   $('pfCancel').onclick = ()=>{ pfDraft = favSaved(); pfDraftS = favShinySaved(); renderProfile(); };
   $('pubChk').checked = save.pubProfile !== false;
-  $('pubChk').onchange = e => { save.pubProfile = e.target.checked; persist(); if(typeof fpPublish === 'function') fpPublish(); toast(save.pubProfile ? 'Tus amigos pueden ver tu perfil.' : 'Tu perfil está oculto para tus amigos.'); };
-  $('pubPrev').onclick = () => { if(typeof openMyCardPreview === 'function') openMyCardPreview(); };
+  $('pubChk').onchange = e => { save.pubProfile = e.target.checked; persist(); if(typeof fpPublish === 'function') fpPublish(); toast(save.pubProfile ? 'Tus amigos pueden ver tu perfil.' : 'Tu perfil está oculto para tus amigos.'); renderMyCard(); };
 }
 
 // Cuadrícula para elegir el Pokémon de un espacio
@@ -118,7 +122,7 @@ function renderTitleFrame(){
   const titles = achTitlesUnlocked(), unlocked = achFramesUnlocked(), curT = achActiveTitle() ? save.title : '', curF = achActiveFrame();
   sel.innerHTML = `<option value="">Sin título</option>` + titles.map(t => `<option value="${esc(t.id)}"${t.id === curT ? ' selected' : ''}>${esc(t.text)}</option>`).join('');
   if(!titles.length) sel.title = 'Aún no tienes ninguno: reclama logros con título.';
-  sel.onchange = () => { save.title = sel.value; persist(); refreshUserTitle(); };
+  sel.onchange = () => { save.title = sel.value; persist(); refreshUserTitle(); renderMyCard(); };
   row.innerHTML = `<button type="button" class="frb${curF ? '' : ' on'}" data-f="" title="Sin marco"><i></i><span>Ninguno</span></button>` + Object.entries(ACH_FRAMES).map(([id, f]) => {
     const ok = unlocked.includes(id);
     return `<button type="button" class="frb${id === curF ? ' on' : ''}${ok ? '' : ' lock'}" data-f="${id}" title="${ok ? 'Marco ' + f.n : 'Bloqueado: se consigue con ' + esc(achFrameSource(id))}"><i class="afr-${id}"></i><span>${f.n}</span>${ok ? '' : '<u>🔒</u>'}</button>`;
@@ -126,7 +130,7 @@ function renderTitleFrame(){
   row.onclick = e => {
     const b = e.target.closest('.frb'); if(!b) return;
     if(b.classList.contains('lock')){ toast(b.title); return; }
-    save.frame = b.dataset.f; persist(); refreshAvatars(); renderTitleFrame();
+    save.frame = b.dataset.f; persist(); refreshAvatars(); renderTitleFrame(); renderMyCard();
   };
   const pv = $('pfAv'); if(pv) pv.className = (pv.className.replace(/\s*\bafr-\S+/g, '') + (curF ? ' afr-' + curF : '')).trim();
 }
@@ -152,7 +156,7 @@ function renderAvatarGrid(){
       const a = avDraft && avatarList().find(x => x.file === avDraft);
       if(avDraft && !(a && avatarUnlocked(a))) return;
       save.avatar = avDraft; persist(); refreshAvatars(); refreshHud();            // se actualiza la cabecera al instante
-      toast('Avatar activo: ' + (a ? a.name : 'Clásico')); renderAvatarGrid();
+      toast('Avatar activo: ' + (a ? a.name : 'Clásico')); renderAvatarGrid(); renderMyCard();
     };
   }
 }

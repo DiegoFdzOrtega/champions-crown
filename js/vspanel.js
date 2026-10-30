@@ -13,6 +13,7 @@
    USO:  vsIntro({name, id, path, label, enemies, go})
         name = nombre del rival · id = nombre de su retrato (lideres/...) · path = ruta fija del retrato (Campo)
         label = texto de abajo · enemies = su equipo (nº de Pokédex u objetos {dex}) · go = función que empieza el combate
+        music = el objeto del combate (el mismo que recibe startBattle): hace que la música del combate empiece a sonar ya en esta pantalla. Si cancelas con Esc, vuelve la música del menú.
    ===================================================================== */
 const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en avatares/ con los dos personajes: Red (chico, izquierda) y Leaf (chica, derecha)
 const VS_SKIN_URL = 'avatares/' + encodeURIComponent(VS_SKIN_FILE);
@@ -44,32 +45,47 @@ function vsEnd(run){
   if(!vsState) return; const v = vsState; vsState = null;
   clearTimeout(v.timer); clearInterval(v.draw); removeEventListener('keydown', v.key, true);
   $('vs').classList.add('hide'); $('vs').innerHTML = '';
-  if(run) v.go();
+  if(run) v.go(); else if(v.music) Music.play('menu');                                      // cancelar: vuelve la música del menú
 }
-function vsSide(cls, name, mons, setImg, shinyOf){
+// Tipo que más se repite entre los Pokémon del rival (solo su primer tipo): si lo comparten la mitad o más (un líder de gimnasio), el fondo del rival toma el color de ese tipo
+function vsTint(list){
+  const n = {};
+  list.forEach(e => { try{ const t = mon(typeof e === 'number' ? e : e.dex).types[0]; if(t) n[t] = (n[t] || 0) + 1; }catch(err){} });
+  const k = Object.keys(n).sort((x, y) => n[y] - n[x])[0];
+  return k && TC[k] && n[k] >= Math.ceil(list.length / 2) ? {type: k, color: TC[k], es: (typeof TYPE_ES !== 'undefined' && TYPE_ES[k]) || k} : null;
+}
+function vsSide(cls, name, mons, setImg, shinyOf, tint, sub){
   const d = document.createElement('div'); d.className = 'vs-side ' + cls;
-  d.innerHTML = `<div class="vs-in"><b class="vs-name"></b><div class="vs-pic"><img alt=""></div><div class="vs-mons"></div></div>`;
+  d.innerHTML = `<div class="vs-bg"></div><div class="vs-pic"><img alt=""></div><div class="vs-plate"><b class="vs-name"></b><small class="vs-sub"></small></div><div class="vs-mons"></div>`;
+  if(tint) d.style.setProperty('--t', tint.color);                                                                  // el fondo del rival toma el color de su tipo
+  d.querySelector('.vs-sub').textContent = sub || '';
   const nm = d.querySelector('.vs-name'); nm.textContent = name; if(name.length > 9) nm.classList.add('long');         // nombres largos (Campo de Entrenamiento): letra más pequeña
   setImg(d.querySelector('img'));
   const box = d.querySelector('.vs-mons'), cv = [];
   mons.forEach((e, i) => {
-    const dex = typeof e === 'number' ? e : e.dex, c = document.createElement('canvas'); c.width = c.height = 96; c.style.setProperty('--i', i);
-    box.appendChild(c); cv.push({c, dex, s: shinyOf ? shinyOf(dex) : false});
+    const dex = typeof e === 'number' ? e : e.dex, w = document.createElement('div'), c = document.createElement('canvas'); c.width = c.height = 144;
+    let tc = '#fff'; try{ tc = TC[mon(dex).types[0]] || '#fff'; }catch(err){}                                          // el aro de cada Pokémon lleva el color de su tipo
+    w.className = 'vs-mon'; w.style.setProperty('--i', i); w.style.setProperty('--tc', tc); w.appendChild(c); box.appendChild(w);
+    cv.push({c, dex, s: shinyOf ? shinyOf(dex) : false});
   });
   return {el: d, cv};
 }
 function vsIntro(o){
   if(vsState) return;
-  const me = vsSide('vs-me', save.name, team.slice(), el => setPlayerSkin(el), dex => useShiny(dex)),
-        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, im => vsFoeImg(im, o));
+  const me = vsSide('vs-me', save.name, team.slice(), el => setPlayerSkin(el), dex => useShiny(dex), null, 'Tu equipo'),
+        tint = vsTint(o.enemies),
+        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, im => vsFoeImg(im, o), null, tint, tint ? 'Tipo ' + tint.es : '');
   const root = $('vs'); root.innerHTML = '';
   const vs = document.createElement('div'); vs.className = 'vs-vs'; vs.textContent = 'VS';
+  const cut = document.createElement('div'); cut.className = 'vs-cut';
+  const flash = document.createElement('div'); flash.className = 'vs-flash';
   const foot = document.createElement('div'); foot.className = 'vs-foot'; foot.textContent = `${team.length} vs ${o.enemies.length}${o.label ? ' · ' + o.label : ''}`;
   const hint = document.createElement('div'); hint.className = 'vs-hint'; hint.textContent = 'Clic o Enter para empezar';
-  root.append(me.el, foe.el, vs, foot, hint); root.classList.remove('hide');
+  root.append(me.el, foe.el, cut, vs, foot, hint, flash); root.classList.remove('hide');
+  if(o.music) Music.battle(o.music);                                                                                  // la música del combate empieza en la pantalla VS (startBattle la pide otra vez y ya está sonando)
   const all = [...me.cv, ...foe.cv], paint = () => all.forEach(({c, dex, s}) => {           // los sprites se dibujan al cargar (como las miniaturas del resto del juego)
     const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
-    if(!drawFrame(x, dex, 'Idle', 0, 0, c.width / 2, c.height / 2, c.width / 32, c.width - 8, s)){ x.fillStyle = TC[mon(dex).types[0]]; x.beginPath(); x.arc(c.width / 2, c.height / 2, c.width * .3, 0, 7); x.fill(); }
+    if(!drawFrame(x, dex, 'Idle', 0, 0, c.width / 2, c.height / 2, c.width / 32, c.width - 10, s)){ x.fillStyle = TC[mon(dex).types[0]]; x.beginPath(); x.arc(c.width / 2, c.height / 2, c.width * .3, 0, 7); x.fill(); }
   });
   paint();
   const key = e => {
@@ -78,6 +94,6 @@ function vsIntro(o){
     else e.stopImmediatePropagation();                                                                              // el resto de teclas no llegan al juego mientras se ve el panel
   };
   addEventListener('keydown', key, true);
-  vsState = {go: o.go, t0: Date.now(), key, draw: setInterval(paint, 300), timer: setTimeout(() => vsEnd(true), VS_AUTO_MS)};
+  vsState = {go: o.go, music: !!o.music, t0: Date.now(), key, draw: setInterval(paint, 300), timer: setTimeout(() => vsEnd(true), VS_AUTO_MS)};
   root.onclick = () => { if(vsState && Date.now() - vsState.t0 > VS_MIN_MS) vsEnd(true); };
 }

@@ -232,7 +232,7 @@ function campoFight(id){
     enemies:T.team, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
   };
   if(!team.length){ startBattle(o); return; }
-  vsIntro({name:T.name, path:'entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), go:() => startBattle(o)});   // panel VS antes del combate
+  vsIntro({name:T.name, path:'entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS antes del combate
 }
 function campoEnd(won){                                    // lo llama endBattle (modes.js) cuando el combate es del Campo de Entrenamiento
   g.over = true;

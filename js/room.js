@@ -151,7 +151,7 @@ function roomLabels(canvas){
 }
 function roomStart(canvas){
   if(!canvas) return;
-  RM.won = ROOM_LEAGUES.map(([n]) => !!(save.champ && save.champ[n]));                      // Ligas superadas = trofeos en la estantería
+  RM.won = ROOM_LEAGUES.map(([n]) => champAny(n));                      // Ligas superadas = trofeos en la estantería
   roomLabels(canvas);
   rmBuild();
   RM.cv = canvas; canvas.width = RM.W; canvas.height = RM.H; RM.x = canvas.getContext('2d'); RM.x.imageSmoothingEnabled = false;
