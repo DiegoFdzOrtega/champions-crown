@@ -7,6 +7,11 @@
    ===================================================================== */
 const PATCHES = [
   {v:'Megaevolución', date:'30 oct 2026', sections:[
+    {t:'Pantalla de combate', i:[
+      'Tarjetas de Pokémon rediseñadas: la habilidad tiene su propia línea y ya no desaparece cuando el objeto tiene nombre largo; las barras llevan etiqueta (PS / EN) y la de vida marca el 50 % y el 20 %.',
+      'Los cuadritos del equipo enseñan una «M» si ese Pokémon puede megaevolucionar (arcoíris), si ya lo hizo (rosa) o si otra mega ya se usó (gris). Los debilitados llevan una ✖ roja. Un Pokémon megaevolucionado tiene el borde de su tarjeta en arcoíris.',
+      'El retrato del líder ya no va debajo del subtítulo: ahora está en un marco a la izquierda del panel del piso, sin tapar ningún texto.',
+      'Los avisos flotantes y el subtítulo del gimnasio llevan contorno o fondo oscuro para leerse sobre cualquier fondo.']},
     {t:'Combate', i:[
       'Ya puedes megaevolucionar: equipa la Megapiedra de tu Pokémon, ten el Mega-Aro y pulsa R (o haz clic en el hueco MEGA que sale junto a tus ataques). Solo una megaevolución por combate (para todo tu equipo).',
       'Animación al estilo de Pokémon X e Y: hélice de luz, silueta blanca, destello y símbolo mega. Cambian sprite, tipos, habilidad, ataque y velocidad; los PS no.',

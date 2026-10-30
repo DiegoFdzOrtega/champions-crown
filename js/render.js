@@ -6,6 +6,11 @@ function text(t, x, y, size, col, align){
   ctx.font = `${size}px ${FONT}`; ctx.fillStyle = col || '#fff';
   ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(t, x, y);
 }
+function textO(t, x, y, size, col, align){                // texto con contorno oscuro: se lee sobre cualquier fondo (avisos flotantes, subtítulo)
+  ctx.font = `${size}px ${FONT}`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(3, size / 3); ctx.strokeStyle = 'rgba(8,10,20,.92)'; ctx.strokeText(t, x, y);
+  text(t, x, y, size, col, align);
+}
 const HUD_SCALE = .74;                                   // tamaño del HUD en combate (1 = como antes; más pequeño = molesta menos)
 function hudAt(ax, ay, fn){ ctx.save(); ctx.translate(ax, ay); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-ax, -ay); fn(); ctx.restore(); }   // dibuja fn() reducido desde la esquina (ax, ay)
 function bar(x, y, w, h, v, max, col){
@@ -62,17 +67,18 @@ function drawF(f, col){
 }
 
 // Cuadritos del equipo (debajo de tu tarjeta): posición en el mundo del juego. La usan hud() para dibujarlos y ui.js para saber si hiciste clic en uno.
-function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52) * k, y:(10 + 84) * k, w:46 * k, h:46 * k}; }
+const HUD_H = 90, ICON_DY = 98;                           // alto de la tarjeta de Pokémon y dónde empiezan los cuadritos del equipo (debajo de ella)
+function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52) * k, y:(10 + ICON_DY) * k, w:46 * k, h:46 * k}; }
 function hudIconAt(mx, my){                      // nº del cuadrito que hay en (mx, my), o -1
   if(!g || g.over) return -1;
   for(let i = 0; i < g.p.length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
   return -1;
 }
 function hud(x, y, list, idx, col){
-  const f = list[idx], w = 340, r = f.hp / f.max;
-  hudBox(x, y, w, 76, col);
+  const f = list[idx], w = 340, r = f.hp / f.max, side = list === g.p ? 'p' : 'e', t = performance.now() / 1000;
+  hudBox(x, y, w, HUD_H, f.m.isMega ? hue(t * 140, .85) : col);                                           // megaevolucionado: borde arcoíris
   ctx.fillStyle = '#0a0d15'; ctx.fillRect(x+8, y+10, 56, 56);                // retrato
-  ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
+  ctx.strokeStyle = f.m.isMega ? hue(t * 140 + 90, .9) : col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
   drawFrame(ctx, f.m.dex, 'Idle', 0, 0, x+36, y+38, 2, 50, f.shiny);
   if(hasStatus(f)) statusChips(f, x+8, y+55, 27, 11, 6);                    // estado en el retrato
   text(f.m.name.toUpperCase(), x+74, y+24, f.m.name.length > 9 ? 8 : 10);                 // nombres largos (Mega-Charizard X...) un poco más pequeños para no tapar los tipos
@@ -81,23 +87,31 @@ function hud(x, y, list, idx, col){
     ctx.fillStyle = TC[t]; ctx.fillRect(tx, y+12, 60, 12);
     text(t.toUpperCase(), tx+30, y+21, 6, '#10141e', 'center');
   });
-  bar(x+74, y+32, 254, 12, f.hp, f.max, r > .5 ? '#4ccf6a' : r > .2 ? '#e8c33a' : '#e8493a');
-  bar(x+74, y+48, 254, 5, f.en, 100, '#4fb3ff');
-  text(`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`, x+328, y+69, 8, '#fff', 'right');
-  {                                                                                                        // objeto y habilidad (el nivel del rival no se muestra)
+  const bx = x + 92, bw = 236;                                               // barras con su etiqueta (PS = vida · EN = energía)
+  text('PS', x+74, y+42, 7, '#c9d6f5'); text('EN', x+74, y+54, 6, '#7fa8d8');
+  bar(bx, y+32, bw, 12, f.hp, f.max, r > .5 ? '#4ccf6a' : r > .2 ? '#e8c33a' : '#e8493a');
+  [.5, .2].forEach(m => { ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(Math.round(bx + 1 + (bw - 2) * m), y+33, 1, 10); });     // marcas del 50 % y del 20 % (donde la barra cambia de color)
+  bar(bx, y+48, bw, 5, f.en, 100, '#4fb3ff');
+  text(`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`, x+328, y+68, 8, '#fff', 'right');
+  {                                                                                                        // objeto (1ª línea) y habilidad (2ª línea): ya no se pisan ni desaparece la habilidad
     let tx = x+74;
     const im = f.item && itemImg(f.item);
-    if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, tx, y+57, 16, 16); tx += 19; }
-    if(f.item){ text(ITEMS[f.item].n.toUpperCase(), tx, y+69, 6, '#c9d6f5'); tx += ctx.measureText(ITEMS[f.item].n.toUpperCase()).width + 8; }
-    if(f.ab && tx + f.ab.length * 6 < x+252) text(f.ab.toUpperCase(), tx, y+69, 6, '#9be29b');
+    if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, tx, y+56, 16, 16); tx += 19; }
+    if(f.item) text(ITEMS[f.item].n.toUpperCase(), tx, y+68, 6, '#c9d6f5');
+    if(f.ab){ const ab = f.ab.toUpperCase(); ctx.font = `6px ${FONT}`; const aw = ctx.measureText(ab).width;
+      ctx.fillStyle = 'rgba(155,226,155,.14)'; ctx.fillRect(x+74, y+73, aw + 12, 11); ctx.strokeStyle = 'rgba(155,226,155,.45)'; ctx.lineWidth = 1; ctx.strokeRect(x+74.5, y+73.5, aw + 11, 10);
+      text(ab, x+80, y+81, 6, '#9be29b'); }
   }
   list.forEach((u,i)=>{                                                      // mini-iconos del equipo
-    const px = x + i*52, py = y + 84;
+    const px = x + i*52, py = y + ICON_DY;
     ctx.fillStyle = 'rgba(16,20,30,.9)'; ctx.fillRect(px, py, 46, 46);
     ctx.strokeStyle = i === idx ? '#ffcc33' : 'rgba(255,255,255,.25)'; ctx.lineWidth = i === idx ? 2 : 1; ctx.strokeRect(px+.5, py+.5, 45, 45);
     ctx.globalAlpha = u.dead ? .35 : 1;
     drawFrame(ctx, u.m.dex, 'Idle', 0, 0, px+23, py+20, 1, 34, u.shiny);
     bar(px+4, py+37, 38, 5, u.hp, u.max, '#4ccf6a'); ctx.globalAlpha = 1;
+    if(u.dead){ ctx.save(); ctx.strokeStyle = 'rgba(232,73,58,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px+13, py+10); ctx.lineTo(px+33, py+30); ctx.moveTo(px+33, py+10); ctx.lineTo(px+13, py+30); ctx.stroke(); ctx.restore(); }   // ✖ = debilitado
+    { const ready = u.megaKey && !u.megaDone && !u.dead, done = u.m.isMega, blocked = ready && megaUsed(side);                    // «M» de megaevolución: arcoíris = lista · rosa = ya megaevolucionó · gris = otra mega ya usada
+      if(ready || done){ const mx = px + 31, my = py + 3; ctx.fillStyle = done ? '#ff6ad8' : blocked ? '#3a4258' : hue(t * 200 + i * 60, .95); ctx.fillRect(mx, my, 13, 12); text('M', mx + 2, my + 10, 8, blocked ? '#7a86a6' : '#10141e'); } }
     if(list === g.p){                                                        // solo tus cuadritos: se pueden pulsar para cambiar de Pokémon
       const can = !u.dead && i !== idx, wait = can && g.swCd > 0, hov = hudIconAt(mouse.x, mouse.y) === i;
       if(wait){                                                              // en espera: se oscurece y muestra los segundos que faltan
@@ -110,7 +124,7 @@ function hud(x, y, list, idx, col){
     }
   });
   if(list === g.p){                                                          // mensajes bajo los cuadritos
-    const hv = hudIconAt(mouse.x, mouse.y), ty = y + 84 + 46 + 12;
+    const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 + 12;
     if(g.swNote > 0) text(`ESPERA ${Math.ceil(g.swCd)} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
     else if(hv >= 0 && hv !== idx && !list[hv].dead) text(g.swCd > 0 ? `ESPERA ${Math.ceil(g.swCd)} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
     else if(g.clock < 8 && g.count <= 0 && !g.over) text('CLIC EN UN CUADRO O TECLAS 1 · 2 · 3 PARA CAMBIAR', x, ty, 6, 'rgba(201,214,245,.75)');
@@ -141,7 +155,7 @@ function draw(){
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
-  g.pops.forEach(p => text(p.txt, p.x, p.y - (1-p.t)*20, p.s || 9, p.c || '#ffe066', 'center'));
+  g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
 
   hudAt(0, 0, () => hud(10, 10, g.p, g.pi, '#4a8cff'));
   hudAt(W, 0, () => hud(W-350, 10, g.e, g.ei, '#ff4a5a'));
@@ -153,9 +167,14 @@ function draw(){
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
   if(g.o.title) text('CAMPO', W/2, 29, 12, '#ffcc33', 'center'); else text('PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
   text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
-  text(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
+  { ctx.font = `8px ${FONT}`; const sw = ctx.measureText(g.o.sub).width + 16; ctx.fillStyle = 'rgba(8,10,20,.62)'; ctx.fillRect(W/2 - sw/2, 64, sw, 16); }       // fondo tras el subtítulo para que se lea
+  textO(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
   const L = leaderImg(g.o.leader, g.o.portrait);                                             // retrato del líder
-  if(L && L.ok){ const h = 54, w = L.width/L.height*h; ctx.imageSmoothingEnabled = false; ctx.drawImage(L, W/2 - w/2, 84, w, h); }
+  if(L && L.ok){                                                                             // en un marco, a la izquierda del panel (antes iba debajo y se mezclaba con el subtítulo y el aviso del clima)
+    const fx0 = W/2 - 110 - 8 - 52, k = Math.min(44 / L.width, 44 / L.height), w = L.width * k, h = L.height * k;
+    hudBox(fx0, 8, 52, 52, '#4a8cff');
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(L, fx0 + 26 - w/2, 34 - h/2, w, h);
+  }
   });
   text('ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');

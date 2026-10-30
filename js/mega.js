@@ -104,6 +104,7 @@ function megaPlayer(){                                                          
 function megaStart(f){
   const M = MEGA[f.megaKey];
   (g.megaUsed = g.megaUsed || {})[megaSide(f)] = true;                         // ya no podrá megaevolucionar nadie más de su equipo en este combate
+  g.pops = g.pops.filter(p => !/MEGAEVOLUCIÓN LISTA/.test(p.txt));            // quita el cartel «LISTA» (ya no hace falta)
   f.megaDone = true; f.mv = false; f.act = 'Idle'; f.at = 0; f.dash = 0;
   g.mega = {f, M, from:f.m.name, t:0, swapped:false, parts:[], acc:0};
   Sfx.play('mega');
