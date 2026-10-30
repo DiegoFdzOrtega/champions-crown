@@ -198,7 +198,7 @@ const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], mort
                      anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio'],
                      // Kalos: los archivos están en minúsculas con el nombre inglés (lideres/kalos/viola.png...) · Ástrid y Édel llevan tilde en el juego pero no en el archivo
                      violeta:['viola'], lino:['grant'], corelia:['korrina'], amaro:['ramos'], lem:['clemont'], valeria:['valerie'], astrid:['olympia'], edel:['wulfric'],
-                     narciso:['siebold'], tileo:['wikstrom'], dracena:['drasna'], dianta:['diantha']};
+                     narciso:['siebold'], tileo:['wikstrom'], agata:['agata', 'drasna'], dianta:['diantha']};
 // Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es lideres/Unova)
 const REGION_DIR = {'Unova / Teselia':'Unova', Kalos:'kalos'};
 

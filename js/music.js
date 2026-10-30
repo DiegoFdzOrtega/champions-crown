@@ -121,7 +121,7 @@ const MUSIC_BY_TRAINER = {
   mirto:'campeon_mirto',
   // Kalos: 8 líderes, Alto Mando (4) y Campeona
   violeta:'lider_kalos', lino:'lider_kalos', corelia:'lider_kalos', amaro:'lider_kalos', lem:'lider_kalos', valeria:'lider_kalos', astrid:'lider_kalos', edel:'lider_kalos',
-  malva:'alto_kalos', narciso:'alto_kalos', tileo:'alto_kalos', dracena:'alto_kalos',
+  malva:'alto_kalos', narciso:'alto_kalos', tileo:'alto_kalos', agata:'alto_kalos',
   dianta:'campeon_dianta'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.

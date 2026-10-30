@@ -1,13 +1,13 @@
 "use strict";
 /* =====================================================================
    17f) ARENAS DE KALOS: un fondo pixel art por cada combate de Kalos (X e Y): los 8 gimnasios (Novarte, Relieve, Yantra, Tiriópolis, Luminalia, Romantis,
-   Anistar y Fractal), el Alto Mando (Malva, Narciso, Tileo, Drácena) y la Campeona Dianta. En total 13 fondos.
+   Anistar y Fractal), el Alto Mando (Malva, Narciso, Tileo, Ágata) y la Campeona Dianta. En total 13 fondos.
    Dibujadas con código (sin imágenes), igual que las de las otras regiones, y con el espíritu de los gimnasios «vivos» de Blanco y Negro: cada sala tiene
    algo que se mueve (agua, luces, engranajes, pétalos, nieve, estrellas...). Se cargan DESPUÉS de arenasteselia.js y usan los ayudantes de arenas.js y
    siguientes (arTiles, arBricks, arSpeck, arEll, arPool, arGlowC, arCone, arMote, arMotes, arStars, arGear, arBolt, arScales, arDragonHead, arFluted...).
    Cómo funciona build() / anim(): ver la cabecera de arenas.js.
 
-   El id de cada arena es el id del combate: violeta, lino, corelia, amaro, lem, valeria, astrid, edel, malva, narciso, tileo, dracena y dianta.
+   El id de cada arena es el id del combate: violeta, lino, corelia, amaro, lem, valeria, astrid, edel, malva, narciso, tileo (fantasma), agata (acero) y dianta.
 
    REGLA (igual que las demás): el centro del suelo (donde pelean los dos Pokémon) se deja LIMPIO; la decoración va en la pared del fondo, en las bandas de los
    lados y en el borde de arriba. El marcador tapa la parte de arriba a izquierda y derecha: lo importante se ve en el centro de arriba, en los lados y en el suelo.
@@ -212,7 +212,7 @@ Object.assign(ARENAS, {
 });
 
 // =====================================================================
-//  LA LIGA POKÉMON DE KALOS: Alto Mando (Malva, Narciso, Tileo, Drácena) y Campeona (Dianta)
+//  LA LIGA POKÉMON DE KALOS: Alto Mando (Malva, Narciso, Tileo, Ágata) y Campeona (Dianta)
 // =====================================================================
 Object.assign(ARENAS, {
 
@@ -259,8 +259,8 @@ Object.assign(ARENAS, {
       d.fish.forEach(([x, y, sp, col], i) => { const xx = ((x + t * 14 * sp) % (w + 20)) - 10; c.fillStyle = col; c.fillRect(Math.round(xx), Math.round(y + Math.sin(t * 2 + i) * 2), 5, 2); c.fillRect(Math.round(xx) - 2, Math.round(y + Math.sin(t * 2 + i) * 2) - 1, 2, 4); });
       arMote(c, d.bub, t, w, '#d8faff', .6, 1, -10); }},
 
-  // ---- Tileo · Acero: cámara acorazada. Planchas de acero con remaches, engranajes enormes y focos que barren la sala ----
-  tileo: {dark: .24,
+  // ---- Ágata · Acero: cámara acorazada. Planchas de acero con remaches, engranajes enormes y focos que barren la sala ----
+  agata: {dark: .24,
     build(P, w, h, WH){
       arTiles(P, 0, WH, w, h - WH, 30, 30, (x, y) => (x + y) & 1 ? '#6a7288' : '#5e667c', '#2a3040', .22);                                 // planchas de acero
       for(let y = WH; y < h; y += 30) for(let x = 0; x < w; x += 30) [[3, 3], [24, 3], [3, 24], [24, 24]].forEach(([dx, dy]) => { P.px('#aab4cc', x + dx, y + dy); P.px('#2a3040', x + dx + 1, y + dy + 1); });   // remaches
@@ -277,24 +277,32 @@ Object.assign(ARENAS, {
       d.gears.forEach(([x, y, r, n, dir], i) => arGear(c, x, y, r, n, t * .35 * dir + i, '#8a94b0', '#ffd84a'));
       const sx = ((t * 40) % (w + 60)) - 30; c.globalAlpha = .12; c.fillStyle = '#ffffff'; c.fillRect(Math.round(sx), AR_WALL, 16, AR_H - AR_WALL); c.globalAlpha = 1; }},
 
-  // ---- Drácena · Dragón: santuario de dragones. Pared de escamas, cabezas de dragón de piedra con ojos brillantes y bruma morada ----
-  dracena: {dark: .24,
+  // ---- Tileo · Fantasma: salón encantado. Muro de piedra con ventanales ojivales y luna llena, candelabros de llama violeta, telarañas y luces que flotan ----
+  tileo: {dark: .3,
     build(P, w, h, WH){
-      arTiles(P, 0, WH, w, h - WH, 24, 24, (x, y) => (x + y) & 1 ? '#2a2640' : '#262238', '#100e1c', .1);                                  // suelo de piedra violeta
-      arSpeck(P, 0, WH, w, h - WH, 420, ['#4a4468', '#16142a', '#5a5478']);
-      const mx = Math.round(w / 2); for(let a = 0; a < 720; a++){ const an = a * Math.PI / 360; P.alpha('#8a5aff', .1, mx + Math.cos(an) * 90, Math.round((WH + h) / 2) + Math.sin(an) * 52, 1, 1); }
-      arScales(P, 0, 0, w, WH + 2, 8, 5, '#2a3a5a', '#4a6a9a');                                                                            // pared de escamas
-      for(let i = 0; i < 5; i++){ const x = Math.round(w * (i + .5) / 5); P.rect('#14102a', x - 5, 6, 10, WH - 10); P.rect('#8a5aff', x - 1, 8, 2, WH - 14); }
-      P.rect('#100e1c', 0, WH - 4, w, 4); P.rect('#8a5aff', 0, WH - 4, w, 1);
-      [0, 1].forEach(sd => { const bx = sd ? w - 44 : 0; P.rect('#0c0a18', bx, 0, 44, h); arScales(P, bx, WH - 2, 44, h - WH + 2, 8, 5, '#262a48', '#3a4a7a');
-        arDragonHead(P, sd ? bx + 6 : bx + 38, WH + 40, sd ? -1 : 1, '#4a5a8a', '#ffd84a'); arDragonHead(P, sd ? bx + 6 : bx + 38, h - 34, sd ? -1 : 1, '#4a5a8a', '#ffd84a');
-        arShade(P, bx, sd, 44, WH, h); });
-      arPool(P, mx, h - 30, 80, 22, '#8a5aff', .1);
-      arOcclude(P, w, WH); return {eyes: [[8, WH + 36], [w - 8, WH + 36], [8, h - 38], [w - 8, h - 38]], mist: arMotes(P, 24, w, h)};
+      arTiles(P, 0, WH, w, h - WH, 24, 24, (x, y) => (x + y) & 1 ? '#2a2238' : '#241c32', '#0e0a18', .1);                                  // suelo de losas violetas
+      arSpeck(P, 0, WH, w, h - WH, 420, ['#4a3e68', '#16102a', '#5a4e78']);
+      const mx = Math.round(w / 2); for(let a = 0; a < 720; a++){ const an = a * Math.PI / 360; P.alpha('#9a6aff', .12, mx + Math.cos(an) * 92, Math.round((WH + h) / 2) + Math.sin(an) * 54, 1, 1); }   // círculo mágico
+      for(let i = 0; i < 9; i++) arCrack(P, 24 + (i * 67) % (w - 48), WH + 8 + (i * 41) % (h - WH - 16), 14 + (i * 5) % 18, '#3a2e58', 1, 1, .5);        // grietas
+      arBricks(P, 0, 0, w, WH, 14, 7, '#2e2640', '#120e1c', .15);                                                                           // muro de piedra oscura
+      [.25, .5, .75].forEach((k, n) => { const x = Math.round(w * k);                                                                      // ventanales ojivales
+        P.rect('#0a0814', x - 10, 5, 20, WH - 10); arGradR(P, x - 8, 8, 16, WH - 14, n === 1 ? '#8a7ac8' : '#4a3a8a', '#1e1442'); P.rect('#0a0814', x - 1, 8, 2, WH - 14); P.rect('#0a0814', x - 8, 20, 16, 2);
+        P.rect('#0a0814', x - 6, 5, 12, 3); P.px('#0a0814', x - 8, 8); P.px('#0a0814', x + 7, 8); });
+      arEll(P, mx, 14, 7, 7, '#efeaff', .9); arEll(P, mx + 3, 12, 5, 5, '#8a7ac8', .6);                                                       // luna llena tras el ventanal central
+      P.rect('#0e0a18', 0, WH - 4, w, 4); P.rect('#9a6aff', 0, WH - 4, w, 1);
+      for(let i = 0; i < 2; i++){ const cx = i ? w - 4 : 4, dir = i ? -1 : 1; for(let k = 0; k < 18; k++){ P.alpha('#d8d0f0', .35, cx + dir * k * .9, 1 + k * .9, 1, 1); P.alpha('#d8d0f0', .35, cx + dir * k * .6, 1 + k * 1.2, 1, 1); } }   // telarañas en las esquinas
+      const fl = [];
+      [0, 1].forEach(sd => { const bx = sd ? w - 40 : 0; P.rect('#0c0814', bx, 0, 40, h); arBricks(P, bx, WH - 2, 40, h - WH + 2, 13, 8, '#2a2238', '#0a0612', .15);
+        [WH + 8, h - 22].forEach(y => { P.rect('#1a1228', bx + 17, y + 6, 6, 18); P.rect('#6a5a98', bx + 12, y + 22, 16, 3); P.rect('#6a5a98', bx + 10, y + 6, 20, 2);       // candelabro: pie, brazo y 3 velas
+          [11, 19, 27].forEach(dx => { P.rect('#e8e0f8', bx + dx - 1, y + 1, 3, 5); fl.push([bx + dx, y]); }); });
+        arShade(P, bx, sd, 40, WH, h); });
+      arPool(P, mx, h - 30, 80, 22, '#9a6aff', .1);
+      arOcclude(P, w, WH); return {fl, wisps: arMotes(P, 26, w, h), mist: arMotes(P, 14, w, h)};
     },
     anim(c, t, d, w){
-      d.eyes.forEach(([x, y], i) => arGlowC(c, x, y, 6 + Math.sin(t * 2.5 + i) * 1.5, '#ffd84a', .3));
-      arMote(c, d.mist, t, w, '#b08aff', .5, 5, -3); c.globalAlpha = .06 + .03 * Math.sin(t); c.fillStyle = '#b08aff'; c.fillRect(0, AR_H - 40, w, 40); c.globalAlpha = 1; }},
+      d.fl.forEach(([x, y], i) => { arFlame(c, x, y, t, i, '#b08aff', '#f0e4ff'); arGlowC(c, x, y - 5, 12, '#9a6aff', .22); });
+      arMote(c, d.wisps, t, w, '#c8b8ff', .7, 3, -9);
+      arMote(c, d.mist, t, w, '#8a7ac8', .35, 6, -3); c.globalAlpha = .07 + .03 * Math.sin(t * .8); c.fillStyle = '#9a7aff'; c.fillRect(0, AR_H - 46, w, 46); c.globalAlpha = 1; }},
 
   // ---- Dianta · Campeona: gran salón de la Liga. Suelo de mármol con incrustaciones doradas, columnas acanaladas, lámparas de araña y ventanales ----
   dianta: {dark: .1,

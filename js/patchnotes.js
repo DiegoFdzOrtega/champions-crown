@@ -7,6 +7,10 @@
    ===================================================================== */
 const PATCHES = [
   {v:'Megaevolución', date:'30 oct 2026', sections:[
+    {t:'Kalos', i:[
+      'Nuevos equipos en los 13 combates de Kalos (los de tu lista), con EVs, IVs, naturaleza, habilidad, objeto y movimientos.',
+      'Los rivales con mega disponible megaevolucionan: Tyranitar y Aerodactyl (Lino), Lucario y Gallade (Corelia), Manectric (Lem), Mawile y Gardevoir (Valeria), Glalie (Édel), Gengar (Tileo) y Gardevoir (Dianta). Solo una por combate.',
+      'Alto Mando: Tileo pasa a ser de tipo Fantasma (con un salón encantado nuevo) y el cuarto es Ágata, de tipo Acero. Sustituye a Drácena.']},
     {t:'Pantalla de combate', i:[
       'Tarjetas de Pokémon rediseñadas: la habilidad tiene su propia línea y ya no desaparece cuando el objeto tiene nombre largo; las barras llevan etiqueta (PS / EN) y la de vida marca el 50 % y el 20 %.',
       'Los cuadritos del equipo enseñan una «M» si ese Pokémon puede megaevolucionar (arcoíris), si ya lo hizo (rosa) o si otra mega ya se usó (gris). Los debilitados llevan una ✖ roja. Un Pokémon megaevolucionado tiene el borde de su tarjeta en arcoíris.',
@@ -23,7 +27,7 @@ const PATCHES = [
   ]},
   {v:'Kalos: la sexta Liga', date:'30 oct 2026', sections:[
     {t:'Historia', i:[
-      'Llega Kalos: 8 gimnasios (Violeta, Lino, Corelia, Amaro, Lem, Valeria, Ástrid y Édel), Alto Mando de 4 (Malva, Narciso, Tileo y Drácena) y la Campeona Dianta. 13 combates con 6 Pokémon cada uno. Se abre al ser Campeón de Teselia.',
+      'Llega Kalos: 8 gimnasios (Violeta, Lino, Corelia, Amaro, Lem, Valeria, Ástrid y Édel), Alto Mando de 4 (Malva, Narciso, Tileo y Ágata) y la Campeona Dianta. 13 combates con 6 Pokémon cada uno. Se abre al ser Campeón de Teselia.',
       'Cada gimnasio tiene su fondo animado: invernadero, rocódromo con cascadas, pista de patinaje y dojo, casa del árbol, torre tecnológica, pasarela con sakuras, observatorio sobre el cosmos y laberinto de hielo con ventisca.',
       'Recompensa: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por victoria.']},
     {t:'Música', i:[

@@ -408,12 +408,14 @@ Kalos usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Kalos
 | 6 | Valeria | Romantis | Hada |
 | 7 | Ástrid | Anistar | Psíquico |
 | 8 | Édel | Fractal | Hielo |
-Alto Mando: **Malva** (Fuego), **Narciso** (Roca/Agua), **Tileo** (Acero) y **Drácena** (Dragón). Campeona: **Dianta**.
+Alto Mando: **Malva** (Fuego), **Narciso** (Agua), **Tileo** (Fantasma) y **Ágata** (Acero). Campeona: **Dianta**. (Ágata sustituye a Drácena; usa el retrato `drasna.png` hasta que haya un `lideres/kalos/agata.png`: `LEADER_FILE` ya lo busca primero.)
+- **Equipos (los que dio Diego):** 6 Pokémon por entrenador, con IVs 31, EVs, naturaleza, habilidad, objeto y 4 movimientos (en `kalos.js`). En tu lista Lem se llamaba «Électra», Valeria «Ástrid» y Ástrid «Áureo»; el juego conserva los nombres de WikiDex.
+- **Megas de los rivales:** todo Pokémon con mega disponible la lleva (`PM(...)`, con su Megapiedra como objeto): Lino (Tyranitar, Aerodactyl), Corelia (Lucario, Gallade), Lem (Manectric), Valeria (Mawile, Gardevoir), Édel (Glalie), Tileo (Gengar) y Dianta (Gardevoir). Si un equipo tiene dos, megaevoluciona el primero que salga al campo (solo una mega por combate). Heracross, Pinsir, Venusaur, Metagross, etc. tienen mega en los juegos pero aún no están en `MEGA`.
 - **Retratos:** carpeta `lideres/kalos/` (en minúsculas; `LEADER_FILE` y `REGION_DIR` en data.js dicen qué archivo es de quién). El panel VS usa estos retratos normales. (Si algún día quieres arte VS grande, `VS_ART_REGIONS` en vspanel.js está vacío: ponle `['kalos']` y añade `lideres/kalos/VS_<Nombre>.webp`.)
-- **Sin sprite:** Pyroar (668) está en `NO_SPRITE`; Malva lleva a Houndoom en su lugar. Cuando tenga sprite, se cambia en kalos.js.
+- **Sin sprite:** Pyroar (668) está en `NO_SPRITE`; Malva lleva a Houndoom en su lugar (sin mega). Cuando tenga sprite, se cambia en kalos.js.
 - **Dificultad:** `lvl` 150-170 y `dn` 8-22 en kalos.js (Dianta es la más dura). **Recompensa:** `REWARD_REGION['Kalos']` (teams.js) = 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por victoria.
 - **Modo ver:** `PREVIEW.Kalos` en data.js está en `false`; ponlo en `true` para ver los 13 combates sin tocar tu partida.
-- **Megaevolución:** los Pokémon que megaevolucionan en X e Y (Lucario de Corelia, Alakazam y Gardevoir de Dianta) llevan el campo `mega` en su plantilla (`PM('lucario', 448, ...)`) y **megaevolucionan solos** unos segundos después de salir (ver «Mega-Aro y Megaevolución» más abajo).
+- **Megaevolución:** los Pokémon que tienen mega disponible llevan el campo `mega` en su plantilla (`PM('lucario', 448, ...)`) y **megaevolucionan solos** unos segundos después de salir (ver «Mega-Aro y Megaevolución» más abajo).
 
 **Fondos de combate (js/arenaskalos.js)**, al estilo de los gimnasios dinámicos de Blanco y Negro (centro del suelo libre, laterales y luces animadas):
 - Violeta (Bicho): invernadero gigante de cristal con enredaderas, flores flotando y un haz de luz cenital.
@@ -424,7 +426,7 @@ Alto Mando: **Malva** (Fuego), **Narciso** (Roca/Agua), **Tileo** (Acero) y **Dr
 - Valeria (Hada): pasarela de moda con celosías japonesas y cerezos; los pétalos de sakura caen durante el combate.
 - Ástrid (Psíquico): observatorio con suelo de cristal sobre el cosmos, planetario, galaxias y estrellas fugaces.
 - Édel (Hielo): laberinto ártico de hielo pulido que refleja, pinos nevados y ventisca en bucle.
-- Malva, Narciso, Tileo, Drácena y Dianta: salas de la Liga de Kalos (cada una con su tipo y su ambiente).
+- Malva, Narciso, Tileo (salón encantado, fantasma), Ágata (cámara acorazada, acero) y Dianta: salas de la Liga de Kalos (cada una con su tipo y su ambiente).
 
 **Música de Kalos:** carpeta `musica/Kalos/` (ver la sección de música).
 
