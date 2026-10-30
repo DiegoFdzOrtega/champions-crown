@@ -10,10 +10,10 @@
    Los IV se suben directamente con el botón +5 (gasta 1 Chapa Dorada) y los EV con el +10 (gasta 1 Chapa Plateada).
    La lógica (qué se guarda, qué cuesta) está en training.js; aquí solo se dibuja y se pulsan botones.
    ===================================================================== */
-const dt = {dex:0, view:'main', slot:1, pick:null, t0:0, lock:0};
+const dt = {dex:0, view:'main', slot:1, pick:null, t0:0, lock:0, tr:{iv:{}, ev:{}}};   // tr = barras de entrenamiento a medio mover (aún no aplicadas)
 const dtOpen = () => !$('tmData').classList.contains('hide');
 
-function openData(dex){ dt.dex = dex; dt.view = 'main'; dt.pick = null; dt.t0 = performance.now(); $('tmData').classList.remove('hide'); renderData(); }
+function openData(dex){ dt.dex = dex; dt.view = 'main'; dt.pick = null; dt.tr = {iv:{}, ev:{}}; dt.t0 = performance.now(); $('tmData').classList.remove('hide'); renderData(); }
 function openDataMoves(dex, slot, pick){ openData(dex); dt.view = 'moves'; dt.slot = slot; dt.pick = pick || null; renderData(); }   // ficha abierta directamente en «Cambiar ataque»
 function closeData(quiet){ if(!tm.built) return; $('tmData').classList.add('hide'); if(!quiet) renderTeamSlots(); }
 function dataEsc(){ if(dt.view !== 'main'){ dt.view = 'main'; dt.pick = null; renderData(); } else closeData(); }   // Esc: vuelve a la ficha; otra vez, cierra
@@ -56,10 +56,7 @@ function dataMain(){
       <td class="fin"><b>${tot}</b>${pn ? `<small class="${pn > 0 ? 'up' : 'dn2'}">${sg(pn)} nat.</small>` : ''}</td></tr>`;
   }).join('');
   // Derecha: entrenamiento (aquí se suben los IVs con Chapas Doradas y los EVs con Chapas Plateadas)
-  const ivRows = STAT_KEYS.map(k => `<tr><th>${STAT_NAMES[k]}</th><td class="bc"><div class="cw"><div class="bar iv"><i style="width:${iv[k] / TRAIN.ivMax * 100}%"></i></div><b>${iv[k]}</b>
-        <button class="mini" data-act="chapa" data-k="${k}" title="${chapa < 1 ? 'Necesitas Chapas Doradas (Tienda > Mejoras)' : iv[k] >= TRAIN.ivMax ? 'IV al máximo' : `Gasta 1 Chapa Dorada: +${TRAIN.chapaIV} IV`}"${chapa < 1 || iv[k] >= TRAIN.ivMax ? ' disabled' : ''}>+${TRAIN.chapaIV}</button></div></td></tr>`).join('');
-  const evRows = STAT_KEYS.map(k => `<tr><th>${STAT_NAMES[k]}</th><td class="bc"><div class="cw"><div class="bar ev"><i style="width:${ev[k] / TRAIN.evCap * 100}%"></i></div><b>${ev[k]}</b>
-        <button class="mini" data-act="chapap" data-k="${k}" title="${plata < 1 ? 'Necesitas Chapas Plateadas (Tienda > Mejoras)' : evRoom(d, k) <= 0 ? `EVs al máximo (${TRAIN.evCap} por stat, ${TRAIN.evTotal} en total)` : `Gasta 1 Chapa Plateada: +${TRAIN.chapaEV} EV`}"${plata < 1 || evRoom(d, k) <= 0 ? ' disabled' : ''}>+${TRAIN.chapaEV}</button></div></td></tr>`).join('');
+  const ivRows = STAT_KEYS.map(k => trRow('iv', k)).join(''), evRows = STAT_KEYS.map(k => trRow('ev', k)).join('');   // barras deslizantes (ver más abajo)
   const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], ch = (save.mv[d] || {})[s];
     return `<div class="mvrow${ch ? ' chg' : ''}"><span class="sl">${SLOT_NAMES[s]}</span><b>${esc(n)}</b>${typeChip(t)}${ch ? '<em title="Enseñado con un MT">MT</em>' : ''}
       <button data-act="mtview" data-s="${s}" title="Aprender un MT o recuperar un ataque anterior">Cambiar ataque</button></div>`; }).join('');
@@ -75,12 +72,13 @@ function dataMain(){
             <table class="dtt stt"><thead><tr><th></th><th>Base</th><th>+IV</th><th>+EV</th><th>Total</th></tr></thead><tbody>${statRows}</tbody></table>
             <p class="note">Total = Base + IV + EV (y la naturaleza, que sube o baja un 10%). Para subirlas, entrena los IVs y EVs en el apartado de la derecha.</p></div>
           <div class="dtbox"><h3>Entrenamiento</h3>
-            <div class="trn iv"><h4>IVs <small>(0-${TRAIN.ivMax} · total ${ivSum(d)}/${TRAIN.ivTotal})</small></h4>
-              <table class="dtt"><tbody>${ivRows}</tbody></table>
+            <div class="trn iv"><h4>IVs <small>(0-${TRAIN.ivMax} · total ${ivSum(d)}/${TRAIN.ivTotal} · cada Chapa Dorada +${TRAIN.chapaIV})</small></h4>
+              ${ivRows}
               <button data-act="rsview" data-w="iv"${cap.gold < 1 ? ' disabled' : ''} title="Vuelve los IV a 0 (el valor inicial de todos los Pokémon) y devuelve las Chapas Doradas gastadas">↺ Restablecer IVs <small>(devuelve ${cap.gold})</small></button></div>
-            <div class="trn ev"><h4>EVs <small>(0-${TRAIN.evCap} · total ${evSum(d)}/${TRAIN.evTotal})</small></h4>
-              <table class="dtt"><tbody>${evRows}</tbody></table>
-              <button data-act="rsview" data-w="ev"${cap.silver < 1 ? ' disabled' : ''} title="Quita los EVs que dieron las Chapas Plateadas (los de combate se quedan) y las devuelve">↺ Restablecer EVs <small>(devuelve ${cap.silver})</small></button></div></div>
+            <div class="trn ev"><h4>EVs <small>(0-${TRAIN.evCap} · total ${evSum(d)}/${TRAIN.evTotal} · cada Chapa Plateada +${TRAIN.chapaEV})</small></h4>
+              ${evRows}
+              <button data-act="rsview" data-w="ev"${cap.silver < 1 ? ' disabled' : ''} title="Quita los EVs que dieron las Chapas Plateadas (los de combate se quedan) y las devuelve">↺ Restablecer EVs <small>(devuelve ${cap.silver})</small></button></div>
+            <div class="trfoot" id="trFoot">${trFoot()}</div></div>
         </div>
         <p class="boost">En combate: PS <b>${mult(cb.hm)}</b> · Daño <b>${mult(cb.dm)}</b> · Velocidad <b>${mult(cb.spdm)}</b> · Resistencia <b>${mult(cb.defm)}</b></p>
         <div class="dinfo dtinfo">
@@ -163,8 +161,72 @@ function dataReset(){
       <p class="note">${iv ? 'Vuelven a 0, el valor inicial de todos los Pokémon.' : 'Solo se quitan los EVs que dieron las Chapas Plateadas: los que ganó en combate se quedan.'}</p></div>
     <div class="cbar"><span>¿Restablecer y recuperar <b>${n} ${name}</b>?</span><button class="main" data-act="ok">Restablecer</button><button data-act="back">Cancelar</button></div>`;
 }
+// ---- Barras de entrenamiento (IV con Chapas Doradas, EV con Chapas Plateadas) ----
+// Se arrastra la barra hacia la derecha: la zona rayada es lo que se va a subir y abajo se ve cuántas chapas costará.
+// NO se gasta nada hasta pulsar «Aplicar cambios». La lógica real (qué cuesta, topes) sigue en training.js: aquí solo se llama a useChapa / useChapaPlata.
+// dt.tr.iv[k] / dt.tr.ev[k] = valor al que quieres llegar (si no hay nada, se queda como está).
+const trCfg = kind => kind === 'iv'
+  ? {step:TRAIN.chapaIV, cap:TRAIN.ivMax, item:'chapa', cur:(d, k) => ivOf(d)[k]}
+  : {step:TRAIN.chapaEV, cap:TRAIN.evCap, item:'chapaplata', cur:(d, k) => evOf(d)[k]};
+const trWant = (d, kind, k) => Math.max(trCfg(kind).cur(d, k), dt.tr[kind][k] || 0);
+const trChapas = (d, kind, k) => Math.max(0, Math.ceil((trWant(d, kind, k) - trCfg(kind).cur(d, k)) / trCfg(kind).step));
+const trChapasTotal = (d, kind) => STAT_KEYS.reduce((s, k) => s + trChapas(d, kind, k), 0);
+function trMax(d, kind, k){                                          // valor más alto que se puede alcanzar en este stat (con las chapas y el hueco de EV que dejan los demás)
+  const c = trCfg(kind), cur = c.cur(d, k); let others = 0, chOthers = 0;
+  STAT_KEYS.forEach(j => { if(j === k) return; others += trWant(d, kind, j) - c.cur(d, j); chOthers += trChapas(d, kind, j); });
+  let top = c.cap; if(kind === 'ev') top = Math.min(top, cur + Math.max(0, TRAIN.evTotal - evSum(d) - others));
+  return Math.min(top, cur + Math.max(0, held(c.item) - chOthers) * c.step);
+}
+const TR_SHORT = {hp:'PS', atk:'ATQ', def:'DEF', spa:'AT.E', spd:'DEF.E', spe:'VEL'};     // nombres cortos de las barras (caben en la columna)
+function trRow(kind, k){
+  const d = dt.dex, c = trCfg(kind), cur = c.cur(d, k), mx = trMax(d, kind, k), t = Math.min(trWant(d, kind, k), mx);
+  if(t > cur) dt.tr[kind][k] = t; else delete dt.tr[kind][k];
+  return `<div class="trr" data-kind="${kind}" data-k="${k}"><span class="trl" title="${STAT_NAMES[k]}">${TR_SHORT[k]}</span>
+    <div class="trs ${kind}" style="--cur:${cur / c.cap * 100}%;--tgt:${t / c.cap * 100}%"><i class="trc"></i><i class="trg"></i>
+      <input type="range" min="0" max="${c.cap}" step="1" value="${t}" aria-label="${STAT_NAMES[k]}"${mx <= cur ? ` disabled title="${held(c.item) < 1 && !trChapasTotal(d, kind) ? 'No tienes chapas (Tienda > Mejoras)' : 'Ya está al máximo'}"` : ''}></div>
+    <span class="trv">${trValText(d, kind, k)}</span></div>`;
+}
+function trValText(d, kind, k){
+  const c = trCfg(kind), cur = c.cur(d, k), t = trWant(d, kind, k), n = trChapas(d, kind, k);
+  return `<b>${cur}</b>${t > cur ? ` → <b class="nw">${t}</b><em><img class="iimg" src="${imgOf(c.item)}" alt="">×${n}</em>` : ''}`;
+}
+function trFoot(){
+  const d = dt.dex, g = trChapasTotal(d, 'iv'), s = trChapasTotal(d, 'ev'), any = g + s > 0;
+  const chip = (id, n) => `<img class="iimg" src="${imgOf(id)}" alt=""><b>${n}</b> <small>(tienes ${held(id)})</small>`;
+  return `<span class="trcost">${any ? `Coste: ${g ? chip('chapa', g) + ' ' : ''}${s ? chip('chapaplata', s) : ''}` : 'Arrastra una barra hacia la derecha para subir un IV o un EV. No se gasta nada hasta que pulses «Aplicar cambios».'}</span>
+    <button data-act="trundo"${any ? '' : ' disabled'}>Deshacer</button><button class="main" data-act="trapply"${any ? '' : ' disabled'}>Aplicar cambios</button>`;
+}
+function trSync(){                                                    // actualiza las barras sin volver a dibujar la ventana (si no, se soltaría la barra mientras la arrastras)
+  const d = dt.dex;
+  document.querySelectorAll('#tmDataB .trr').forEach(r => {
+    const kind = r.dataset.kind, k = r.dataset.k, c = trCfg(kind), cur = c.cur(d, k), mx = trMax(d, kind, k), t = Math.min(trWant(d, kind, k), mx);
+    if(t > cur) dt.tr[kind][k] = t; else delete dt.tr[kind][k];
+    const bar = r.querySelector('.trs'), inp = r.querySelector('input');
+    bar.style.setProperty('--tgt', t / c.cap * 100 + '%'); inp.value = t; inp.disabled = mx <= cur;
+    r.querySelector('.trv').innerHTML = trValText(d, kind, k);
+  });
+  const f = $('trFoot'); if(f) f.innerHTML = trFoot();
+}
+document.addEventListener('input', e => {
+  const inp = e.target.closest && e.target.closest('#tmDataB .trs input'); if(!inp) return;
+  const r = inp.closest('.trr'), kind = r.dataset.kind, k = r.dataset.k, d = dt.dex, c = trCfg(kind), cur = c.cur(d, k), mx = trMax(d, kind, k);
+  let v = +inp.value, t = cur;
+  if(v > cur){ const n = v >= mx ? Math.ceil((mx - cur) / c.step) : Math.round((v - cur) / c.step); t = Math.min(mx, cur + n * c.step); }   // la barra salta de chapa en chapa
+  if(t > cur) dt.tr[kind][k] = t; else delete dt.tr[kind][k];
+  trSync();
+});
+function trApply(){                                                   // gasta las chapas de las barras (una por una, con las mismas reglas de siempre)
+  const d = dt.dex; let err = '', g = 0, s = 0;
+  STAT_KEYS.forEach(k => {
+    for(let n = trChapas(d, 'iv', k); n > 0 && !err; n--){ err = useChapa(d, k); if(!err) g++; }
+    for(let n = trChapas(d, 'ev', k); n > 0 && !err; n--){ err = useChapaPlata(d, k); if(!err) s++; }
+  });
+  dt.tr = {iv:{}, ev:{}};
+  toast(err || `Entrenamiento aplicado: ${g ? g + ' Chapa' + (g > 1 ? 's' : '') + ' Dorada' + (g > 1 ? 's' : '') : ''}${g && s ? ' y ' : ''}${s ? s + ' Chapa' + (s > 1 ? 's' : '') + ' Plateada' + (s > 1 ? 's' : '') : ''}.`);
+}
+
 // ---- Botones de la ficha (un solo controlador para toda la ventana) ----
-function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; }
+function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; dt.tr = {iv:{}, ev:{}}; }
 function confirmPick(){
   if(dt.pick === null && dt.view !== 'reset') return;                    // (Restablecer no elige nada: solo se confirma)
   const d = dt.dex; let err = '', ok = '';
@@ -189,6 +251,8 @@ document.addEventListener('click', e => {
   else if(a === 'back'){ dt.view = 'main'; dt.pick = null; }
   else if(a === 'chapa'){ const err = useChapa(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: IV +${TRAIN.chapaIV} (ahora ${ivOf(d)[b.dataset.k]}).`); }
   else if(a === 'chapap'){ const err = useChapaPlata(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: +${TRAIN.chapaEV} EV (ahora ${evOf(d)[b.dataset.k]}).`); }
+  else if(a === 'trapply') trApply();
+  else if(a === 'trundo') dt.tr = {iv:{}, ev:{}};
   else if(a === 'rsview'){ dt.view = 'reset'; dt.what = b.dataset.w; dt.pick = null; }
   else if(a === 'natview'){ dt.view = 'nature'; dt.pick = null; }
   else if(a === 'abview'){ dt.view = 'abil'; dt.pick = null; }

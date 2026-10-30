@@ -418,13 +418,13 @@ button.leg:disabled{box-shadow:none}
 .rbody{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
 .treg.open .rbody{grid-template-rows:1fr}
 .rin{overflow:hidden;min-height:0}
-.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(13em,1fr));gap:.8em;padding:.9em 1.1em 1.2em}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16em,1fr));gap:.8em;padding:.9em 1.1em 1.2em}
 .tmempty{padding:1.2em;color:#8fb3e8;margin:0!important}
 .tcard{position:relative;display:flex;flex-direction:column;align-items:center;gap:.3em;padding:.8em .6em .7em;background:#101a33;
   border:2px solid #243a66;border-bottom:.3em solid var(--r);border-radius:.9em;cursor:pointer;text-align:center;transition:transform .15s,box-shadow .15s,border-color .15s}
 .tcard:hover{transform:translateY(-.25em);border-color:var(--r);box-shadow:0 .5em 1em #0007}
 .tcard.sel{border-color:#ffcc33;background:#1f2a4a;box-shadow:0 0 1.2em #ffcc3366}
-.tcard canvas{width:5.6em;height:5.6em;image-rendering:pixelated}
+.tcard canvas{width:13em;height:13em;margin:-1em 0 -1.3em;image-rendering:pixelated}
 .tcard b{font-weight:normal;font-size:.95em}
 .tcard small{color:#8fb3e8;font-size:.7em}
 .tcard .num{position:absolute;left:.5em;top:.4em;font-style:normal;font-size:.9em;color:#1b1500;background:#ffcc33;border-radius:50%;min-width:1.6em;height:1.6em;line-height:1.6em;display:none}
@@ -660,7 +660,7 @@ button.leg:disabled{box-shadow:none}
 /* ---- Vistas de elección ---- */
 .dtsub{display:flex;align-items:center;gap:1em;margin:.4em 0 .8em;flex-wrap:wrap}
 .dtsub h2{margin:0;font-size:1.1em;flex:1;color:#fff}
-.optgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:.6em}
+.optgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(16em,1fr));gap:.6em}
 .optgrid.two{grid-template-columns:repeat(auto-fill,minmax(24em,1fr))}
 .dx button.optb{display:flex;flex-direction:column;align-items:flex-start;gap:.3em;text-align:left;padding:.7em .9em;background:#101a33;line-height:1.6}
 .optb b{font-weight:normal;color:#fff}.optb small{color:#8fb3e8;font-size:.8em}.optb em{font-style:normal;color:#ffcc33;font-size:.8em}
@@ -946,7 +946,7 @@ button.leg:disabled{box-shadow:none}
 /* ---- Cambiar ataque (MT, ataques anteriores, resumen) ---- */
 .dtr h3.mvh,.dx h3.mvh{margin:1em 0 .5em;font-size:1em;color:#ffcc33}
 .mvh small{color:#6d7899;font-weight:normal}
-.mvcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:.6em}
+.mvcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(16em,1fr));gap:.6em}
 .mvc{display:flex;flex-direction:column;align-items:flex-start;gap:.25em;padding:.6em .9em;background:#0e1830;border:2px solid #1b2c52;border-radius:.8em;position:relative}
 .mvc .sl{color:#8fb3e8;font-size:.8em}
 .mvc b{font-weight:normal;color:#fff}
@@ -1302,3 +1302,263 @@ button.leg:disabled{box-shadow:none}
 @keyframes vsRise{from{transform:translate(-50%,2rem);opacity:0}to{transform:translateX(-50%);opacity:1}}
 @keyframes vsBlink{0%,100%{opacity:.25}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){#vs *,#vs{animation-duration:.01s!important;animation-delay:0s!important}}
+
+/* =====================================================================
+   CASA DEL EQUIPO (js/casa.js): la casa en el centro, la ficha del Pokémon elegido a la izquierda (.tmL) y las tarjetas del equipo a la derecha (.tmR).
+   Todo va bajo «#teamv.casa»: si casa.js quita esa clase (TEAM_HOUSE=false o la imagen no carga) se ve el diseño antiguo de arriba
+   (.tmL y .tmR no existen para él: display:contents, y lo nuevo —chips, ficha, texto de ayuda— está oculto).
+   --pw = ancho de cada panel; --hs = lado de la casa (cuadrada): el alto de la pantalla, o lo que deje libre entre los dos paneles.
+   ===================================================================== */
+.tmL,.tmR,.cvres,.cvwk,.tmdh{display:contents}
+.tmbar,.tmquick,.tmact,.tmlp,.tmrp,.cvbtns,.shs,.tmnone{display:none}
+.tmnum{display:none}
+.tmchips,.tsd,.tmrh,.tsit,.cvh,.cvo,.tsmv{display:none}
+.cvr{display:contents}
+#teamv.casa{--pw:25em;--hs:min(100vh,calc(100vw - 2 * var(--pw) - 2em));background:#0a1020}
+#teamv.casa::before{display:none}
+#teamv.casa .room{position:absolute;left:calc((100vw - var(--hs)) / 2);top:0;right:auto;bottom:auto;width:var(--hs);height:var(--hs);object-fit:contain;image-rendering:auto;z-index:0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+#teamv.casa .tmx{position:absolute;inset:0;z-index:2;display:block;margin:0;padding:0;max-width:none;overflow:visible;background:none;border:0;box-shadow:none;pointer-events:none}
+#teamv.casa .tmL,#teamv.casa .tmR{display:flex;flex-direction:column;position:absolute;top:.85em;bottom:.85em;width:var(--pw);pointer-events:auto}
+#teamv.casa .tmL{left:.85em;padding:1em;overflow-y:auto;border-radius:1em;background:linear-gradient(#1c2246,#141934);border:3px solid #3a4478;box-shadow:0 0 2em #000a}
+#teamv.casa .tmR{right:.85em;gap:.6em;overflow-y:auto;padding:.4em .1em .2em}
+/* cabecera: solo queda el botón de cerrar, flotando en la esquina de la casa */
+#teamv.casa .tmhd{display:block;position:static;min-height:0;height:0;margin:0;padding:0;border:0;background:none;overflow:visible}
+#teamv.casa .tmhl,#teamv.casa #tmTotal{display:none}
+#teamv.casa #tmBack{position:fixed;top:.8em;right:calc(var(--pw) + 1.8em);margin:0!important;z-index:5;padding:.4em .9em;background:#101a33e6}
+/* pestañas de equipo, nombre y chips */
+#teamv.casa .tmteams{display:block;margin:0 0 .4em;padding:0;background:none;border:0}
+#teamv.casa .tmtabs{display:flex;gap:.3em;margin:0 0 .4em;width:100%}
+#teamv.casa .tmtab{flex:1 1 0;min-width:0;max-width:none;min-height:0;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:0;padding:.4em 0;
+  border-radius:.7em;background:#1a2040;border:2px solid #3a4478;color:#fff;font-weight:700;font-size:.72em;white-space:nowrap;box-shadow:none;transform:none}
+#teamv.casa .tmtab b,#teamv.casa .tmtab .tmt-m{display:none}
+#teamv.casa .tmtab .tmt-n{position:static;display:inline;width:auto;height:auto;margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;box-shadow:none}
+#teamv.casa .tmtab .tmt-n::before{content:'Eq. '}
+#teamv.casa .tmtab.on{background:#ffd24a;color:#3a2414;border-color:#fff0a0}
+#teamv.casa .tmname{display:flex;flex-direction:row;align-items:center;gap:.5em;font-size:.7em;color:#9fb6de;margin:0}
+#teamv.casa .tmname input{flex:1;min-width:0;width:auto;font-size:1.1em;padding:.25em .6em}
+#teamv.casa .tmchips{display:flex;gap:.3em;margin:.2em 0 .5em;font-size:.9em;font-weight:700}
+#teamv.casa .tmchips span{flex:1;text-align:center;background:#1a2040;border:2px solid #3a4478;border-radius:.7em;padding:.3em 0}
+/* ficha del Pokémon elegido */
+#teamv.casa .tsd{display:block;position:relative}
+.tsd h2{margin:0;font-size:1.7em;line-height:1.15}.tsd h2 .fvs{color:#ffcc33;font-style:normal;font-size:.7em}
+.tsdty{display:flex;gap:.3em;flex-wrap:wrap;margin:.2em 0}
+.tsdty .mgb{background:linear-gradient(90deg,#ff7ac8,#ffcc33,#3ea6ff);color:#2a1a0a}
+.tsdspr{display:flex;justify-content:center;margin:.2em 0;background:radial-gradient(ellipse at 50% 85%,#ffffff2a,#0000 65%)}
+.tsdspr canvas{width:9.5em;height:9.5em;image-rendering:pixelated}
+.tsdch{display:flex;flex-direction:column;gap:.3em;margin:.2em 0 .4em;font-size:.82em;font-weight:700}
+.tsdch span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#0e1330;border:1px solid #2d3a6c;border-radius:.6em;padding:.3em .5em}
+.tsd .idd{margin:0 0 .3em}
+.tsd .iddb{padding:.3em .6em!important;font-size:.85em!important;min-height:0!important;gap:.5em}.tsd .iddb .noimg{width:1.6em!important;height:1.6em!important;min-width:0!important}.tsd .iddb .iimg{width:1.8em;height:1.8em}.tsd .iddb .none{white-space:nowrap}
+.tsd .iddl{width:100%;right:auto;max-height:17em}
+.tsd h3{margin:.6em 0 .3em;font-size:.78em;letter-spacing:.09em;color:#ffd24a;text-transform:uppercase}.tsd h3 small{font-weight:600;color:#b8c0f0;letter-spacing:0;text-transform:none}
+.tsm{display:flex;justify-content:space-between;align-items:center;gap:.5em;margin-bottom:.25em;padding:.3em .6em;border-radius:.5em;border-left:.4em solid var(--c);background:#ffffff16;font-size:.92em}
+.tsm em{font-style:normal;font-size:.72em;color:#aab4dc;white-space:nowrap}
+.tss{display:grid;grid-template-columns:3.3em minmax(0,1fr) 2.4em 3em;gap:.4em;align-items:center;margin-bottom:.25em;font-size:.8em}
+.tss u{text-decoration:none;font-weight:800}.tss i{display:block;height:.55em;border-radius:.3em;background:#ffffff1f;overflow:hidden}.tss s{display:block;height:100%}
+.tss b{text-align:right}.tss em{font-style:normal;font-size:.8em;color:#aab4dc;text-align:right}
+.tsdmega{margin:.5em 0 0;padding:.5em .7em;border:2px solid #3a4478;border-radius:.7em;background:#0e1330;font-size:.82em;line-height:1.45}
+.tsdbt{display:grid;grid-template-columns:1fr 1fr;gap:.5em;margin-top:.7em}
+.tsdbt button{padding:.6em .3em;border-radius:.7em;border:2px solid #4a5a9c;background:#252d5c;color:#fff;font-weight:700;cursor:pointer}
+.tsdbt button.main{color:#fff!important;border-color:transparent;background:linear-gradient(#141934,#141934) padding-box,linear-gradient(90deg,#ff7ac8,#ffcc33,#4ccf6a,#3ea6ff) border-box}
+.tsdbt button:hover{filter:brightness(1.2)}
+.tsdbt2{display:flex;gap:.4em;margin-top:.4em}
+.tsdbt2 button,.tsd .tsdbt2 .x{position:static;flex:1;padding:.35em .3em;font-size:.78em;border-radius:.6em;border:1px solid #3a4478;background:#171d42;color:#cfe0ff;cursor:pointer;width:auto;height:auto}
+.tsdbt2 .sbtn.on{border-color:#ffcc33;color:#ffe48a}
+.tsdbt2 .x:hover{border-color:#ff6b6b;color:#ff9a9a}
+.tsdempty{margin:2em 0;text-align:center;color:#9fb6de}
+/* cobertura del equipo (abajo del panel) */
+#teamv.casa .tmcov{display:block;margin:auto 0 0;padding:.6em 0 0;border:0;background:none;min-height:0;font-size:1em}
+#teamv.casa .cvh{display:block;margin:0 0 .3em;font-size:.76em;letter-spacing:.09em;color:#ffd24a;text-transform:uppercase}
+#teamv.casa .cvr{display:flex;flex-wrap:wrap;gap:.3em;align-items:center;font-size:.72em}
+#teamv.casa .cvres{display:none}
+#teamv.casa .cvo{display:block;margin-top:.3em;font-size:.72em;line-height:1.5}.cvo .ok{color:#9be28f}.cvo .bad{color:#ff9a7a}
+/* tarjetas del equipo (derecha): sprite grande, nombre y tipos; la elegida brilla */
+#teamv.casa .tmtop{padding:0;margin:0;flex:none;display:block}
+#teamv.casa .tmslots{display:flex;flex-direction:column;gap:.7em;grid-template-columns:none}
+#teamv.casa .tslot{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 .8em;align-items:center;height:13em;padding:.6em .9em;border:3px solid #3a4478;border-radius:.9em;
+  background:linear-gradient(#1c2246,#141934);box-shadow:none;backdrop-filter:none;cursor:pointer}
+#teamv.casa .tslot.sel{border-color:#ffd24a;background:#262c58;box-shadow:0 0 0 2px #fff,0 0 1.2em #ffd24a99}
+#teamv.casa .tslot:hover:not(.sel):not(.empty){border-color:#6a7ac8}
+#teamv.casa .tslot .tshead{display:contents}
+#teamv.casa .tsprite{width:10em;height:10em;margin:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible}
+#teamv.casa .tsprite canvas{width:12em;height:12em;max-width:none;flex:none}
+#teamv.casa .tsinfo{text-align:left;padding:0}
+#teamv.casa .tshead .tsinfo b{font-size:1.3em;margin:0 0 .35em}
+#teamv.casa .tshead .tbs{justify-content:flex-start}
+#teamv.casa .tslot .tschips,#teamv.casa .tslot .tsitem,#teamv.casa .tslot .tsbtns,#teamv.casa .tslot .x{display:none}
+#teamv.casa .tsn{left:.6em;top:.45em;font-size:.8em}
+#teamv.casa .tsit{display:block;position:absolute;right:.7em;bottom:.5em}
+#teamv.casa .tsit .iimg{width:2.4em;height:2.4em;image-rendering:pixelated}
+#teamv.casa .tslot.empty{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:.4em;height:5.5em;cursor:default}
+#teamv.casa .tslot.empty p{display:none}
+#teamv.casa .tslot.empty .addbtn{width:100%}
+#teamv.casa .tmrh{display:block;margin:.2em .3em 0;font-size:.72em;line-height:1.5;color:#7f93c0}
+@media (max-width:1100px){
+  #teamv.casa{--pw:21em}
+  #teamv.casa::before{display:block}
+  #teamv.casa .room{left:0;width:100%;height:100%;object-fit:cover;-webkit-mask-image:none;mask-image:none}
+  #teamv.casa .tmL{background:rgba(20,25,52,.93)}
+  #teamv.casa .tmtab .tmt-n::before{content:''}
+  #teamv.casa .tslot{height:11em;background:rgba(20,25,52,.93)}
+  #teamv.casa .tsprite{width:8em;height:8em}
+  #teamv.casa .tsprite canvas{width:10em;height:10em}
+}
+
+/* ===== «Ver datos»: barras deslizantes de IV/EV (arrastra hacia la derecha; la zona rayada es lo que vas a subir) ===== */
+.trr{display:grid;grid-template-columns:4.4em minmax(0,1fr) 8.6em;gap:.8em;align-items:center;margin:.55em 0}
+.trl{font-size:.85em;color:#cfe0ff}
+.trs{position:relative;height:1.1em;border-radius:.6em;background:#0b1224;border:2px solid #2d4a7c}
+.trs .trc,.trs .trg{position:absolute;top:0;bottom:0;border-radius:.5em}
+.trs .trc{left:0;width:var(--cur)}
+.trs.iv .trc{background:linear-gradient(90deg,#c98d14,#ffcc33)}
+.trs.ev .trc{background:linear-gradient(90deg,#7f8ca6,#d6deee)}
+.trs .trg{left:var(--cur);width:calc(var(--tgt) - var(--cur));background:repeating-linear-gradient(45deg,#ffffffd0 0 .35em,#ffffff55 .35em .7em);border-radius:0 .5em .5em 0}
+.trs input{position:absolute;left:-.6em;width:calc(100% + 1.2em);top:50%;transform:translateY(-50%);margin:0;padding:0;height:2.2em;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer;border:0}
+.trs input::-webkit-slider-runnable-track{background:transparent;height:2.2em}
+.trs input::-moz-range-track{background:transparent;height:2.2em}
+.trs input::-webkit-slider-thumb{-webkit-appearance:none;width:1.5em;height:1.5em;border-radius:50%;background:#fff;border:.2em solid #101a33;box-shadow:0 .15em 0 #0009;margin-top:.35em}
+.trs input::-moz-range-thumb{width:1.2em;height:1.2em;border-radius:50%;background:#fff;border:.2em solid #101a33;box-shadow:0 .15em 0 #0009}
+.trs input:focus-visible{outline:0}.trs input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 .25em #ffcc3399}
+.trs input:disabled{opacity:.3;cursor:not-allowed}
+.trv{font-size:.85em;white-space:nowrap;text-align:right}.trv .nw{color:#9be28f}.trv em{font-style:normal;color:#ffcc33;margin-left:.3em}.trv .iimg{width:1.4em;height:1.4em;vertical-align:-.3em;image-rendering:pixelated}
+.trfoot{display:flex;align-items:center;gap:.7em;margin-top:.8em;padding:.6em .8em;border-radius:.8em;background:#0b1224;border:1px solid #243a66;flex-wrap:wrap}
+.trfoot .trcost{flex:1 1 14em;font-size:.82em;color:#cfe0ff;line-height:1.5}.trfoot .trcost b{color:#fff}.trfoot .trcost .iimg{width:1.4em;height:1.4em;vertical-align:-.3em;image-rendering:pixelated}
+.trfoot .trbad{color:#ff9a7a}
+/* ficha: más sitio para las barras de entrenamiento */
+.dtg{grid-template-columns:minmax(0,.85fr) minmax(0,1.25fr)}
+.trr{grid-template-columns:3.6em minmax(0,1fr) 7.6em;gap:.7em}
+.trs{height:1.3em}
+.trn h4 small{display:block}
+@container (max-width:50em){.dtg{grid-template-columns:1fr}}
+.trr{grid-template-columns:3.6em minmax(0,1fr) 9em;gap:.6em}
+.trl{white-space:nowrap;font-size:.78em}
+.trs{margin-left:.6em}
+.trv{font-size:.8em}
+
+
+/* =====================================================================
+   PANTALLA DE EQUIPO EN LISTA (js/team.js, TEAM_LIST). Arriba: título, nº de equipos, buscador, orden, filtro y «+ Nuevo equipo».
+   Izquierda: lista de equipos (hasta 18) con filtros rápidos. Derecha: el equipo elegido con su nombre (★ favorito, ✏️ nombre, 🗑️ borrar),
+   sus 3 Pokémon, y abajo debilidades, resistencias y los botones Ver detalles / Cambiar (actúan sobre el Pokémon marcado).
+   Va bajo «#teamv.lista»; con TEAM_LIST=false no se aplica y se ve el diseño antiguo (pensado para 5 equipos). Fondo: la habitación, oscurecida.
+   .tmx es una rejilla; .tmL, .tmR, .tmteams y .tmdh no cuentan (display:contents). .tmlp y .tmrp son solo los fondos de los dos paneles.
+   ===================================================================== */
+#teamv.lista{--ac:#ffcc33;--bd:#2d4f99;font-size:clamp(7px,calc((100vh - var(--sc) * 66) / 70),14px)}
+#teamv.lista::before{background:radial-gradient(ellipse at 50% 40%,rgba(8,12,28,.74),rgba(4,6,16,.9))}
+#teamv.lista .tmx{display:grid;grid-template-columns:minmax(30em,34em) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto auto;column-gap:1em;row-gap:0;
+  height:calc(100vh - var(--sc) * 66 - 2vh);width:min(94vw,122em);margin:calc(var(--sc) * 66) auto 0;box-sizing:border-box;padding:.8em 1.2em .9em;max-width:none;overflow:hidden;
+  background:rgba(5,9,24,.55);border:2px solid #2d4f9966;border-radius:1.2em;box-shadow:0 1em 4em #000a;backdrop-filter:blur(3px)}
+#teamv.lista .tmx>*,#teamv.lista .tmL>*,#teamv.lista .tmR>*,#teamv.lista .tmteams>*{position:relative;z-index:1}
+#teamv.lista .tmlp,#teamv.lista .tmrp{display:block;z-index:0;background:linear-gradient(180deg,rgba(14,24,56,.94),rgba(9,16,40,.95));border:2px solid var(--bd);border-radius:1em;box-shadow:0 .4em 2em #0008}
+#teamv.lista .tmlp{grid-column:1;grid-row:2/6}
+#teamv.lista .tmrp{grid-column:2;grid-row:2/6}
+/* barra de arriba */
+#teamv.lista .tmhr{flex:none}
+#teamv.lista .tmhd{grid-column:1/-1;grid-row:1;display:flex;align-items:center;gap:.8em;margin:0 0 .7em;min-height:0}
+#teamv.lista .tmhl{flex:none}
+#teamv.lista .tmhl h1{font-size:1.7em;margin:0;white-space:nowrap}
+#teamv.lista .tmhl .tmhint,#teamv.lista #tmTotal{display:none}
+#teamv.lista .tmbar{display:flex;flex:1;align-items:center;gap:.6em;min-width:0}
+#teamv.lista .tmbar>*{flex:0 1 auto;min-width:0;font-size:.85em;background:rgba(14,24,56,.94);border:2px solid var(--bd);border-radius:.7em;color:#e6eefc;padding:.55em .8em;font-family:inherit}
+#teamv.lista .tmcount{white-space:nowrap}
+#teamv.lista .tmsearch{display:flex;flex:1 1 14em;align-items:center;gap:.5em;min-width:10em;max-width:26em}
+#teamv.lista .tmsearch input{flex:1;min-width:0;background:none;border:0;color:#fff;font:inherit;outline:0;padding:0}
+#teamv.lista .tmbar select{cursor:pointer;flex:none;width:auto;max-width:none}
+#teamv.lista .tmnew{margin-left:auto;background:#1f6fe0;border-color:#5aa7ff;color:#fff;cursor:pointer;white-space:nowrap}
+#teamv.lista .tmnew:hover:not(:disabled){filter:brightness(1.15)}#teamv.lista .tmnew:disabled{opacity:.45;cursor:not-allowed}
+#teamv.lista .tmhr{margin-left:0}
+/* izquierda: filtros rápidos y lista de equipos */
+#teamv.lista #tmQuick{align-self:center;display:flex;gap:.4em;flex-wrap:wrap;grid-column:1;grid-row:2;margin:.8em .8em .6em}
+#teamv.lista #tmQuick button{flex:1;padding:.4em .5em;font-size:.78em;border:2px solid var(--bd);border-radius:.6em;background:#0c1634;color:#cfe0ff;cursor:pointer;white-space:nowrap}
+#teamv.lista #tmQuick button.on{background:var(--ac);border-color:#fff0a0;color:#2a1a00}
+#teamv.lista #tmTabs{grid-column:1;grid-row:3/6;display:grid;grid-template-columns:1fr;grid-auto-rows:max-content;gap:.5em;align-content:start;overflow-y:auto;min-height:0;margin:0 .6em .8em .8em;padding:.15em .2em .2em 0;flex-wrap:nowrap}
+#teamv.lista .tmnone{display:block;grid-column:1/-1;margin:1em 0;color:#8fb3e8;font-size:.85em;text-align:center}
+#teamv.lista .tmtab{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"n nm fv" "m m m";align-items:center;gap:.3em .5em;width:auto;max-width:none;min-height:0;margin:0;
+  padding:.5em .6em;border:2px solid #243a74;border-radius:.8em;background:#0b1430;text-align:left;transform:none;box-shadow:none}
+#teamv.lista .tmtab:hover{border-color:#5aa7ff;transform:none}
+#teamv.lista .tmtab.on{border-color:var(--ac);background:#1a2146;box-shadow:0 0 1em #ffcc3333}
+#teamv.lista .tmtab .tmt-n{grid-area:n;grid-row:auto;width:2.5em;height:2.5em;font-size:.7em}
+#teamv.lista .tmtab b{grid-area:nm;font-size:.85em}
+#teamv.lista .tmtab .tmt-f{grid-area:fv;font-style:normal;color:var(--ac);font-size:.9em}
+#teamv.lista .tmt-m{grid-area:m;min-height:5.6em;gap:.4em;justify-content:flex-start;padding-left:.3em}
+#teamv.lista .tmt-m canvas{width:6.4em;height:6.4em;margin:-.5em -.5em}
+/* derecha: cabecera del equipo (nº, nombre, iconos) */
+#teamv.lista .tmteams{display:contents}
+#teamv.lista .tmdh{grid-column:2;grid-row:2;display:flex;align-items:center;gap:.6em;margin:.8em .9em .6em;padding:.35em .8em;background:#0b1430;border:2px solid #243a74;border-radius:.8em}
+#teamv.lista .tmname{flex:1;display:flex;flex-direction:row;align-items:center;gap:.8em;font-size:1em;background:none;border:0;padding:0}
+#teamv.lista .tmnum{display:inline-flex;align-items:center;justify-content:center;font-style:normal;min-width:2.2em;height:2.2em;border-radius:50%;background:var(--ac);color:#1b1500;border:1px solid #fff4c2;font-size:.85em}
+#teamv.lista .tmnl{display:none}
+#teamv.lista .tmname input{flex:1;width:auto;min-width:0;font-size:1.3em;padding:.15em .3em;background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;color:#fff}
+#teamv.lista .tmname input:focus{border-bottom-color:var(--ac)}
+#teamv.lista .tmact{display:flex;gap:.4em}
+#teamv.lista .tmact button{min-width:2.3em;height:2.3em;padding:0 .5em;border:2px solid #243a74;border-radius:.6em;background:#101c42;color:#cfe0ff;cursor:pointer;font-size:.9em}
+#teamv.lista .tmact button:hover{border-color:#5aa7ff}
+#teamv.lista #tmFav.on{color:var(--ac);border-color:var(--ac)}
+#teamv.lista #tmDel.arm{background:#7a1f2d;border-color:#ff6b6b;color:#fff;font-size:.75em}
+/* los 3 Pokémon */
+#teamv.lista .tmtop{grid-column:2;grid-row:3;display:block;min-height:0;margin:0 .9em;padding:0}
+#teamv.lista .tmslots{height:100%;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:.8em}
+#teamv.lista .tslot{padding:.9em .9em .8em;gap:.45em;background:#0b1430;border:2px solid #243a74;border-radius:.9em;box-shadow:none;backdrop-filter:none;min-height:0;cursor:pointer}
+#teamv.lista .tslot:hover:not(.empty){border-color:#5aa7ff}
+#teamv.lista .tslot.sel{border-color:var(--ac);background:#161d44;box-shadow:0 0 1.1em #ffcc3344}
+#teamv.lista .tsn{left:.7em;top:.6em;width:1.7em;height:1.7em;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:.85em}
+#teamv.lista .tslot .x{right:.6em;top:.5em}
+#teamv.lista .tslot .shs{display:block;position:absolute;right:2.6em;top:.45em;padding:.1em .4em;font-size:.85em;background:transparent;border:0;cursor:pointer;opacity:.4;filter:grayscale(1)}
+#teamv.lista .tslot .shs.on{opacity:1;filter:none}
+#teamv.lista .tshead{margin-top:.2em;gap:.4em;flex:1 1 auto;justify-content:center}
+#teamv.lista .tsprite{width:clamp(5em,13em,13em);height:clamp(5em,13em,13em)}
+#teamv.lista .tsprite canvas{width:88%;height:88%}
+#teamv.lista .tshead .tsinfo b{font-size:1.25em;margin-bottom:.3em}
+#teamv.lista .tschips{display:flex;flex-direction:column;gap:.3em}
+#teamv.lista .chip{flex-direction:row;justify-content:flex-start;align-items:baseline;gap:.5em;padding:.3em .6em;background:transparent;border:0}
+#teamv.lista .chip em{font-size:.72em;text-transform:none;letter-spacing:0;color:#9fb6de;flex:none}
+#teamv.lista .chip em::after{content:':'}
+#teamv.lista .chip b{font-size:.9em;color:#fff}
+#teamv.lista .tsitem{flex:none;display:flex;flex-direction:row;align-items:center;gap:.5em;padding:0 .6em}
+#teamv.lista .tsitem>label{flex:none;margin:0;font-size:.72em;letter-spacing:0;color:#9fb6de;font-weight:normal}
+#teamv.lista .tsitem>label::after{content:':'}
+#teamv.lista .tsitem .idd{flex:1;min-width:0}
+#teamv.lista .iddb{padding:.3em .5em!important;border-width:1px!important;background:#0e1a40!important}
+#teamv.lista .iddb span{font-size:.9em;white-space:nowrap}
+#teamv.lista .iddb .noimg{width:1.6em!important;height:1.6em!important;min-width:0!important}
+#teamv.lista .iddb .iimg{width:1.7em;height:1.7em}
+#teamv.lista .iddl{width:max(100%,22em);right:auto}
+#teamv.lista .idesc{display:none}
+#teamv.lista .tsmv{display:block;margin-top:.3em}
+#teamv.lista .tsmv .tsm{font-size:.82em;margin-bottom:.25em}
+#teamv.lista .tsbtns{display:none}
+#teamv.lista .tslot.empty{justify-content:center;align-items:center;text-align:center}
+/* abajo: debilidades, resistencias y botones */
+#teamv.lista #tmCov{grid-column:2;grid-row:4;display:flex;align-items:stretch;gap:.7em;margin:.7em .9em .5em;padding:0;background:none;border:0;min-height:0}
+#teamv.lista .cvh,#teamv.lista .cvo{display:none}
+#teamv.lista .cvr{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:.7em}
+#teamv.lista .cvwk,#teamv.lista .cvres{display:flex;flex-wrap:wrap;gap:.3em .35em;align-items:center;align-content:center;padding:.5em .8em;border:2px solid;border-radius:.8em;background:#0b1430;font-size:.85em;min-width:0}
+#teamv.lista .cvwk{border-color:#e0443e}
+#teamv.lista .cvres{border-color:#3fbf6a}
+#teamv.lista .cvl{flex:none;margin:0 .3em 0 0;font-weight:bold}
+#teamv.lista .cvl.bad{color:#ff8a7a}#teamv.lista .cvl.good,#teamv.lista .cvl.ok{color:#6fe092}
+#teamv.lista .cvnone{font-style:normal;color:#8fb3e8;font-size:.9em}
+#teamv.lista .cvbtns{display:flex;gap:.6em;flex:none}
+#teamv.lista .cvbtns button{padding:.5em 1.1em;border-radius:.7em;border:2px solid #3a6fd8;background:#16337a;color:#fff;font-weight:bold;cursor:pointer;white-space:nowrap}
+#teamv.lista .cvbtns button.main{background:var(--ac);border-color:#fff0a0;color:#2a1a00}
+#teamv.lista .cvbtns button:hover{filter:brightness(1.12)}
+#teamv.lista .tmrh{display:block;grid-column:2;grid-row:5;margin:0 .9em .6em;font-size:.7em;color:#8fa6d4}
+@media (max-width:1100px){
+  #teamv.lista .tmx{grid-template-columns:1fr;grid-template-rows:none;height:auto;min-height:100vh;overflow:auto;padding:.8em 1.2em 1.4em}
+  #teamv.lista .tmlp,#teamv.lista .tmrp{display:none}
+  #teamv.lista .tmhd{flex-wrap:wrap}#teamv.lista .tmbar{flex-wrap:wrap;flex-basis:100%;order:3}
+  #teamv.lista #tmQuick,#teamv.lista #tmTabs,#teamv.lista .tmdh,#teamv.lista .tmtop,#teamv.lista #tmCov,#teamv.lista .tmrh{grid-column:1;grid-row:auto;margin-left:0;margin-right:0}
+  #teamv.lista #tmTabs{grid-template-columns:repeat(auto-fill,minmax(10em,1fr));max-height:18em}
+  #teamv.lista .tmslots{grid-template-columns:1fr;grid-auto-rows:auto}
+  #teamv.lista #tmCov,#teamv.lista .cvr{flex-direction:column;grid-template-columns:1fr}
+}
+
+/* Nombre de la región bajo cada trofeo, sobre el tablón de la estantería (js/room.js, roomLabels) */
+#teamv .roomlbl{position:absolute;left:0;top:0;width:0;height:0;z-index:2;pointer-events:none}
+#teamv .roomlbl span{position:absolute;top:calc(var(--sc) * 53.5);transform:translateX(-50%);white-space:nowrap;font-size:max(7px,calc(var(--sc) * 3.1));line-height:calc(var(--sc) * 9);color:#a98a63;text-shadow:0 1px 0 #1a0f08;letter-spacing:0}
+#teamv .roomlbl span.won{color:#ffe9a0;text-shadow:0 1px 0 #3a2208,0 0 .6em #ffb83a88}
+#teamv.casa .roomlbl{display:none}
+/* con la pantalla en lista el fondo se oscurece menos arriba para que se vean los trofeos y sus nombres */
+#teamv.lista::before{background:linear-gradient(180deg,rgba(4,6,16,.12) 0,rgba(4,6,16,.18) calc(var(--sc) * 52),rgba(4,6,16,.8) calc(var(--sc) * 66),rgba(4,6,16,.9) 100%)}
+#teamv.lista .tmt-m:has(>em){min-height:1.6em;padding-left:0}

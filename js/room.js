@@ -87,12 +87,11 @@ function rmBuild(){
   R(cx - 21, 219, 42, 2, '#222'); for(let i = -2; i <= 2; i++) R(cx + i * 9, 216, 2, 6, '#222'); R(cx - 21, 216, 42, 1, '#333');           // rejilla
 
   // ---- Estantería de trofeos (x 94-394, y 52): una casilla por Liga ----
-  R(94, 52, 300, 5, '#4a2f20'); R(94, 52, 300, 1, '#7a4f2e'); R(94, 57, 300, 3, 'rgba(0,0,0,.45)');
-  for(const bx of [110, 240, 372]){ R(bx, 57, 3, 8, P.woodLo); R(bx - 2, 63, 7, 2, P.woodLo); }                                        // ménsulas
+  R(94, 52, 300, 12, '#4a2f20'); R(94, 52, 300, 1, '#7a4f2e'); R(94, 55, 300, 1, 'rgba(0,0,0,.25)'); R(94, 63, 300, 1, P.woodLo); R(94, 64, 300, 3, 'rgba(0,0,0,.45)');   // tablón de 12 px: ahí se rotula la región
+  for(const bx of [110, 240, 372]){ R(bx, 64, 3, 8, P.woodLo); R(bx - 2, 70, 7, 2, P.woodLo); }                                        // ménsulas
   RM.slots = ROOM_LEAGUES.map(([name, col], i) => ({x: 112 + i * 33, y: 52, col, name}));
   RM.slots.forEach((s, i) => {
     R(s.x - 7, 49, 15, 3, '#2a1a10'); R(s.x - 7, 49, 15, 1, '#5a3a22');                                                           // peana
-    R(s.x - 4, 58, 9, 2, '#b8893a');                                                                                                // placa
     rmTrophy(x, s.x, 49, s.col, RM.won[i]);
   });
   RM.base = c;
@@ -143,9 +142,17 @@ function rmFrame(){
   RM.timer = setTimeout(rmFrame, 66);
 }
 
+// Nombre de cada región sobre el tablón, bajo su trofeo. Es texto normal (no del lienzo de 480x270) para que se lea bien; --sc (css) es el tamaño de cada píxel del dibujo
+const ROOM_LABEL = {'Unova / Teselia':'Teselia'};
+function roomLabels(canvas){
+  let l = document.getElementById('tmRoomLbl');
+  if(!l){ l = document.createElement('div'); l.id = 'tmRoomLbl'; l.className = 'roomlbl'; l.setAttribute('aria-hidden', 'true'); canvas.parentNode.insertBefore(l, canvas.nextSibling); }
+  l.innerHTML = ROOM_LEAGUES.map(([n], i) => `<span class="${RM.won[i] ? 'won' : ''}" style="left:calc(var(--sc) * ${112 + i * 33})">${ROOM_LABEL[n] || n}</span>`).join('');
+}
 function roomStart(canvas){
   if(!canvas) return;
   RM.won = ROOM_LEAGUES.map(([n]) => !!(save.champ && save.champ[n]));                      // Ligas superadas = trofeos en la estantería
+  roomLabels(canvas);
   rmBuild();
   RM.cv = canvas; canvas.width = RM.W; canvas.height = RM.H; RM.x = canvas.getContext('2d'); RM.x.imageSmoothingEnabled = false;
   clearTimeout(RM.timer); RM.t0 = performance.now(); RM.on = true;

@@ -50,24 +50,24 @@ try{
 }catch(e){}
 // ¿Se usa la versión shiny de este Pokémon? Solo si lo tienes shiny y no lo has puesto en "normal" desde Equipo Pokémon
 const useShiny = d => save.shiny.includes(d) && !save.shinyOff.includes(d);
-// ---- EQUIPOS (hasta 5): cada uno con sus Pokémon y SUS objetos. Siempre hay uno activo: 'team' (sus Pokémon) y 'save.equip' (sus objetos) apuntan a él,
+// ---- EQUIPOS (hasta 18; empiezas con 5 y puedes crear o borrar desde Equipo Pokémon): cada uno con sus Pokémon y SUS objetos. Siempre hay uno activo: 'team' (sus Pokémon) y 'save.equip' (sus objetos) apuntan a él,
 //      así todo lo que ya usaba team/save.equip (combate, tienda, mochila, objetos libres) sigue funcionando sin cambios. ----
-const TEAM_MAX = 5;
+const TEAM_MAX = 18, TEAM_START = 5;                                                        // máximo de equipos / con cuántos empieza una partida nueva
 (function initTeams(){
   let s = null; try{ s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null'); }catch(e){}
   const okMons = a => Array.isArray(a) && a.length <= 3 && new Set(a).size === a.length && a.every(id => save.box.includes(id) && !hidden(id));
   const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
   const T = [];
-  if(s && Array.isArray(s.teams)) s.teams.slice(0, TEAM_MAX).forEach((t, i) => T.push({n:String((t && t.n) || '').slice(0, 14) || 'Equipo ' + (i + 1), mons:t && okMons(t.mons) ? t.mons.slice() : [], equip:obj(t && t.equip)}));
+  if(s && Array.isArray(s.teams)) s.teams.slice(0, TEAM_MAX).forEach((t, i) => T.push({n:String((t && t.n) || '').slice(0, 14) || 'Equipo ' + (i + 1), mons:t && okMons(t.mons) ? t.mons.slice() : [], equip:obj(t && t.equip), fav:!!(t && t.fav)}));
   else T.push({n:'Equipo 1', mons:team.slice(), equip:save.equip});                      // partidas antiguas: tu equipo de siempre pasa a ser el Equipo 1
-  while(T.length < TEAM_MAX) T.push({n:'Equipo ' + (T.length + 1), mons:[], equip:{}});            // los equipos nuevos empiezan vacíos: los rellenas tú en Equipo Pokémon
+  while(T.length < TEAM_START) T.push({n:'Equipo ' + (T.length + 1), mons:[], equip:{}});          // los equipos nuevos empiezan vacíos: los rellenas tú en Equipo Pokémon (si ya tenías más de 5 o menos por haber borrado, se respeta)
   if(!T[0].mons.length) T[0].mons = team.slice();                                                 // el Equipo 1 nunca queda vacío (si no hay nada guardado, el equipo inicial)
-  save.teams = T; save.tsel = s && s.tsel >= 0 && s.tsel < TEAM_MAX ? s.tsel : 0;
+  save.teams = T; save.tsel = s && s.tsel >= 0 && s.tsel < T.length ? s.tsel : 0;
   team = T[save.tsel].mons; save.equip = T[save.tsel].equip;
 })();
 function teamSync(){ const T = save.teams[save.tsel]; if(T){ T.mons = team; T.equip = save.equip; } }       // guarda en el equipo activo lo que haya en team / save.equip
 function selectTeam(i){                                                                              // cambia de equipo activo
-  if(i === save.tsel || !(i >= 0 && i < TEAM_MAX)) return;
+  if(i === save.tsel || !(i >= 0 && i < save.teams.length)) return;
   teamSync(); const T = save.teams[i];
   save.tsel = i; team = T.mons; save.equip = T.equip; persist();
 }

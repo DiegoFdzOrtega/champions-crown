@@ -6,6 +6,18 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Barras de IV y EV', date:'31 oct 2026', sections:[
+    {t:'Equipo Pokémon', i:[
+      'Pantalla nueva y más cómoda: arriba tienes la barra con el buscador, el orden, el filtro por tipo y el botón «+ Nuevo equipo».',
+      'Ahora puedes tener hasta 18 equipos. Cada uno se puede marcar como favorito (★), renombrar (✏️) o borrar (🗑️, pulsando dos veces).',
+      'Las tarjetas enseñan sprite, tipos, naturaleza, habilidad, objeto y los 4 ataques. «Ver detalles» y «Cambiar» actúan sobre el Pokémon que tengas seleccionado.',
+      'Los sprites se ven mucho más grandes, tanto en la lista de equipos como en las cajas del selector «Cambiar».',
+      'Bajo cada trofeo de la estantería aparece el nombre de su región.',
+      'Debajo se ven las debilidades y resistencias del equipo. Se sigue pudiendo arrastrar las tarjetas para ordenar.']},
+    {t:'Ver datos', i:[
+      'Los IVs y los EVs se suben con barras que arrastras (antes eran botones +5 / +10). Cada paso gasta una Chapa Dorada (+5 IV) o Plateada (+10 EV).',
+      'Los cambios se aplican con el botón «Aplicar cambios» (o «Deshacer» para soltarlos); no se gasta ninguna chapa hasta entonces.']}
+  ]},
   {v:'Megaevolución', date:'30 oct 2026', sections:[
     {t:'Kalos', i:[
       'Nuevos equipos en los 13 combates de Kalos (los de tu lista), con EVs, IVs, naturaleza, habilidad, objeto y movimientos.',

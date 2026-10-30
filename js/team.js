@@ -14,6 +14,10 @@ const TEAM_REGIONS = [
   {n:'Alola', a:722, b:809, c:'#ff9a3a'},  {n:'Galar', a:810, b:898, c:'#c05cff'},   {n:'Hisui', a:899, b:905, c:'#7fd6c2'},
   {n:'Paldea', a:906, b:1025, c:'#4ccf6a'}
 ];
+// ▶ Diseño de la pantalla de equipo: true = lista de equipos a la izquierda y los 3 Pokémon en fila a la derecha (CSS «#teamv.lista»).
+//   false = el diseño de siempre (los 5 equipos arriba y 3 tarjetas altas). Si TEAM_HOUSE (casa.js) está en true, manda la casa.
+const TEAM_LIST = true;
+const tl = {q:'', order:'num', quick:'all', type:'', delAt:0};                                     // lista de equipos: búsqueda, orden y filtros (solo se ven, no se guardan)
 const tm = {region:'Todas', q:'', type:'', rar:new Set(), fav:false, open:null, built:false, from:'', target:null};   // target = hueco que se sustituye (null = añadir)     // open = regiones desplegadas (Set)
 const inRegion = (r, d) => d >= r.a && d <= r.b;
 const ownedInTeamRegion = r => save.box.filter(d => inRegion(r, d) && !hidden(d));
@@ -29,10 +33,23 @@ function teamVisible(r){
 function buildTeamShell(){
   $('teamv').innerHTML = `<canvas id="tmRoom" class="room" aria-hidden="true"></canvas>
     <div class="dx tmx">
-    <header class="dxh tmhd"><div class="tmhl"><h1>Equipo Pokémon</h1><p class="tmhint">⠿ Arrastra las cajas para ordenar · el nº 1 sale primero al combate · cada equipo lleva sus propios objetos</p></div><div class="tmhr"><span id="tmTotal"></span><button id="tmBack" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></div></header>
-    <section class="tmteams"><div id="tmTabs" class="tmtabs"></div><label class="tmname">Nombre del equipo <input id="tmName" maxlength="14" autocomplete="off"></label></section>
-    <div id="tmCov" class="tmcov"></div>
-    <section class="tmtop"><div id="tmSlots" class="tmslots"></div></section></div>
+    <div class="tmL">
+    <header class="dxh tmhd"><div class="tmhl"><h1>Equipo Pokémon</h1><p class="tmhint">⠿ Arrastra las cajas para ordenar · el nº 1 sale primero al combate · cada equipo lleva sus propios objetos</p></div>
+      <div class="tmbar"><span id="tmCount" class="tmcount"></span>
+        <label class="tmsearch"><span aria-hidden="true">🔍</span><input id="tmSearch" placeholder="Buscar equipo o Pokémon" autocomplete="off"></label>
+        <select id="tmOrder" title="Ordenar los equipos"><option value="num">Orden: número</option><option value="name">Orden: nombre</option><option value="fav">Orden: favoritos</option></select>
+        <select id="tmFilt" title="Filtrar los equipos por tipo de Pokémon"></select>
+        <button id="tmNew" class="tmnew" title="Crear un equipo nuevo">+ Nuevo equipo</button></div>
+      <div class="tmhr"><span id="tmTotal"></span><button id="tmBack" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></div></header>
+    <section class="tmteams"><div id="tmQuick" class="tmquick"></div><div id="tmTabs" class="tmtabs"></div>
+      <div class="tmdh"><label class="tmname"><i id="tmNum" class="tmnum"></i><span class="tmnl">Nombre del equipo</span> <input id="tmName" maxlength="14" autocomplete="off"></label>
+        <div class="tmact"><button id="tmFav" title="Marcar el equipo como favorito">☆</button><button id="tmEdit" title="Cambiar el nombre">✏️</button><button id="tmDel" title="Borrar el equipo">🗑️</button></div></div></section>
+    <div class="tmlp"></div><div class="tmrp"></div>
+    <div id="tmChips" class="tmchips"></div>
+    <div id="tmSel" class="tsd"></div>
+    <div id="tmCov" class="tmcov"></div></div>
+    <div class="tmR"><section class="tmtop"><div id="tmSlots" class="tmslots"></div></section>
+    <p class="tmrh">⠿ Arrastra las tarjetas para ordenar · el nº 1 sale primero al combate · cada equipo lleva sus propios objetos</p></div></div>
     <div id="tmPick" class="tmm hide"><div class="dx tmmb">
       <header class="dxh"><h1 id="tmPickT">Añadir Pokémon</h1><span id="tmPickS"></span><button id="tmPickX" class="tmclose" title="Cerrar (Esc)">✕ Cerrar</button></header>
       <div class="tool"><input id="tmQ" placeholder="Buscar Pokémon por nombre" autocomplete="off"><select id="tmType"></select>
@@ -42,10 +59,22 @@ function buildTeamShell(){
       <div id="tmList" class="tmlist"></div></div></div>
     <div id="tmData" class="tmm hide"><div class="dx tmmb tmdb" id="tmDataB"></div></div>`;
   $('tmSlots').addEventListener('click', ddClick); $('tmSlots').addEventListener('keydown', ddKey);
+  $('tmSel').addEventListener('click', ddClick); $('tmSel').addEventListener('keydown', ddKey); $('tmSel').addEventListener('click', selClick);   // la ficha de la casa (casa.js) lleva su propio desplegable y botones
+  $('tmSlots').addEventListener('click', e => { if(e.target.closest('button, .idd')) return; const c = e.target.closest('.tslot[data-d]'); if(c){ tm.selD = +c.dataset.d; selUpdate(); } });   // clic en una tarjeta = verla en la ficha
   ['pointerdown','pointermove','pointerup','pointercancel'].forEach(t => $('tmSlots').addEventListener(t, slotDrag));   // arrastrar las cajas para ordenar el equipo   // desplegable de objetos (se reparte por eventos: las tarjetas se redibujan)
   document.addEventListener('click', e => { if(!e.target.closest('.idd')) closeDd(); });
   $('tmBack').onclick = closeTeam; $('tmPickX').onclick = closePick;
-  $('tmTabs').onclick = e => { const b = e.target.closest('.tmtab'); if(!b || +b.dataset.i === save.tsel) return; closePick(); closeDd(); selectTeam(+b.dataset.i); renderTeamSlots(); };
+  $('tmTabs').onclick = e => { const b = e.target.closest('.tmtab'); if(!b || +b.dataset.i === save.tsel) return; closePick(); closeDd(); resetDel(); selectTeam(+b.dataset.i); renderTeamSlots(); };
+  $('tmQuick').onclick = e => { const b = e.target.closest('[data-q]'); if(!b) return; tl.quick = b.dataset.q; renderTeamTabs(); };      // Todos / favoritos / completos / vacíos
+  $('tmSearch').oninput = e => { tl.q = e.target.value; renderTeamTabs(); };
+  $('tmOrder').onchange = e => { tl.order = e.target.value; renderTeamTabs(); };
+  $('tmFilt').innerHTML = '<option value="">Todos los tipos</option>' + Object.keys(TYPE_ES).map(t => `<option value="${t}">${TYPE_ES[t]}</option>`).join('');
+  $('tmFilt').onchange = e => { tl.type = e.target.value; renderTeamTabs(); };
+  $('tmNew').onclick = newTeam;
+  $('tmFav').onclick = () => { const t = save.teams[save.tsel]; t.fav = !t.fav; persist(); renderTeamTabs(); };
+  $('tmEdit').onclick = () => { $('tmName').focus(); $('tmName').select(); };
+  $('tmDel').onclick = delTeamClick;
+  $('tmCov').addEventListener('click', e => { const b = e.target.closest('[data-act]'); if(!b || !tm.selD) return; if(b.dataset.act === 'data') openData(tm.selD); else openPick(team.indexOf(tm.selD)); });   // botones de abajo: actúan sobre el Pokémon elegido
   $('tmName').oninput = e => { const t = save.teams[save.tsel]; t.n = e.target.value.trim().slice(0, 14) || 'Equipo ' + (save.tsel + 1); persist(); const b = $('tmTabs').querySelector('.tmtab.on b'); if(b) b.textContent = t.n; $('tmTotal').textContent = teamTotalText(); };
   $('tmPick').onclick = e => { if(e.target === $('tmPick')) closePick(); };                  // clic fuera de la ventana = cerrar
   $('tmData').onclick = e => { if(e.target === $('tmData')) closeData(); };
@@ -95,7 +124,7 @@ function openPick(target){                                                      
   $('tmPick').classList.remove('hide'); renderRarPills(); renderTeamNav(); renderTeamList();
 }
 function closePick(){ $('tmPick').classList.add('hide'); tm.target = null; }
-function closeTeam(){ closePick(); closeData(true); closeDd(); roomStop(); tm.from === 'shop' ? openShop() : tm.from === 'story' ? goStory() : tm.from === 'campo' ? openCampo() : goMain(); }
+function closeTeam(){ closePick(); closeData(true); closeDd(); teamBgStop(); tm.from === 'shop' ? openShop() : tm.from === 'story' ? goStory() : tm.from === 'campo' ? openCampo() : goMain(); }
 // Esc cierra primero la ventana de arriba (ficha o selector) y por último el panel del equipo
 addEventListener('keydown', e => {
   if(e.code !== 'Escape' || !tm.built || $('teamv').classList.contains('hide')) return;
@@ -133,9 +162,9 @@ function itemDesc(dex){
   const any = Object.keys(ITEMS).some(id => free(id) > 0);
   return `<div class="idesc none"><div><b>Sin objeto equipado</b><p>${any ? 'Abre el desplegable y elige uno de tus objetos.' : 'No tienes objetos libres. Compra más en la Tienda.'}</p></div></div>`;
 }
-function closeDd(){ document.querySelectorAll('.iddl:not([hidden])').forEach(l => { l.hidden = true; l.parentNode.querySelector('.iddb').setAttribute('aria-expanded', 'false'); l.closest('.tslot').classList.remove('ddopen'); }); }
+function closeDd(){ document.querySelectorAll('.iddl:not([hidden])').forEach(l => { l.hidden = true; l.parentNode.querySelector('.iddb').setAttribute('aria-expanded', 'false'); l.closest('.tslot, .tsd').classList.remove('ddopen'); }); }
 function openDd(dd){
-  closeDd(); const l = dd.querySelector('.iddl'); l.hidden = false; dd.querySelector('.iddb').setAttribute('aria-expanded', 'true'); dd.closest('.tslot').classList.add('ddopen');
+  closeDd(); const l = dd.querySelector('.iddl'); l.hidden = false; dd.querySelector('.iddb').setAttribute('aria-expanded', 'true'); dd.closest('.tslot, .tsd').classList.add('ddopen');
   const r = dd.getBoundingClientRect(), need = l.offsetHeight + 12;                              // si no cabe debajo, se abre hacia arriba
   l.classList.toggle('up', r.bottom + need > innerHeight && r.top > innerHeight - r.bottom);
   const cur = l.querySelector('[aria-selected="true"]'); if(cur) cur.scrollIntoView({block:'nearest'});
@@ -143,7 +172,7 @@ function openDd(dd){
 function ddClick(e){
   const b = e.target.closest('.iddb'), li = e.target.closest('.iddl li');
   if(b){ const dd = b.parentNode; dd.querySelector('.iddl').hidden ? openDd(dd) : closeDd(); return; }
-  if(li){ const d = +li.closest('.tslot').dataset.d; closeDd(); setItem(d, li.dataset.id); }
+  if(li){ const d = +li.closest('[data-d]').dataset.d; closeDd(); setItem(d, li.dataset.id); }
 }
 function ddKey(e){                                                                                  // teclado: ↑ ↓ para moverse, Intro para elegir
   const dd = e.target.closest('.idd'); if(!dd) return;
@@ -208,25 +237,67 @@ const stopOnce = ev => ev.stopPropagation();
 // ---- Tu equipo (3 tarjetas grandes) ----
 const teamTotalText = () => `${save.teams[save.tsel].n} · ${team.length}/3 • ${boxCount()} Pokémon`;
 // ---- Pestañas de los 5 equipos (con los Pokémon de cada uno en miniatura) ----
+function teamVisibleList(){                                                                       // equipos que pasan la búsqueda y los filtros, en el orden elegido
+  const q = tl.q.trim().toLowerCase();
+  const L = save.teams.map((t, i) => ({t, i, mons: i === save.tsel ? team : t.mons})).filter(({t, mons}) =>
+    (tl.quick !== 'fav' || t.fav) && (tl.quick !== 'full' || mons.length >= 3) && (tl.quick !== 'empty' || !mons.length) &&
+    (!tl.type || mons.some(d => mon(d).types.includes(tl.type))) &&
+    (!q || t.n.toLowerCase().includes(q) || mons.some(d => mon(d).name.toLowerCase().includes(q))));
+  if(tl.order === 'name') L.sort((a, b) => a.t.n.localeCompare(b.t.n, 'es') || a.i - b.i);
+  else if(tl.order === 'fav') L.sort((a, b) => (b.t.fav ? 1 : 0) - (a.t.fav ? 1 : 0) || a.i - b.i);
+  return L;
+}
 function renderTeamTabs(){
-  $('tmTabs').innerHTML = save.teams.map((t, i) => {
-    const ms = i === save.tsel ? team : t.mons;
-    return `<button class="tmtab${i === save.tsel ? ' on' : ''}" data-i="${i}"><span class="tmt-n">${i + 1}</span><b>${esc(t.n)}</b>` +
-      `<span class="tmt-m">${ms.length ? ms.map(d => `<canvas width="36" height="36" data-d="${d}"></canvas>`).join('') : '<em>Vacío</em>'}</span></button>`;
-  }).join('');
+  const L = teamVisibleList(), cur = save.teams[save.tsel];
+  $('tmTabs').innerHTML = L.map(({t, i, mons}) => `<button class="tmtab${i === save.tsel ? ' on' : ''}" data-i="${i}" title="${esc(t.n)}"><span class="tmt-n">${String(i + 1).padStart(2, '0')}</span><b>${esc(t.n)}</b>${t.fav ? '<i class="tmt-f">★</i>' : ''}` +
+      `<span class="tmt-m">${mons.length ? mons.map(d => `<canvas width="36" height="36" data-d="${d}"></canvas>`).join('') : '<em>Vacío</em>'}</span></button>`).join('') || '<p class="tmnone">Ningún equipo coincide con la búsqueda o el filtro.</p>';
   $('tmTabs').querySelectorAll('canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:2, fit:34, shiny:useShiny(+c.dataset.d)}));
-  if(document.activeElement !== $('tmName')) $('tmName').value = save.teams[save.tsel].n;
+  $('tmQuick').innerHTML = [['all', 'Todos'], ['fav', '★ Favoritos'], ['full', 'Completos'], ['empty', 'Vacíos']].map(([k, n]) => `<button data-q="${k}"${tl.quick === k ? ' class="on"' : ''}>${n}</button>`).join('');
+  $('tmCount').textContent = `${save.teams.length} Equipos`;
+  $('tmNew').disabled = save.teams.length >= TEAM_MAX;
+  if(document.activeElement !== $('tmName')) $('tmName').value = cur.n;
+  $('tmNum').textContent = String(save.tsel + 1).padStart(2, '0');
+  const fv = $('tmFav'); fv.textContent = cur.fav ? '★' : '☆'; fv.classList.toggle('on', !!cur.fav); fv.title = cur.fav ? 'Quitar el equipo de favoritos' : 'Marcar el equipo como favorito';
+}
+// Crear y borrar equipos (hasta TEAM_MAX; siempre queda al menos 1). Borrar pide pulsar dos veces el cubo.
+function newTeam(){
+  if(save.teams.length >= TEAM_MAX) return toast(`Máximo ${TEAM_MAX} equipos.`);
+  teamSync(); save.teams.push({n:'Equipo ' + (save.teams.length + 1), mons:[], equip:{}});
+  Object.assign(tl, {q:'', quick:'all', type:''}); $('tmSearch').value = ''; $('tmFilt').value = '';              // se quitan los filtros para que se vea el equipo nuevo
+  closePick(); closeDd(); resetDel(); selectTeam(save.teams.length - 1); renderTeamSlots();
+  const on = $('tmTabs').querySelector('.tmtab.on'); if(on) on.scrollIntoView({block:'nearest'});
+  $('tmName').focus(); $('tmName').select();
+}
+function resetDel(){ tl.delAt = 0; const b = $('tmDel'); b.classList.remove('arm'); b.textContent = '🗑️'; }
+function delTeamClick(){
+  if(save.teams.length <= 1) return toast('Necesitas al menos 1 equipo.');
+  if(tl.delAt && Date.now() - tl.delAt < 3500){ resetDel(); return delTeam(save.tsel); }
+  const b = $('tmDel'); tl.delAt = Date.now(); b.classList.add('arm'); b.textContent = '¿Borrar?';
+  setTimeout(() => { if(tl.delAt && Date.now() - tl.delAt >= 3400) resetDel(); }, 3500);
+}
+function delTeam(i){
+  teamSync(); const name = save.teams[i].n; save.teams.splice(i, 1);
+  save.tsel = save.tsel > i ? save.tsel - 1 : save.tsel === i ? Math.min(i, save.teams.length - 1) : save.tsel;
+  const T = save.teams[save.tsel]; team = T.mons; save.equip = T.equip; persist();
+  closePick(); closeDd(); renderTeamSlots(); toast(`Equipo «${name}» borrado.`);
 }
 // ---- Debilidades compartidas del equipo (tabla de tipos CH de data.js): tipos a los que 2 o más de tus Pokémon son débiles / resisten ----
 function renderCov(){
-  const ms = team.map(mon), el = $('tmCov'), hint = '';
-  if(ms.length < 2){ el.innerHTML = hint; return; }
+  const ms = team.map(mon), el = $('tmCov');
+  if(!ms.length){ el.innerHTML = ''; return; }
   const weak = [], res = [];
   Object.keys(CH).forEach(t => { const w = ms.filter(m => eff(t, m.types) > 1).length, r = ms.filter(m => eff(t, m.types) < 1).length; if(w >= 2) weak.push([t, w]); if(r >= 2) res.push([t, r]); });
   weak.sort((a, b) => b[1] - a[1]);
   const chip = ([t, n]) => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]} <i>${n}/${ms.length}</i></span>`;
-  el.innerHTML = `<span class="cvl ${weak.length ? 'bad' : 'ok'}">${weak.length ? 'Débiles a:' : '✓ Sin debilidades compartidas'}</span>${weak.map(chip).join('')}` +
-    (res.length ? `<span class="cvl good">Resisten bien:</span>${res.map(chip).join('')}` : '') + hint;
+  // Cobertura de ataque (la enseña la casa): tipos a los que alguno de los ataques de tu equipo les hace daño súper efectivo
+  const mvTypes = new Set(team.flatMap(d => movesOf(d).map(n => (MOVES[n] || {}).t).filter(Boolean))), all = Object.keys(CH);
+  const miss = all.filter(t => ![...mvTypes].some(a => eff(a, [t]) > 1));
+  const lone = '<em class="cvnone">Hacen falta 2 Pokémon</em>';
+  const rows = `<div class="cvr"><span class="cvwk"><span class="cvl ${weak.length ? 'bad' : 'ok'}">${weak.length || ms.length < 2 ? 'Debilidades' : '✓ Sin debilidades compartidas'}</span>${ms.length < 2 ? lone : weak.map(chip).join('')}</span>` +
+    `<span class="cvres"><span class="cvl good">Resistencias</span>${ms.length < 2 ? lone : res.length ? res.map(chip).join('') : '<em class="cvnone">Ninguna compartida</em>'}</span></div>`;
+  el.innerHTML = `<h5 class="cvh">Cobertura del equipo</h5>${rows}<div class="cvo"><span class="ok">Cubre ${all.length - miss.length}/${all.length} tipos</span>` +
+    (miss.length ? ` · <span class="bad cvmiss">Sin respuesta: ${miss.map(t => TYPE_ES[t].toUpperCase()).join(', ')}</span>` : '') + '</div>' +
+    '<div class="cvbtns"><button class="main" data-act="data">Ver detalles</button><button data-act="chg">Cambiar</button></div>';       // botones de abajo: actúan sobre el Pokémon elegido
 }
 // Selector «Equipo» de las pantallas de Historia y Campo (cambia el equipo activo y vuelve a dibujar la pantalla)
 function fillTeamSel(id, after){
@@ -237,28 +308,70 @@ function fillTeamSel(id, after){
 
 function renderTeamSlots(){
   $('tmTotal').textContent = teamTotalText(); renderTeamTabs(); renderCov();
+  if(!team.includes(tm.selD)) tm.selD = team[0];                                                  // Pokémon que se ve en la ficha de la casa
   $('tmSlots').innerHTML = [0, 1, 2].map(i => {
     const dex = team[i];
     if(!dex) return `<article class="tslot empty" data-i="${i}"><i class="tsn">${i + 1}</i><button class="addbtn">＋ Añadir Pokémon</button><p>Hueco libre. Elige uno de tu colección.</p></article>`;
     const m = mon(dex), nat = natureOf(dex), ab = abilityOf(dex);
-    return `<article class="tslot" data-d="${dex}" data-i="${i}"><i class="tsn">${i + 1}</i>
+    const eq = save.equip[dex];
+    return `<article class="tslot${dex === tm.selD ? ' sel' : ''}" data-d="${dex}" data-i="${i}"><i class="tsn">${i + 1}</i>
+      <span class="tsit">${eq ? `<img class="iimg" src="${imgOf(eq)}" alt="" title="${esc(ITEMS[eq].n)}" onerror="this.style.visibility='hidden'">` : ''}</span>
       <button class="x" title="Quitar del equipo">✕</button>
+      ${save.shiny.includes(dex) ? `<button class="shs${useShiny(dex) ? ' on' : ''}" title="${useShiny(dex) ? 'Usando su versión shiny: púlsalo para usar la normal' : 'Usando la versión normal: púlsalo para usar la shiny'}">⭐</button>` : ''}
       <div class="tshead"><div class="tsprite"><canvas width="128" height="128"></canvas></div>
         <div class="tsinfo"><b>${esc(m.name)}${save.fav.includes(dex) ? ' <em class="fvs">★</em>' : ''}</b><div class="tbs">${typeBadges(m)}</div></div></div>
       <div class="tschips"><span class="chip" title="${esc(natText(nat))}"><em>Naturaleza</em><b>${esc(nat[0])}</b></span><span class="chip" title="${esc(abilDesc(ab))}"><em>Habilidad</em><b>${esc(ab)}</b></span></div>
-      <div class="tsitem"><label>Objeto equipado</label>${itemDd(dex)}${itemDesc(dex)}</div>
+      <div class="tsitem"><label>Objeto</label>${itemDd(dex)}${itemDesc(dex)}</div>
+      <div class="tsmv">${movesOf(dex).map(n => { const t = (MOVES[n] || {}).t || m.types[0]; return `<div class="tsm" style="--c:${TC[t]}"><b>${esc(n)}</b><em>${TYPE_ES[t].toUpperCase()}</em></div>`; }).join('')}</div>
       <div class="tsbtns"><button class="bdata main">Ver datos</button><button class="bchg">Cambiar</button>
         ${save.shiny.includes(dex) ? `<button class="sbtn${useShiny(dex) ? ' on' : ''}" title="${useShiny(dex) ? 'Usando su versión shiny: púlsalo para usar la normal' : 'Usando la versión normal: púlsalo para usar la shiny'}">⭐ ${useShiny(dex) ? 'Shiny' : 'Normal'}</button>` : ''}</div></article>`;
   }).join('');
   $('tmSlots').querySelectorAll('.tslot').forEach(s => {
     const i = +s.dataset.i, d = +s.dataset.d;
     if(!d){ s.querySelector('.addbtn').onclick = () => openPick(null); return; }
-    paintSprite(s.querySelector('canvas'), d, {sc:4, fit:116, shiny: useShiny(d)});                 // mismos sprites del usuario, en más grande
+    paintSprite(s.querySelector('canvas'), d, {sc:6, fit:128, shiny: useShiny(d)});                 // mismos sprites del usuario, en más grande
     const sbt = s.querySelector('.sbtn'); if(sbt) sbt.onclick = () => toggleShiny(d);
+    const shs = s.querySelector('.shs'); if(shs) shs.onclick = () => toggleShiny(d);
     s.querySelector('.x').onclick = () => removeMon(d);
     s.querySelector('.bdata').onclick = () => openData(d);
     s.querySelector('.bchg').onclick = () => openPick(i);
   });
+  renderSel();
+}
+
+// ---- Ficha del Pokémon elegido (la enseña la casa a la izquierda; con la habitación antigua está oculta por CSS) ----
+const SEL_COL = {hp:'#e8602c', atk:'#ffd24a', def:'#4ccf6a', spa:'#9aa6ff', spd:'#3ea6ff', spe:'#ff7ac8'}, SEL_LBL = {hp:'PS', atk:'ATQ', def:'DEF', spa:'AT.E', spd:'DEF.E', spe:'VEL'};
+function renderSel(){
+  const d = tm.selD, el = $('tmSel'), ch = $('tmChips');
+  ch.innerHTML = `<span title="Chapas Doradas (suben IVs)">🥇 ×${held('chapa')}</span><span title="Chapas Plateadas (suben EVs)">🥈 ×${held('chapaplata')}</span><span title="Ligas Pokémon superadas">🏆 ${leaguesWon()}/${REGIONS.length}</span>`;
+  if(!d){ el.removeAttribute('data-d'); el.innerHTML = '<p class="tsdempty">Tu equipo está vacío.<br>Añade un Pokémon con los botones de la derecha.</p>'; return; }
+  const m = mon(d), nat = natureOf(d), ab = abilityOf(d), iv = ivOf(d), ev = evOf(d), eq = save.equip[d], M = eq && ITEMS[eq] && ITEMS[eq].mega ? MEGA[ITEMS[eq].mega] : null;
+  const canMega = Object.values(MEGA).some(x => x.dex === d);
+  const moves = movesOf(d).map(n => { const t = (MOVES[n] || {}).t || m.types[0]; return `<div class="tsm" style="--c:${TC[t]}"><b>${esc(n)}</b><em>${TYPE_ES[t].toUpperCase()}</em></div>`; }).join('');
+  const stats = STAT_KEYS.map(k => { const v = realStat(d, k); return `<div class="tss"><u style="color:${SEL_COL[k]}">${SEL_LBL[k]}</u><i><s style="width:${Math.min(100, v / 2)}%;background:${SEL_COL[k]}"></s></i><b>${v}</b><em>${ev[k]}/${iv[k]}</em></div>`; }).join('');
+  el.dataset.d = d;
+  el.innerHTML = `<h2>${esc(m.name)}${save.fav.includes(d) ? ' <em class="fvs">★</em>' : ''}</h2>
+    <div class="tsdty">${typeBadges(m)}${canMega ? '<span class="tb mgb">MEGA</span>' : ''}</div>
+    <div class="tsdspr"><canvas width="128" height="128"></canvas></div>
+    <div class="tsdch"><span title="${esc(abilDesc(ab))}">✨ ${esc(ab)}</span><span title="${esc(natText(nat))}">🌿 ${esc(nat[0])}</span></div>
+    ${itemDd(d)}
+    <h3>Ataques</h3><div class="tsdmv">${moves}</div>
+    <h3>Estadísticas <small>· EV / IV</small></h3><div class="tsdst">${stats}</div>
+    ${M ? `<div class="tsdmega">${esc(M.form)}: ATQ ${M.base[1]} · AT.E ${M.base[3]} · VEL ${M.base[5]} · ${esc(M.ab)}</div>` : ''}
+    <div class="tsdbt"><button class="bchg">Cambiar</button><button class="bdata main">Ver datos</button></div>
+    <div class="tsdbt2">${save.shiny.includes(d) ? `<button class="sbtn${useShiny(d) ? ' on' : ''}">⭐ ${useShiny(d) ? 'Shiny' : 'Normal'}</button>` : ''}<button class="x">✕ Quitar del equipo</button></div>`;
+  paintSprite(el.querySelector('canvas'), d, {sc:6, fit:128, shiny:useShiny(d)});
+}
+function selUpdate(){                                                                              // cambia el Pokémon visto sin redibujar las tarjetas (así el arrastre no se rompe)
+  $('tmSlots').querySelectorAll('.tslot[data-d]').forEach(c => c.classList.toggle('sel', +c.dataset.d === tm.selD));
+  closeDd(); renderSel();
+}
+function selClick(e){
+  const d = +$('tmSel').dataset.d; if(!d) return;
+  if(e.target.closest('.bdata')) openData(d);
+  else if(e.target.closest('.bchg')) openPick(team.indexOf(d));
+  else if(e.target.closest('.sbtn')) toggleShiny(d);
+  else if(e.target.closest('.x')) removeMon(d);
 }
 const typeBadges = m => m.types.map(t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`).join('');
 
@@ -323,5 +436,6 @@ function openTeam(from){                                                        
   if(!tm.open.size) tm.open.add('Kanto');
   closePick(); $('tmData').classList.add('hide');
   $('tmQ').value = tm.q; $('tmType').value = tm.type;
-  renderTeamSlots(); show('teamv'); roomStart($('tmRoom'));                                       // fondo de habitación (room.js)
+  renderTeamSlots(); show('teamv'); teamBgStart($('tmRoom'));
+  $('teamv').classList.toggle('lista', TEAM_LIST && !$('teamv').classList.contains('casa'));                                     // fondo: la casa (casa.js) o, con TEAM_HOUSE=false, la habitación antigua (room.js)
 }
