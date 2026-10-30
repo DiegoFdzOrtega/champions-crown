@@ -71,7 +71,7 @@ const HUD_H = 90, ICON_DY = 98;                           // alto de la tarjeta 
 function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52) * k, y:(10 + ICON_DY) * k, w:46 * k, h:46 * k}; }
 function hudIconAt(mx, my){                      // nº del cuadrito que hay en (mx, my), o -1
   if(!g || g.over) return -1;
-  for(let i = 0; i < g.p.length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
+  for(let i = 0; i < myList().length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
   return -1;
 }
 function hud(x, y, list, idx, col){
@@ -112,21 +112,21 @@ function hud(x, y, list, idx, col){
     if(u.dead){ ctx.save(); ctx.strokeStyle = 'rgba(232,73,58,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px+13, py+10); ctx.lineTo(px+33, py+30); ctx.moveTo(px+33, py+10); ctx.lineTo(px+13, py+30); ctx.stroke(); ctx.restore(); }   // ✖ = debilitado
     { const ready = u.megaKey && !u.megaDone && !u.dead, done = u.m.isMega, blocked = ready && megaUsed(side);                    // «M» de megaevolución: arcoíris = lista · rosa = ya megaevolucionó · gris = otra mega ya usada
       if(ready || done){ const mx = px + 31, my = py + 3; ctx.fillStyle = done ? '#ff6ad8' : blocked ? '#3a4258' : hue(t * 200 + i * 60, .95); ctx.fillRect(mx, my, 13, 12); text('M', mx + 2, my + 10, 8, blocked ? '#7a86a6' : '#10141e'); } }
-    if(list === g.p){                                                        // solo tus cuadritos: se pueden pulsar para cambiar de Pokémon
-      const can = !u.dead && i !== idx, wait = can && g.swCd > 0, hov = hudIconAt(mouse.x, mouse.y) === i;
+    if(list === myList()){                                                        // solo tus cuadritos: se pueden pulsar para cambiar de Pokémon
+      const can = !u.dead && i !== idx, wait = can && myCd() > 0, hov = hudIconAt(mouse.x, mouse.y) === i;
       if(wait){                                                              // en espera: se oscurece y muestra los segundos que faltan
         ctx.fillStyle = 'rgba(5,7,12,.62)'; ctx.fillRect(px+1, py+1, 44, 44);
-        ctx.fillStyle = '#ffcc33'; ctx.fillRect(px+1, py+43, 44 * Math.min(1, g.swCd / SWITCH_CD), 2);          // barrita que se vacía
-        text(String(Math.ceil(g.swCd)), px+23, py+30, 16, '#ffcc33', 'center');
+        ctx.fillStyle = '#ffcc33'; ctx.fillRect(px+1, py+43, 44 * Math.min(1, myCd() / SWITCH_CD), 2);          // barrita que se vacía
+        text(String(Math.ceil(myCd())), px+23, py+30, 16, '#ffcc33', 'center');
       }
       if(hov && can){ ctx.strokeStyle = wait ? '#ff9a3a' : '#7dffa0'; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, 44, 44); }
       text(String(i + 1), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
     }
   });
-  if(list === g.p){                                                          // mensajes bajo los cuadritos
+  if(list === myList()){                                                          // mensajes bajo los cuadritos
     const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 + 12;
-    if(g.swNote > 0) text(`ESPERA ${Math.ceil(g.swCd)} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
-    else if(hv >= 0 && hv !== idx && !list[hv].dead) text(g.swCd > 0 ? `ESPERA ${Math.ceil(g.swCd)} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
+    if(g.swNote > 0) text(`ESPERA ${Math.ceil(myCd())} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
+    else if(hv >= 0 && hv !== idx && !list[hv].dead) text(myCd() > 0 ? `ESPERA ${Math.ceil(myCd())} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
     else if(g.clock < 8 && g.count <= 0 && !g.over) text('CLIC EN UN CUADRO O TECLAS 1 · 2 · 3 PARA CAMBIAR', x, ty, 6, 'rgba(201,214,245,.75)');
   }
 }
@@ -137,9 +137,9 @@ function draw(){
   if(!g){ menuBg(performance.now()/1000); return; }
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
   arena();
-  const P = g.p[g.pi], E = g.e[g.ei];
+  const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
 
-  [[P,'#4ccf6a'],[E,'#ff5a5a']].sort((a,b)=>a[0].y-b[0].y).forEach(([f,c]) => drawF(f,c));
+  [[P, gm ? '#ff5a5a' : '#4ccf6a'], [E, gm ? '#4ccf6a' : '#ff5a5a']].sort((a,b)=>a[0].y-b[0].y).forEach(([f,c]) => drawF(f,c));
   g.shots.forEach(s=>{
     if(fxShot(s)) return;                          // proyectil con sprite; si no, el círculo de siempre
     ctx.save(); ctx.fillStyle = TC[s.type]; ctx.shadowColor = TC[s.type]; ctx.shadowBlur = 14;
@@ -151,21 +151,21 @@ function draw(){
   megaDraw();                                      // animación de megaevolución (js/mega.js)
   abDrawWeather();                                 // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
-  if(!P.dead){                                                               // cruz de puntería
+  if(!M.dead){                                                               // cruz de puntería
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
   g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
 
-  hudAt(0, 0, () => hud(10, 10, g.p, g.pi, '#4a8cff'));
-  hudAt(W, 0, () => hud(W-350, 10, g.e, g.ei, '#ff4a5a'));
+  hudAt(0, 0, () => hud(10, 10, myList(), myIdx(), '#4a8cff'));
+  hudAt(W, 0, () => hud(W-350, 10, oppList(), oppIdx(), '#ff4a5a'));
   abDrawHud();                                                               // clima activo (js/abilities.js)
 
   // Panel central: piso y temporizador
   const s = g.clock | 0;
   hudAt(W/2, 0, () => {
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
-  if(g.o.title) text('CAMPO', W/2, 29, 12, '#ffcc33', 'center'); else text('PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
+  text(g.pvp ? 'ONLINE' : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
   text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
   { ctx.font = `8px ${FONT}`; const sw = ctx.measureText(g.o.sub).width + 16; ctx.fillStyle = 'rgba(8,10,20,.62)'; ctx.fillRect(W/2 - sw/2, 64, sw, 16); }       // fondo tras el subtítulo para que se lea
   textO(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
@@ -176,7 +176,7 @@ function draw(){
     ctx.imageSmoothingEnabled = false; ctx.drawImage(L, fx0 + 26 - w/2, 34 - h/2, w, h);
   }
   });
-  text('ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
+  text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
 
   // Barra de ataques, centrada abajo
@@ -186,28 +186,28 @@ function draw(){
   { const ey = y0 - 38, bx = x0 + 78, bwid = tw - 78 - 12, bh = 10, by = ey + 16;
     hudBox(x0, ey, tw, 34, '#4fb3ff');
     text('ENERGÍA', x0 + 12, by + 8, 7, '#4fb3ff');
-    bar(bx, by, bwid, bh, P.en, 100, '#4fb3ff');
+    bar(bx, by, bwid, bh, M.en, 100, '#4fb3ff');
     [[3, 'Q'], [4, 'E']].forEach(([i, k]) => {
-      const need = Math.round(enCost(P, i)), mx = bx + 1 + (bwid - 2) * need / 100, ready = P.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
+      const need = Math.round(enCost(M, i)), mx = bx + 1 + (bwid - 2) * need / 100, ready = M.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
       ctx.fillStyle = col; ctx.fillRect(Math.round(mx) - 1, by - 3, 2, bh + 6);
-      const wait = Math.max(0, (need - P.en) / EN_REGEN);
+      const wait = Math.max(0, (need - M.en) / EN_REGEN);
       text(`${k} ${need}` + (ready ? ' ✔' : ` · ${wait.toFixed(1)}s`), mx, by - 5, 6, ready ? '#9be29b' : col, 'center');
     });
-    text(String(Math.floor(P.en)), bx + bwid - 4, by + 8, 7, '#fff', 'right'); }
+    text(String(Math.floor(M.en)), bx + bwid - 4, by + 8, 7, '#fff', 'right'); }
   hudBox(x0, y0, tw, 72, '#4a8cff');
   MV.forEach((m,i)=>{
-    const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52, cost = Math.round(enCost(P, i));      // cost: energía real (Presión del rival)
-    const enWait = Math.max(0, (cost - P.en) / EN_REGEN), cdWait = Math.max(0, P.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
+    const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52, cost = Math.round(enCost(M, i));      // cost: energía real (Presión del rival)
+    const enWait = Math.max(0, (cost - M.en) / EN_REGEN), cdWait = Math.max(0, M.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
     const ok = wait <= 0;
-    const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(P, i)];
+    const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(M, i)];
     ctx.fillStyle = '#161c2c'; ctx.fillRect(x, y, bw, h);
     ctx.strokeStyle = ok ? col : '#2c3550'; ctx.lineWidth = 2; ctx.strokeRect(x+1, y+1, bw-2, h-2);
     ctx.fillStyle = ok ? col : '#2c3550'; ctx.fillRect(x+4, y+4, m.key.length*6 + 6, 10);      // tecla
     text(m.key, x+7, y+12, 6, '#10141e');
-    const nm = mvName(P, i).toUpperCase();
+    const nm = mvName(M, i).toUpperCase();
     text(nm, x+bw/2, y+32, nm.length > 10 ? 7 : 8, ok ? '#fff' : '#6d7899', 'center');
-    if(m.en) text('EN ' + cost, x+bw-5, y+14, 6, P.en >= cost ? '#4fb3ff' : '#e8493a', 'right');
-    if(m.en){ const fr = Math.min(1, P.en / cost); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
+    if(m.en) text('EN ' + cost, x+bw-5, y+14, 6, M.en >= cost ? '#4fb3ff' : '#e8493a', 'right');
+    if(m.en){ const fr = Math.min(1, M.en / cost); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
       ctx.fillStyle = fr >= 1 ? '#9be29b' : '#4fb3ff'; ctx.fillRect(x+4, y+h-6, (bw-8)*fr, 3); }
     if(!ok){
       const total = Math.max(m.cd, cost / EN_REGEN, .01);
@@ -218,10 +218,12 @@ function draw(){
   ctx.restore();
   megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
   megaTop();                                       // destello y cartel de la megaevolución, encima de todo
+  if(g.pvp) pvpDraw();                             // combate online: avisos de conexión (js/pvp.js)
 }
 
 let last = performance.now();
 function loop(now){
   const dt = Math.min(.05, (now-last)/1000); last = now;
-  update(dt); draw(); requestAnimationFrame(loop);
+  if(g && g.pvp) pvpFrame(dt); else update(dt);    // combate online: pasos fijos sincronizados con el rival (js/pvp.js)
+  draw(); requestAnimationFrame(loop);
 }

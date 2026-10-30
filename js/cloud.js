@@ -59,7 +59,7 @@ async function cloudLoadProfile(){
 }
 async function cloudAfterLogin(){
   cloud.err = ''; await cloudLoadProfile();
-  if(!cloud.needName) await cloudSync();
+  if(!cloud.needName){ await cloudSync(); cloudFriendsLoad().then(() => { cloudRtStart(); cloudRefresh(); }); }
   cloudRefresh();
 }
 
@@ -69,7 +69,7 @@ async function cloudSetName(name){                                              
   if(!CLOUD_NAME_RE.test(name)) return 'El nombre debe tener de 3 a 16 caracteres: letras sin tilde, números o _.';
   const {error} = await cloud.sb.from('profiles').insert({id: cloud.user.id, username: name});
   if(error) return error.code === '23505' ? 'Ese nombre ya lo tiene otro jugador. Prueba con otro.' : 'No se pudo guardar el nombre: ' + error.message;
-  cloud.name = name; cloud.needName = false; return '';
+  cloud.name = name; cloud.needName = false; cloudRtStart(); return '';
 }
 
 function cloudErr(e){
@@ -101,7 +101,7 @@ async function cloudSignIn(email, pass){
   cloud.user = data.user; await cloudAfterLogin(); return '';
 }
 async function cloudSignOut(){
-  clearTimeout(cloud.timer);
+  clearTimeout(cloud.timer); cloudRtStop();
   if(cloud.user && !cloud.needName) await cloudPush().catch(() => {});                              // última subida antes de salir
   await cloud.sb.auth.signOut();
   cloud.user = null; cloud.name = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
@@ -203,6 +203,75 @@ async function cloudFriendAccept(id){
 async function cloudFriendRemove(id){                                                             // rechazar, cancelar o quitar: es borrar la fila
   const {error} = await cloud.sb.from('friendships').delete().eq('id', id);
   if(error) return cloudErr(error); await cloudFriendsLoad(); return '';
+}
+
+// ---- EN LÍNEA Y DESAFÍOS (Supabase Realtime: canal «lobby») ----
+// Presence = quién está conectado ahora mismo. Broadcast = mensajes sueltos entre jugadores (desafío, respuesta, cancelar).
+// Un desafío dura 30 s. Solo se aceptan desafíos de AMIGOS. Al aceptarse se crea cloud.match y se llama a cloudOnMatch(match) (el combate online: js/pvp.js).
+cloud.rt = null; cloud.online = {}; cloud.chal = null; cloud.match = null;
+const CLOUD_CHAL_MS = 30000;
+function cloudRtStart(){
+  if(!cloud.ok || !cloud.user || !cloud.name || cloud.rt) return;
+  const ch = cloud.sb.channel('lobby', {config: {presence: {key: cloud.user.id}, broadcast: {self: false}}});
+  ch.on('presence', {event: 'sync'}, () => {
+      const st = ch.presenceState(), on = {};
+      Object.keys(st).forEach(k => { on[k] = (st[k][0] && st[k][0].name) || ''; });
+      cloud.online = on; if(typeof cloudRenderFriends === 'function') cloudRenderFriends();
+    })
+    .on('broadcast', {event: 'challenge'}, m => cloudOnChallenge(m.payload))
+    .on('broadcast', {event: 'reply'}, m => cloudOnReply(m.payload))
+    .on('broadcast', {event: 'cancel'}, m => cloudOnCancel(m.payload))
+    .subscribe(st => { if(st === 'SUBSCRIBED') ch.track({name: cloud.name, at: Date.now()}); });
+  cloud.rt = ch;
+}
+function cloudRtStop(){
+  if(cloud.chal) clearTimeout(cloud.chal.timer);
+  if(cloud.rt){ try{ cloud.sb.removeChannel(cloud.rt); }catch(e){} }
+  cloud.rt = null; cloud.online = {}; cloud.chal = null; cloud.match = null; if(typeof cloudChalUi === 'function') cloudChalUi();
+}
+const cloudSend = (event, payload) => { if(cloud.rt) cloud.rt.send({type: 'broadcast', event, payload}); };
+const cloudBusy = () => (typeof g !== 'undefined' && g && !g.over) || !!cloud.match;               // ya hay un combate en marcha (o uno online preparándose)
+const cloudNoTeam = () => typeof team !== 'undefined' && team.length !== 3;                          // para el combate online hace falta un equipo de 3 Pokémon
+function cloudChalEnd(msg){ if(cloud.chal) clearTimeout(cloud.chal.timer); cloud.chal = null; if(typeof cloudChalUi === 'function') cloudChalUi(); if(msg && typeof toast === 'function') toast(msg); }
+function cloudChalTimer(id){ return setTimeout(() => { if(cloud.chal && cloud.chal.id === id){ const c = cloud.chal; if(c.dir === 'out') cloudSend('cancel', {id, from: cloud.user.id, to: c.uid}); cloudChalEnd(c.dir === 'out' ? c.name + ' no ha respondido.' : 'Desafío de ' + c.name + ' caducado.'); } }, CLOUD_CHAL_MS); }
+
+function cloudChallenge(f){                                                                        // f = {uid, name} de un amigo. Devuelve un texto de error o ''
+  if(!cloud.rt) return 'Aún no hay conexión en línea. Espera un momento.';
+  if(cloud.chal) return 'Ya hay un desafío en curso.';
+  if(cloudBusy()) return 'Estás en un combate.';
+  if(cloudNoTeam()) return 'Para un combate online necesitas un equipo de 3 Pokémon (Equipo Pokémon).';
+  if(cloud.online[f.uid] === undefined) return f.name + ' no está en línea.';
+  const id = Math.random().toString(36).slice(2, 10);
+  cloud.chal = {dir: 'out', id, uid: f.uid, name: f.name, t: Date.now(), timer: cloudChalTimer(id)};
+  cloudSend('challenge', {id, from: cloud.user.id, fromName: cloud.name, to: f.uid});
+  cloudChalUi(); return '';
+}
+async function cloudOnChallenge(p){
+  if(!p || p.to !== cloud.user.id) return;
+  let fr = cloud.fr.friends.some(f => f.uid === p.from);
+  if(!fr){ await cloudFriendsLoad(); fr = cloud.fr.friends.some(f => f.uid === p.from); }          // quizá os hicisteis amigos hace un momento
+  if(!fr) return;                                                                                   // los desconocidos se ignoran
+  if(cloud.chal || cloudBusy()){ cloudSend('reply', {id: p.id, from: cloud.user.id, to: p.from, ok: false, why: 'busy'}); return; }
+  if(cloudNoTeam()){ cloudSend('reply', {id: p.id, from: cloud.user.id, to: p.from, ok: false, why: 'noteam'}); if(typeof toast === 'function') toast(p.fromName + ' te ha desafiado, pero tu equipo no tiene 3 Pokémon.'); return; }
+  cloud.chal = {dir: 'in', id: p.id, uid: p.from, name: p.fromName || '(jugador)', t: Date.now(), timer: cloudChalTimer(p.id)};
+  cloudChalUi(); if(typeof Sfx !== 'undefined' && Sfx.play) try{ Sfx.play('click'); }catch(e){}
+}
+function cloudAnswer(ok){                                                                           // el jugador contesta a un desafío recibido
+  const c = cloud.chal; if(!c || c.dir !== 'in') return;
+  cloudSend('reply', {id: c.id, from: cloud.user.id, to: c.uid, ok});
+  if(ok) cloudMatchStart(c); else cloudChalEnd();
+}
+function cloudCancelChal(){ const c = cloud.chal; if(!c) return; if(c.dir === 'out') cloudSend('cancel', {id: c.id, from: cloud.user.id, to: c.uid}); cloudChalEnd(); }
+function cloudOnReply(p){
+  const c = cloud.chal; if(!p || p.to !== cloud.user.id || !c || c.dir !== 'out' || c.id !== p.id) return;
+  if(p.ok) cloudMatchStart(c); else cloudChalEnd(c.name + (p.why === 'busy' ? ' está ocupado.' : p.why === 'noteam' ? ' no tiene un equipo de 3 Pokémon.' : ' ha rechazado el desafío.'));
+}
+function cloudOnCancel(p){ const c = cloud.chal; if(!p || p.to !== cloud.user.id || !c || c.dir !== 'in' || c.id !== p.id) return; cloudChalEnd(c.name + ' ha cancelado el desafío.'); }
+function cloudMatchStart(c){                                                                        // desafío aceptado: aquí empezará el combate online
+  clearTimeout(c.timer); cloud.chal = null;
+  cloud.match = {id: c.id, opp: {uid: c.uid, name: c.name}, host: c.dir === 'out'};               // host = quien lanzó el desafío (su navegador calculará el combate)
+  if(typeof cloudChalUi === 'function') cloudChalUi();
+  if(typeof cloudOnMatch === 'function') cloudOnMatch(cloud.match);
 }
 
 addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden' && cloud.user && cloudMeta().dirty) cloudPush().catch(() => {}); });

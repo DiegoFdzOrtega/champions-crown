@@ -116,7 +116,7 @@ function swapUpdate(dt){
       fx.shake = Math.max(fx.shake, 3); if(typeof Sfx !== 'undefined') Sfx.play('sendout');
     }
   }
-  g.sw = g.sw.filter(s => { if(s.t >= s.tR + s.tT + s.tO){ s.to.ghost = false; if(s.vol && s.side === 'p') g.swCd = SWITCH_CD; if(s.side === 'p') g.swGrace = AI_SWAP.grace; return false; } return true; });    // terminó: el combate sigue con normalidad
+  g.sw = g.sw.filter(s => { if(s.t >= s.tR + s.tT + s.tO){ s.to.ghost = false; if(s.vol){ if(s.side === 'p') g.swCd = SWITCH_CD; else g.swCdE = SWITCH_CD; } if(s.side === 'p') g.swGrace = AI_SWAP.grace; return false; } return true; });    // terminó: el combate sigue con normalidad
 }
 
 // ---------------------------------------------------------------------

@@ -82,11 +82,12 @@ function cloudRenderFriends(){
   const el = document.getElementById('frList'); if(!el) return; const fr = cloud.fr;
   if(fr.err){ el.innerHTML = `<p class="warn">${cloudEsc(fr.err)}</p><button id="frRetry" class="sec">Reintentar</button>`; document.getElementById('frRetry').onclick = () => { fr.err = ''; fr.loaded = false; cloudRender(); }; return; }
   if(!fr.loaded){ el.innerHTML = '<p class="help">Cargando amigos...</p>'; return; }
-  const row = (f, btns) => `<div class="frRow"><b>${cloudEsc(f.name)}</b><span>${btns}</span></div>`;
+  const on = f => cloud.online[f.uid] !== undefined;
+  const row = (f, btns, st) => `<div class="frRow"><b>${st ? `<i class="dot${on(f) ? ' on' : ''}"></i>` : ''}${cloudEsc(f.name)}${st ? `<small>${on(f) ? 'En línea' : 'Desconectado'}</small>` : ''}</b><span>${btns}</span></div>`;
   const btn = (a, id, t, main) => `<button data-fr="${a}" data-id="${id}"${main ? ' class="main"' : ''}>${t}</button>`;
   let h = '';
   if(fr.incoming.length) h += `<h3>Solicitudes recibidas (${fr.incoming.length})</h3>` + fr.incoming.map(f => row(f, btn('accept', f.id, 'Aceptar', true) + btn('remove', f.id, 'Rechazar'))).join('');
-  h += `<h3>Tus amigos (${fr.friends.length})</h3>` + (fr.friends.length ? fr.friends.map(f => row(f, btn('remove', f.id, 'Quitar'))).join('') : '<p class="help">Todavía no tienes amigos. Escribe arriba el nombre de un jugador para enviarle una solicitud.</p>');
+  h += `<h3>Tus amigos (${fr.friends.length})</h3>` + (fr.friends.length ? fr.friends.slice().sort((a, b) => on(b) - on(a)).map(f => row(f, (on(f) ? btn('chal', f.uid, 'Desafiar', true) : '') + btn('remove', f.id, 'Quitar'), true)).join('') : '<p class="help">Todavía no tienes amigos. Escribe arriba el nombre de un jugador para enviarle una solicitud.</p>');
   if(fr.outgoing.length) h += `<h3>Solicitudes enviadas</h3>` + fr.outgoing.map(f => row(f, '<small>Esperando respuesta</small>' + btn('remove', f.id, 'Cancelar'))).join('');
   h += `<button id="frRefresh" class="sec">Actualizar lista</button>`;
   el.innerHTML = h;
@@ -94,6 +95,7 @@ function cloudRenderFriends(){
     const b = e.target.closest('button'); if(!b) return;
     if(b.id === 'frRefresh'){ b.disabled = true; await cloudFriendsLoad(); return cloudRenderFriends(); }
     if(!b.dataset.fr) return; const id = b.dataset.id, a = b.dataset.fr;
+    if(a === 'chal'){ const f = fr.friends.find(x => x.uid === id); const e = f ? cloudChallenge(f) : ''; if(e) toast(e); return; }
     if(a === 'remove' && b.textContent === 'Quitar' && !(cloudArm.id === id && Date.now() - cloudArm.t < 3500)){ cloudArm.id = id; cloudArm.t = Date.now(); b.textContent = '¿Seguro?'; return; }
     b.disabled = true;
     const err = a === 'accept' ? await cloudFriendAccept(id) : await cloudFriendRemove(id);
@@ -106,4 +108,22 @@ function openFriends(){
   cloudRender();
   clearInterval(cloudPoll);                                       // mientras esta pantalla está abierta, la lista se actualiza sola cada 15 s (solicitudes nuevas...)
   cloudPoll = setInterval(() => { if(!document.getElementById('cloudBox')){ clearInterval(cloudPoll); return; } if(cloud.user && !cloud.needName && !cloud.conflict && cloud.fr.loaded) cloudFriendsLoad().then(cloudRenderFriends); }, 15000);
+}
+
+// ---- Ventana de desafío (sale en cualquier pantalla del juego) ----
+function cloudChalUi(){
+  let o = document.getElementById('chalOv'); const c = cloud.chal, m = cloud.match;
+  if(!c && !m){ if(o) o.remove(); return; }
+  if(!o){ o = document.createElement('div'); o.id = 'chalOv'; o.className = 'dlOv'; document.body.appendChild(o); }
+  if(m && typeof pvpStart === 'function'){ o.remove(); return; }                                   // el combate online (js/pvp.js) lleva su propio aviso
+  if(m){
+    o.innerHTML = `<div class="dlBox chalBox"><h2>¡Desafío aceptado!</h2><p>Combate contra <b>${cloudEsc(m.opp.name)}</b>.</p><p class="help">El combate online llegará en el siguiente paso. Por ahora, el desafío ya funciona: os habéis conectado.</p><button id="chalOk" class="main">Vale</button></div>`;
+    document.getElementById('chalOk').onclick = () => { cloud.match = null; cloudChalUi(); }; return;
+  }
+  const inc = c.dir === 'in';
+  o.innerHTML = `<div class="dlBox chalBox"><h2>${inc ? '¡Te han desafiado!' : 'Desafío enviado'}</h2>
+    <p>${inc ? `<b>${cloudEsc(c.name)}</b> te desafía a un combate.` : `Esperando a que <b>${cloudEsc(c.name)}</b> responda...`}</p>
+    <div class="cbtns" style="justify-content:center">${inc ? '<button id="chalYes" class="main">Aceptar</button><button id="chalNo">Rechazar</button>' : '<button id="chalNo">Cancelar</button>'}</div></div>`;
+  const y = document.getElementById('chalYes'); if(y) y.onclick = () => cloudAnswer(true);
+  document.getElementById('chalNo').onclick = () => inc ? cloudAnswer(false) : cloudCancelChal();
 }

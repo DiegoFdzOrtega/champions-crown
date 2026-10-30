@@ -18,7 +18,10 @@ const PATCHES = [
       'Nuevo: en Amigos puedes crear una cuenta (nombre de jugador, email y contraseña) para guardar tu partida en internet y jugarla desde otro ordenador. Es opcional.',
       'Tu partida se sube sola unos segundos después de cada cambio. Si ya tenías partida y la cuenta tiene otra, el juego te pregunta cuál conservar (y guarda una copia de seguridad).',
       'Lista de amigos: busca a un jugador por su nombre, envíale una solicitud y, cuando la acepte, aparecerá en tu lista. Las solicitudes recibidas se aceptan o se rechazan desde la misma pantalla.',
-      'Próximamente: combates contra tus amigos.']},
+      'Verás qué amigos están en línea (punto verde) y podrás desafiarlos. Te avisa una ventana con Aceptar o Rechazar en cualquier pantalla del juego (el desafío caduca a los 30 segundos).',
+      '¡Combate online en tiempo real! Cuando un amigo acepta tu desafío, los dos entráis a la arena con vuestros equipos de 3 Pokémon (hace falta un equipo completo). Cada uno controla el suyo con sus teclas de siempre, incluidos el cambio de Pokémon (1·2·3) y la megaevolución (R).',
+      'Es un combate amistoso: no da recompensas ni toca tu progreso. Con Esc puedes abandonar (el combate no se pausa) y al terminar tienes un botón de Revancha.',
+      'Los dos jugadores deben tener la misma versión del juego: si no coincide, el juego te lo dice y basta con recargar la página (Ctrl+F5).']},
     {t:'Ver datos', i:[
       'Los IVs y los EVs se suben con barras que arrastras (antes eran botones +5 / +10). Cada paso gasta una Chapa Dorada (+5 IV) o Plateada (+10 EV).',
       'Los cambios se aplican con el botón «Aplicar cambios» (o «Deshacer» para soltarlos); no se gasta ninguna chapa hasta entonces.']}

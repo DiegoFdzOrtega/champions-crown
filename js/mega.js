@@ -94,6 +94,7 @@ function megaCan(f){
 }
 function megaPlayer(){                                                          // tecla R y clic en el hueco MEGA
   if(!g || g.over || g.paused || g.count > 0) return false;
+  if(g.pvp){ pvpEvent('mg'); return true; }                                      // combate online: se manda como pulsación (js/pvp.js)
   const P = g.p[g.pi];
   if(megaCan(P)){ megaStart(P); return true; }
   if(P.dead || P.ghost) return false;
@@ -124,7 +125,7 @@ function megaAI(E, dt){
 }
 // Aviso al empezar el combate: «¡MEGAEVOLUCIÓN LISTA!» sobre tu Pokémon (una vez por Pokémon)
 function megaHint(P){
-  if(P.megaKey && !P.megaDone && !megaUsed('p') && !P.megaHinted && !P.dead && !P.ghost && !g.mega){ P.megaHinted = true; g.pops.push({x:P.x, y:P.y - 150, txt:'¡MEGAEVOLUCIÓN LISTA! (R)', t:2.4, c:'#ff9ae8', s:10}); }
+  if(P.megaKey && !P.megaDone && !megaUsed(megaSide(P)) && !P.megaHinted && !P.dead && !P.ghost && !g.mega){ P.megaHinted = true; g.pops.push({x:P.x, y:P.y - 150, txt:'¡MEGAEVOLUCIÓN LISTA! (R)', t:2.4, c:'#ff9ae8', s:10}); }
 }
 
 // ---------------------------------------------------------------------
@@ -247,8 +248,8 @@ function megaBadgeRect(){                                                       
   return {x: W / 2 + (lx - W / 2) * k, y: H + (ly - H) * k, w: lw * k, h: lh * k, lx, ly, lw, lh};
 }
 function megaBadgeState(){                                                       // 'ready' | 'used' | 'noring' | null (no se enseña)
-  const P = g && g.p[g.pi]; if(!P || P.dead || g.over || g.mega) return null;
-  if(P.megaKey && !P.megaDone) return megaUsed('p') ? 'used' : 'ready';
+  const P = g && myMon(); if(!P || P.dead || g.over || g.mega) return null;
+  if(P.megaKey && !P.megaDone) return megaUsed(meSide()) ? 'used' : 'ready';
   if(P.megaNeedRing) return 'noring';
   return null;
 }
@@ -256,7 +257,7 @@ function megaBadgeOn(){ return megaBadgeState() === 'ready' && g.count <= 0; }
 function megaBadgeAt(mx, my){ if(!megaBadgeState()) return false; const r = megaBadgeRect(); return mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h; }
 function megaHud(){                                                              // la llama draw() al final
   const st = megaBadgeState(); if(!st) return;
-  const P = g.p[g.pi], r = megaBadgeRect(), t = performance.now() / 1000, hov = megaBadgeAt(mouse.x, mouse.y), ok = st === 'ready';
+  const P = myMon(), r = megaBadgeRect(), t = performance.now() / 1000, hov = megaBadgeAt(mouse.x, mouse.y), ok = st === 'ready';
   hudAt(W / 2, H, () => {
     hudBox(r.lx, r.ly, r.lw, r.lh, ok ? hue(t * 180, .6 + .4 * Math.sin(t * 6)) : '#2c3550');
     if(hov && ok){ ctx.fillStyle = 'rgba(255,154,232,.12)'; ctx.fillRect(r.lx + 2, r.ly + 2, r.lw - 4, r.lh - 4); }

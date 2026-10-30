@@ -21,6 +21,7 @@ function floorFight(n){                          // n = 0 es el primer líder
 let pzAct = null;                                                // acción pendiente de confirmar: salir o reiniciar
 function pauseBattle(on){
   if(!g || g.over) return;
+  if(g.pvp){ if(on) pvpMenu(); return; }                         // combate online: no se puede pausar, Esc abre el menú de abandonar (js/pvp.js)
   g.paused = on; $('pause').classList.toggle('hide', !on); Music.duck(on); $('pMus').textContent = save.mute ? 'Sonido: no (M)' : 'Sonido: sí (M)';
   if(on){
     for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; $('pBtns').classList.remove('hide'); $('pAsk').classList.add('hide'); $('pGo').focus();   // sueltas teclas y ratón para que no se quede nada pulsado
@@ -46,6 +47,7 @@ function restartBattle(){                                        // empieza el m
   el('pMus').onclick = () => { Music.toggleMute(); el('pMus').textContent = save.mute ? 'Sonido: no (M)' : 'Sonido: sí (M)'; }; }
 
 function endBattle(won){
+  if(g.pvp) return pvpEnd(won);                                 // combate online: won = ¿ganó el bando 'p'? (js/pvp.js)
   if(g.o.campo) return campoEnd(won);                          // Campo de Entrenamiento: ver campo.js
   g.over = true;
   const o = g.o, F = FLOORS[o.n], b = document.getElementById('rBtns'); b.innerHTML = '';

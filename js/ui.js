@@ -33,7 +33,7 @@ addEventListener('keydown', e=>{
 addEventListener('keyup', e=> keys[e.code] = false);
 addEventListener('blur', ()=>{ for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; });
 function setMouse(e){ const r = cv.getBoundingClientRect(); mouse.x = (e.clientX-r.left)*W/r.width; mouse.y = (e.clientY-r.top)*H/r.height; }
-cv.addEventListener('mousemove', e=>{ setMouse(e); const k = g && !g.paused ? hudIconAt(mouse.x, mouse.y) : -1; cv.style.cursor = k >= 0 && !g.p[k].dead && k !== g.pi ? 'pointer' : ''; });   // manita sobre los cuadritos del equipo
+cv.addEventListener('mousemove', e=>{ setMouse(e); const k = g && !g.paused ? hudIconAt(mouse.x, mouse.y) : -1; cv.style.cursor = k >= 0 && !myList()[k].dead && k !== myIdx() ? 'pointer' : ''; });   // manita sobre los cuadritos del equipo
 cv.addEventListener('mousedown', e=>{ setMouse(e);
   if(e.button===0 && g && !g.over && !g.paused && megaBadgeAt(mouse.x, mouse.y)){ megaPlayer(); return; }     // clic en el hueco de megaevolución
   if(e.button===0 && g && !g.over && !g.paused){ const k = hudIconAt(mouse.x, mouse.y); if(k >= 0){ switchMon(k); return; } }     // clic en un cuadrito del equipo = cambiar de Pokémon (no dispara)
