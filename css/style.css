@@ -1252,10 +1252,12 @@ button.leg:disabled{box-shadow:none}
 @media(max-width:700px){.sa-body{grid-template-columns:1fr}.sa-cats{flex-direction:row;flex-wrap:wrap}.sa-sign{font-size:1rem;padding:.5rem 1rem}.sa-bal{position:static;margin:.4rem 0}}
 
 /* ---- PERFIL › Personaje (chico / chica del panel VS) ---- */
-.gen-row{display:flex;gap:1rem;margin:.8rem 0 1.2rem}
+.gen-row{display:flex;flex-wrap:wrap;gap:1rem;margin:.8rem 0 1.2rem}
 .gen-row button{display:flex;flex-direction:column;align-items:center;gap:.4rem;width:8rem;padding:.7rem .5rem;background:#0d1117;border:2px solid #2d4a7c;border-radius:.8rem;color:var(--text);cursor:pointer}
 .gen-row button .skin{height:5.5rem}
 .gen-row button.on{border-color:var(--acc);box-shadow:0 0 1rem #ffcc3344}
+.gen-row button.lock{border-color:#2a3550;color:#6d7899}
+.gen-row button.lock .skin{filter:brightness(0) opacity(.45)}      /* bloqueado: silueta */
 
 /* ---- PANEL VS: pantalla previa al combate (js/vspanel.js) · izquierda roja = tú · derecha = el rival (azul, o el color de su tipo si es un líder) · corte en diagonal ---- */
 #vs{position:fixed;inset:0;z-index:80;overflow:hidden;background:#0a0e18;cursor:pointer;user-select:none}
@@ -1674,7 +1676,7 @@ button.leg:disabled{box-shadow:none}
 .utitle{font-size:.62rem;color:#a9d4ff}
 .frames{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0 1rem}
 .ui .frb{position:relative;display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.6rem .7rem;min-width:5.4rem;font-size:.62rem}
-.frb i{display:block;width:2.6rem;height:2.6rem;background:#0d1117;border:2px solid #3ea6ff}
+.frb i{display:block;width:3.4rem;height:3.4rem;background:#0d1117;border:2px solid #3ea6ff}
 .frb.on{border-color:#ffcc33;box-shadow:0 0 .8rem rgba(255,204,51,.4)}
 .frb.lock{opacity:.45}
 .frb u{position:absolute;right:.3rem;top:.2rem;text-decoration:none;font-size:.7rem}
@@ -1745,10 +1747,9 @@ button.leg:disabled{box-shadow:none}
 .fp-fav.shiny{border-color:#ffd23a;box-shadow:0 0 1rem rgba(255,210,58,.35)}
 .fp-fav canvas{width:7.2rem;height:7.2rem;image-rendering:pixelated;display:block;margin:0 auto .4rem}
 .fp-fav b{font-size:.75rem;font-weight:normal}
-.fp-meds{display:grid;grid-template-columns:repeat(4,3.6rem);gap:.7rem}
-.fp-med{display:block;width:3.6rem;height:3.6rem;padding:.2rem;background:rgba(6,10,20,.55);border:1px solid color-mix(in srgb,var(--ac) 40%,#243a66);box-sizing:border-box}
-.fp-med .amedal{width:100%;height:100%}
-.fp-card .fp-medn{font-size:.68rem;color:#8fb3e8;margin:.8rem 0 0;line-height:1.5}
+.fp-trcol{text-align:center}
+.fp-trainer{display:flex;justify-content:center;align-items:flex-end;height:11rem}
+.fp-trainer .skin{height:100%;width:auto;filter:drop-shadow(0 .4rem .6rem rgba(0,0,0,.5))}
 @media (max-width:860px){.fp-cups{grid-template-columns:repeat(5,minmax(0,1fr))}.fp-main{grid-template-columns:1fr}.fp-bottom{grid-template-columns:1fr}.fp-favs{flex-wrap:wrap}}
 
 /* =====================================================================

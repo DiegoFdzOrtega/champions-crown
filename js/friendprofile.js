@@ -1,7 +1,7 @@
 "use strict";
 /* =====================================================================
    PERFIL DE AMIGOS: cada jugador publica una «tarjeta» con un resumen suyo y sus amigos pueden abrirla desde Amigos.
-   - La tarjeta es un trozo pequeño de datos (avatar, marco, título, cifras, 3 favoritos y logros destacados). NO lleva tu partida, ni BP, ni tickets.
+   - La tarjeta es un trozo pequeño de datos (avatar, marco, título, cifras, 3 favoritos y personaje). NO lleva tu partida, ni BP, ni tickets.
    - Se guarda en la tabla «cards» de Supabase (fila = user_id). Reglas (RLS): solo tú la escribes, y solo la leen tú y tus AMIGOS ACEPTADOS (SQL en el README).
    - fpCard()      construye MI tarjeta a partir de save.
    - fpPublish()   la sube si ha cambiado (la llama cloudPush y también al iniciar sesión). Con save.pubProfile = false borra la fila (nadie la ve).
@@ -18,15 +18,14 @@ const fpRegions = () => ROOM_LEAGUES.map(r => r[0]);                            
 // ---- Mi tarjeta ----
 function fpCard(){
   const claimed = ACHIEVEMENTS.filter(a => achGet(a.id).claimed);
-  const top = claimed.slice().sort((a, b) => ((b.secret ? 1e6 : 0) + ((b.reward && b.reward.bp) || 0)) - ((a.secret ? 1e6 : 0) + ((a.reward && a.reward.bp) || 0))).slice(0, 8).map(a => a.id);
   const shV = favShinySaved();
   return {
-    v: FP_VER, nm: fpStr(save.name, 10), g: save.gender === 'f' ? 'f' : 'm',
+    v: FP_VER, nm: fpStr(save.name, 10), g: skinOf(save.gender),
     av: (() => { const a = save.avatar && avatarList().find(x => x.file === save.avatar); return a && avatarUnlocked(a) ? a.file : ''; })(),
     fr: achActiveFrame(), ti: achActiveTitle() ? save.title : '',
     box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length, sec: claimed.filter(a => a.secret).length,
     lg: REGIONS.filter(champAny), camp: fpNum(ACH_METRICS.campo_wins({})),
-    top, fav: favSaved().map((d, i) => d ? [d, shV[i]] : null).filter(Boolean)
+    fav: favSaved().map((d, i) => d ? [d, shV[i]] : null).filter(Boolean)
   };
 }
 
@@ -58,7 +57,7 @@ function fpView(card, o){
   const tiA = card.ti && achDef(fpStr(card.ti, 60)), title = tiA && tiA.reward && tiA.reward.title ? tiA.reward.title : '';
   const box = fpNum(card.box), sh = fpNum(card.sh), ach = fpNum(card.ach), achT = fpNum(card.achT) || ACHIEVEMENTS.length, camp = fpNum(card.camp), sec = fpNum(card.sec), secT = ACHIEVEMENTS.filter(a => a.secret).length;
   const lg = Array.isArray(card.lg) ? card.lg.filter(r => REGIONS.includes(r)) : [];
-  const top = (Array.isArray(card.top) ? card.top : []).map(id => achDef(fpStr(id, 60))).filter(Boolean).slice(0, 8);
+  const tr = card.g === 'f' ? 'f' : (card.g === 'r' ? (String(o.name || '').toLowerCase() === VS_MASTERS_USER ? 'r' : 'm') : (vsKnown(card.g) ? card.g : 'm'));     // personaje (de vspanel.js); el Masters solo se ve si es de verdad de esa cuenta
   const fav = (Array.isArray(card.fav) ? card.fav : []).map(p => Array.isArray(p) ? [fpNum(p[0]), p[1] ? 1 : 0] : null).filter(p => p && p[0] && mon(p[0]) && !hidden(p[0])).slice(0, 3);
   const tile = (label, val, mine) => `<div class="fp-tile"><small>${label}</small><b>${val}</b>${self ? '' : `<em>Tú: ${mine}</em>`}</div>`;
   const online = !self && o.uid && cloud.online[o.uid] !== undefined;
@@ -82,9 +81,8 @@ function fpView(card, o){
     <div class="fp-bottom">
       <div><div class="fp-sub">Pokémon favoritos</div>
         ${fav.length ? `<div class="fp-favs">${fav.map(([d, s]) => `<div class="fp-fav${s ? ' shiny' : ''}"><canvas width="96" height="96" data-d="${d}" data-s="${s}"></canvas><b>${s ? '⭐ ' : ''}${cloudEsc(mon(d).name)}</b></div>`).join('')}</div>` : '<p class="help">No ha elegido favoritos.</p>'}</div>
-      <div><div class="fp-sub">Logros destacados</div>
-        ${top.length ? `<div class="fp-meds">${top.map(a => `<span class="fp-med" data-a="${cloudEsc(a.id)}" title="${cloudEsc(a.name)}${a.secret ? ' (secreto)' : ''}"></span>`).join('')}</div>` : '<p class="help">Todavía no ha reclamado logros.</p>'}
-        ${top.length ? `<p class="fp-medn">${top.slice(0, 2).map(a => cloudEsc(a.name)).join(' · ')}${top.length > 2 ? ' · …' : ''}</p>` : ''}</div>
+      <div class="fp-trcol"><div class="fp-sub">Entrenador</div>
+        <div class="fp-trainer"><span data-tr="${tr}"></span></div></div>
     </div></div>`;
 }
 function fpPaint(root){                                                   // sprites, trofeos y medallas (necesitan el DOM ya puesto)
@@ -93,7 +91,7 @@ function fpPaint(root){                                                   // spr
     x.fillStyle = '#2a1a10'; x.fillRect(5, 22, 17, 3); x.fillStyle = '#5a3a22'; x.fillRect(5, 22, 17, 1);
   });
   root.querySelectorAll('canvas[data-d]').forEach(c => paintSprite(c, +c.dataset.d, {sc:5, fit:90, shiny: c.dataset.s === '1'}));
-  root.querySelectorAll('.fp-med').forEach(m => { const a = achDef(m.dataset.a); if(a) m.appendChild(achMedal(a)); });
+  root.querySelectorAll('[data-tr]').forEach(el => setPlayerSkin(el, el.dataset.tr, true));                   // el personaje (el mismo dibujo que el panel VS)
   root.querySelectorAll('img.fp-av').forEach(im => { im.onerror = () => { im.onerror = null; im.src = defaultAvatar(); }; });
 }
 

@@ -6,6 +6,17 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Más personajes', date:'31 oct 2026', sections:[
+    {t:'Personajes', i:[
+      'Hay 10 personajes nuevos para el panel VS y tu tarjeta de entrenador: Ash, Lucas, Lyra, Maya, Nate, Akari, la chica kimono y N, más las versiones Masters de Lance y de N.',
+      'Se desbloquean con logros nuevos (pestaña Entrenadores en Logros): consigue en shiny a tres Pokémon de su equipo (seis en las versiones Masters) y reclama el logro.',
+      'En Perfil › Personaje salen todos; los que aún no tienes se ven como una silueta con candado, y al pulsarlos te dicen qué logro te falta.']}
+  ]},
+  {v:'Tu entrenador en la tarjeta', date:'31 oct 2026', sections:[
+    {t:'Perfil de amigos', i:[
+      'En la tarjeta de entrenador, el recuadro de «Logros destacados» se ha sustituido por tu personaje (Red, Leaf o Red Masters, el que elijas en Perfil › Personaje), centrado abajo a la derecha. Se sigue viendo el número de logros en las cifras de arriba.',
+      'Los personajes nuevos se desbloquean con logros (mira «Más personajes»).']}
+  ]},
   {v:'Controles y música', date:'31 oct 2026', sections:[
     {t:'Ajustes', i:[
       'Música separada: ahora tienes un volumen para la música del menú y otro para la música de combate (y de victoria), además del volumen general y el de efectos. Se pueden subir más que antes.',

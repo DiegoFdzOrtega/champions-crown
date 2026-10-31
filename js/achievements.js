@@ -99,7 +99,7 @@ const ACHIEVEMENT_DATA = [
   {"id":"sec_mewtwo_sh", "cat":"secreto", "secret":true, "name":"Clon esmeralda",         "hint":"Un clon creado en un laboratorio, pero de otro color.",  "desc":"Consigue a Mewtwo shiny.",                              "icon":"gacha", "metric":"shiny_dex", "dex":[150], "goal":1, "reward":{"bp":1500, "tickets":8, "title":"Clon esmeralda", "frame":"mewtwo"}},
   {"id":"sec_campo_250", "cat":"secreto", "secret":true, "name":"Incansable",              "hint":"Entrenar, entrenar y entrenar un poco más.",             "desc":"Vence a 250 entrenadores en el Campo de Entrenamiento.", "icon":"campo", "metric":"campo_wins", "goal":250, "reward":{"bp":2500, "tickets":15, "title":"Incansable", "frame":"campo"}},
 ];
-const ACH_CATS = {historia:'Historia', campo:'Campo de Entrenamiento', coleccion:'Colección', secreto:'Secretos'};
+const ACH_CATS = {historia:'Historia', campo:'Campo de Entrenamiento', coleccion:'Colección', entrenadores:'Entrenadores', secreto:'Secretos'};
 
 // ---- Métricas: cada una devuelve el número actual que se compara con "goal" ----
 const ACH_PROG = (kind, region) => FLOORS.filter(F => F.kind === kind && (!region || F.region === region) && F.idx < progAny(F.region)).length;   // combates de la Historia ya superados
@@ -128,6 +128,11 @@ ACHIEVEMENT_DATA.forEach(registerAchievement);
 REGIONS_DEX.filter(r => regionSize(r.a, r.b) > 0).forEach(r => registerAchievement({id:'dex_' + r.n.toLowerCase(), cat:'coleccion', name:'Pokédex de ' + r.n,
   desc:`Consigue todos los Pokémon de ${r.n}. Te dan su Amuleto Arcoíris: más shiny en el Gachapon de ${r.n}.`, icon:'dex', metric:'dex_region', region:r.n, goal:regionSize(r.a, r.b),
   reward:{bp:1500, tickets:10, charm:r.n, title:'Pokédex de ' + r.n}}));
+// Un logro por cada personaje de TRAINERS (vspanel.js): consigue esos Pokémon EN SHINY y reclama el logro para desbloquear al personaje (se elige en Perfil › Personaje)
+const dexNames = list => { const n = list.map(d => { try{ return mon(d).name; }catch(e){ return '#' + d; } }); return n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0]; };
+TRAINERS.forEach(t => registerAchievement({id:'tr_' + t.id, cat:'entrenadores', name:t.name, desc:`Consigue en versión shiny a ${dexNames(t.dex)}. Desbloquea al personaje ${t.name}.`, icon:'dex',
+  metric:'shiny_dex', dex:t.dex, goal:t.dex.length, reward:{trainer:t.id}}));
+const trainerUnlocked = id => ACHIEVEMENTS.some(a => a.reward && a.reward.trainer === id && achGet(a.id).claimed);
 const achDef = id => ACHIEVEMENTS.find(a => a.id === id);
 function achGet(id){                                // estado de un logro (no modifica nada). Las partidas antiguas ya tenían "date" = cobrado
   const s = save.ach[id], d = achDef(id), claimed = !!(s && s.date);
@@ -135,7 +140,7 @@ function achGet(id){                                // estado de un logro (no mo
 }
 const achClaimedCount = () => ACHIEVEMENTS.filter(a => achGet(a.id).claimed).length;
 const achReadyCount = () => ACHIEVEMENTS.filter(a => { const s = achGet(a.id); return s.done && !s.claimed; }).length;
-const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : '', r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key] ? KEY_ITEMS[r.key].n : '', r.title ? `título «${r.title}»` : '', r.frame && typeof ACH_FRAMES !== 'undefined' && ACH_FRAMES[r.frame] ? `marco ${ACH_FRAMES[r.frame].n}` : ''].filter(Boolean).join(' + ') : '';
+const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : '', r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key] ? KEY_ITEMS[r.key].n : '', r.title ? `título «${r.title}»` : '', r.frame && typeof ACH_FRAMES !== 'undefined' && ACH_FRAMES[r.frame] ? `marco ${ACH_FRAMES[r.frame].n}` : '', r.trainer ? `personaje ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}` : ''].filter(Boolean).join(' + ') : '';
 
 // ---- Recompensa: Puntos de Batalla y/o tickets de Gachapon ----
 function achGrant(r){
@@ -206,7 +211,7 @@ setTimeout(() => achSync(), 900);                                               
 const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8'};   // color de cada región
 const ACH_REG_NAME = {'Unova / Teselia':'Teselia'};                                          // cómo se escribe el grupo en pantalla
 const ACH_GROUP = {primer_gimnasio:'Primeros pasos', mega_aro:'Unova / Teselia'};            // logros que van a un grupo concreto (si no, se agrupan por región o por métrica)
-const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['coleccion', 'Colección'], ['secreto', 'Secretos']];
+const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['coleccion', 'Colección'], ['entrenadores', 'Entrenadores'], ['secreto', 'Secretos']];
 let achTab = 'all', achHideDone = false; const achJust = new Set();                           // pestaña actual · ocultar los ya reclamados · logros recién reclamados (animación)
 
 // ---- Marcos de avatar y títulos de perfil: son recompensas especiales de algunos logros (reward.frame / reward.title) y se eligen en Perfil ----
@@ -301,6 +306,7 @@ function achChips(r, hidden){
   if(r.tickets) chip('tk', `${r.tickets} ticket${r.tickets > 1 ? 's' : ''}`, 'ticket', '#ff8ad8');
   if(r.title) chip('ti', `Título: ${r.title}`);
   if(r.frame && ACH_FRAMES[r.frame]) chip('fr', `Marco ${ACH_FRAMES[r.frame].n}`, null, null, null, ACH_FRAMES[r.frame].c);
+  if(r.trainer) chip('ti', `Personaje: ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}`);
   if(r.charm) chip('ch', 'Amuleto Arcoíris', null, null, CHARM_IMG);
   if(r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key]) chip('ky', KEY_ITEMS[r.key].n);
   return w;
@@ -311,6 +317,7 @@ function achGroupOf(a){
   if(ACH_GROUP[a.id]) return ACH_GROUP[a.id];
   if(a.cat === 'historia') return a.region || 'Maestro de Ligas';
   if(a.cat === 'campo') return a.metric === 'campo_tier' ? 'Dificultades' : 'Victorias';
+  if(a.cat === 'entrenadores') return a.reward && TRAINERS.some(t => t.masters && t.id === a.reward.trainer) ? 'Versiones Masters' : 'Personajes';
   if(a.cat === 'coleccion') return a.metric === 'shiny_owned' ? 'Shiny' : a.metric === 'dex_region' ? 'Pokédex' : 'Pokémon';
   return ACH_CATS[a.cat] || a.cat;
 }

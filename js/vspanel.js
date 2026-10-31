@@ -7,7 +7,7 @@
    - Se cierra solo a los pocos segundos; clic / Enter / Espacio lo salta; Esc cancela y vuelves al menú.
 
    TU PERSONAJE: la imagen  avatares/RED Y LEAF.png  trae a los dos (Red a la izquierda, Leaf a la derecha); se enseña una mitad u otra.
-   Se elige en Perfil › Personaje (save.gender: 'm' = chico, 'f' = chica, 'r' = Red Masters, solo para la cuenta yumbax). Si falta la imagen se usa el avatar clásico.
+   Se elige en Perfil › Personaje (save.gender: 'm' = chico, 'f' = chica, 'r' = Red Masters, solo para la cuenta yumbax, o el id de un personaje de TRAINERS desbloqueado con su logro). Si falta la imagen se usa el avatar clásico.
    (No sale en la lista de avatares: loadAvatars la salta.)
 
    USO:  vsIntro({name, id, path, label, enemies, go})
@@ -19,11 +19,28 @@ const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en 
 const VS_SKIN_URL = 'avatares/' + encodeURIComponent(VS_SKIN_FILE);
 // Personajes de una sola imagen (80x80, con margen transparente que se recorta al dibujarlos): 'm' = chico (Red de 3.ª gen.) · 'r' = Red Masters (EXCLUSIVO de la cuenta VS_MASTERS_USER)
 // La chica ('f') sigue siendo la mitad derecha de VS_SKIN_FILE.
-const VS_SKINS = {m: 'red-gen3.png', r: 'red-masters.png'};
+// PERSONAJES EXTRA que se desbloquean con logros (categoría «Entrenadores» de js/achievements.js): para añadir uno, pon su imagen (80x80) en avatares/ y una línea aquí.
+//   id = código que se guarda (save.gender) · name = nombre · file = imagen · dex = Pokémon que hay que tener EN SHINY para desbloquearlo (3 en los normales, 6 en los «Masters»)
+// Cada uno crea solo su logro y su recompensa «personaje» (no hay que tocar nada más). Los de Red (chico, chica y Red Masters) no están aquí: el chico y la chica son gratis y Red Masters es de una sola cuenta.
+const TRAINERS = [
+  {id: 'ash',        name: 'Ash',        file: 'ash.png',        dex: [25, 6, 658]},               // Pikachu, Charizard, Greninja
+  {id: 'lucas',      name: 'Lucas',      file: 'lucas.png',      dex: [389, 392, 395]},            // Torterra, Infernape, Empoleon
+  {id: 'lyra',       name: 'Lyra',       file: 'lyra.png',       dex: [154, 157, 160]},            // Meganium, Typhlosion, Feraligatr
+  {id: 'maya',       name: 'Maya',       file: 'maya.png',       dex: [257, 3, 267]},              // Blaziken, Venusaur, Beautifly
+  {id: 'nate',       name: 'Nate',       file: 'nate.png',       dex: [497, 500, 503]},            // Serperior, Emboar, Samurott
+  {id: 'akari',      name: 'Akari',      file: 'akari.png',      dex: [724, 157, 503]},            // Decidueye, Typhlosion, Samurott
+  {id: 'kimonogirl', name: 'Chica kimono', file: 'kimonogirl.png', dex: [196, 197, 134]},          // Espeon, Umbreon, Vaporeon
+  {id: 'n',          name: 'N',          file: 'n.png',          dex: [571, 601, 643]},            // Zoroark, Klinklang, Reshiram
+  {id: 'lance-masters', name: 'Lance Masters', file: 'lance-masters.png', masters: true, dex: [130, 148, 149, 142, 6, 373]},   // Gyarados, Dragonair, Dragonite, Aerodactyl, Charizard, Salamence
+  {id: 'n-masters',  name: 'N Masters',  file: 'n-masters.png',  masters: true, dex: [571, 601, 643, 584, 581, 567]}           // Zoroark, Klinklang, Reshiram, Vanilluxe, Swanna, Archeops
+];
+const VS_SKINS = Object.assign({m: 'red-gen3.png', r: 'red-masters.png'}, ...TRAINERS.map(t => ({[t.id]: t.file})));
+const vsKnown = g => typeof g === 'string' && Object.prototype.hasOwnProperty.call(VS_SKINS, g);       // ¿es un personaje que existe? (se usa para validar lo que llega de fuera)
 const VS_SKIN_FILES = [VS_SKIN_FILE, ...Object.values(VS_SKINS)];       // (no salen en la lista de avatares: loadAvatars las salta)
 const VS_MASTERS_USER = 'yumbax';
 const skinAllowed = g => g !== 'r' || (typeof cloud !== 'undefined' && !!cloud.name && cloud.name.toLowerCase() === VS_MASTERS_USER);   // es solo un detalle de adorno: se mira el nombre de la cuenta (Amigos)
-const skinOf = g => { g = g || save.gender; return g === 'f' ? 'f' : (g === 'r' && skinAllowed('r') ? 'r' : 'm'); };      // el personaje que se usa de verdad (si no puedes tener el Masters, el chico)
+const trainerOpen = id => typeof trainerUnlocked === 'function' && trainerUnlocked(id);          // ¿ya has reclamado el logro de ese personaje? (achievements.js)
+const skinOf = g => { g = g || save.gender; return g === 'f' ? 'f' : (g === 'r' ? (skinAllowed('r') ? 'r' : 'm') : (vsKnown(g) && g !== 'm' && trainerOpen(g) ? g : 'm')); };      // el personaje que se usa de verdad (si no lo tienes, el chico)
 const VS_AUTO_MS = 4600, VS_MIN_MS = 700;                  // se cierra solo a los 4,6 s · no se puede saltar en los primeros 0,7 s (evita dobles clics)
 // Arte VS de los rivales (como el de la pantalla VS de los juegos): si existe lideres/<región>/VS_<Nombre>.webp (o .png / vs_<nombre>), se usa en vez del retrato pequeño.
 // Solo se busca en las regiones de esta lista (así no se piden archivos que no existen).  Si no está, se usa el retrato de siempre.
@@ -52,8 +69,8 @@ function vsTrim(sp, im){                                     // recorta el marge
     sp.style.backgroundPosition = `${W > bw ? x0 / (W - bw) * 100 : 0}% ${H > bh ? y0 / (H - bh) * 100 : 0}%`;
   }catch(e){}                                                // (si el navegador lo impide, se ve entera con su margen)
 }
-function setPlayerSkin(el, g){                              // cambia 'el' por el personaje elegido: chico ('m'), chica ('f': mitad derecha de la imagen de Red y Leaf) o Red Masters ('r'); si falta la imagen se usa el avatar clásico
-  g = skinOf(g);
+function setPlayerSkin(el, g, raw){                              // cambia 'el' por el personaje elegido: chico ('m'), chica ('f': mitad derecha de la imagen de Red y Leaf) o Red Masters ('r'); si falta la imagen se usa el avatar clásico
+  g = raw ? (g === 'f' || vsKnown(g) ? g : 'm') : skinOf(g);          // raw: la tarjeta de otro jugador ya ha comprobado el personaje por su cuenta
   const sp = document.createElement('span'); sp.className = 'skin'; sp.dataset.g = g;
   el.replaceWith(sp);
   if(g === 'f'){

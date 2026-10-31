@@ -19,6 +19,11 @@ function renderMyCard(){
   el.innerHTML = (save.pubProfile === false ? '<p class="warn">Tu perfil está oculto: tus amigos no ven esta tarjeta.</p>' : '') + fpView(fpCard(), {name: (cloud && cloud.name) || save.name, self: true});
   fpPaint(el);
 }
+// Botones de Personaje: Chico y Chica (gratis), Red Masters (solo su cuenta) y los de TRAINERS (vspanel.js), que salen con candado hasta reclamar su logro (categoría «Entrenadores»)
+function genButtons(){
+  const b = (g, name, lock) => `<button type="button" data-g="${g}"${lock ? ' class="lock" title="Bloqueado"' : ''}><img alt=""><span>${lock ? '🔒 ' : ''}${name}</span></button>`;
+  return b('m', 'Chico') + b('f', 'Chica') + (skinAllowed('r') ? b('r', 'Red Masters') : '') + TRAINERS.map(t => b(t.id, t.name, !trainerUnlocked(t.id))).join('');
+}
 function openProfile(){ pfDraft = favSaved(); pfDraftS = favShinySaved(); avDraft = save.avatar || ''; renderProfile(); }
 
 function renderProfile(){
@@ -30,7 +35,7 @@ function renderProfile(){
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
     <h2>Personaje</h2>
     <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
-    <div class="gen-row" id="genRow"><button type="button" data-g="m"><img alt=""><span>Chico</span></button><button type="button" data-g="f"><img alt=""><span>Chica</span></button>${skinAllowed('r') ? '<button type="button" data-g="r"><img alt=""><span>Red Masters</span></button>' : ''}</div>
+    <div class="gen-row" id="genRow">${genButtons()}</div>
     <h2>Avatar</h2>
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
     <div class="av-grid" id="avGrid"></div>
@@ -50,8 +55,9 @@ function renderProfile(){
   renderAvatarGrid(); renderTitleFrame(); renderMyCard();
   $('nameIn').value = save.name;
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
-    setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', skinOf() === b.dataset.g);
-    b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); };
+    const lock = b.classList.contains('lock'); setPlayerSkin(b.querySelector('img'), b.dataset.g, lock); b.classList.toggle('on', !lock && skinOf() === b.dataset.g);
+    if(lock){ b.onclick = () => { const a = achDef('tr_' + b.dataset.g); toast(a ? `Se desbloquea con el logro «${a.name}» (Logros › Entrenadores): ${a.desc.split('. ')[0]}.` : 'Personaje bloqueado.'); }; return; }
+    b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); renderMyCard(); };          // (y la tarjeta de arriba cambia al momento)
   });
   $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };
   const box = $('pfSlots');
