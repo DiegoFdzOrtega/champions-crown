@@ -233,7 +233,7 @@ button.leg:disabled{box-shadow:none}
 .gc .dxh h1{color:#ffcc33;text-shadow:.1em .1em 0 #000}
 #gcTop{display:flex;gap:.6em;justify-content:flex-end}
 .gchip{font-style:normal;white-space:nowrap;flex:none;display:inline-flex;gap:.4em;align-items:center;padding:.4em .9em;border-radius:2em;background:#0b1224cc;border:2px solid #2d4a7c;color:#cfe0ff;font-size:.95em}
-.gchip b{font-weight:normal;color:#fff;font-size:1.1em}.gchip.sp{border-color:#ffcc33}.gchip.sp b{color:#ffcc33}
+.gchip b{font-weight:normal;color:#fff;font-size:1.1em}.gchip.sp{border-color:#ffcc33}.gchip.sp b{color:#ffcc33}.gchip.sv{border-color:#4de0ff}.gchip.sv b{color:#4de0ff}
 #gcTabs .tab{border-bottom:.3em solid var(--rc)}
 #gcTabs .tab.on{background:var(--rc)!important;border-color:var(--rc)!important;color:#0b1020}#gcTabs .tab.on small{color:#0b1020aa}
 #gcLeft{display:flex;flex-direction:column;min-height:0}
@@ -285,6 +285,11 @@ button.leg:disabled{box-shadow:none}
 .dx .gb.sp:active:not(:disabled){box-shadow:0 .1em 0 #8a6500}
 .dx .gb.sp:not(:disabled)::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);
   background-size:260% 100%;animation:glint 3.2s linear infinite;pointer-events:none}
+.dx .gb.sv{background:linear-gradient(115deg,#7af0ff,#a9a4ff 35%,#ff9ee0 65%,#ffe27a);color:#06222b;border-color:#e8fbff;box-shadow:0 .3em 0 #2c6f8f,0 .5em 1em #0006}
+.dx .gb.sv:hover:not(:disabled){box-shadow:0 .5em 0 #2c6f8f,0 .8em 1.4em #0008,0 0 1.4em #7af0ffaa}
+.dx .gb.sv:active:not(:disabled){box-shadow:0 .1em 0 #2c6f8f}
+.dx .gb.sv:not(:disabled)::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.6) 50%,transparent 60%);
+  background-size:260% 100%;animation:glint 3s linear infinite;pointer-events:none}
 .dx .gb:disabled{background:#1a2440;color:#6d7899;border-color:#2d4a7c;box-shadow:0 .2em 0 #0a1020;cursor:not-allowed}
 .dx .gb:disabled em{background:#0006}
 .gb .ic{width:1.4em;height:1.4em;image-rendering:pixelated}.gb b{font-weight:normal}
@@ -2023,3 +2028,17 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 .gf-row b{font-size:1.6rem;font-weight:normal;color:#fff;text-align:left}
 .gf-row small{display:block;font-size:.8rem;color:#8b98ad;margin-top:.3rem}
 @media (prefers-reduced-motion:reduce){.gf-icon{animation:none}}
+
+/* =====================================================================
+   TORRE BATALLA (js/torre.js): pantalla de la Torre y premios únicos
+   ===================================================================== */
+.twbanner{border-color:#ff9a3a}
+.twbanner h1{color:#ff9a3a}
+.tw-go{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;margin:1.4rem 0}
+.tw-go .main{padding:1.1rem 2.2rem;font-size:1.3rem;background:#ff9a3a;color:#1b0f00;border-color:#fff}
+.tw-hitos{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem;margin:1rem 0 2rem}
+.tw-h{display:flex;flex-direction:column;gap:.5rem;padding:1.1rem 1.3rem;background:#161b2c;border:2px solid #2d3a5c;font-size:.95rem;line-height:1.5}
+.tw-h b{color:#ff9a3a;font-size:1.15rem;font-weight:normal}
+.tw-h span{color:#fff}
+.tw-h em{font-style:normal;color:#8b98ad;font-size:.85rem}
+.tw-h.got{border-color:#4ccf6a;background:#13241a}.tw-h.got em{color:#4ccf6a}

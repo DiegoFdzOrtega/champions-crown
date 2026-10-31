@@ -42,10 +42,10 @@ const NAV = [
   {k:'team',    n:'EQUIPO POKÉMON',  c:'#3ea6ff', d:'Elige 3 Pokémon y equípales un objeto de combate.',                       f:()=>`Equipo: ${team.length} / 3`},
   {k:'shop',    n:'TIENDA',          c:'#ffcc33', d:'Compra tickets de Gachapon y objetos con tus Puntos de Batalla.',         f:()=>`Puntos de Batalla: ${save.bp}`},
   {k:'dex',     n:'POKÉDEX',         c:'#3ea6ff', d:'Tu colección de Pokémon desbloqueados.',                                  f:()=>`Desbloqueados: ${boxCount()} / ${DEX_SHOWN}`},
-  {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}`},
+  {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}` + (save.ticketsS ? ` · Variocolor: ${save.ticketsS}` : '')},
   {k:'set',     n:'AJUSTES',         c:'#9aa6b8', d:'Nombre, volumen, controles y pantalla completa.',                         f:()=>'Ajusta el juego a tu gusto'},
   {k:'rank',    n:'CLASIFICATORIA',  c:'#6d7899', d:'Aquí verás las mejores puntuaciones de todos los jugadores. Necesita cuentas de usuario, así que llegará cuando el juego esté en internet.', f:()=>'PRÓXIMAMENTE', soon:true},
-  {k:'tower',   n:'TORRE BATALLA',   c:'#6d7899', d:'Se desbloquea al derrotar a los Campeones de todas las Ligas Pokémon (las 9 regiones de la Historia).', f:()=>leaguesWon() < REGIONS.length ? `BLOQUEADA · Ligas superadas: ${leaguesWon()} / ${REGIONS.length}` : 'Desbloqueada: pronto abrirá sus puertas', get lock(){ return leaguesWon() < REGIONS.length; }}
+  {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'Sube piso a piso sin parar: tus Pokémon se curan en cada piso, los rivales son cada vez más fuertes y cada piso da premios. Se desbloquea al vencer a los Campeones de todas las Ligas disponibles.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : `BLOQUEADA · Ligas superadas: ${leaguesAvail().length - towerNeed()} / ${leaguesAvail().length}`, get lock(){ return !towerOpen(); }}
 ];
 let navIdx = 0;
 const thumbs = [], dexThumbs = [];                // miniaturas que se dibujan cuando cargan los sprites
@@ -60,7 +60,7 @@ function pick(i){
 function refreshHud(){
   $('pName').textContent = trainerName(); $('crumbs').innerHTML = crumbsHtml(''); refreshAvatars();     // nombre, migas de pan y avatar activo
   if(typeof dailyRefresh === 'function') dailyRefresh();
-  $('bp').textContent = save.bp; $('tk').textContent = save.tickets + (save.ticketsL ? ` +${save.ticketsL}★` : ''); pick(navIdx);
+  $('bp').textContent = save.bp; $('tk').textContent = save.tickets + (save.ticketsL ? ` +${save.ticketsL}★` : '') + (save.ticketsS ? ` +${save.ticketsS}✦` : ''); pick(navIdx);
 }
 function buildMain(){
   const nav = $('nav'); nav.innerHTML = '';
@@ -74,7 +74,7 @@ function buildMain(){
 }
 function enter(k){
   ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>toast('La Clasificatoria llegará próximamente.'), friends:openFriends, bag:openBag, set:openSettings,
-    tower:()=>toast(leaguesWon() < REGIONS.length ? `La Torre Batalla se desbloquea al derrotar todas las Ligas (${leaguesWon()}/${REGIONS.length} superadas).` : 'La Torre Batalla está desbloqueada: pronto abrirá sus puertas.')})[k]();
+    tower:()=>towerOpen() ? openTorre() : toast(`La Torre Batalla se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).`)})[k]();
 }
 function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)
 function goStory(){ buildStory(); show('tower'); }
@@ -116,7 +116,7 @@ const leaguesWon = () => REGIONS.filter(champAny).length;      // Ligas superada
 function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
   storyToggle($('rMode'), buildRegions);                                                            // botón Fácil / Difícil, cada una con su avance (js/dificultad.js)
-  $('rTower').textContent = leaguesWon() < REGIONS.length ? `Torre Batalla: se desbloquea al derrotar a los Campeones de todas las Ligas (${leaguesWon()}/${REGIONS.length} superadas).` : 'Torre Batalla: ¡has superado todas las Ligas!';
+  $('rTower').textContent = !towerOpen() ? `Torre Batalla: se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).` : 'Torre Batalla: ¡abierta! Pulsa «Torre Batalla» en el menú principal.';
   REGIONS.forEach((n,i)=>{
     const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
     const open = playable && (i === 0 || champOf(prev) || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior

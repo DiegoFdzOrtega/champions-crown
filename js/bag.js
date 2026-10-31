@@ -8,8 +8,8 @@ const bagSt = {q:''};
 
 function bagSections(){
   const q = bagSt.q.trim().toLowerCase(), has = n => !q || n.toLowerCase().includes(q), out = [];
-  const tk = [['ticket_n', 'Ticket Gachapon', save.tickets, 'Se gasta en el Gachapon para conseguir Pokémon.'], ['ticket_l', 'Ticket Legendario', save.ticketsL, 'Se gasta en el Gachapon para intentar un Pokémon legendario.']]
-    .filter(([, n, c]) => c > 0 && has(n)).map(([id, n, c, d]) => ({id, n, c, d, tk: id === 'ticket_l' ? '#ffcc33' : '#ff3ea5'}));
+  const tk = [['ticket_n', 'Ticket Gachapon', save.tickets, 'Se gasta en el Gachapon para conseguir Pokémon.'], ['ticket_l', 'Ticket Legendario', save.ticketsL, 'Se gasta en el Gachapon para intentar un Pokémon legendario.'], ['ticket_s', 'Ticket Variocolor', save.ticketsS, 'Se gasta en el Gachapon («Tirar variocolor») para conseguir un shiny que aún no tengas en la región elegida. Solo se consigue al sacar un shiny repetido.']]
+    .filter(([, n, c]) => c > 0 && has(n)).map(([id, n, c, d]) => ({id, n, c, d, tk: id === 'ticket_l' ? '#ffcc33' : id === 'ticket_s' ? '#4de0ff' : '#ff3ea5'}));
   if(tk.length) out.push({t:'Tickets', list:tk});
   const ky = typeof KEY_ITEMS === 'undefined' ? [] : Object.keys(KEY_ITEMS).filter(id => hasKey(id) && has(KEY_ITEMS[id].n)).map(id => ({id, n:KEY_ITEMS[id].n, c:1, d:KEY_ITEMS[id].d, img:KEY_ITEMS[id].img, key:true}));
   if(ky.length) out.push({t:'Objetos clave', list:ky});

@@ -39,7 +39,7 @@ function openGacha(){
 function renderGacha(){
   const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = regionSize(a, b), col = REG_COL[reg];
   $('gachav').style.setProperty('--c', col);
-  $('gcTop').innerHTML = `<i class="gchip">🎟 <b>${save.tickets}</b> tickets</i><i class="gchip sp">🌟 <b>${save.ticketsL}</b> especiales</i><i class="gchip">🪙 <b>${save.bp}</b> PB</i>`;
+  $('gcTop').innerHTML = `<i class="gchip">🎟 <b>${save.tickets}</b> tickets</i><i class="gchip sp">🌟 <b>${save.ticketsL}</b> especiales</i>${save.ticketsS ? `<i class="gchip sv">✨ <b>${save.ticketsS}</b> variocolor</i>` : ''}<i class="gchip">🪙 <b>${save.bp}</b> PB</i>`;
   $('gcTabs').innerHTML = REGIONS_DEX.map(r =>
     `<button class="tab${r.n === reg ? ' on' : ''}" style="--rc:${REG_COL[r.n]}" data-r="${r.n}">${r.n} <small>${ownedIn(r.n)}/${regionSize(r.a, r.b)}</small></button>`).join('');
 
@@ -47,6 +47,8 @@ function renderGacha(){
   const feat = [...pool(reg, 'legendary'), ...pool(reg, 'epic')].slice(0, 6);
   const btn = (mode, label, n, l) => `<button class="gb${mode === 'special' ? ' sp' : ''}" data-mode="${mode}" ${canPull(mode) ? '' : 'disabled title="No tienes tickets suficientes"'}>
       <span>${label}</span><em><canvas class="ic" data-sp="${l ? 1 : 0}" width="16" height="16"></canvas><b>${l || n}</b></em></button>`;
+  const svOk = canPull('shiny', reg), svWhy = !shinyLeft(reg).length ? 'Ya tienes todos los shiny de esta región' : 'Necesitas un ticket variocolor (se gana al sacar un shiny repetido)';
+  const svBtn = `<button class="gb sv" data-mode="shiny" ${svOk ? '' : `disabled title="${svWhy}"`}><span>Tirar variocolor</span><em><canvas class="ic" data-sv="1" width="16" height="16"></canvas><b>1</b></em></button>`;
   const pity = pityOf(reg), hot = pity >= PITY_MAX - 1;
   gx.hp = gx.hp || domePile(Math.random() * 4294967296);
   $('gcLeft').innerHTML = `
@@ -61,7 +63,7 @@ function renderGacha(){
         <p class="bn-sub">Destacados del banner</p>
         <div class="feat">${feat.map((d, i) => `<div class="fc${DEX[d-1].rar === 'legendary' ? ' lg' : ''}${own(d) ? ' got' : ''}" style="--c:${RAR[DEX[d-1].rar].col};--i:${i}"><canvas data-d="${d}" width="128" height="128"></canvas>
           <i>${RAR[DEX[d-1].rar].ic} ${esc(DEX[d-1].name)}</i></div>`).join('') || '<p>Sin destacados en esta región.</p>'}</div>
-        <div class="gbar">${btn('one', 'Tirar x1', 1, 0)}${btn('ten', 'Tirar x10', 10, 0)}${btn('special', 'Tirar x10 especial', 0, 1)}</div>
+        <div class="gbar">${btn('one', 'Tirar x1', 1, 0)}${btn('ten', 'Tirar x10', 10, 0)}${btn('special', 'Tirar x10 especial', 0, 1)}${svBtn}</div>
         <div class="pity-box${hot ? ' hot' : ''}">
           <div class="pity-h"><span>Garantía de legendaria</span><b>${pity} / ${PITY_MAX}</b></div>
           <div class="pbar"><i style="width:${Math.min(100, pity / PITY_MAX * 100)}%"></i></div>
@@ -69,7 +71,7 @@ function renderGacha(){
       </div>
     </div>`;
   drawMachine($('gcMach'));
-  $('gcLeft').querySelectorAll('canvas.ic').forEach(c => ticketIcon(c, c.dataset.sp === '1' ? '#1b1500' : '#ffffff'));
+  $('gcLeft').querySelectorAll('canvas.ic').forEach(c => ticketIcon(c, c.dataset.sv === '1' ? '#06222b' : c.dataset.sp === '1' ? '#1b1500' : '#ffffff'));
   $('gcLeft').querySelectorAll('.fc canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:8, fit:150}));
   gcStart(col);
 
@@ -84,6 +86,7 @@ function renderGacha(){
       <li>La tirada <b>x10 especial</b> garantiza una <b>Legendaria</b>.</li>
       <li><b>Pity:</b> a las ${PITY_MAX} tiradas sin legendaria, la siguiente lo es (se cuenta por región).</li>
       <li>El <b>shiny</b> puede salir con cualquier rareza.</li>
+      <li>✨ <b>Tirada variocolor:</b> gasta 1 <b>ticket variocolor</b> y te da un <b>shiny que aún no tengas</b> de ${reg}. Ese ticket <b>solo</b> se consigue al sacar un <b>shiny repetido</b> (tienes <b>${save.ticketsS}</b>).</li>
       <li>${save.charms[reg] ? `🌈 Tienes el <b>Amuleto Arcoíris de ${reg}</b>: shiny al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.` : `🌈 Completa la Pokédex de ${reg} y ganarás su <b>Amuleto Arcoíris</b>: el shiny sube del ${(SHINY_RATE * 100).toFixed(0)}% al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.`}</li>
       <li>Los <b>repetidos</b> te dan monedas (PB): ${RARITIES.map(r => r.ic + ' ' + DUP_BP[r.id]).join(' · ')}.</li>
       <li>Los tickets se consiguen <b>jugando</b>: la primera vez que vences a cada líder te dan uno. También puedes comprarlos en la tienda.</li>
@@ -440,8 +443,9 @@ function startEngine(){
 function startPull(mode){
   if(gx.anim) return;
   const res = pullGacha(mode, save.gachaRegion);
-  if(!res){ toast('No tienes tickets suficientes.'); return; }
+  if(!res){ toast(mode === 'shiny' && save.ticketsS > 0 ? 'Ya tienes todos los shiny de esta región.' : 'No tienes tickets suficientes.'); return; }
   gx.res = res; gx.mode = mode; gx.best = bestOf(res); gx.anim = true;
+  if(mode === 'shiny') toast('✨ Tirada variocolor: te toca un shiny nuevo');
   gx.ballType = gx.best.shiny ? 'shiny' : gx.best.rarity;                       // la bola que sale es SIEMPRE la del premio real
   const r = RAR[gx.best.rarity];
   ovHtml(); const ov = $('gOv');
@@ -465,7 +469,7 @@ function paintReveal(){
   $('gName').textContent = m.name;
   $('gTag').innerHTML = tagOf(b);
 }
-const tagOf = r => r.newShiny ? '⭐ ¡Shiny nuevo!' : r.isNew ? '✨ ¡Nuevo en tu Pokédex!' : `Repetido: +${r.bp} PB`;
+const tagOf = r => r.newShiny ? '⭐ ¡Shiny nuevo!' : r.isNew ? '✨ ¡Nuevo en tu Pokédex!' : `Repetido: +${r.bp} PB` + (r.tkS ? ' · ✨ +1 ticket variocolor' : '');
 // El sprite grande se anima mientras se ve el resultado
 setInterval(() => {
   const ov = $('gOv'), c = $('gSpr');
@@ -487,7 +491,7 @@ function showSummary(){
     return `<div class="sc${rr.rank <= 1 || r.shiny ? ' hi' : ''}${nw ? ' nw' : ''}" style="--c:${r.shiny ? '#ffd23a' : rr.col};--i:${i}"><img class="sb" alt="" src="${ballURL(r.shiny ? 'shiny' : r.rarity)}">
       <div class="sp"><canvas width="160" height="160" data-d="${r.dex}" data-s="${r.shiny ? 1 : 0}"></canvas></div>
       <b>${esc(DEX[r.dex - 1].name)}</b><em>${nat || '&nbsp;'}</em>
-      <small>${nw ? (r.shiny ? '⭐ ' : '') + '¡NUEVO!' : 'Repetido · 🪙 +' + r.bp}</small></div>`; }).join('');
+      <small>${nw ? (r.shiny ? '⭐ ' : '') + '¡NUEVO!' : 'Repetido · 🪙 +' + r.bp + (r.tkS ? '<br>✨ +1 variocolor' : '')}</small></div>`; }).join('');
   $('gSum').querySelectorAll('canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:5, fit:150, shiny: c.dataset.s === '1'}));
 }
 function closeOverlay(){

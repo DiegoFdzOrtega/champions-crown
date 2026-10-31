@@ -13,20 +13,20 @@ function resize(){
 }
 
 let team = [3, 6, 9];                            // equipo inicial: Venusaur, Charizard y Blastoise (los únicos que tienes al empezar una partida nueva)
-// record = líderes vencidos · tickets = normales · ticketsL = legendarios · box = Pokémon que tienes
+// record = líderes vencidos · tickets = normales · ticketsL = legendarios · ticketsS = variocolor (solo al sacar un shiny repetido) · box = Pokémon que tienes
 // items = objetos en la mochila · equip = objeto equipado a cada Pokémon {nº: id}
 // box = Pokémon que tienes (en orden de llegada) · shiny/fav = nº de Pokédex · nat = naturaleza de cada uno
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
-const save = {record:0, bp:0, tickets:0, ticketsL:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
+const save = {record:0, bp:0, tickets:0, ticketsL:0, ticketsS:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', cardBg:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
-              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, title:'', frame:'', pubProfile:true, storyMode:'facil', easy:{record:0, prog:{}, champ:{}}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
+              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, tower:{best:0, total:0, runs:0, ms:{}}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, title:'', frame:'', pubProfile:true, storyMode:'facil', easy:{record:0, prog:{}, champ:{}}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){
     if(Array.isArray(s.box) && s.box.every(id => mon(id))) save.box = s.box;
     if(Array.isArray(s.team) && s.team.length === 3 && s.team.every(id => save.box.includes(id) && !hidden(id))) team = s.team;
-    save.ticketsL = s.ticketsL || 0; save.region = s.region || 'Kanto'; save.items = s.items || {};
+    save.ticketsL = s.ticketsL || 0; save.ticketsS = Math.max(0, Math.min(1e6, Math.floor(+s.ticketsS) || 0)); save.region = s.region || 'Kanto'; save.items = s.items || {};
     save.equip = s.equip || {}; save.shiny = s.shiny || []; save.fav = s.fav || []; save.nat = s.nat || {};
     save.pity = s.pity || {}; save.used = s.used || {}; save.gachaRegion = s.gachaRegion || 'Kanto';
     save.record = s.record || 0; save.bp = s.bp || 0; save.tickets = s.tickets || 0;
@@ -54,7 +54,8 @@ try{
     const played = (s.record || 0) > 0 || Object.values(s.prog || {}).some(v => v > 0) || Object.keys(s.champ || {}).length > 0 || save.easy.record > 0 || Object.keys(save.easy.prog).length > 0;
     save.storyMode = s.storyMode === 'facil' || s.storyMode === 'dificil' ? s.storyMode : (played ? 'dificil' : 'facil');          // partida antigua = Difícil (como estaba) · partida nueva = empieza en Fácil (se cambia en Historia)
     if(save.easy.record >= floorsOf('Kanto').length) save.easy.champ.Kanto = 1;
-    save.champ = obj(s.champ); save.prog = obj(s.prog); save.campoWins = obj(s.campoWins); save.stats = obj(s.stats); if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
+    save.champ = obj(s.champ); save.prog = obj(s.prog); save.campoWins = obj(s.campoWins); save.stats = obj(s.stats);
+    { const t0 = obj(s.tower), nn = v => Math.max(0, Math.min(1e6, Math.floor(+v) || 0)); save.tower = {best:nn(t0.best), total:nn(t0.total), runs:nn(t0.runs), ms:obj(t0.ms)}; }      // Torre Batalla (js/torre.js): récord de piso, pisos totales, subidas y premios únicos ya cobrados if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
          // quien ya venció a Azul tiene el trofeo de Kanto
     save.profileFav = Array.isArray(s.profileFav) ? s.profileFav : []; save.profileSh = Array.isArray(s.profileSh) ? s.profileSh : []; save.ach = (s.ach && typeof s.ach === 'object') ? s.ach : {};   save.welcome = s.welcome === undefined ? 1 : s.welcome; save.login = (s.login && typeof s.login === 'object') ? {streak:+s.login.streak || 0, last:String(s.login.last || '')} : {streak:0, last:''}; save.firstWin = String(s.firstWin || '');   // profileSh = 1 en cada favorito que enseñas en su versión shiny
   }

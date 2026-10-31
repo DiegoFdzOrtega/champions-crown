@@ -193,7 +193,7 @@ const REWARD_REGION = {
   'Unova / Teselia': {chapa:5, chapaplata:5, tickets:10},
   Kalos: {chapa:5, chapaplata:5, tickets:10}
 };
-const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', bp:'Puntos de Batalla (BP)'};
+const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', ticketsL:'tiradas legendarias', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]) : REWARD_REGION[F.region] || REWARD[F.kind];
 let lastReward = null;                                              // lo que ha dado la última victoria {list:[[id, cantidad]...], dbl} (lo enseña la pantalla de victoria, victoria.js)
 function giveReward(F, firstTime){

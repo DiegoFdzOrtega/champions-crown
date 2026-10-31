@@ -128,7 +128,7 @@ const MUSIC_BY_TRAINER = {
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){
-  if(o.campo) return 'campo';
+  if(o.campo || (o.torre && !o.boss)) return 'campo';                       // Torre Batalla: música del Campo (los jefes llevan la suya)
   if(MUSIC_BY_TRAINER[o.leader]) return MUSIC_BY_TRAINER[o.leader];
   const F = FLOORS.find(x => x.id === o.leader), k = F ? ({lider:'lider', alto:'alto', campeon:'campeon'})[F.kind] : 'lider', r = F ? F.region.toLowerCase() : 'kanto';
   return [`${k}_${r}`, `${k}_kanto`, 'lider_kanto'].find(id => MUSIC_TRACKS[id]);

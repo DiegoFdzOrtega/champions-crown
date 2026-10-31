@@ -194,23 +194,11 @@ const CAMPO = [
     P(549, 'Modesta', 'Clorofila',      'periscopio',{spa:252, spe:252, hp:4}, ['Látigo Cepa',  'Hoja Afilada',    'Danza Aleteo',    'Rayo Solar']),      // Lilligant: la danza de las flores
     P( 38, 'Miedosa', 'Absorbe Fuego',  'gafasol',   {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Fuego Fatuo',     'Llamarada'])        // Ninetales: las nueve colas
   ]},
-  {id:'palmer', file:'palmer.png', name:'Palmer', cls:'Magnate de la Torre', theme:'Pesos pesados de la torre de batalla', tier:3, arena:'giovanni', team:[
-    P(143, 'Firme',   'Sebo',           'restos',    {hp:252, atk:252, spd:4}, ['Golpe Cuerpo', 'Rayo Hielo',      'Amnesia',         'Hiperrayo']),       // Snorlax: el muro que duerme
-    P(149, 'Alegre',  'Multiescala',    'cinturon',  {atk:252, spe:252, hp:4}, ['Garra Dragón', 'Pulso Dragón',    'Danza Dragón',    'Terremoto']),       // Dragonite: el dragón cartero
-    P(464, 'Firme',   'Roca Sólida',    'casco',     {hp:252, atk:252, def:4}, ['Tumba Rocas',  'Disparo Lodo',    'Pulimento',       'Roca Afilada']),    // Rhyperior: el taladro
-    P(473, 'Alegre',  'Manto Níveo',    'vidasfera', {atk:252, spe:252, hp:4}, ['Colmillo Hielo','Rayo Hielo',     'Maldición',       'Terremoto'])        // Mamoswine: el mamut helado
-  ]},
   {id:'veterano', file:'veteran.png', name:'Veterano', cls:'Veterano', theme:'Los iniciales de Kanto y su fiel Arcanine', tier:3, arena:'azul', team:[
     P(  6, 'Miedosa', 'Mar Llamas',     'gafasesp',  {spa:252, spe:252, hp:4}, ['Garra Dragón', 'Lanzallamas',     'Danza Dragón',    'Llamarada']),       // Charizard: el dragón de fuego
     P(  9, 'Modesta', 'Torrente',       'restos',    {hp:252, spa:252, def:4}, ['Acua Cola',    'Hidropulso',      'Refugio',         'Hidrobomba']),      // Blastoise: el cañón de agua
     P(  3, 'Modesta', 'Espesura',       'chaleco',   {hp:252, spa:252, def:4}, ['Látigo Cepa',  'Bomba Lodo',      'Desarrollo',      'Rayo Solar']),      // Venusaur: la flor gigante
     P( 59, 'Alegre',  'Intimidación',   'cinturon',  {atk:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Agilidad',        'Envite Ígneo'])     // Arcanine: el compañero
-  ]},
-  {id:'wikstrom', file:'wikstrom.png', name:'Duque Wikstrom', cls:'Caballero de acero', theme:'Armaduras, espadas y acero', tier:3, arena:'azul', team:[
-    P(681, 'Modesta', 'Cambio Táctico', 'aguante',   {hp:252, spa:252, spd:4}, ['Garra Metal',  'Tinieblas',       'Danza Espada',    'Foco Resplandor']), // Aegislash: la espada del duque
-    P(212, 'Firme',   'Técnico',        'vidasfera', {atk:252, hp:252, spe:4}, ['Puño Bala',    'Bomba Imán',      'Danza Espada',    'Megacuerno']),      // Scizor: el puño de acero
-    P(823, 'Osada',   'Presión',        'restos',    {hp:252, def:252, atk:4}, ['Ataque Ala',   'Tajo Aéreo',      'Defensa Férrea',  'Pájaro Osado']),    // Corviknight: el corcel blindado
-    P(530, 'Alegre',  'Ímpetu Arena',   'cinturon',  {atk:252, spe:252, hp:4}, ['Excavar',      'Bomba Imán',      'Tormenta de Arena','Terremoto'])        // Excadrill: el taladro de acero
   ]}
 ];
 

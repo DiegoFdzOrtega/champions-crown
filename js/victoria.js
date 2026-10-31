@@ -12,6 +12,7 @@
    ===================================================================== */
 const RW_LOOK = {                                   // aspecto de cada recompensa: color · icono (bitmap de ICONS, o la imagen del objeto) · lo que tienes ahora
   tickets:   {c:'#ff3ea5', icon:'ticket', own:() => save.tickets,       lab:'Tiradas de Gachapon'},
+  ticketsL:  {c:'#ffcc33', icon:'ticket', own:() => save.ticketsL,      lab:'Tiradas legendarias'},
   bp:        {c:'#ffcc33', icon:'coin',   own:() => save.bp,            lab:'Puntos de Batalla'},
   chapa:     {c:'#ffcc33', item:'chapa',  own:() => held('chapa'),      lab:'Chapas Doradas'},
   chapaplata:{c:'#c9d6f5', item:'chapaplata', own:() => held('chapaplata'), lab:'Chapas Plateadas'}
@@ -46,7 +47,7 @@ function victoryScreen(o){
   const R = o.rewards && o.rewards.list && o.rewards.list.length ? o.rewards : null;
   if(R){
     const grid = mk('div', 'vic-grid', 'vGrid');
-    const ORD = ['tickets', 'bp', 'chapa', 'chapaplata'], rank = id => ORD.includes(id) ? ORD.indexOf(id) : 99;      // siempre en el mismo orden: tiradas · BP · chapas
+    const ORD = ['tickets', 'ticketsL', 'bp', 'chapa', 'chapaplata'], rank = id => ORD.includes(id) ? ORD.indexOf(id) : 99;      // siempre en el mismo orden: tiradas · BP · chapas
     R.list.slice().sort((a, b) => rank(a[0]) - rank(b[0])).forEach(([id, n], i) => {
       const L2 = RW_LOOK[id] || {c:'#3ea6ff', lab:REWARD_NAMES[id] || id, own:() => 0}, card = mk('div', 'rwc');
       card.style.setProperty('--c', L2.c); card.style.setProperty('--i', i);

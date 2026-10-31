@@ -175,7 +175,7 @@ function draw(){
   const s = g.clock | 0;
   hudAt(W/2, 0, () => {
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
-  text(g.pvp ? 'ONLINE' : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
+  text(g.pvp ? 'ONLINE' : g.o.torre ? 'TORRE · PISO ' + g.o.floor : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
   text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
   { ctx.font = `8px ${FONT}`; const sw = ctx.measureText(g.o.sub).width + 16; ctx.fillStyle = 'rgba(8,10,20,.62)'; ctx.fillRect(W/2 - sw/2, 64, sw, 16); }       // fondo tras el subtítulo para que se lea
   textO(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');

@@ -6,6 +6,20 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Tirada variocolor', date:'31 oct 2026', sections:[
+    {t:'Gachapon', i:[
+      'Nueva tirada «Tirar variocolor»: gasta 1 Ticket Variocolor y te da un shiny que aún no tengas de la región que estés mirando. Se elige la rareza con las probabilidades de siempre, pero solo entre los shiny que te faltan.',
+      'El Ticket Variocolor solo se consigue al sacar un shiny repetido en el Gachapon (además de las monedas de siempre). No se vende ni se regala. Lo ves en la cabecera del Gachapon, en el menú y en la Mochila.']}
+  ]},
+  {v:'Campo de Entrenamiento', date:'31 oct 2026', sections:[
+    {t:'Campo', i:['Palmer y el Duque Wikstrom ya no salen en el Campo de Entrenamiento (ni en la Torre Batalla). La dificultad Difícil pasa a tener 8 entrenadores.']}
+  ]},
+  {v:'Torre Batalla', date:'31 oct 2026', sections:[
+    {t:'Modo nuevo', i:[
+      'La Torre Batalla ya existe: sube piso a piso sin parar. Tus Pokémon se curan por completo en cada piso, pero los rivales son cada vez más fuertes. Si pierdes, empiezas otra subida desde el piso 1.',
+      'Cada piso superado da premio (BP, tiradas de Gachapon, Chapas) y cuanto más alto, más. Cada 10 pisos hay un jefe del Alto Mando o un Campeón. La primera vez que superas los pisos 10, 25, 50, 75 y 100 hay un premio extra, y se guarda tu récord.',
+      'Se abre al vencer a los Campeones de todas las Ligas que hay en el juego.']}
+  ]},
   {v:'Tu nombre es el de tu cuenta', date:'31 oct 2026', sections:[
     {t:'Cuenta', i:[
       'Con la sesión iniciada, tu nombre en todo el juego (menú, pantalla VS, tarjeta y combate online) es el nombre de tu cuenta. El campo «Nombre de entrenador» de Perfil queda bloqueado.',

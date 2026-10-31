@@ -47,20 +47,34 @@ function rollOne(reg, rar){
   return {dex, rarity: DEX[dex-1].rar, shiny: Math.random() < shinyRate(reg)};
 }
 // Cuántos tickets cuesta cada modo: x1 = 1 normal, x10 = 10 normales, special = 1 legendario (x10 con legendaria)
-const GACHA_COST = {one:{n:1, l:0, pulls:1}, ten:{n:10, l:0, pulls:10}, special:{n:0, l:1, pulls:10}};
-const canPull = mode => { const c = GACHA_COST[mode]; return save.tickets >= c.n && save.ticketsL >= c.l; };
+// shiny (tirada VARIOCOLOR) = 1 ticket variocolor (s): 1 tirada que SIEMPRE sale shiny y que aún no tenías. El ticket variocolor solo se gana al sacar un shiny repetido.
+const GACHA_COST = {one:{n:1, l:0, s:0, pulls:1}, ten:{n:10, l:0, s:0, pulls:10}, special:{n:0, l:1, s:0, pulls:10}, shiny:{n:0, l:0, s:1, pulls:1}};
+// Pokémon de la región cuyo shiny aún NO tienes (la tirada variocolor elige entre ellos)
+const shinyLeft = reg => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(!hidden(d) && !save.shiny.includes(d)) out.push(d); return out; };
+const canPull = (mode, reg = save.gachaRegion) => { const c = GACHA_COST[mode]; return save.tickets >= c.n && save.ticketsL >= c.l && save.ticketsS >= c.s && (mode !== 'shiny' || (!!REGION_DEX[reg] && shinyLeft(reg).length > 0)); };
+// Tirada variocolor: la rareza se elige con las probabilidades de siempre, pero solo entre las rarezas que aún tienen algún shiny sin conseguir
+function rollShinyOne(reg){
+  const by = {}; shinyLeft(reg).forEach(d => (by[DEX[d-1].rar] = by[DEX[d-1].rar] || []).push(d));
+  const ids = RARITIES.map(r => r.id).filter(id => by[id]);
+  let x = Math.random() * ids.reduce((s, id) => s + GACHA_RATES[id], 0), pick = ids[ids.length - 1];
+  for(const id of ids){ if((x -= GACHA_RATES[id]) < 0){ pick = id; break; } }
+  return {dex: rnd(by[pick]), rarity: pick, shiny: true};
+}
 
 /* Hace la tirada. Devuelve la lista de resultados (o null si no hay tickets):
    cada uno es {dex, rarity, shiny, isNew, newShiny, bp}. Reglas:
    - El x10 normal NO garantiza nada (solo las probabilidades de siempre); el x10 especial garantiza una Legendaria.
    - Pity: a la tirada 70 sin legendaria, sale una legendaria. Se cuenta por región.
-   - Repetido = monedas (PB) según la rareza. Un shiny nuevo de uno que ya tenías se guarda como shiny. */
+   - Repetido = monedas (PB) según la rareza. Un shiny nuevo de uno que ya tenías se guarda como shiny.
+   - Shiny REPETIDO (ya tenías ese shiny) = las monedas de siempre + 1 ticket variocolor (r.tkS = 1). Es la ÚNICA forma de conseguir ese ticket.
+   - Tirada variocolor (mode 'shiny'): gasta 1 ticket variocolor y da un shiny que aún no tenías en esa región. No cuenta para el pity. */
 function pullGacha(mode, reg){
   const c = GACHA_COST[mode];
-  if(!REGION_DEX[reg] || !canPull(mode)) return null;
-  save.tickets -= c.n; save.ticketsL -= c.l;
+  if(!REGION_DEX[reg] || !canPull(mode, reg)) return null;
+  save.tickets -= c.n; save.ticketsL -= c.l; save.ticketsS -= c.s;
   const res = [];
-  for(let i = 0; i < c.pulls; i++){
+  if(mode === 'shiny') res.push(rollShinyOne(reg));
+  else for(let i = 0; i < c.pulls; i++){
     let forced = null;
     if(pityOf(reg) >= PITY_MAX - 1) forced = 'legendary';                       // pity
     const r = rollOne(reg, forced);
@@ -80,6 +94,8 @@ function pullGacha(mode, reg){
     if(r.newShiny) save.shiny.push(r.dex);
     r.bp = (!r.isNew && !r.newShiny) ? DUP_BP[r.rarity] : 0;                    // repetido (y no shiny nuevo) = monedas
     save.bp += r.bp;
+    r.tkS = (r.shiny && !r.newShiny) ? 1 : 0;                                   // shiny repetido = 1 ticket variocolor
+    save.ticketsS = Math.min(1e6, save.ticketsS + r.tkS);
   });
   persist(); if(typeof achSync === 'function') achSync();                       // logros de colección / shiny (achievements.js)
   return res;
