@@ -82,6 +82,9 @@ function selectTeam(i){                                                         
   teamSync(); const T = save.teams[i];
   save.tsel = i; team = T.mons; save.equip = T.equip; persist();
 }
+// Nombre que se enseña en todo el juego: con cuenta iniciada es el de la CUENTA (único y fijo, se elige al crearla); sin cuenta, el que escribas en Perfil.
+const nameLocked = () => typeof cloud !== 'undefined' && !!(cloud.user && cloud.name);
+const trainerName = () => nameLocked() ? cloud.name : save.name;
 function persist(){
   if(typeof cloud !== 'undefined' && cloud.lock) return;                                         // se está sustituyendo la partida por la de la nube: no escribir hasta recargar (js/cloud.js)
   try{ teamSync(); localStorage.setItem('arena2d_v2', JSON.stringify({team, ...save})); }catch(e){}

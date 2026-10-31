@@ -6,6 +6,23 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Tu nombre es el de tu cuenta', date:'31 oct 2026', sections:[
+    {t:'Cuenta', i:[
+      'Con la sesión iniciada, tu nombre en todo el juego (menú, pantalla VS, tarjeta y combate online) es el nombre de tu cuenta. El campo «Nombre de entrenador» de Perfil queda bloqueado.',
+      'Sin cuenta puedes seguir poniéndote el nombre que quieras. Más adelante se podrá cambiar el nombre de la cuenta.']}
+  ]},
+  {v:'Regalos', date:'31 oct 2026', sections:[
+    {t:'Cuenta', i:[
+      'Si tienes una cuenta, ahora te pueden hacer regalos (tickets, Puntos de Batalla...). Los recibes al iniciar sesión o al volver al menú, con una ventana de «¡Has recibido un regalo!».']}
+  ]},
+  {v:'Menú más limpio', date:'31 oct 2026', sections:[
+    {t:'Menú principal', i:[
+      'Los avisos salen de uno en uno y abajo a la izquierda, así que ya no se tapan entre ellos ni tapan la tarjeta de descripción.',
+      'El botón de Recompensa diaria baja bajo tus puntos y tickets (antes tapaba tu barra de perfil), y la tarjeta de descripción es más pequeña para dejar ver la torre.']},
+    {t:'Fondo', i:[
+      'La torre del menú cambia con tu progreso: delante hay 9 farolillos, uno por región, que se encienden de su color al superar esa Liga.',
+      'Cuantas más Ligas superas, más ventanas se iluminan. Con las 9 Ligas, la torre se vuelve dorada.']}
+  ]},
   {v:'Tileo y Dracena', date:'31 oct 2026', sections:[
     {t:'Historia', i:[
       'Corregido el Alto Mando de Kalos: Tileo es de tipo Acero (Klefki, Magnezone, Probopass, Bastiodon, Klinklang y Metagross) y Dracena de tipo Dragón.',

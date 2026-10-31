@@ -65,7 +65,7 @@ async function loadAvatars(){
 const CRUMBS = [['profile', 'Perfil'], ['ach', 'Logros'], ['friends', 'Amigos'], ['bag', 'Mochila']];
 const crumbsHtml = active => `<nav class="crumbs" aria-label="Secciones del jugador">` +
   CRUMBS.map(([k, n]) => `<button type="button" data-crumb="${k}"${k === active ? ' class="on" aria-current="page"' : ''}>${n}${k === 'ach' && typeof achReadyCount === 'function' && achReadyCount() ? `<em class="bdg">${achReadyCount()}</em>` : ''}</button>`).join('<i>›</i>') + '</nav>';
-const userBar = active => `<div class="ubar"><img class="av" alt="Avatar"><span class="uwho"><b class="uname">${esc(save.name)}</b></span>${crumbsHtml(active)}</div>`;
+const userBar = active => `<div class="ubar"><img class="av" alt="Avatar"><span class="uwho"><b class="uname">${esc(trainerName())}</b></span>${crumbsHtml(active)}</div>`;
 // Un solo "clic" para todas las migas (la cabecera del menú y las barras de las pantallas): cambia de sección sin pasar por el menú
 document.addEventListener('click', e => { const b = e.target.closest('[data-crumb]'); if(b) enter(b.dataset.crumb); });
 

@@ -1990,3 +1990,36 @@ body.pc-dragging,body.pc-dragging *{cursor:grabbing!important}
 .bg-grid button.lock .th{filter:grayscale(1) brightness(.35)}
 .bg-grid button.lock .th::after{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;filter:none}
 .bg-grid button.none .th{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#6d7899}
+
+
+/* =====================================================================
+   MENÚ PRINCIPAL v2 (prototipo): nada se pisa
+   - El aviso (toast) sale abajo a la izquierda, encima de «Notas del parche», en vez de tapar la tarjeta de descripción.
+   - «Recompensa diaria» baja justo debajo de los contadores (antes tapaba la barra del perfil).
+   - La tarjeta de descripción es más compacta, para dejar ver la torre.
+   - Más aire entre el logo y el primer botón.
+   ===================================================================== */
+body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:none;max-width:36rem;font-size:10px;line-height:1.6;padding:.9rem 1.3rem}
+#main .dlbtn{right:3rem;top:12.6rem;width:15rem;padding:.7rem 1rem;font-size:.95rem;line-height:1.45;text-align:center;white-space:normal}
+#main .info{width:34rem;padding:1.1rem 1.4rem;background:rgba(13,17,23,.82)}
+#main .info h3{margin:0 0 .5rem;font-size:1.3rem}
+#main .info p{margin:.25rem 0;font-size:.95rem;line-height:1.5}
+#main .info .stat{margin-top:.6rem}
+#main .brand p{margin:.7rem 0 0}
+#main .nav{top:23.2rem}
+
+
+/* =====================================================================
+   REGALOS DE LA CUENTA: ventana «¡Has recibido un regalo!» (js/gifts.js; reutiliza .dlOv / .dlBox del login diario)
+   ===================================================================== */
+.gfBox{max-width:44rem;border-color:#ff3ea5;box-shadow:0 0 2.4rem rgba(255,62,165,.45)}
+.gfBox h2{color:#ffcc33;font-size:1.8rem;margin:.4rem 0 .8rem}
+.gf-icon{width:9.6rem;height:9.6rem;image-rendering:pixelated;display:block;margin:0 auto;animation:gfbob 1.4s ease-in-out infinite}
+@keyframes gfbob{50%{transform:translateY(-.6rem) rotate(-3deg)}}
+.gf-note{color:#9fb0d8;margin:.2rem 0 1rem;line-height:1.6}
+.gf-rows{display:flex;flex-direction:column;gap:.8rem;margin:1.2rem auto 1.8rem;align-items:center}
+.gf-row{display:flex;align-items:center;gap:1.1rem;padding:.8rem 1.4rem;background:#161b2c;border:2px solid #2d3a5c;min-width:28rem;justify-content:flex-start}
+.gf-row canvas{width:2.8rem;height:2.8rem;image-rendering:pixelated;flex:none}
+.gf-row b{font-size:1.6rem;font-weight:normal;color:#fff;text-align:left}
+.gf-row small{display:block;font-size:.8rem;color:#8b98ad;margin-top:.3rem}
+@media (prefers-reduced-motion:reduce){.gf-icon{animation:none}}

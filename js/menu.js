@@ -58,7 +58,7 @@ function pick(i){
   inf.innerHTML = `<h3>${it.n}</h3><p>${it.d}</p><p class="stat">${it.f()}</p>`;
 }
 function refreshHud(){
-  $('pName').textContent = save.name; $('crumbs').innerHTML = crumbsHtml(''); refreshAvatars();     // nombre, migas de pan y avatar activo
+  $('pName').textContent = trainerName(); $('crumbs').innerHTML = crumbsHtml(''); refreshAvatars();     // nombre, migas de pan y avatar activo
   if(typeof dailyRefresh === 'function') dailyRefresh();
   $('bp').textContent = save.bp; $('tk').textContent = save.tickets + (save.ticketsL ? ` +${save.ticketsL}★` : ''); pick(navIdx);
 }
@@ -76,7 +76,7 @@ function enter(k){
   ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>toast('La Clasificatoria llegará próximamente.'), friends:openFriends, bag:openBag, set:openSettings,
     tower:()=>toast(leaguesWon() < REGIONS.length ? `La Torre Batalla se desbloquea al derrotar todas las Ligas (${leaguesWon()}/${REGIONS.length} superadas).` : 'La Torre Batalla está desbloqueada: pronto abrirá sus puertas.')})[k]();
 }
-function goMain(){ refreshHud(); show('main'); }
+function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)
 function goStory(){ buildStory(); show('tower'); }
 function goRegions(){ buildRegions(); show('regions'); }
 function back(){
@@ -88,9 +88,14 @@ function mainKey(e){
   if(e.code === 'ArrowDown'){ navIdx = (navIdx+1) % NAV.length; [...$('nav').children][navIdx].focus(); e.preventDefault(); }
   if(e.code === 'ArrowUp'){ navIdx = (navIdx+NAV.length-1) % NAV.length; [...$('nav').children][navIdx].focus(); e.preventDefault(); }
 }
-function toast(msg){
+// Los avisos salen de UNO EN UNO: si llega otro mientras hay uno en pantalla, espera su turno (así nunca se pisan).
+const toastQ = []; let toastOn = false;
+function toast(msg){ toastQ.push(msg); if(!toastOn) toastNext(); }
+function toastNext(){
+  const msg = toastQ.shift(); if(msg === undefined){ toastOn = false; return; }
+  toastOn = true;
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 2600);
+  setTimeout(()=>{ t.remove(); setTimeout(toastNext, 200); }, 2600);
 }
 // Abre el panel genérico con un título y un contenido
 function panel(html){
@@ -204,7 +209,7 @@ function buildStory(){
 function openRank(){
   panel(`<h1>Clasificatoria</h1><table class="tbl"><tr><th>#</th><th>Entrenador</th><th>Líderes vencidos</th></tr>` +
     `<tr><td>1</td><td id="rkName"></td><td>${save.record}</td></tr>` + [2,3,4,5].map(n=>`<tr><td>${n}</td><td>---</td><td>---</td></tr>`).join('') + `</table>`);
-  $('rkName').textContent = save.name;
+  $('rkName').textContent = trainerName();
 }
 // openFriends() (Amigos y cuenta) está en js/cloudui.js
 // ---- AJUSTES: Pantalla completa, Audio (general, música del menú, música de combate, efectos y silenciar) y Controles (js/controls.js) ----

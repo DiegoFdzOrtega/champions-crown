@@ -570,6 +570,8 @@ El juego cambia la música solo según el entrenador al que te enfrentas. La mú
 ## Shinys en el perfil y Pokémon de tu equipo en el menú
 - **Perfil › Pokémon favoritos**: al elegir un favorito que tengas en versión shiny (⭐ en su tarjeta) salen los botones **Normal / ⭐ Shiny**. Al elegir uno nuevo se marca la versión que usas en tu equipo (Equipo Pokémon). El favorito shiny se ve con su sprite shiny y el marco dorado. Solo se puede mostrar shiny si lo has conseguido. Se guarda en `save.profileSh` (`1` por cada favorito shiny; las partidas antiguas siguen valiendo).
 - **Menú principal**: los 3 Pokémon que dan vueltas por la torre (`menuMon()` en `js/background.js`) son los 3 de tu equipo, en el mismo orden. Si usas la versión shiny de alguno, sale shiny con brillo y destellos dorados (los demás tienen brillo azul). Si tu equipo está incompleto, se rellena con Dragonite, Charizard y Gengar.
+- **Fondo según tu progreso** (`buildBg()` en `js/background.js`): delante de la torre hay 9 farolillos, uno por región (orden de `REGIONS`, colores en `LEAGUE_COL`); se encienden al superar esa Liga (`champAny`). Cuantas más Ligas, más ventanas encendidas (la torre no cambia de forma: el generador aleatorio gasta lo mismo). Con las 9 Ligas sale un aura dorada, y las almenas, luces laterales y baliza pasan a dorado. El fondo se redibuja solo cuando cambian tus Ligas (`bgKey`).
+- **Avisos (`toast()` en `js/menu.js`)**: van en cola, uno a la vez (`toastQ`). En el menú principal salen abajo a la izquierda, sobre «Notas del parche», para no tapar la tarjeta de descripción. El botón de Recompensa diaria está bajo los contadores (caja de 2 líneas) y la tarjeta de descripción es más compacta (bloque «MENÚ PRINCIPAL v2» al final de `css/style.css`).
 - Se ven a color pero oscurecidos para encajar con la noche. Si prefieres siluetas negras como antes, pon `MENU_MONS_COLOR = false` en `js/background.js` (en ese modo el shiny solo se nota por el brillo dorado).
 - Historia › "Tu equipo" también enseña la versión shiny de los que la usan.
 
@@ -1038,7 +1040,7 @@ create table saves (user_id uuid primary key references auth.users(id) on delete
 alter table profiles enable row level security;  alter table saves enable row level security;
 create policy "ver perfiles" on profiles for select to authenticated using (true);
 create policy "crear mi perfil" on profiles for insert to authenticated with check (auth.uid() = id);
-create policy "cambiar mi perfil" on profiles for update to authenticated using (auth.uid() = id);
+-- (no hay política de «update»: el nombre de cuenta no se puede cambiar. Si ya existía «cambiar mi perfil», quítala: drop policy if exists "cambiar mi perfil" on public.profiles;)
 create policy "ver mi partida" on saves for select to authenticated using (auth.uid() = user_id);
 create policy "crear mi partida" on saves for insert to authenticated with check (auth.uid() = user_id);
 create policy "cambiar mi partida" on saves for update to authenticated using (auth.uid() = user_id);
@@ -1046,6 +1048,7 @@ create policy "cambiar mi partida" on saves for update to authenticated using (a
 - **Subida:** `persist()` (state.js) llama a `cloudDirty()`, que sube la partida 4 s después del último cambio (`cloudPush`, upsert en `saves`). También sube al ocultar la pestaña y al cerrar sesión. El meta de sincronización (`arena2d_cloud`: usuario, fecha de la última versión de la nube y si hay cambios sin subir) decide qué hacer al entrar (`cloudSync`).
 - **Al entrar:** si la cuenta no tiene partida, se sube la del navegador. Si la nube no ha cambiado, no pasa nada. Si se jugó en otro sitio y aquí no hay cambios sin subir, se descarga sola. Si este navegador está sin estrenar, se usa la de la nube. Si las dos tienen cambios, sale la pantalla «¿Qué partida quieres usar?» y **nunca se pisa nada sin que el jugador elija**. Al elegir la de la nube se guarda antes una copia en `localStorage` bajo `arena2d_backup` y se recarga la página.
 - **Nombre de jugador:** único sin distinguir mayúsculas (3-16 letras sin tilde, números o `_`). Si está cogido al registrarse, la cuenta se crea igual y se pide otro nombre.
+- **El nombre va ligado a la cuenta:** hay dos nombres: el de la **cuenta** (`cloud.name`, tabla `profiles`, único y fijo) y el de **entrenador** (`save.name`, solo local, el que se escribe en Perfil sin cuenta). `trainerName()` (state.js) devuelve el de la cuenta si hay sesión iniciada (`nameLocked()`) y, si no, el local. Lo usan la barra del menú y de Perfil/Logros/Amigos, el panel VS de la Historia, la Clasificatoria y `fpCard()` (campo `nm` de la tarjeta, hasta 16 letras). El combate online y la lista de amigos ya usaban el de la cuenta. Con sesión, el campo «Nombre de entrenador» de Perfil sale bloqueado con una explicación; al iniciar sesión, elegir nombre o cerrar sesión se llama a `refreshHud()` para que cambie al momento. Los nombres largos (hasta 16) se encogen en la tarjeta (`fp-name`). **Seguridad:** sin política de update en `profiles`, nadie puede renombrarse ni siquiera hablando directo con Supabase. **Para añadir «cambiar nombre» más adelante:** hacerlo con una función SQL `security definer` (una vez cada X días, comprobando `lower(username)` único) y llamarla con `cloud.sb.rpc`; después actualizar `cloud.name` y llamar a `refreshHud()` y `fpPublish()`.
 - **Pantalla:** Amigos (`openFriends` en cloudui.js) · `#cloudBox`: arriba la cuenta, debajo la lista de amigos (`#frList`, se actualiza sola cada 15 s mientras la pantalla está abierta).
 - **Amigos (tabla `friendships`):** una fila por pareja: `requester` pide, `addressee` acepta (`status` = `pending` o `accepted`). Hay un índice único para que no se repita la pareja en ningún sentido. Reglas (RLS): solo ves las filas en las que participas, solo puedes pedir amistad en tu nombre (`requester = tú`, `status = pending`), solo el que recibe puede aceptar (update) y cualquiera de los dos puede borrar (rechazar, cancelar o quitar). Funciones en cloud.js: `cloudFriendsLoad`, `cloudFriendAdd(nombre)` (busca con `ilike`, escapando `_` porque es comodín), `cloudFriendAccept`, `cloudFriendRemove`. Si la otra persona ya te había pedido amistad y tú le pides a ella, se acepta directamente. «Quitar» pide una segunda pulsación para confirmar.
 ```sql
@@ -1080,3 +1083,43 @@ create policy "borrar amistad" on friendships for delete to authenticated using 
   - **Hay que configurarlo en Supabase:** Authentication › URL Configuration: **Site URL** = la dirección del juego en GitHub Pages (p. ej. `https://diegofdzortega.github.io/champions-crown/`) y esa misma en **Redirect URLs**. Si no, el enlace del correo lleva a otra dirección y no funciona. Ojo: el correo que manda Supabase por defecto tiene un límite muy bajo de envíos por hora; si falla con «rate limit», espera un rato (para más, se configura un SMTP propio en Authentication › SMTP).
 - **Ajuste en Supabase:** ahora «Confirm email» está **desactivado** (Authentication › Sign In / Providers › Email) para probar rápido. Antes de enseñarlo a más gente conviene volver a activarlo (el juego ya avisa de que hay que confirmar el correo).
 - **Si algo falla:** abre la consola del navegador (F12). Un error de red significa que no hay conexión con Supabase; «new row violates row-level security» significa que falta una política del SQL de arriba.
+
+### Regalos de la cuenta (js/gifts.js, tabla `gifts` de Supabase)
+
+Sirve para darle tickets o BP a un jugador concreto sin que tenga que hacer nada: lo apuntas tú en Supabase y, al entrar, le sale la ventana **«¡Has recibido un regalo!»**.
+
+- **Seguridad:** la tabla tiene RLS activado y **ninguna política**, así que desde el juego nadie puede leer, crear ni cambiar regalos (solo tú, desde el SQL Editor). El juego solo puede llamar a la función `claim_gifts()`, que marca como cobrados los regalos de **su propia cuenta** (`auth.uid()`) y los devuelve en la misma operación: un regalo nunca se cobra dos veces.
+- **Cuándo se cobra:** al iniciar sesión (`cloudAfterLogin`, justo después de `cloudSync`) y al volver al menú principal (`goMain`, como mucho cada 90 s: `GIFT_EVERY`). Si en ese momento se está cambiando la partida por la de la nube (`cloud.lock`) o hay un conflicto, espera.
+- **No se pierde:** lo cobrado se guarda primero en la cola `arena2d_giftq` (localStorage) y después se suma a `save.bp / tickets / ticketsL` con `persist()`; solo entonces se vacía la cola. Los últimos 50 ids sumados se recuerdan (`arena2d_giftseen`) por si la nube repitiera alguno.
+- **Números:** el juego vuelve a limpiarlos (enteros de 0 a `GIFT_MAX` = 1.000.000 por regalo y tipo) y el texto se escapa (`cloudEsc`): probado con una nota con `<img onerror>` y cantidades raras (negativas, `1e99`, texto).
+- **Si la tabla no existe todavía:** el fallo es silencioso (el juego sigue igual).
+- **SQL que se ejecuta UNA vez en Supabase › SQL Editor:**
+```sql
+create table if not exists public.gifts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  bp int not null default 0 check (bp >= 0),
+  tickets int not null default 0 check (tickets >= 0),
+  tickets_l int not null default 0 check (tickets_l >= 0),
+  note text not null default '',
+  created_at timestamptz not null default now(),
+  claimed_at timestamptz
+);
+alter table public.gifts enable row level security;   -- sin políticas: el juego no puede tocar la tabla directamente
+
+create or replace function public.claim_gifts()
+returns table(id uuid, bp int, tickets int, tickets_l int, note text)
+language sql security definer set search_path = public as $$
+  update public.gifts g set claimed_at = now()
+  where g.user_id = auth.uid() and g.claimed_at is null
+  returning g.id, g.bp, g.tickets, g.tickets_l, g.note;
+$$;
+revoke all on function public.claim_gifts() from public, anon;
+grant execute on function public.claim_gifts() to authenticated;
+```
+- **Para regalar (SQL Editor, cada vez):** cambia el nombre de jugador y las cantidades. Debe decir `INSERT 0 1` (si dice `INSERT 0 0`, el nombre no existe).
+```sql
+insert into public.gifts (user_id, bp, tickets, note)
+select id, 50000, 10000, 'Regalo de Diego' from public.profiles where username ilike 'NombreDelJugador';
+```
+  Para tickets legendarios añade la columna `tickets_l`. Para ver los regalos y si ya se cobraron: `select * from public.gifts order by created_at desc;`

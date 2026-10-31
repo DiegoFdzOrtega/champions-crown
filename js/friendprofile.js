@@ -20,7 +20,7 @@ function fpCard(){
   const claimed = ACHIEVEMENTS.filter(a => achGet(a.id).claimed);
   const shV = favShinySaved();
   return {
-    v: FP_VER, nm: fpStr(save.name, 10), g: skinOf(save.gender), bg: cardBgActive(),
+    v: FP_VER, nm: fpStr(trainerName(), 16), g: skinOf(save.gender), bg: cardBgActive(),
     av: (() => { const a = save.avatar && avatarList().find(x => x.file === save.avatar); return a && avatarUnlocked(a) ? a.file : ''; })(),
     fr: achActiveFrame(), ti: achActiveTitle() ? save.title : '',
     box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length, sec: claimed.filter(a => a.secret).length,
@@ -69,8 +69,8 @@ function fpView(card, o){
     <div class="fp-main">
       <div class="fp-left">
         <img class="fp-av${fr ? ' afr-' + fr : ''}" alt="Avatar" src="${av ? avatarUrl(av.file) : defaultAvatar()}">
-        <b class="fp-name">${cloudEsc(o.name)}</b>
-        ${card.nm && fpStr(card.nm, 10).toLowerCase() !== String(o.name).toLowerCase() ? `<span class="fp-tn">Entrenador: ${cloudEsc(fpStr(card.nm, 10))}</span>` : ''}
+        <b class="fp-name"${String(o.name).length > 13 ? ' style="font-size:1rem"' : String(o.name).length > 10 ? ' style="font-size:1.2rem"' : ''}>${cloudEsc(o.name)}</b>
+        ${card.nm && fpStr(card.nm, 16).toLowerCase() !== String(o.name).toLowerCase() ? `<span class="fp-tn">Entrenador: ${cloudEsc(fpStr(card.nm, 16))}</span>` : ''}
         ${title ? `<small class="fp-title">${cloudEsc(title)}</small>` : ''}
         ${self ? '' : `<span class="fp-st"><i class="dot${online ? ' on' : ''}"></i>${online ? 'En línea' : 'Desconectado'}</span>`}
       </div>

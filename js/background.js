@@ -3,10 +3,16 @@
    FONDO DEL MENÚ: pixel art dibujado con código (la Torre Batalla de noche)
    ===================================================================== */
 const BW = 640, BH = 270, TX = 440;           // tamaño del dibujo y posición de la torre
-let bgC = null, bgStars = [], beacon = [TX, 4];
+let bgC = null, bgStars = [], beacon = [TX, 4], bgKey = '', bgGold = false;
+// El fondo cambia con tu progreso: cada Liga superada enciende una luz de su color en la base de la torre,
+// y cuantas más Ligas tienes, más ventanas encendidas. Con las 9 Ligas, la torre se corona de oro.
+const LEAGUE_COL = ['#e23b3b','#ffcc33','#4ccf6a','#3ea6ff','#e6edf7','#ff3ea5','#ff9f43','#b06cff','#46e0d0'];   // un color por región, en el orden de REGIONS (Kanto ... Paldea)
+const bgWon = () => (typeof REGIONS !== 'undefined' && typeof champAny === 'function') ? REGIONS.map(r => !!champAny(r)) : [];
 function rng(a){ return ()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 
 function buildBg(){
+  const won = bgWon(), nWon = won.filter(Boolean).length, pr = nWon/9, gold = nWon === 9;      // pr = progreso de 0 a 1
+  bgKey = won.join(''); bgStars = []; bgGold = gold;
   bgC = document.createElement('canvas'); bgC.width = BW; bgC.height = BH;
   const c = bgC.getContext('2d'), r = rng(7);
   const rect = (col,x,y,w,h)=>{ c.fillStyle = col; c.fillRect(x,y,w,h); };
@@ -26,20 +32,28 @@ function buildBg(){
     c.fillStyle = rad>110 ? 'rgba(255,62,165,.035)' : 'rgba(62,166,255,.045)';
     c.beginPath(); c.ellipse(TX,110,rad,rad*.8,0,0,7); c.fill();
   }
+  if(nWon === 9) for(let rad=170; rad>40; rad-=14){ c.fillStyle = 'rgba(255,204,51,.05)'; c.beginPath(); c.ellipse(TX,90,rad*.8,rad,0,0,7); c.fill(); }   // aura dorada
   let y = 224;                                                                                    // la torre, piso a piso
   [[132,26],[100,34],[74,36],[54,34],[38,30]].forEach(([w,h])=>{
     const x0 = TX - w/2, top = y - h;
     rect('#0f1626',x0,top,w,h); rect('#223356',x0,top,w,1); rect('#223356',x0,top,1,h); rect('#223356',x0+w-1,top,1,h);
-    rect('#3ea6ff',x0-1,top+2,1,h-4); rect('#3ea6ff',x0+w,top+2,1,h-4);                          // luces azules laterales
-    for(let mx=x0; mx<x0+w-3; mx+=8) rect('#223356',mx,top-3,4,3);                                // almenas
+    rect(gold ? '#ffcc33' : '#3ea6ff',x0-1,top+2,1,h-4); rect(gold ? '#ffcc33' : '#3ea6ff',x0+w,top+2,1,h-4);                          // luces azules laterales
+    for(let mx=x0; mx<x0+w-3; mx+=8) rect(gold ? '#c9a227' : '#223356',mx,top-3,4,3);                                // almenas
     for(let wy=top+5; wy<y-5; wy+=9) for(let wx=x0+6; wx<x0+w-8; wx+=9){                         // ventanas
-      const k = r(); rect(k<.32 ? '#ffcc33' : k<.5 ? '#3ea6ff' : '#16203a', wx, wy, 4, 5);
+      const k = r(); rect(k<.32+.3*pr ? '#ffcc33' : k<.5+.4*pr ? '#3ea6ff' : '#16203a', wx, wy, 4, 5);
     }
     y = top - 3;
   });
-  rect('#223356',TX-3,y-26,6,26); rect('#223356',TX-1,y-44,2,18); rect('#ff3ea5',TX-1,y-47,3,3);   // antena
+  rect('#223356',TX-3,y-26,6,26); rect('#223356',TX-1,y-44,2,18); rect(gold ? '#ffcc33' : '#ff3ea5',TX-1,y-47,3,3);   // antena
   beacon = [TX+.5, y-45.5];
   rect('#090d16',0,224,BW,BH-224); rect('#16203a',0,224,BW,1);                                    // suelo
+  for(let i=0;i<9;i++){                                                                           // 9 farolillos delante de la torre: uno por Liga
+    const lx = TX - 196 + i*18, on = won[i];
+    rect('#223356', lx+2, 227, 2, 7);                                                             // poste
+    if(on){ c.fillStyle = LEAGUE_COL[i] + '33'; c.beginPath(); c.arc(lx+3, 224, 10, 0, 7); c.fill(); }   // brillo
+    rect(on ? LEAGUE_COL[i] : '#1a2440', lx, 221, 6, 6);
+    if(on) rect('#ffffff', lx+1, 222, 2, 2);
+  }
   c.strokeStyle = 'rgba(62,166,255,.12)';
   for(let i=-8;i<=8;i++){ c.beginPath(); c.moveTo(TX+i*3,224); c.lineTo(TX+i*34,BH); c.stroke(); }
   for(let i=0;i<60;i++) rect(r()<.5 ? '#ffcc33' : '#3ea6ff', r()*BW|0, 228+(r()*40|0), 1, 1);
@@ -66,7 +80,7 @@ function menuMon(t, dex, cx, cy, rx, ry, sp, ph){
 }
 
 function menuBg(t){
-  if(!bgC) buildBg();
+  if(!bgC || bgKey !== bgWon().join('')) buildBg();       // se redibuja solo cuando cambian tus Ligas superadas
   const s = H/BH, ox = (W - BW*s)/2;
   ctx.imageSmoothingEnabled = false; ctx.drawImage(bgC, ox, 0, BW*s, BH*s);
   bgStars.forEach(([x,y],i)=>{ ctx.fillStyle = `rgba(255,255,255,${.2 + .5*Math.abs(Math.sin(t*1.6+i))})`; ctx.fillRect(ox+x*s, y*s, s, s); });
@@ -76,7 +90,7 @@ function menuBg(t){
   menuMon(t, tm[1], tx, 215, 250, 40, -.38, 2);      // 2.º: órbita baja y ancha
   menuMon(t, tm[2], tx-280, 400, 26, 7, .9, 1);      // 3.º: círculo pequeño delante
   const a = .5 + .5*Math.sin(t*3);                   // luz de la antena
-  ctx.save(); ctx.shadowColor = '#ff3ea5'; ctx.shadowBlur = 22; ctx.fillStyle = `rgba(255,62,165,${.45 + .55*a})`;
+  ctx.save(); ctx.shadowColor = bgGold ? '#ffcc33' : '#ff3ea5'; ctx.shadowBlur = 22; ctx.fillStyle = bgGold ? `rgba(255,204,51,${.45 + .55*a})` : `rgba(255,62,165,${.45 + .55*a})`;
   ctx.beginPath(); ctx.arc(ox + beacon[0]*s, beacon[1]*s, 3 + 3*a, 0, 7); ctx.fill(); ctx.restore();
   const v = ctx.createRadialGradient(W/2, H/2, H*.4, W/2, H/2, Math.hypot(W,H)*.55);   // viñeta
   v.addColorStop(0, 'rgba(5,7,12,0)'); v.addColorStop(1, 'rgba(5,7,12,.6)');

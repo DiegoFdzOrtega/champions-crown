@@ -14,7 +14,8 @@
      cloudDirty()       lo llama persist() en state.js: programa una subida (debounce de 4 s)
      cloudPush()        sube la partida a la nube
      cloudSync()        al entrar: compara nube y navegador y decide (o te pregunta si hay conflicto)
-     cloudUseCloud()    descarga la partida de la nube (guarda antes una copia de seguridad del navegador) y recarga la página
+     cloudGifts()       (js/gifts.js) cobra los regalos que tengas en la nube (después de cloudSync)
+   cloudUseCloud()    descarga la partida de la nube (guarda antes una copia de seguridad del navegador) y recarga la página
    ===================================================================== */
 const CLOUD_URL = 'https://datrtinbmaubkuqvwuzf.supabase.co';
 const CLOUD_KEY = 'sb_publishable_JUEl_Gv0mFLjoHjDOnR7-w_EFbemqOW';
@@ -64,8 +65,8 @@ async function cloudLoadProfile(){
 }
 async function cloudAfterLogin(){
   cloud.err = ''; await cloudLoadProfile();
-  if(!cloud.needName){ await cloudSync(); cloudFriendsLoad().then(() => { cloudRtStart(); cloudRefresh(); }); if(typeof fpPublish === 'function') fpPublish(); }
-  cloudRefresh();
+  if(!cloud.needName){ await cloudSync(); if(typeof cloudGifts === 'function') await cloudGifts(); cloudFriendsLoad().then(() => { cloudRtStart(); cloudRefresh(); }); if(typeof fpPublish === 'function') fpPublish(); }
+  cloudRefresh(); if(typeof refreshHud === 'function') refreshHud();                                // el menú pasa a enseñar el nombre de la cuenta
 }
 
 const CLOUD_NAME_RE = /^[A-Za-z0-9_]{3,16}$/;
@@ -74,7 +75,7 @@ async function cloudSetName(name){                                              
   if(!CLOUD_NAME_RE.test(name)) return 'El nombre debe tener de 3 a 16 caracteres: letras sin tilde, números o _.';
   const {error} = await cloud.sb.from('profiles').insert({id: cloud.user.id, username: name});
   if(error) return error.code === '23505' ? 'Ese nombre ya lo tiene otro jugador. Prueba con otro.' : 'No se pudo guardar el nombre: ' + error.message;
-  cloud.name = name; cloud.needName = false; cloudRtStart(); return '';
+  cloud.name = name; cloud.needName = false; cloudRtStart(); if(typeof refreshHud === 'function') refreshHud(); return '';
 }
 
 function cloudErr(e){
@@ -136,7 +137,7 @@ async function cloudSignOut(){
   cloud.recovery = false; cloud.user = null; cloud.name = ''; cloud.cardKey = ''; cloud.cardErr = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
   cloud.fr = {loaded:false, loading:false, friends:[], incoming:[], outgoing:[], err:''};
   try{ localStorage.removeItem(CLOUD_META); }catch(e){}
-  cloudRefresh();
+  cloudRefresh(); if(typeof refreshHud === 'function') refreshHud();                                // vuelve el nombre de entrenador local
 }
 
 // ---- Subida: persist() llama a cloudDirty() cada vez que se guarda ----

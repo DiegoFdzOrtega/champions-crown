@@ -16,7 +16,7 @@ let avDraft = '';                              // avatar que tienes marcado en l
 // Tu tarjeta de entrenador (la misma que ven tus amigos, js/friendprofile.js): arriba del Perfil, se repinta al cambiar algo
 function renderMyCard(){
   const el = $('myCard'); if(!el || typeof fpView !== 'function') return;
-  el.innerHTML = (save.pubProfile === false ? '<p class="warn">Tu perfil está oculto: tus amigos no ven esta tarjeta.</p>' : '') + fpView(fpCard(), {name: (cloud && cloud.name) || save.name, self: true});
+  el.innerHTML = (save.pubProfile === false ? '<p class="warn">Tu perfil está oculto: tus amigos no ven esta tarjeta.</p>' : '') + fpView(fpCard(), {name: trainerName(), self: true});
   fpPaint(el);
 }
 // Selector de fondo de la tarjeta (js/cardbg.js): primero 'Sin fondo', luego los desbloqueados y al final los bloqueados (con su pista)
@@ -48,6 +48,7 @@ function renderProfile(){
     <div id="myCard" class="fpBody"></div>
     <p class="help">Esta es tu tarjeta de entrenador: la ven tus amigos desde Amigos (puedes ocultarla abajo). Se actualiza sola cuando cambias algo.</p>
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
+    <p class="help" id="nameHint"></p>
     <h2>Personaje</h2>
     <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
     <div class="gen-row" id="genRow">${genButtons()}</div>
@@ -72,13 +73,14 @@ function renderProfile(){
     <p class="help">Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
     <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>`);
   renderAvatarGrid(); renderTitleFrame(); renderMyCard(); renderBgGrid();
-  $('nameIn').value = save.name;
+  $('nameIn').value = trainerName(); $('nameIn').disabled = nameLocked();                        // con cuenta, el nombre es el de la cuenta y no se toca
+  $('nameHint').textContent = nameLocked() ? 'Tu nombre lo da tu cuenta: se elige al crearla y no se puede cambiar por ahora.' : 'Sin cuenta puedes poner el nombre que quieras. Si inicias sesión, se usará el nombre de tu cuenta.';
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
     const lock = b.classList.contains('lock'); setPlayerSkin(b.querySelector('img'), b.dataset.g, lock); b.classList.toggle('on', !lock && skinOf() === b.dataset.g);
     if(lock){ b.onclick = () => { const a = achDef('tr_' + b.dataset.g); toast(a ? `Se desbloquea con el logro «${a.name}» (Logros › Entrenadores): ${a.desc.split('. ')[0]}.` : 'Personaje bloqueado.'); }; return; }
     b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); renderMyCard(); };          // (y la tarjeta de arriba cambia al momento)
   });
-  $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };
+  $('nameIn').oninput = e => { if(nameLocked()) return; save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };
   const box = $('pfSlots');
   pfDraft.forEach((dex, i) => {
     const sh = !!(dex && pfDraftS[i] && save.shiny.includes(dex));
