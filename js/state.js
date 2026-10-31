@@ -41,7 +41,7 @@ try{
     save.avatar = typeof s.avatar === 'string' ? s.avatar : '';
     save.title = typeof s.title === 'string' ? s.title : ''; save.frame = typeof s.frame === 'string' ? s.frame : '';      // título (id del logro) y marco de avatar elegidos (Perfil); se comprueban al usarlos (js/achievements.js)
     save.pubProfile = s.pubProfile !== false;                                       // ¿tus amigos pueden ver tu perfil? (js/friendprofile.js)
-    save.gender = s.gender === 'f' ? 'f' : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
+    save.gender = s.gender === 'f' || s.gender === 'r' ? s.gender : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
     const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
     save.charms = obj(s.charms); save.keys = obj(s.keys); save.iv = obj(s.iv); save.ev = obj(s.ev); save.ivBase = obj(s.ivBase); save.evCap = obj(s.evCap); save.capUsed = obj(s.capUsed); save.abil = obj(s.abil); save.mv = obj(s.mv); save.mvHist = obj(s.mvHist); save.mtV = s.mtV || 1;
     if((s.trainV || 1) < 2){                                                        // v2: todos los Pokémon vuelven a IV 0 y EV 0 y se devuelven las chapas gastadas

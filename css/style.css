@@ -1291,6 +1291,7 @@ button.leg:disabled{box-shadow:none}
 .skin{display:block;aspect-ratio:74/125;background:0 100%/200% 100% no-repeat;image-rendering:pixelated}   /* la imagen trae a Red (mitad izquierda) y a Leaf (mitad derecha) */
 .skin[data-g=f]{background-position:100% 100%}
 .skin.fb{aspect-ratio:1;background-size:contain;background-position:center}
+.skin.one{aspect-ratio:1;background-size:contain;background-position:center bottom}   /* personajes de una sola imagen (chico y Red Masters): vspanel.js recorta su margen */
 #vs .vs-vs{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6;font:italic 900 clamp(5rem,15vw,12rem)/1 Impact,"Arial Black",sans-serif;color:#ffd23a;-webkit-text-stroke:.09em #14213a;paint-order:stroke fill;text-shadow:0 .06em 0 #b3261e,0 .12em 0 #14213a,0 .2em .3em #000a;animation:vsStamp .45s .3s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
 #vs .vs-flash{position:absolute;inset:0;z-index:9;background:#fff;pointer-events:none;animation:vsFlash .7s .3s ease-out both}
 #vs .vs-foot{position:absolute;left:50%;bottom:3.2vh;transform:translateX(-50%);z-index:7;padding:.7rem 2rem;background:#0b0f18;border:2px solid #fff3;border-radius:999px;color:#fff;font:700 clamp(.6rem,1.1vw,.85rem)/1.4 "Press Start 2P","Courier New",monospace;white-space:nowrap;box-shadow:0 .4rem 1rem #000a;animation:vsRise .4s .9s both}
@@ -1580,6 +1581,10 @@ button.leg:disabled{box-shadow:none}
 .cloudbox form button.main{margin-top:1.2rem;width:100%}
 .cloudbox .ctabs{display:flex;gap:.6rem;margin:1rem 0 .4rem}
 .cloudbox .ctabs button{flex:1;opacity:.65}.cloudbox .ctabs button.on{opacity:1;border-color:#ffcc33;color:#ffcc33}
+.cloudbox .linkbtn{display:block;margin:1rem 0 .4rem;padding:0;background:none;border:0;color:#7fb8ff;font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer}
+.cloudbox .linkbtn:hover{color:#ffcc33}
+.cloudbox .cpass{margin:.4rem 0 1.2rem;max-width:34rem;border:2px solid #2d4a7c;padding:.7rem 1rem;background:#0b1224}
+.cloudbox .cpass summary{cursor:pointer;color:#cfe0ff;font-size:1rem}
 .cloudbox .okmsg{color:#7fe3a0;font-size:.95rem;line-height:1.7}
 .cloudbox .cbtns{display:flex;flex-wrap:wrap;gap:.7rem;margin:1rem 0}
 .cloudbox .cchoice{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}

@@ -7,7 +7,7 @@
    - Se cierra solo a los pocos segundos; clic / Enter / Espacio lo salta; Esc cancela y vuelves al menú.
 
    TU PERSONAJE: la imagen  avatares/RED Y LEAF.png  trae a los dos (Red a la izquierda, Leaf a la derecha); se enseña una mitad u otra.
-   Se elige en Perfil › Personaje (save.gender: 'm' = chico, 'f' = chica). Si falta la imagen se usa el avatar clásico.
+   Se elige en Perfil › Personaje (save.gender: 'm' = chico, 'f' = chica, 'r' = Red Masters, solo para la cuenta yumbax). Si falta la imagen se usa el avatar clásico.
    (No sale en la lista de avatares: loadAvatars la salta.)
 
    USO:  vsIntro({name, id, path, label, enemies, go})
@@ -17,6 +17,13 @@
    ===================================================================== */
 const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en avatares/ con los dos personajes: Red (chico, izquierda) y Leaf (chica, derecha)
 const VS_SKIN_URL = 'avatares/' + encodeURIComponent(VS_SKIN_FILE);
+// Personajes de una sola imagen (80x80, con margen transparente que se recorta al dibujarlos): 'm' = chico (Red de 3.ª gen.) · 'r' = Red Masters (EXCLUSIVO de la cuenta VS_MASTERS_USER)
+// La chica ('f') sigue siendo la mitad derecha de VS_SKIN_FILE.
+const VS_SKINS = {m: 'red-gen3.png', r: 'red-masters.png'};
+const VS_SKIN_FILES = [VS_SKIN_FILE, ...Object.values(VS_SKINS)];       // (no salen en la lista de avatares: loadAvatars las salta)
+const VS_MASTERS_USER = 'yumbax';
+const skinAllowed = g => g !== 'r' || (typeof cloud !== 'undefined' && !!cloud.name && cloud.name.toLowerCase() === VS_MASTERS_USER);   // es solo un detalle de adorno: se mira el nombre de la cuenta (Amigos)
+const skinOf = g => { g = g || save.gender; return g === 'f' ? 'f' : (g === 'r' && skinAllowed('r') ? 'r' : 'm'); };      // el personaje que se usa de verdad (si no puedes tener el Masters, el chico)
 const VS_AUTO_MS = 4600, VS_MIN_MS = 700;                  // se cierra solo a los 4,6 s · no se puede saltar en los primeros 0,7 s (evita dobles clics)
 // Arte VS de los rivales (como el de la pantalla VS de los juegos): si existe lideres/<región>/VS_<Nombre>.webp (o .png / vs_<nombre>), se usa en vez del retrato pequeño.
 // Solo se busca en las regiones de esta lista (así no se piden archivos que no existen).  Si no está, se usa el retrato de siempre.
@@ -33,11 +40,32 @@ function vsFoeImg(im, o){
   im.onerror = () => { if(++k < list.length) im.src = list[k]; else { im.onload = null; fallback(); } };
   im.src = list[0];
 }
-function setPlayerSkin(el, g){                              // cambia 'el' por el personaje elegido: la mitad izquierda (chico) o derecha (chica) de la imagen; si no existe, el avatar clásico
-  const sp = document.createElement('span'); sp.className = 'skin'; sp.dataset.g = g || (save.gender === 'f' ? 'f' : 'm');
-  sp.style.backgroundImage = `url("${VS_SKIN_URL}")`;                  // (la ruta se resuelve desde la página, no desde css/)
+function vsTrim(sp, im){                                     // recorta el margen transparente de la imagen para que el personaje salga grande (mira dónde empiezan y acaban los píxeles dibujados)
+  try{
+    const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const x = c.getContext('2d', {willReadFrequently: true}); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, W, H).data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for(let j = 0; j < H; j++) for(let i = 0; i < W; i++) if(d[(j * W + i) * 4 + 3] > 8){ if(i < x0) x0 = i; if(i > x1) x1 = i; if(j < y0) y0 = j; if(j > y1) y1 = j; }
+    if(x1 < 0) return;
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+    sp.style.aspectRatio = bw + '/' + bh; sp.style.backgroundSize = `${W / bw * 100}% ${H / bh * 100}%`;
+    sp.style.backgroundPosition = `${W > bw ? x0 / (W - bw) * 100 : 0}% ${H > bh ? y0 / (H - bh) * 100 : 0}%`;
+  }catch(e){}                                                // (si el navegador lo impide, se ve entera con su margen)
+}
+function setPlayerSkin(el, g){                              // cambia 'el' por el personaje elegido: chico ('m'), chica ('f': mitad derecha de la imagen de Red y Leaf) o Red Masters ('r'); si falta la imagen se usa el avatar clásico
+  g = skinOf(g);
+  const sp = document.createElement('span'); sp.className = 'skin'; sp.dataset.g = g;
   el.replaceWith(sp);
-  const probe = new Image(); probe.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; probe.src = VS_SKIN_URL;
+  if(g === 'f'){
+    sp.style.backgroundImage = `url("${VS_SKIN_URL}")`;                  // (la ruta se resuelve desde la página, no desde css/)
+    const probe = new Image(); probe.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; probe.src = VS_SKIN_URL;
+    return;
+  }
+  const url = 'avatares/' + VS_SKINS[g]; sp.classList.add('one'); sp.style.backgroundImage = `url("${url}")`;
+  const probe = new Image(); probe.onload = () => vsTrim(sp, probe);
+  probe.onerror = () => { sp.classList.remove('one'); sp.dataset.g = 'm'; sp.style.backgroundImage = `url("${VS_SKIN_URL}")`;       // sin la imagen nueva: la mitad izquierda de la antigua
+    const old = new Image(); old.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; old.src = VS_SKIN_URL; };
+  probe.src = url;
 }
 
 let vsState = null;                                         // {go, t0, timer, draw, key}

@@ -41,8 +41,13 @@ function cloudLoadLib(){                                                        
 function cloudInit(){
   if(typeof supabase === 'undefined' || !supabase.createClient){ cloud.ok = false; cloud.ready = true; cloudRefresh(); return; }
   try{
-    cloud.sb = supabase.createClient(CLOUD_URL, CLOUD_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:false}});
+    cloud.sb = supabase.createClient(CLOUD_URL, CLOUD_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true}});
     cloud.ok = true;
+    cloud.sb.auth.onAuthStateChange(ev => {                                                          // el enlace «Olvidé mi contraseña» del correo vuelve aquí con ev = PASSWORD_RECOVERY
+      if(ev !== 'PASSWORD_RECOVERY') return;
+      cloud.recovery = true; try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}   // quita el código de la dirección
+      setTimeout(() => { try{ if(typeof openFriends === 'function') openFriends(); }catch(e){} cloudRefresh(); }, 800);   // (no se llama a Supabase desde aquí dentro)
+    });
   }catch(e){ cloud.ok = false; cloud.ready = true; return; }
   cloud.sb.auth.getSession().then(({data}) => {
     cloud.ready = true;
@@ -100,11 +105,35 @@ async function cloudSignIn(email, pass){
   if(error) return cloudErr(error);
   cloud.user = data.user; await cloudAfterLogin(); return '';
 }
+const CLOUD_HOME = () => location.origin + location.pathname.replace(/index\.html$/, '');          // a dónde vuelve el enlace del correo (esta misma página)
+async function cloudResetMail(email){                                                                // «Olvidé mi contraseña»: manda un correo con un enlace para elegir otra
+  email = String(email || '').trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return 'Escribe arriba tu email y pulsa otra vez.';
+  const {error} = await cloud.sb.auth.resetPasswordForEmail(email, {redirectTo: CLOUD_HOME()});
+  if(error) return cloudErr(error);
+  cloudUi.info = 'Listo. Si ese email tiene cuenta, te hemos mandado un correo con un enlace para elegir una contraseña nueva (mira también en spam). Ábrelo en este mismo navegador.'; return '';
+}
+async function cloudChangePass(cur, p1, p2){                                                         // Cambiar contraseña estando dentro (pide la actual para comprobar que eres tú)
+  if(String(p1 || '').length < 6) return 'La contraseña nueva debe tener al menos 6 caracteres.';
+  if(p1 !== p2) return 'Las dos contraseñas nuevas no son iguales.';
+  const chk = await cloud.sb.auth.signInWithPassword({email: cloud.user.email, password: String(cur || '')});
+  if(chk.error) return 'La contraseña actual no es correcta.';
+  const {error} = await cloud.sb.auth.updateUser({password: p1});
+  if(error) return cloudErr(error);
+  return '';
+}
+async function cloudRecoverPass(p1, p2){                                                             // después de abrir el enlace del correo: elegir la nueva sin pedir la antigua
+  if(String(p1 || '').length < 6) return 'La contraseña nueva debe tener al menos 6 caracteres.';
+  if(p1 !== p2) return 'Las dos contraseñas no son iguales.';
+  const {error} = await cloud.sb.auth.updateUser({password: p1});
+  if(error) return cloudErr(error);
+  cloud.recovery = false; cloudUi.info = 'Contraseña cambiada. Ya estás dentro con la nueva.'; return '';
+}
 async function cloudSignOut(){
   clearTimeout(cloud.timer); cloudRtStop();
   if(cloud.user && !cloud.needName) await cloudPush().catch(() => {});                              // última subida antes de salir
   await cloud.sb.auth.signOut();
-  cloud.user = null; cloud.name = ''; cloud.cardKey = ''; cloud.cardErr = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
+  cloud.recovery = false; cloud.user = null; cloud.name = ''; cloud.cardKey = ''; cloud.cardErr = ''; cloud.needName = false; cloud.conflict = null; cloud.msg = ''; cloud.err = '';
   cloud.fr = {loaded:false, loading:false, friends:[], incoming:[], outgoing:[], err:''};
   try{ localStorage.removeItem(CLOUD_META); }catch(e){}
   cloudRefresh();

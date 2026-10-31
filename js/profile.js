@@ -30,7 +30,7 @@ function renderProfile(){
     <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
     <h2>Personaje</h2>
     <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
-    <div class="gen-row" id="genRow"><button type="button" data-g="m"><img alt=""><span>Chico</span></button><button type="button" data-g="f"><img alt=""><span>Chica</span></button></div>
+    <div class="gen-row" id="genRow"><button type="button" data-g="m"><img alt=""><span>Chico</span></button><button type="button" data-g="f"><img alt=""><span>Chica</span></button>${skinAllowed('r') ? '<button type="button" data-g="r"><img alt=""><span>Red Masters</span></button>' : ''}</div>
     <h2>Avatar</h2>
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
     <div class="av-grid" id="avGrid"></div>
@@ -50,7 +50,7 @@ function renderProfile(){
   renderAvatarGrid(); renderTitleFrame(); renderMyCard();
   $('nameIn').value = save.name;
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
-    setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', (save.gender || 'm') === b.dataset.g);
+    setPlayerSkin(b.querySelector('img'), b.dataset.g); b.classList.toggle('on', skinOf() === b.dataset.g);
     b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); };
   });
   $('nameIn').oninput = e => { save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };

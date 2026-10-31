@@ -30,6 +30,12 @@ const PATCHES = [
       'La lista de equipos tiene buscador y filtros (Todos, Favoritos, Completos, Vacíos). Sigues teniendo hasta 18 equipos, con nombre, favorito y borrar.',
       'El objeto de cada Pokémon se cambia directamente en su hueco del equipo. La ficha de la derecha enseña habilidad, naturaleza, ataques y estadísticas (más claras y sin amontonarse), y «Ver datos» abre el entrenamiento de siempre.',
       'Todo es más grande y se adapta al tamaño de la ventana; en la lista de equipos los sprites son grandes para reconocer cada equipo.']},
+    {t:'Cuenta', i:[
+      'Nuevo enlace «¿Has olvidado la contraseña?» al entrar: te llega un correo para elegir una nueva.',
+      'Con la sesión iniciada puedes cambiar la contraseña (Amigos › Cambiar contraseña). El botón Cerrar sesión sale ahora en todas las pantallas de la cuenta.']},
+    {t:'Personajes', i:[
+      'El chico del panel VS ahora es Red de 3.ª generación (el anterior salía mal recortado). La chica sigue igual.',
+      'Nuevo personaje «Red Masters», exclusivo de la cuenta yumbax: aparece en Perfil › Personaje solo con esa cuenta.']},
     {t:'Combate online', i:[
       'Arreglado el aviso «Combate cancelado: los dos combates se han descuadrado»: lo causaban los nuevos sonidos de golpe. Los dos jugadores tenéis que recargar la página (Ctrl+F5) para tener la versión nueva; con versiones distintas el juego no deja jugar.']},
     {t:'Gachapón', i:[

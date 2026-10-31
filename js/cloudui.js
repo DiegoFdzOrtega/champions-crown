@@ -3,7 +3,7 @@
    PANTALLA «AMIGOS · CUENTA» (la rellena cloudRender, y la lógica está en js/cloud.js)
    Se abre desde el menú (Perfil › Logros › Amigos › Mochila). Trae la cuenta (guardado en la nube) y la lista de amigos (cloudRenderFriends). Los desafíos vendrán después.
    ===================================================================== */
-const cloudUi = {tab:'in', busy:false, err:'', info:''};      // tab: 'in' = Entrar · 'up' = Crear cuenta
+const cloudUi = {tab:'in', busy:false, err:'', info:'', email:'', pw:null};      // tab: 'in' = Entrar · 'up' = Crear cuenta
 const cloudEsc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
 function cloudSummary(d){                                      // resumen de una partida para decidir en un conflicto
@@ -24,10 +24,17 @@ function cloudHtml(){
       <div class="ctabs"><button class="${up ? '' : 'on'}" data-tab="in">Entrar</button><button class="${up ? 'on' : ''}" data-tab="up">Crear cuenta</button></div>
       <form id="cloudForm" autocomplete="on">
         ${up ? `<label>Nombre de jugador<input id="cfName" type="text" maxlength="16" autocomplete="username" placeholder="3-16 letras, números o _"></label>` : ''}
-        <label>Email<input id="cfEmail" type="email" autocomplete="email" placeholder="tu@correo.com"></label>
+        <label>Email<input id="cfEmail" type="email" autocomplete="email" placeholder="tu@correo.com" value="${cloudEsc(cloudUi.email || '')}"></label>
         <label>Contraseña<input id="cfPass" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" placeholder="mínimo 6 caracteres"></label>
         <button type="submit" class="main"${dis}>${up ? 'Crear cuenta' : 'Entrar'}</button>
-      </form>${msg}`;
+      </form>${up ? '' : `<button type="button" id="cloudForgot" class="linkbtn"${dis}>¿Has olvidado la contraseña?</button>`}${msg}`;
+  }
+  if(cloud.recovery){                                                                           // has abierto el enlace del correo: elige tu contraseña nueva
+    return `<h2>Elige tu contraseña nueva</h2>
+      <p class="help">Has entrado con el enlace del correo. Escribe la contraseña nueva dos veces.</p>
+      <form id="cloudRecForm" autocomplete="off"><label>Contraseña nueva<input id="crP1" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres"></label>
+      <label>Repite la contraseña nueva<input id="crP2" type="password" autocomplete="new-password"></label>
+      <button type="submit" class="main"${dis}>Guardar contraseña nueva</button></form>${msg}<button id="cloudOut" class="sec">Cerrar sesión</button>`;
   }
   if(cloud.needName){
     return `<h2>Elige tu nombre de jugador</h2>
@@ -39,13 +46,18 @@ function cloudHtml(){
     return `<h2>¿Qué partida quieres usar?</h2>
       <p class="help">Tu cuenta ya tiene una partida en la nube y este navegador también tiene la suya, y son distintas. Elige cuál conservar. La otra se sustituye (si eliges la de la nube, antes se guarda una copia de seguridad de la de este navegador).</p>
       <div class="cchoice"><div><h3>Partida de la nube</h3><p>${cloudEsc(cloudSummary(cloud.conflict.data))}</p><small>Guardada: ${cloudTime(cloud.conflict.at)}</small><button id="cloudUseCloud" class="main"${dis}>Usar la de la nube</button></div>
-      <div><h3>Partida de este navegador</h3><p>${cloudEsc(cloudSummary(cloudPayload()))}</p><small>Se sube y pisa la de la nube</small><button id="cloudUseLocal"${dis}>Usar la de este navegador</button></div></div>${msg}`;
+      <div><h3>Partida de este navegador</h3><p>${cloudEsc(cloudSummary(cloudPayload()))}</p><small>Se sube y pisa la de la nube</small><button id="cloudUseLocal"${dis}>Usar la de este navegador</button></div></div>${msg}<button id="cloudOut" class="sec">Cerrar sesión</button>`;
   }
   return `<h2>Tu cuenta</h2>
     <p>Sesión iniciada como <b>${cloudEsc(cloud.name)}</b></p><p class="help">${cloudEsc((cloud.user && cloud.user.email) || '')}</p>
     <p class="${cloud.err ? 'warn' : 'okmsg'}">${cloudEsc(cloud.err || cloud.msg || 'Tu partida se guarda en la nube automáticamente.')}</p>
     <p class="help">Última subida: ${cloud.lastPush ? cloudTime(cloud.lastPush) : (cloudMeta().at ? cloudTime(cloudMeta().at) : '—')}</p>
     <div class="cbtns"><button id="cloudPush" class="main"${dis}>Guardar en la nube ahora</button><button id="cloudOut" class="sec">Cerrar sesión</button></div>
+    <details class="cpass"${cloudUi.pw ? ' open' : ''}><summary>Cambiar contraseña</summary>${cloudUi.pw ? `<p class="${cloudUi.pw.err ? 'warn' : 'okmsg'}">${cloudEsc(cloudUi.pw.err || cloudUi.pw.info)}</p>` : ''}
+      <form id="cpForm" autocomplete="off"><label>Contraseña actual<input id="cpOld" type="password" autocomplete="current-password"></label>
+      <label>Contraseña nueva<input id="cpNew" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres"></label>
+      <label>Repite la contraseña nueva<input id="cpNew2" type="password" autocomplete="new-password"></label>
+      <button type="submit" class="main"${dis}>Cambiar contraseña</button></form></details>
     <h2>Amigos</h2>
     <p class="help">Escribe el nombre de jugador de un amigo para enviarle una solicitud. Cuando la acepte, aparecerá en tu lista.</p>
     <form id="frForm" class="frAdd"><input id="frName" type="text" maxlength="16" placeholder="Nombre de tu amigo" autocomplete="off"><button type="submit" class="main"${dis}>Añadir</button></form>${msg}
@@ -56,16 +68,19 @@ function cloudRender(){
   const box = document.getElementById('cloudBox'); if(!box) return;
   box.innerHTML = cloudHtml();
   const by = id => document.getElementById(id), run = async fn => {
-    cloudUi.busy = true; cloudUi.err = ''; cloudUi.info = ''; cloudRender();
+    cloudUi.busy = true; cloudUi.err = ''; cloudUi.info = ''; cloudUi.pw = null; cloudRender();
     let e = ''; try{ e = await fn(); }catch(x){ e = cloudErr(x); }
     cloudUi.busy = false; cloudUi.err = e || ''; cloudRender();
   };
   box.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { cloudUi.tab = b.dataset.tab; cloudUi.err = ''; cloudUi.info = ''; cloudRender(); });
   const f = by('cloudForm');
-  if(f) f.onsubmit = ev => { ev.preventDefault(); const email = by('cfEmail').value, pass = by('cfPass').value;
+  if(f) f.onsubmit = ev => { ev.preventDefault(); const email = by('cfEmail').value, pass = by('cfPass').value; cloudUi.email = email;
     if(cloudUi.tab === 'up'){ const name = by('cfName').value; run(async () => { const e = await cloudSignUp(email, pass, name); if(e && /^¡Cuenta creada/.test(e)){ cloudUi.tab = 'in'; cloudUi.info = e; return ''; } return e; }); }
     else run(() => cloudSignIn(email, pass)); };
   const nf = by('cloudNameForm'); if(nf) nf.onsubmit = ev => { ev.preventDefault(); const n = by('cfName').value; run(async () => { const e = await cloudSetName(n); if(!e) await cloudSync(); return e; }); };
+  const fg = by('cloudForgot'); if(fg) fg.onclick = () => { const em = by('cfEmail').value; cloudUi.email = em; run(() => cloudResetMail(em)); };
+  const rf = by('cloudRecForm'); if(rf) rf.onsubmit = ev => { ev.preventDefault(); const a = by('crP1').value, b = by('crP2').value; run(() => cloudRecoverPass(a, b)); };
+  const cp = by('cpForm'); if(cp) cp.onsubmit = ev => { ev.preventDefault(); const a = by('cpOld').value, b = by('cpNew').value, c = by('cpNew2').value; run(async () => { const e = await cloudChangePass(a, b, c); cloudUi.pw = e ? {err: e} : {info: 'Contraseña cambiada.'}; return ''; }); };
   const o = by('cloudOut'); if(o) o.onclick = () => run(() => cloudSignOut().then(() => { cloudUi.tab = 'in'; return ''; }));
   const p = by('cloudPush'); if(p) p.onclick = () => run(async () => (await cloudPush()) ? (cloud.msg = 'Guardado en la nube.', '') : (cloud.err || 'No se pudo guardar.'));
   const af = by('frForm');
