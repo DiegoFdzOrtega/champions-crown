@@ -20,7 +20,7 @@ function fpCard(){
   const claimed = ACHIEVEMENTS.filter(a => achGet(a.id).claimed);
   const shV = favShinySaved();
   return {
-    v: FP_VER, nm: fpStr(save.name, 10), g: skinOf(save.gender),
+    v: FP_VER, nm: fpStr(save.name, 10), g: skinOf(save.gender), bg: cardBgActive(),
     av: (() => { const a = save.avatar && avatarList().find(x => x.file === save.avatar); return a && avatarUnlocked(a) ? a.file : ''; })(),
     fr: achActiveFrame(), ti: achActiveTitle() ? save.title : '',
     box: boxCount(), sh: new Set(save.shiny.filter(d => !hidden(d))).size, ach: claimed.length, achT: ACHIEVEMENTS.length, sec: claimed.filter(a => a.secret).length,
@@ -61,9 +61,10 @@ function fpView(card, o){
   const fav = (Array.isArray(card.fav) ? card.fav : []).map(p => Array.isArray(p) ? [fpNum(p[0]), p[1] ? 1 : 0] : null).filter(p => p && p[0] && mon(p[0]) && !hidden(p[0])).slice(0, 3);
   const tile = (label, val, mine) => `<div class="fp-tile"><small>${label}</small><b>${val}</b>${self ? '' : `<em>Tú: ${mine}</em>`}</div>`;
   const online = !self && o.uid && cloud.online[o.uid] !== undefined;
+  const bgD = CARD_BG[fpStr(card.bg, 20)] || null;                                  // fondo: solo se acepta un id que exista en la tabla (js/cardbg.js)
   const ac = fr ? ACH_FRAMES[fr].c : '#3ea6ff', anyShiny = fav.some(p => p[1]);
   const cups = ROOM_LEAGUES.map(([r, col]) => { const won = lg.includes(r); return `<div class="fp-cup${won ? ' on' : ''}" style="--c:${col}" title="Liga de ${cloudEsc(ROOM_LABEL[r] || r)}${won ? ' superada' : ': sin superar'}"><canvas width="26" height="26" data-cup="${col}" data-won="${won ? 1 : 0}"></canvas><small>${cloudEsc(ROOM_LABEL[r] || r)}</small></div>`; }).join('');
-  return `<div class="fp-card${anyShiny ? ' foil' : ''}" style="--ac:${ac}">
+  return `<div class="fp-card${anyShiny ? ' foil' : ''}${bgD ? ' hasbg' : ''}" style="--ac:${ac}${bgD ? `;--bg:url(${new URL(cardBgUrl(bgD), document.baseURI).href});--bgpos:${bgD.pos}` : ''}">
     <div class="fp-top"><span>TARJETA DE ENTRENADOR</span><span>Nº ${fpId(o.uid || (cloud.user && cloud.user.id) || o.name)}</span></div>
     <div class="fp-main">
       <div class="fp-left">

@@ -7,7 +7,7 @@
      - etiquetas con lo demás (EVs, trofeo, siguiente rival, dificultad superada...).
    Los datos salen de giveReward() (teams.js), que deja lo que se ha dado en `lastReward`. No inventa nada: si una victoria no da recompensa, no hay tarjetas.
    Funciones: victoryScreen(o) · resultClear() (derrota: vuelve a la pantalla de texto sencilla)
-     o = {title, sub, rewards:lastReward, chips:[{t, c}], leader, path}   (leader/path = retrato del rival, como en el combate)
+     o = {title, sub, rewards:lastReward, chips:[{t, c}], leader, path, skin}   (leader/path = retrato del rival, como en el combate · skin = en el combate online, el personaje del otro jugador)
    Para añadir un tipo de recompensa nuevo: ponle nombre en REWARD_NAMES (teams.js) y su aspecto en RW_LOOK (abajo).
    ===================================================================== */
 const RW_LOOK = {                                   // aspecto de cada recompensa: color · icono (bitmap de ICONS, o la imagen del objeto) · lo que tienes ahora
@@ -38,7 +38,8 @@ function victoryScreen(o){
   // retrato del rival vencido + cartel
   const L = o.leader && typeof leaderImg === 'function' ? leaderImg(o.leader, o.path) : null;
   const banner = mk('div', 'vic-banner', 'rBanner');
-  if(L && L.src){ const p = mk('img', 'vic-portrait', 'rPortrait'); p.alt = ''; p.src = L.src; p.onerror = () => p.remove(); inner.insertBefore(p, $('rTitle')); }
+  if(o.skin){ const p = mk('div', 'vic-portrait sk', 'rPortrait'), ph = document.createElement('span'); p.appendChild(ph); inner.insertBefore(p, $('rTitle')); setPlayerSkin(ph, o.skin, true); }      // rival = otro jugador (combate online): su personaje de cuerpo entero
+  else if(L && L.src){ const p = mk('img', 'vic-portrait', 'rPortrait'); p.alt = ''; p.src = L.src; p.onerror = () => p.remove(); inner.insertBefore(p, $('rTitle')); }
   banner.textContent = '★ VICTORIA ★'; inner.insertBefore(banner, $('rTitle'));
   $('rTitle').textContent = o.title; $('rText').textContent = o.sub || ''; $('rText').classList.toggle('hide', !o.sub);
   // tarjetas de recompensa

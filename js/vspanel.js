@@ -13,6 +13,7 @@
    USO:  vsIntro({name, id, path, label, enemies, go})
         name = nombre del rival · id = nombre de su retrato (lideres/...) · path = ruta fija del retrato (Campo)
         label = texto de abajo · enemies = su equipo (nº de Pokédex u objetos {dex}) · go = función que empieza el combate
+        skin = (combate online) el personaje del rival, que es otro jugador · sub = texto bajo su nombre · shinyOf(dex) = si su Pokémon es shiny · cancel = función para Esc (en vez de volver a la música del menú)
         music = el objeto del combate (el mismo que recibe startBattle): hace que la música del combate empiece a sonar ya en esta pantalla. Si cancelas con Esc, vuelve la música del menú.
    ===================================================================== */
 const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en avatares/ con los dos personajes: Red (chico, izquierda) y Leaf (chica, derecha)
@@ -90,7 +91,7 @@ function vsEnd(run){
   if(!vsState) return; const v = vsState; vsState = null;
   clearTimeout(v.timer); clearInterval(v.draw); removeEventListener('keydown', v.key, true);
   $('vs').classList.add('hide'); $('vs').innerHTML = '';
-  if(run) v.go(); else if(v.music) Music.play('menu');                                      // cancelar: vuelve la música del menú
+  if(run) v.go(); else if(v.cancel) v.cancel(); else if(v.music) Music.play('menu');                                      // cancelar: vuelve la música del menú
 }
 // Tipo que más se repite entre los Pokémon del rival (solo su primer tipo): si lo comparten la mitad o más (un líder de gimnasio), el fondo del rival toma el color de ese tipo
 function vsTint(list){
@@ -119,8 +120,8 @@ function vsIntro(o){
   if(vsState) return;
   const me = vsSide('vs-me', save.name, team.slice(), el => setPlayerSkin(el), dex => useShiny(dex), null, 'Tu equipo'),
         tint = vsTint(o.enemies),
-        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, im => vsFoeImg(im, o), null, tint, tint ? 'Tipo ' + tint.es : '');
-  const root = $('vs'); root.innerHTML = '';
+        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, o.skin ? (im => setPlayerSkin(im, o.skin, true)) : (im => vsFoeImg(im, o)), o.shinyOf || null, tint, o.sub || (tint ? 'Tipo ' + tint.es : ''));        // o.skin = el rival es otro jugador (combate online): se enseña su personaje, mirando hacia ti
+  const root = $('vs'); root.innerHTML = ''; foe.el.classList.toggle('mir', !!o.skin);
   const vs = document.createElement('div'); vs.className = 'vs-vs'; vs.textContent = 'VS';
   const cut = document.createElement('div'); cut.className = 'vs-cut';
   const flash = document.createElement('div'); flash.className = 'vs-flash';
@@ -139,6 +140,6 @@ function vsIntro(o){
     else e.stopImmediatePropagation();                                                                              // el resto de teclas no llegan al juego mientras se ve el panel
   };
   addEventListener('keydown', key, true);
-  vsState = {go: o.go, music: !!o.music, t0: Date.now(), key, draw: setInterval(paint, 300), timer: setTimeout(() => vsEnd(true), VS_AUTO_MS)};
+  vsState = {go: o.go, cancel: o.cancel || null, pvp: !!o.skin, music: !!o.music, t0: Date.now(), key, draw: setInterval(paint, 300), timer: setTimeout(() => vsEnd(true), VS_AUTO_MS)};
   root.onclick = () => { if(vsState && Date.now() - vsState.t0 > VS_MIN_MS) vsEnd(true); };
 }

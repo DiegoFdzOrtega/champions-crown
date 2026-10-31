@@ -6,6 +6,26 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Pantalla VS online', date:'31 oct 2026', sections:[
+    {t:'Combate online', i:[
+      'Antes de cada combate online sale ahora la pantalla VS, igual que en la Historia: tú a la izquierda con tu personaje y tus 3 Pokémon, y tu rival a la derecha con el suyo.',
+      'El combate empieza cuando los dos la habéis cerrado (se cierra sola a los pocos segundos, o con clic / Enter). Esc la cancela y vuelves al menú.',
+      'Si ganas un combate online, sale el mismo cartel de «★ VICTORIA ★» que en la Historia, con el personaje de tu rival. Sigue sin dar recompensas.']}
+  ]},
+  {v:'Fondos de la tarjeta', date:'31 oct 2026', sections:[
+    {t:'Perfil', i:[
+      'Nuevo apartado Perfil › Fondo de la tarjeta: 54 ilustraciones de lugares de Pokémon Masters para poner de fondo en tu tarjeta de entrenador. Tus amigos también lo ven.',
+      'Se desbloquean al derrotar al líder de gimnasio, al miembro del Alto Mando o al Campeón de ese lugar (en Fácil o en Difícil). Los bloqueados salen en gris con candado y al pulsarlos te dicen qué combate te falta.',
+      'Algunos se consiguen de otra forma: el Monte Plateado de Red es gratis, la Cima de la Liga se desbloquea con tu primera Liga y los mapas de Kanto, Johto y Teselia con ser Campeón de esa región.']}
+  ]},
+  {v:'Sonidos al atacar', date:'31 oct 2026', sections:[
+    {t:'Sonidos de combate', i:[
+      'Ahora suena también el momento de lanzar cada ataque, y cada tipo suena distinto: golpe de brazo (cuerpo a cuerpo), disparo, brillo que sube (mejoras), onda rara (ataques de estado) y carga con «bum» (ataque fuerte).',
+      'Los ataques del rival en la Historia suenan un poco más bajos que los tuyos para que no tapen el combate. Se controlan con el volumen de Efectos.']}
+  ]},
+  {v:'Cynthia', date:'31 oct 2026', sections:[
+    {t:'Historia', i:['La campeona de Sinnoh ahora se escribe Cynthia en todo el juego (combates, logros y panel VS).']}
+  ]},
   {v:'Más personajes', date:'31 oct 2026', sections:[
     {t:'Personajes', i:[
       'Hay 10 personajes nuevos para el panel VS y tu tarjeta de entrenador: Ash, Lucas, Lyra, Maya, Nate, Akari, la chica kimono y N, más las versiones Masters de Lance y de N.',

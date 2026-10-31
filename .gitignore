@@ -16,3 +16,6 @@ trailer/
 
 # Música original sin comprimir (pesa mucho): solo se sube la de musica/<Región>/ ya optimizada
 musica/Musica2/
+
+# Ilustraciones originales de Pokémon Masters (pesan mucho): solo se sube lo ya optimizado en fondos/tarjeta/ y avatares/
+Pokémon Masters sprites/

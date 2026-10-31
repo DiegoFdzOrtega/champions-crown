@@ -450,7 +450,7 @@ Object.assign(ARENAS, {
       arMote(c, d.motes, t, w, '#7ae8ff', .6, 3, -6); }}
 });
 
-// ---- Columna acanalada con capitel y base dorados (para el templo de Cintia) ----
+// ---- Columna acanalada con capitel y base dorados (para el templo de Cynthia) ----
 function arFluted(P, x, y0, y1, ww, base, gold){
   P.rect(arDrk(base, .35), x, y0, ww, y1 - y0); P.rect(base, x + 1, y0, ww - 3, y1 - y0);
   for(let k = 2; k < ww - 2; k += 3){ P.alpha('#000000', .28, x + k, y0 + 4, 1, y1 - y0 - 8); P.alpha('#ffffff', .1, x + k + 1, y0 + 4, 1, y1 - y0 - 8); }
@@ -626,7 +626,7 @@ Object.assign(ARENAS, {
       const pulse = (t * 28) % 180; c.globalAlpha = .55; c.fillStyle = '#e8f8ff'; for(let k = 0; k < 8; k++){ const x = 24 + ((pulse + k * 60) % (w - 48)); c.fillRect(Math.round(x), AR_WALL + 2, 3, 1); c.fillRect(Math.round(x), AR_H - 5, 3, 1); } c.globalAlpha = 1;
       arMote(c, d.motes, t, w, '#d8c8ff', .5, 3, -4); }},
 
-  // ---- Cintia · Liga Pokémon (Campeona): el templo antiguo de la cima de Sinnoh, con columnas colosales, escalinata, suelo de mármol negro, símbolos ancestrales, relieves y rayos de luz dorada ----
+  // ---- Cynthia (id cintia) · Liga Pokémon (Campeona): el templo antiguo de la cima de Sinnoh, con columnas colosales, escalinata, suelo de mármol negro, símbolos ancestrales, relieves y rayos de luz dorada ----
   cintia: {dark: .12,
     build(P, w, h, WH){
       const GOLD = '#d8b050', GL = '#f0d078', GD = '#8a6a20', CREAM = '#f0e4c0', mx = Math.round(w / 2);

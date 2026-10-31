@@ -109,6 +109,7 @@ function pvpFail(msg){ pvpLeave(); if(msg && typeof toast === 'function') toast(
 function pvpLeave(){                                     // cierra el canal y deja todo como estaba (no toca el combate en pantalla: eso lo hace quien llama)
   const P = pvp; if(!P) return;
   clearInterval(P.hsT); clearTimeout(P.limit);
+  if(typeof vsState !== 'undefined' && vsState && vsState.pvp){ vsState.cancel = null; vsEnd(false); }               // si el rival se va mientras se ve la pantalla VS, se cierra
   if(P.ch){ try{ cloud.sb.removeChannel(P.ch); }catch(e){} }
   try{ if(P.dc) P.dc.close(); if(P.pc) P.pc.close(); }catch(e){}
   pvp = null; cloud.match = null; pvpOverlay('');
@@ -121,8 +122,8 @@ function pvpLeave(){                                     // cierra el canal y de
 // ---------------------------------------------------------------------
 function pvpHs(){
   const P = pvp; if(!P || !P.subscribed) return;
-  if(P.built && !P.rdy && (pvpSheetsReady() || Date.now() - P.builtAt > 15000)) P.rdy = true;      // sprites cargados (necesarios: el tamaño de cada Pokémon cuenta en los golpes)
-  pvpSend('hs', {from: cloud.user.id, ver: PVP_VER, name: cloud.name, team: P.mine, rdy: P.rdy});
+  if(P.built && P.vsDone && !P.rdy && (pvpSheetsReady() || Date.now() - P.builtAt > 15000)) P.rdy = true;      // sprites cargados (necesarios: el tamaño de cada Pokémon cuenta en los golpes)
+  pvpSend('hs', {from: cloud.user.id, ver: PVP_VER, name: cloud.name, team: P.mine, rdy: P.rdy, sk: skinOf(save.gender)});
   pvpTryRun();
 }
 function pvpOnHs(p){
@@ -130,7 +131,8 @@ function pvpOnHs(p){
   if(p.ver !== PVP_VER){ pvpSend('bye', {from: cloud.user.id, why: 'ver'}); pvpFail('Tú y ' + P.match.opp.name + ' tenéis versiones distintas del juego. Recargad la página (Ctrl+F5).'); return; }
   if(!P.opp){
     if(!pvpDescOk(p.team)){ pvpSend('bye', {from: cloud.user.id, why: 'team'}); pvpFail('El equipo de ' + P.match.opp.name + ' no es válido.'); return; }
-    P.opp = {name: String(p.name || P.match.opp.name).slice(0, 24), team: p.team}; pvpBuild();
+    const nm = String(p.name || P.match.opp.name).slice(0, 24);
+    P.opp = {name: nm, team: p.team, sk: (vsKnown(p.sk) && (p.sk !== 'r' || nm.toLowerCase() === VS_MASTERS_USER)) ? p.sk : 'm'}; pvpBuild(); pvpVs();
     if(P.me === 'p') pvpRtcInit();                                                                   // el anfitrión empieza a preparar la conexión directa
     pvpOverlay('');
     pvpHs();                                                                                          // contesta enseguida con tu equipo
@@ -152,13 +154,22 @@ function pvpBuild(){                                     // crea el combate (aú
   show('none');
   P.built = true; P.builtAt = Date.now();
 }
+// Pantalla VS antes del combate (js/vspanel.js, la misma que en la Historia): tú a la izquierda, el rival a la derecha con SU personaje. Los dos combates NO empiezan hasta que los dos la hayan cerrado
+// (P.vsDone cuenta como «listo» en el saludo), así que nadie pierde la cuenta atrás. Se cierra sola a los 4,6 s; Esc = cancelar el combate.
+function pvpVs(){
+  const P = pvp; if(!P || P.vsShown) return; P.vsShown = true;
+  const T = P.opp.team, sh = T.filter(d => d.shiny).map(d => d.m.dex);
+  vsIntro({name: P.opp.name, skin: P.opp.sk, sub: 'Rival online', enemies: T.map(d => d.m.dex), shinyOf: dex => sh.includes(dex), label: 'COMBATE ONLINE',
+    go: () => { const Q = pvp; if(!Q) return; Q.vsDone = true; if(!Q.running) pvpOverlay(`<h2>Todo listo</h2><p>Esperando a <b>${cloudEsc(pvpName())}</b>...</p>`, 'Cancelar', () => { pvpSend('bye', {from: cloud.user.id, why: 'cancel'}); pvpFail(''); }); pvpHs(); },
+    cancel: () => { pvpSend('bye', {from: cloud.user.id, why: 'cancel'}); pvpFail(''); }});
+}
 function pvpSheetsReady(){
   const done = d => { const im = sheet(d, 'Idle', false); return im.ok || im.bad; };
   return [...g.p, ...g.e].every(f => done(f.m.dex) && (!f.megaKey || done(MEGA[f.megaKey].folder)));
 }
 function pvpTryRun(){
   const P = pvp; if(!P || P.running || !P.rdy || !P.oppRdy) return;
-  P.running = true; P.acc = 0; P.wait = 0;
+  P.running = true; P.acc = 0; P.wait = 0; pvpOverlay('');
   for(let k = 0; k < P.D; k++){ P.lin[k] = PVP_EMPTY; if(P.rin[k] === undefined) P.rin[k] = PVP_EMPTY; }
 }
 
@@ -332,13 +343,12 @@ function pvpFinish(iWon, why){                           // iWon: true = ganas �
   const P = pvp; if(!P || P.finished) return;
   P.finished = true; P.menu = false; pvpOverlay(''); if(g) g.over = true;
   clearInterval(P.hsT);
-  const opp = pvpName(), oppUid = P.match.opp.uid;
+  const opp = pvpName(), oppUid = P.match.opp.uid, sk = P.opp ? P.opp.sk : 'm';
   setTimeout(() => {
     if(!g || !g.pvp) return;
-    resultClear();
-    const title = iWon === null ? 'Combate cancelado' : iWon ? '¡Has ganado a ' + opp + '!' : opp + ' ha ganado';
-    document.getElementById('rTitle').textContent = title;
-    document.getElementById('rText').textContent = why || 'Combate online amistoso: no da recompensas ni cambia tu progreso.';
+    const title = iWon === null ? 'Combate cancelado' : iWon ? '¡Has ganado a ' + opp + '!' : opp + ' ha ganado', note = 'Combate online amistoso: no da recompensas ni cambia tu progreso.';
+    if(iWon) victoryScreen({title, sub: why || '', skin: sk, chips: [{t: 'COMBATE ONLINE AMISTOSO · SIN RECOMPENSAS', c: '#3ea6ff'}]});      // el mismo cartel de victoria que en la Historia (js/victoria.js), con el personaje del rival
+    else{ resultClear(); document.getElementById('rTitle').textContent = title; document.getElementById('rText').textContent = why || note; }
     const b = document.getElementById('rBtns'); b.innerHTML = '';
     const add = (t, fn, main) => { const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
     add('Revancha', () => { pvpLeave(); g = null; goMain(); const err = cloudChallenge({uid: oppUid, name: opp}); if(err && typeof toast === 'function') toast(err); }, true);

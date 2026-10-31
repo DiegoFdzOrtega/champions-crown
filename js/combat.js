@@ -86,7 +86,9 @@ function use(f, i, ang, mine){
   const d = f.dmg * qAtk(f) * (skin ? ABX.skin : 1) * (it === 'vidasfera' ? 1.3 : 1) * boost
           * (it === 'cintaelec' && i === 1 ? IFX.cinta : 1) * (it === 'gafaselec' && shotMv ? IFX.gafaselec : 1) * (it === 'gafasesp' && shotMv ? IFX.gafasesp : 1);
   if(f.item === 'vidasfera' && (i === 1 || i === 2 || i === 4) && f.ab !== 'Cabeza Roca' && f.ab !== 'Muro Mágico') f.hp = Math.max(1, f.hp - f.max*.025);   // Vidasfera
-  if(i === 0){ f.dash = .25; f.da = ang; Sfx.play('dash'); }
+  const vk = g.pvp || mine ? 1 : .6;                                            // volumen del sonido al lanzar: el del rival de la Historia, más suave
+  Sfx.play(i === 0 ? 'dash' : i === 1 ? 'swing' : i === 2 ? 'shot' : i === 4 ? 'strong' : sm ? 'status' : 'buff', vk);      // (el sonido de cada ataque; el del golpe lo pone hit())
+  if(i === 0){ f.dash = .25; f.da = ang; }
   if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
   if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño

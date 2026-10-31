@@ -21,7 +21,7 @@
    - EFECTOS DE SONIDO (Sfx): pitidos cortos generados por código, sin archivos: 'click' (botones), 'win', 'lose' (resultado del combate), 'logro' y 'mega' (megaevolución).
      Sfx.play('click'). Para añadir uno: una línea en SFX (lista de notas: f = frecuencia, at = cuándo, d = duración, w = onda, v = volumen, to = frecuencia final).
      GOLPES DE COMBATE (los lanza hit() en js/combat.js según la eficacia del tipo): 'hit' (normal), 'hit_super' (muy eficaz: más fuerte, crujido y doble impacto), 'hit_weak' (poco eficaz: sordo y flojo),
-     'hit_none' (sin efecto/inmune), 'crit' (chispa extra del crítico), 'dodge' (esquiva), 'dash' (carrera con Espacio), 'faint' (se debilita). Además de notas con osciladores, una nota puede ser ruido filtrado (n:1, ft = filtro, f/to = frecuencia, q) y x:1 hace que el tono baje en curva.
+     'hit_none' (sin efecto/inmune), 'crit' (chispa extra del crítico), 'dodge' (esquiva), 'dash' (carrera con Espacio), 'faint' (se debilita). AL LANZAR un ataque (use() en combat.js): 'swing' (cuerpo a cuerpo), 'shot' (disparo), 'buff' (mejora Q), 'status' (ataque de estado) y 'strong' (ataque fuerte E, con carga y «bum»). Sfx.play(nombre, k): k = 0-1 baja el volumen (los ataques del rival de la Historia suenan a 0,6). Además de notas con osciladores, una nota puede ser ruido filtrado (n:1, ft = filtro, f/to = frecuencia, q) y x:1 hace que el tono baje en curva.
 
    PARA EL PROGRAMADOR
      Music.play('menu')     Music.battle(o)  (lo llama startBattle)     Music.scene('main')  (lo llama show())
@@ -66,7 +66,7 @@ const MUSIC_TRACKS = {
                  synth:{seed:24, bpm:150, root:59, scale:'dorian',   prog:[0,5,4,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.78}},
   alto_sinnoh:  {name:'Alto Mando de Sinnoh', file:'Sinnoh/Combate Alto Mando', win:'win_lider_sinnoh',      ref:'"Battle! Elite Four" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:34, bpm:168, root:55, scale:'minor',    prog:[0,3,6,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.82}},
-  campeon_cintia:{name:'Campeona Cintia (Sinnoh)', file:'Sinnoh/Combate Campeona Cintia', win:'win_campeon_sinnoh', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
+  campeon_cintia:{name:'Campeona Cynthia (Sinnoh)', file:'Sinnoh/Combate Campeona Cintia', win:'win_campeon_sinnoh', ref:'"Battle! Champion" de Sinnoh (Diamante/Perla/Platino)',
                  synth:{seed:44, bpm:178, root:56, scale:'harmonic', prog:[0,5,6,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   lider_teselia:{name:'Líderes de Teselia', file:'Unova/Combate Lideres', win:'win_lider_teselia',          ref:'"Battle! Gym Leader" de Teselia (Negro/Blanco)',
                  synth:{seed:25, bpm:160, root:61, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
@@ -335,13 +335,20 @@ const Music = (() => {
     hit_none: [{n:1, ft:'bandpass', f:420, to:260, q:.7, at:0, d:.09, v:.16}, {f:95, to:70, x:1, at:0, d:.08, w:'sine', v:.14}],   // casi nada: no le hace daño
     crit:     [{n:1, ft:'highpass', f:2600, at:0, d:.07, v:.55}, {f:1760, at:.01, d:.09, w:'triangle', v:.28}, {f:2349, at:.07, d:.14, w:'triangle', v:.25}],   // se suma al golpe
     dash:     [{n:1, ft:'bandpass', f:500, to:2600, q:1.1, at:0, d:.2, v:1.1}, {n:1, ft:'lowpass', f:900, to:250, at:0, d:.16, v:.35}],   // carrera: 'fuuush' corto y rápido
-    dodge:    [{n:1, ft:'bandpass', f:600, to:3200, q:1.5, at:0, d:.22, v:1.2}],                                          // 'fiuuu' de esquiva
+    dodge:    [{n:1, ft:'bandpass', f:600, to:3200, q:1.5, at:0, d:.22, v:1.2}],
+    // ---- Al LANZAR un ataque (antes del golpe): cada uno suena distinto para que se oiga qué se está usando ----
+    swing:    [{n:1, ft:'bandpass', f:700, to:2300, q:1.3, at:0, d:.14, v:1.3}, {n:1, ft:'highpass', f:2500, at:.02, d:.07, v:.3}],       // cuerpo a cuerpo: un 'fffsh' de golpe de brazo, más corto y agudo que el dash
+    shot:     [{f:1100, to:320, x:1, at:0, d:.14, w:'triangle', v:.5}, {n:1, ft:'bandpass', f:2400, to:900, q:1, at:0, d:.07, v:.35}],       // disparo: 'piú' que cae
+    buff:     [{f:523, at:0, d:.14, w:'triangle', v:.38}, {f:784, at:.08, d:.16, w:'triangle', v:.36}, {f:1175, at:.16, d:.28, w:'sine', v:.34}, {n:1, ft:'highpass', f:5000, at:.1, d:.25, v:.12}],   // mejora: brillo que sube
+    status:   [{f:330, to:520, at:0, d:.3, w:'sine', v:.4}, {f:335, to:515, at:.02, d:.3, w:'triangle', v:.2}, {n:1, ft:'bandpass', f:1500, to:700, q:2, at:0, d:.25, v:.2}],       // ataque de estado: onda rara que sube
+    strong:   [{f:110, to:420, at:0, d:.28, w:'sawtooth', v:.32}, {n:1, ft:'bandpass', f:400, to:3000, q:1.2, at:0, d:.28, v:.5},            // ataque fuerte: se carga...
+               {f:140, to:45, x:1, at:.26, d:.26, w:'sine', v:.9}, {n:1, ft:'lowpass', f:1400, to:200, at:.26, d:.2, v:.5}],                 // ...y sale con un 'bum'                                          // 'fiuuu' de esquiva
     faint:    [{f:640, to:70, x:1, at:0, d:.5, w:'triangle', v:.55}, {f:320, to:50, x:1, at:0, d:.55, w:'sine', v:.5}, {n:1, ft:'lowpass', f:1200, to:150, at:0, d:.35, v:.25}]   // se debilita: baja y se apaga
   };
   const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
-  function sfx(name){
+  function sfx(name, k){                                                           // k (opcional, 0-1): lo bajito que suena (los ataques del rival de la Historia suenan más suaves)
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;
-    const lvl = sfxVol(); if(lvl <= 0) return;
+    const lvl = sfxVol() * (k === undefined ? 1 : k); if(lvl <= 0) return;
     if(ctx.state === 'suspended') ctx.resume().catch(() => {});
     const t0 = ctx.currentTime + .005;
     const now = ctx.currentTime; if(sfxLast[name] && now - sfxLast[name] < .045) return; sfxLast[name] = now;
@@ -378,4 +385,4 @@ const Music = (() => {
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, unlock, {passive: true}));
   return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
 })();
-const Sfx = {play: name => Music.sfx(name)};
+const Sfx = {play: (name, k) => Music.sfx(name, k)};

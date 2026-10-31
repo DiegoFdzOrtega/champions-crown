@@ -1,6 +1,6 @@
 "use strict";
 /* =====================================================================
-   21) SINNOH: 8 líderes de gimnasio, Alto Mando (4) y Campeona (Cintia), con sus equipos de 6 Pokémon
+   21) SINNOH: 8 líderes de gimnasio, Alto Mando (4) y Campeona (Cynthia), con sus equipos de 6 Pokémon
    Se carga DESPUÉS de hoenn.js y ANTES de campo.js (que comprueba todos los equipos al final). No toca nada de Kanto, Johto ni Hoenn.
 
    VERSIÓN DE REFERENCIA: Pokémon PLATINO (orden de líderes: Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro). Nombres en español de
@@ -14,13 +14,13 @@
      Inverna: Medicham · Lectro: Ambipom). El último del equipo es siempre el As.
        OJO: la lista de Lectro es la menos segura: Jolteon y Raichu (nv. 61) están confirmados y Lanturn aparece en sus revanchas; Luxray y Electivire
        (su As) son los de su equipo normal de Platino. Si ves que no coincide con tu juego, cámbialos en TEAMS.lectro.
-   - ALTO MANDO Y CAMPEONA: los 5 (Cintia 6) Pokémon oficiales de Platino tras la Pokédex Nacional, en su orden. El Alto Mando lleva 5, así que se
+   - ALTO MANDO Y CAMPEONA: los 5 (Cynthia 6) Pokémon oficiales de Platino tras la Pokédex Nacional, en su orden. El Alto Mando lleva 5, así que se
      añade 1 Pokémon más de su equipo de Diamante/Perla (Beautifly de Alecrán, Quagsire de Gaia, Lopunny de Fausto, Girafarig de Delos).
    - Especies repetidas entre equipos son normales (p. ej. Medicham de Brega e Inverna); dentro de un mismo equipo no se repite ninguna.
    - Los movimientos son los más parecidos que permite el motor (4 huecos: golpe / disparo / mejora / ataque fuerte, ver MOVESET en moves.js).
 
    DIFICULTAD (cambia estos números para equilibrar): lvl = nivel del rival · dn = índice de dificultad (DIFF en data.js).
-     Kanto: dn 0-12 · Johto: dn 2-14 · Hoenn: dn 4-16 · Sinnoh: empieza en dn 6 (Roco ≈ Candela de Hoenn) y acaba en dn 18 (Cintia, la más dura de las cuatro Ligas).
+     Kanto: dn 0-12 · Johto: dn 2-14 · Hoenn: dn 4-16 · Sinnoh: empieza en dn 6 (Roco ≈ Candela de Hoenn) y acaba en dn 18 (Cynthia, la más dura de las cuatro Ligas).
    RECOMPENSA: REWARD_REGION.Sinnoh (teams.js): 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por cada victoria (como Johto y Hoenn).
    ===================================================================== */
 Object.assign(TEAMS, {
@@ -153,7 +153,7 @@ FLOORS.push(
   SF('gaia',     'Gaia',     'Tierra',    'alto',  144, 14, 'Liga Pokémon'),
   SF('fausto',   'Fausto',   'Fuego',     'alto',  145, 15, 'Liga Pokémon'),
   SF('delos',    'Delos',    'Psíquico',  'alto',  146, 16, 'Liga Pokémon'),
-  SF('cintia',   'Cintia',   'Campeona',  'campeon', 153, 18, 'Liga Pokémon')
+  SF('cintia',   'Cynthia',  'Campeona',  'campeon', 153, 18, 'Liga Pokémon')
 );
 floorsOf('Sinnoh').forEach((F, i) => F.idx = i);                          // posición dentro de Sinnoh (0 = Roco)
 

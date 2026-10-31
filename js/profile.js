@@ -19,6 +19,21 @@ function renderMyCard(){
   el.innerHTML = (save.pubProfile === false ? '<p class="warn">Tu perfil está oculto: tus amigos no ven esta tarjeta.</p>' : '') + fpView(fpCard(), {name: (cloud && cloud.name) || save.name, self: true});
   fpPaint(el);
 }
+// Selector de fondo de la tarjeta (js/cardbg.js): primero 'Sin fondo', luego los desbloqueados y al final los bloqueados (con su pista)
+function renderBgGrid(){
+  const g = $('bgGrid'); if(!g) return;
+  const all = CARD_BGS.slice().sort((a, b) => cardBgUnlocked(b) - cardBgUnlocked(a)), n = all.filter(cardBgUnlocked).length, cur = cardBgActive();
+  $('bgCount').textContent = `Desbloqueados: ${n} / ${CARD_BGS.length}`;
+  g.innerHTML = `<button type="button" class="none${cur ? '' : ' on'}" data-b=""><span class="th">∅</span><span>Sin fondo</span></button>` +
+    all.map(b => { const ok = cardBgUnlocked(b); return `<button type="button" class="${ok ? '' : 'lock'}${ok && cur === b.id ? ' on' : ''}" data-b="${b.id}" title="${cloudEsc(ok ? cardBgName(b) : cardBgHint(b))}"><span class="th" style="background-image:url(${cardBgMini(b)})"></span><span>${cloudEsc(cardBgName(b))}</span></button>`; }).join('');
+  g.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      const b = CARD_BG[btn.dataset.b];
+      if(b && !cardBgUnlocked(b)){ toast(cardBgHint(b) + '.'); return; }
+      save.cardBg = b ? b.id : ''; persist(); renderBgGrid(); renderMyCard();
+    };
+  });
+}
 // Botones de Personaje: Chico y Chica (gratis), Red Masters (solo su cuenta) y los de TRAINERS (vspanel.js), que salen con candado hasta reclamar su logro (categoría «Entrenadores»)
 function genButtons(){
   const b = (g, name, lock) => `<button type="button" data-g="${g}"${lock ? ' class="lock" title="Bloqueado"' : ''}><img alt=""><span>${lock ? '🔒 ' : ''}${name}</span></button>`;
@@ -36,6 +51,10 @@ function renderProfile(){
     <h2>Personaje</h2>
     <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
     <div class="gen-row" id="genRow">${genButtons()}</div>
+    <h2>Fondo de la tarjeta</h2>
+    <p class="help">Ilustración de fondo de tu tarjeta (la ven tus amigos). Se desbloquean al derrotar a su líder, miembro del Alto Mando o Campeón; los bloqueados dicen cómo conseguirlos.</p>
+    <div class="bg-count" id="bgCount"></div>
+    <div class="bg-grid" id="bgGrid"></div>
     <h2>Avatar</h2>
     <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
     <div class="av-grid" id="avGrid"></div>
@@ -52,7 +71,7 @@ function renderProfile(){
     <h2>Perfil para amigos</h2>
     <p class="help">Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
     <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>`);
-  renderAvatarGrid(); renderTitleFrame(); renderMyCard();
+  renderAvatarGrid(); renderTitleFrame(); renderMyCard(); renderBgGrid();
   $('nameIn').value = save.name;
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
     const lock = b.classList.contains('lock'); setPlayerSkin(b.querySelector('img'), b.dataset.g, lock); b.classList.toggle('on', !lock && skinOf() === b.dataset.g);

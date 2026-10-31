@@ -905,6 +905,8 @@ button.leg:disabled{box-shadow:none}
 
 /* ===== Pantalla de victoria con recompensas (js/victoria.js) ===== */
 #result .inner.win{max-width:96rem}
+.vic-portrait.sk{width:auto;height:13rem;padding:0;border:0;border-radius:0;background:none;box-shadow:none;display:flex;justify-content:center;align-items:flex-end}   /* rival online: personaje de cuerpo entero, sin círculo */
+.vic-portrait.sk .skin{height:100%;width:auto;filter:drop-shadow(0 .4rem .8rem rgba(0,0,0,.55))}
 .vic-banner{display:inline-block;margin-bottom:1.2rem;padding:.55em 1.6em;font-size:1.3rem;letter-spacing:.35em;color:#1b1500;background:linear-gradient(90deg,#ffcc33,#fff0a8 50%,#ffcc33);background-size:200% 100%;border-radius:2rem;box-shadow:0 0 1.8rem #ffcc3388;animation:vicShine 2.6s linear infinite}
 @keyframes vicShine{to{background-position:-200% 0}}
 .vic-portrait{display:block;margin:0 auto 1rem;width:9rem;height:9rem;object-fit:contain;image-rendering:pixelated;background:radial-gradient(circle,#1a2a52,#0b1224);border:2px solid #ffcc33;border-radius:50%;box-shadow:0 0 2rem #ffcc3355;padding:.6rem;animation:rwPop .5s cubic-bezier(.2,1.4,.4,1) both}
@@ -1276,6 +1278,7 @@ button.leg:disabled{box-shadow:none}
 #vs .vs-pic::after{content:"";position:absolute;bottom:-1.4vh;left:14%;right:14%;height:3.4vh;border-radius:50%;background:radial-gradient(#000b,#0000 70%);z-index:-1}
 #vs .vs-pic img,#vs .vs-pic .skin{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:center bottom;image-rendering:pixelated;filter:drop-shadow(.3vh 0 0 #fff) drop-shadow(-.3vh 0 0 #fff) drop-shadow(0 .3vh 0 #fff) drop-shadow(0 -.3vh 0 #fff) drop-shadow(0 1.2vh 1.4vh #0008)}
 /* placa del nombre (inclinada, con una barra del color del lado) */
+#vs .vs-foe.mir .vs-pic .skin{transform:scaleX(-1)}                    /* rival = otro jugador (combate online): su personaje mira hacia ti */
 #vs .vs-plate{position:absolute;top:4.5vh;z-index:4;max-width:47vw;display:flex;flex-direction:column;background:linear-gradient(90deg,#0b1220f5,#0b1220d0)}
 #vs .vs-plate::before{content:"";position:absolute;left:0;right:0;bottom:0;height:.4rem;background:color-mix(in srgb,var(--t) 45%,#fff)}
 #vs .vs-me .vs-plate{left:0;padding:1.2vh 3.2rem 1.5vh 3vw;align-items:flex-start;clip-path:polygon(0 0,100% 0,calc(100% - 1.8rem) 100%,0 100%);animation:vsPlateL .5s .35s cubic-bezier(.2,1.1,.4,1) both}
@@ -1722,6 +1725,7 @@ button.leg:disabled{box-shadow:none}
 .fp-card.foil::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.07) 42%,rgba(255,226,106,.14) 50%,rgba(255,255,255,.07) 58%,transparent 70%);background-size:250% 100%;animation:fpfoil 5s linear infinite;pointer-events:none}
 @keyframes fpfoil{0%{background-position:150% 0}100%{background-position:-100% 0}}
 @media (prefers-reduced-motion:reduce){.fp-card.foil::after{animation:none}}
+.fp-card.hasbg{background-color:#0b1020;background-image:linear-gradient(180deg,rgba(6,10,20,.30) 0,rgba(6,10,20,.52) 42%,rgba(6,10,20,.84) 100%),var(--bg);background-position:0 0,var(--bgpos,50% 50%);background-size:auto,cover;background-repeat:no-repeat}
 .fp-top{display:flex;justify-content:space-between;gap:1rem;font-size:.7rem;letter-spacing:.12em;color:color-mix(in srgb,var(--ac) 65%,#fff);padding-bottom:.9rem;margin-bottom:1.2rem;border-bottom:1px solid color-mix(in srgb,var(--ac) 35%,transparent)}
 .fp-main{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:2rem;align-items:start}
 .fp-left{display:flex;flex-direction:column;align-items:center;gap:.6rem;text-align:center}
@@ -1975,3 +1979,14 @@ body.pc-dragging,body.pc-dragging *{cursor:grabbing!important}
 .sm-b b{font-weight:normal;font-size:1.4rem;color:#ffcc33}
 .sm-b small{font-size:1rem;color:#8fb3e8}
 .sm-note{margin:.9rem 0 0;font-size:1rem;line-height:1.7;color:#8fb3e8}
+
+/* Fondo de la tarjeta (Perfil › Fondo de la tarjeta, js/cardbg.js) */
+.bg-count{color:#8fb3e8;font-size:.8rem;margin:0 0 .6rem}
+.bg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(7.4rem,1fr));gap:.7rem;margin:.6rem 0 1.2rem}
+.bg-grid button{display:flex;flex-direction:column;gap:.35rem;padding:.3rem;background:#0d1117;border:2px solid #2d4a7c;border-radius:.6rem;color:var(--text);cursor:pointer;text-align:center;font-size:.68rem;line-height:1.2}
+.bg-grid button .th{position:relative;display:block;aspect-ratio:1;border-radius:.4rem;background:#0b1020 center/cover no-repeat}
+.bg-grid button.on{border-color:var(--acc);box-shadow:0 0 1rem #ffcc3344}
+.bg-grid button.lock{border-color:#2a3550;color:#6d7899}
+.bg-grid button.lock .th{filter:grayscale(1) brightness(.35)}
+.bg-grid button.lock .th::after{content:"🔒";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem;filter:none}
+.bg-grid button.none .th{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#6d7899}
