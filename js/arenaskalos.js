@@ -1,13 +1,13 @@
 "use strict";
 /* =====================================================================
    17f) ARENAS DE KALOS: un fondo pixel art por cada combate de Kalos (X e Y): los 8 gimnasios (Novarte, Relieve, Yantra, Tiriópolis, Luminalia, Romantis,
-   Anistar y Fractal), el Alto Mando (Malva, Narciso, Tileo, Ágata) y la Campeona Dianta. En total 13 fondos.
+   Anistar y Fractal), el Alto Mando (Malva, Narciso, Tileo, Dracena) y la Campeona Dianta. En total 13 fondos.
    Dibujadas con código (sin imágenes), igual que las de las otras regiones, y con el espíritu de los gimnasios «vivos» de Blanco y Negro: cada sala tiene
    algo que se mueve (agua, luces, engranajes, pétalos, nieve, estrellas...). Se cargan DESPUÉS de arenasteselia.js y usan los ayudantes de arenas.js y
    siguientes (arTiles, arBricks, arSpeck, arEll, arPool, arGlowC, arCone, arMote, arMotes, arStars, arGear, arBolt, arScales, arDragonHead, arFluted...).
    Cómo funciona build() / anim(): ver la cabecera de arenas.js.
 
-   El id de cada arena es el id del combate: violeta, lino, corelia, amaro, lem, valeria, astrid, edel, malva, narciso, tileo (fantasma), agata (acero) y dianta.
+   El id de cada arena es el id del combate: violeta, lino, corelia, amaro, lem, valeria, astrid, edel, malva, narciso, tileo (acero), agata (Dracena, dragón) y dianta.
 
    REGLA (igual que las demás): el centro del suelo (donde pelean los dos Pokémon) se deja LIMPIO; la decoración va en la pared del fondo, en las bandas de los
    lados y en el borde de arriba. El marcador tapa la parte de arriba a izquierda y derecha: lo importante se ve en el centro de arriba, en los lados y en el suelo.
@@ -212,7 +212,7 @@ Object.assign(ARENAS, {
 });
 
 // =====================================================================
-//  LA LIGA POKÉMON DE KALOS: Alto Mando (Malva, Narciso, Tileo, Ágata) y Campeona (Dianta)
+//  LA LIGA POKÉMON DE KALOS: Alto Mando (Malva, Narciso, Tileo, Dracena) y Campeona (Dianta)
 // =====================================================================
 Object.assign(ARENAS, {
 
@@ -259,8 +259,8 @@ Object.assign(ARENAS, {
       d.fish.forEach(([x, y, sp, col], i) => { const xx = ((x + t * 14 * sp) % (w + 20)) - 10; c.fillStyle = col; c.fillRect(Math.round(xx), Math.round(y + Math.sin(t * 2 + i) * 2), 5, 2); c.fillRect(Math.round(xx) - 2, Math.round(y + Math.sin(t * 2 + i) * 2) - 1, 2, 4); });
       arMote(c, d.bub, t, w, '#d8faff', .6, 1, -10); }},
 
-  // ---- Ágata · Acero: cámara acorazada. Planchas de acero con remaches, engranajes enormes y focos que barren la sala ----
-  agata: {dark: .24,
+  // ---- Tileo · Acero: cámara acorazada. Planchas de acero con remaches, engranajes enormes y focos que barren la sala ----
+  tileo: {dark: .24,
     build(P, w, h, WH){
       arTiles(P, 0, WH, w, h - WH, 30, 30, (x, y) => (x + y) & 1 ? '#6a7288' : '#5e667c', '#2a3040', .22);                                 // planchas de acero
       for(let y = WH; y < h; y += 30) for(let x = 0; x < w; x += 30) [[3, 3], [24, 3], [3, 24], [24, 24]].forEach(([dx, dy]) => { P.px('#aab4cc', x + dx, y + dy); P.px('#2a3040', x + dx + 1, y + dy + 1); });   // remaches
@@ -277,8 +277,8 @@ Object.assign(ARENAS, {
       d.gears.forEach(([x, y, r, n, dir], i) => arGear(c, x, y, r, n, t * .35 * dir + i, '#8a94b0', '#ffd84a'));
       const sx = ((t * 40) % (w + 60)) - 30; c.globalAlpha = .12; c.fillStyle = '#ffffff'; c.fillRect(Math.round(sx), AR_WALL, 16, AR_H - AR_WALL); c.globalAlpha = 1; }},
 
-  // ---- Tileo · Fantasma: salón encantado. Muro de piedra con ventanales ojivales y luna llena, candelabros de llama violeta, telarañas y luces que flotan ----
-  tileo: {dark: .3,
+  // ---- Dracena · Dragón: salón oscuro con luna llena (de momento es el antiguo salón encantado; id agata). Muro de piedra con ventanales ojivales y luna llena, candelabros de llama violeta, telarañas y luces que flotan ----
+  agata: {dark: .3,
     build(P, w, h, WH){
       arTiles(P, 0, WH, w, h - WH, 24, 24, (x, y) => (x + y) & 1 ? '#2a2238' : '#241c32', '#0e0a18', .1);                                  // suelo de losas violetas
       arSpeck(P, 0, WH, w, h - WH, 420, ['#4a3e68', '#16102a', '#5a4e78']);

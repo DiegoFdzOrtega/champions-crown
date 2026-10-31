@@ -4,21 +4,21 @@
    Se carga DESPUÉS de teselia.js y ANTES de campo.js (que comprueba todos los equipos al final). No toca nada de las otras regiones.
 
    VERSIÓN DE REFERENCIA: Pokémon X e Y. Gimnasios en orden: Novarte (Violeta), Relieve (Lino), Yantra (Corelia), Tiriópolis (Amaro), Luminalia (Lem),
-   Romantis (Valeria), Anistar (Ástrid) y Fractal (Édel). Alto Mando: Malva, Narciso, Tileo y Ágata. Campeona: Dianta.
+   Romantis (Valeria), Anistar (Ástrid) y Fractal (Édel). Alto Mando: Malva, Narciso, Tileo (Acero) y Dracena (Dragón). Campeona: Dianta.
    Los nombres son los españoles de WikiDex. Los ids con los que se llaman los retratos son los de la carpeta lideres/kalos/ (LEADER_FILE en data.js):
    Violeta=viola · Lino=grant · Corelia=korrina · Amaro=ramos · Lem=clemont · Valeria=valerie · Ástrid=olympia · Édel=wulfric ·
-   Malva=malva · Narciso=siebold · Tileo=wikstrom · Ágata=(sin retrato propio: usa drasna hasta que haya agata.png) · Dianta=diantha.
+   Malva=malva · Narciso=siebold · Tileo=wikstrom · Dracena (id agata)=dracena.png · Dianta=diantha.
    Fuentes: WikiDex («Liga Pokémon (Kalos)»: equipos oficiales de la Liga con niveles) y Bulbapedia / Serebii (equipos de los líderes de X e Y y del Torneo).
 
    CÓMO ESTÁ HECHO (igual que las otras regiones, ver teams.js y teselia.js):
      P(nº de Pokédex, 'Naturaleza', 'Habilidad', 'objeto', {EVs}, ['golpe', 'disparo', 'mejora', 'ataque fuerte'])
    - EQUIPOS: los 6 Pokémon de cada entrenador son los que dio Diego (octubre 2026). Cada uno lleva IVs 31, EVs, naturaleza, habilidad, objeto y 4 movimientos.
      Nombres: en la lista de Diego, Lem se llama «Électra», Valeria «Ástrid» y Ástrid «Áureo»; aquí se mantienen los nombres del juego (WikiDex).
-     El cuarto del Alto Mando es Ágata (acero) y sustituye a Drácena; Tileo lleva el equipo fantasma.
+     Alto Mando: Tileo (Wikstrom) lleva el equipo de Acero y Dracena (Drasna, id interno agata) el de Dragón (oficial X e Y + Haxorus e Hydreigon).
    - SIN SPRITE: Pyroar (668) está en NO_SPRITE (data.js); Malva lleva a Houndoom en su lugar (sin mega). Cuando Pyroar tenga sprite, cámbialo aquí.
    - MEGAEVOLUCIÓN: todo Pokémon que tiene mega disponible en el juego (tabla MEGA de js/mega.js) la lleva: se escribe con PM('clave', nº, ...) y su objeto es su
      Megapiedra (mega_<clave>). Megaevoluciona solo, a los MEGA_FOE_DELAY segundos de salir al campo, y solo UNO por combate (el primero que lo cumpla).
-     Hoy: Lino (Tyranitar, Aerodactyl) · Corelia (Lucario, Gallade) · Lem (Manectric) · Valeria (Mawile, Gardevoir) · Édel (Glalie) · Tileo (Gengar) · Dianta (Gardevoir).
+     Hoy: Lino (Tyranitar, Aerodactyl) · Corelia (Lucario, Gallade) · Lem (Manectric) · Valeria (Mawile, Gardevoir) · Édel (Glalie) · Dracena (Altaria) · Dianta (Gardevoir).
    - Los movimientos son los más parecidos que permite el motor (4 huecos: golpe / disparo / mejora / ataque fuerte, ver MOVESET en moves.js).
 
    DIFICULTAD: lvl = nivel del rival · dn = índice de dificultad (DIFF en data.js). Kalos: dn 8-15 los líderes, 17-19 el Alto Mando y 22 Dianta (la más dura).
@@ -109,21 +109,21 @@ Object.assign(TEAMS, {
     P(689, 'Firme',   'Piel Tosca',    'cintaelec',{atk:252, hp:252, def:4}, ['Acua Cola',     'Lanzarrocas',  'Pulimento',     'Roca Afilada']), // Barbaracle
     P(658, 'Alegre',  'Cambio Táctico','vidasfera',{spa:252, spe:252, hp:4}, ['Mordisco',      'Shuriken de Agua','Maquinación','Hidrobomba'])    // Greninja
   ],
-  tileo: [     // Fantasma · Tileo. Mega: Gengar. (Retrato de Wikstrom y fondo de salón encantado)
-    P(426, 'Modesta', 'Detonación',    'gafasesp', {hp:252, spa:252, def:4}, ['Lengüetazo',    'Tinieblas',    'Maldición',     'Bola Sombra']),  // Drifblim
-    P(711, 'Firme',   'Cosecha',       'restos',   {hp:252, atk:252, def:4}, ['Puño Sombra',   'Bomba Lodo',   'Maldición',     'Bola Sombra']),  // Gourgeist
-    P(681, 'Modesta', 'Cambio Táctico','vidasfera',{hp:252, spa:252, def:4}, ['Garra Metal',   'Tinieblas',    'Defensa Férrea','Bola Sombra']),  // Aegislash
-    P(609, 'Modesta', 'Absorbe Fuego', 'gafasesp', {spa:252, spe:252, hp:4}, ['Lengüetazo',    'Lanzallamas',  'Maldición',     'Bola Sombra']),  // Chandelure
-    P(709, 'Firme',   'Cosecha',       'aguante',  {hp:252, atk:252, def:4}, ['Puño Sombra',   'Hoja Afilada', 'Maldición',     'Terremoto']),    // Trevenant
-    PM('gengar', 94, 'Modesta', 'Cuerpo Maldito', 'mega_gengar', {spa:252, spe:252, hp:4}, ['Lengüetazo', 'Bomba Lodo', 'Maldición', 'Bola Sombra'])   // Gengar (Gengarita)
-  ],
-  agata: [     // Acero · Ágata (cuarta del Alto Mando en esta lista). Sin megas (Metagross tiene mega en los juegos, pero aún no está)
+  tileo: [     // Acero · Tileo (Wikstrom). Sin megas (Metagross tiene mega en los juegos, pero aún no está)
     P(707, 'Osada',   'Bromista',      'restos',   {hp:252, def:252, spa:4}, ['Carantoña',     'Bomba Imán',   'Defensa Férrea','Foco Resplandor']), // Klefki
     P(462, 'Modesta', 'Analítico',     'gafasesp', {spa:252, spe:252, hp:4}, ['Puño Bala',     'Bomba Imán',   'Carga',         'Trueno']),       // Magnezone
     P(476, 'Modesta', 'Roca Sólida',   'chaleco',  {hp:252, spa:252, def:4}, ['Tumba Rocas',   'Bomba Imán',   'Defensa Férrea','Foco Resplandor']), // Probopass
     P(411, 'Osada',   'Robustez',      'restos',   {hp:252, def:252, atk:4}, ['Tumba Rocas',   'Lanzarrocas',  'Defensa Férrea','Foco Resplandor']), // Bastiodon
     P(601, 'Firme',   'Cuerpo Puro',   'vidasfera',{atk:252, spe:252, hp:4}, ['Garra Metal',   'Bomba Imán',   'Defensa Férrea','Foco Resplandor']), // Klinklang
     P(376, 'Firme',   'Cuerpo Puro',   'cintaelec',{atk:252, hp:252, def:4}, ['Puño Bala',     'Psicorrayo',   'Defensa Férrea','Terremoto'])     // Metagross
+  ],
+  agata: [     // Dragón · Dracena (Drasna; id interno agata). Mega: Altaria. Oficial en X e Y: Dragalge, Altaria, Druddigon y Noivern; se añaden Haxorus e Hydreigon para llegar a 6
+    P(691, 'Modesta', 'Francotirador', 'gafasesp', {spa:252, spe:252, hp:4}, ['Garra Dragón',  'Bomba Lodo',   'Maquinación',   'Cometa Draco']), // Dragalge
+    P(621, 'Firme',   'Mandíbula Fuerte','aguante', {atk:252, hp:252, def:4}, ['Garra Dragón',  'Dragoaliento', 'Danza Dragón',  'Terremoto']),    // Druddigon
+    P(715, 'Modesta', 'Cacheo',        'vidasfera',{spa:252, spe:252, hp:4}, ['Ataque Ala',    'Pulso Dragón', 'Maquinación',   'Cometa Draco']), // Noivern
+    P(612, 'Alegre',  'Rompemoldes',   'cintaelec',{atk:252, spe:252, hp:4}, ['Garra Dragón',  'Dragoaliento', 'Danza Dragón',  'Terremoto']),    // Haxorus
+    P(635, 'Modesta', 'Levitación',    'gafasesp', {spa:252, spe:252, hp:4}, ['Mordisco',      'Pulso Dragón', 'Maquinación',   'Cometa Draco']), // Hydreigon
+    PM('altaria', 334, 'Alegre', 'Cura Natural', 'mega_altaria', {atk:252, hp:252, spe:4}, ['Ataque Ala', 'Dragoaliento', 'Danza Dragón', 'Cometa Draco'])   // Altaria (Altarita)
   ],
   // ---------------- CAMPEONA ----------------
   dianta: [    // Dianta (Diantha), Campeona de Kalos. Mega: Gardevoir
@@ -155,8 +155,8 @@ FLOORS.push(
   // Alto Mando (MUY DIFÍCIL) y Campeona
   KF('malva',   'Malva',   'Fuego',     'alto',  160, 17, 'Liga Pokémon'),
   KF('narciso', 'Narciso', 'Agua',      'alto',  161, 18, 'Liga Pokémon'),
-  KF('tileo',   'Tileo',   'Fantasma',  'alto',  162, 19, 'Liga Pokémon'),
-  KF('agata',   'Ágata',   'Acero',     'alto',  163, 19, 'Liga Pokémon'),
+  KF('tileo',   'Tileo',   'Acero',     'alto',  162, 19, 'Liga Pokémon'),
+  KF('agata',   'Dracena', 'Dragón',    'alto',  163, 19, 'Liga Pokémon'),
   KF('dianta',  'Dianta',  'Campeona',  'campeon', 170, 22, 'Liga Pokémon')
 );
 floorsOf(KALOS).forEach((F, i) => F.idx = i);                           // posición dentro de Kalos (0 = Violeta)

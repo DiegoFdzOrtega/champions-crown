@@ -6,6 +6,14 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Tileo y Dracena', date:'31 oct 2026', sections:[
+    {t:'Historia', i:[
+      'Corregido el Alto Mando de Kalos: Tileo es de tipo Acero (Klefki, Magnezone, Probopass, Bastiodon, Klinklang y Metagross) y Dracena de tipo Dragón.',
+      'Equipo nuevo de Dracena: Dragalge, Druddigon, Noivern, Haxorus, Hydreigon y Altaria con su megaevolución. De momento pelea en la sala oscura de antes; más adelante tendrá una arena propia de dragones.']}
+  ]},
+  {v:'Dracena', date:'31 oct 2026', sections:[
+    {t:'Historia', i:['La cuarta del Alto Mando de Kalos (tipo Acero) se llama ahora Dracena en todo el juego, en vez de Ágata, y su retrato se busca como dracena.png.']}
+  ]},
   {v:'Pantalla VS online', date:'31 oct 2026', sections:[
     {t:'Combate online', i:[
       'Antes de cada combate online sale ahora la pantalla VS, igual que en la Historia: tú a la izquierda con tu personaje y tus 3 Pokémon, y tu rival a la derecha con el suyo.',
