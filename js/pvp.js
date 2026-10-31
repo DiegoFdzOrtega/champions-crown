@@ -16,10 +16,11 @@
    - Canal de Supabase Realtime: «match:<id>» (el id sale del desafío). Mensajes: hs (saludo y equipo), inp (pulsaciones), chk (huella), bye (abandono).
    Cuando cambies CUALQUIER cosa del cálculo del combate (combat.js, abilities.js, status.js, qmoves.js, swap.js, mega.js...), sube PVP_VER:
    así dos jugadores con versiones distintas del juego no pueden jugar entre ellos (se descuadrarían).
+   REGLA 2: el combate NO puede leer nada que dependa de la ventana (W cambia con su forma: en online draw() lo fija con LOCKW = PVP_W). Prueba: /tmp/t/pv.js simula dos ventanas distintas y compara huellas.
    REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
    porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '2';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido y descuadraban los combates)
+const PVP_VER = '3';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
 const PVP_DELAY = 5, PVP_DMAX = 18;                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
@@ -91,7 +92,7 @@ function pvpStart(match){
   if(!cloud.ok || !cloud.sb || !mine){ cloud.match = null; if(typeof toast === 'function') toast(mine ? 'Sin conexión en línea.' : 'Para jugar online necesitas un equipo de 3 Pokémon.'); if(typeof cloudChalUi === 'function') cloudChalUi(); return; }
   const me = match.host ? 'p' : 'e';
   pvp = {match, me, mine, opp: null, built: false, rdy: false, oppRdy: false, running: false, finished: false, tick: 0, acc: 0, wait: 0, lin: {}, rin: {}, out: [], outT: 0,
-         chkL: {}, chkR: {}, bad: 0, evSw: -1, evMg: 0, D: PVP_DELAY, nextStamp: PVP_DELAY, winT: 0, winN: 0, calm: 0, menu: false, gotInp: false, rng: pvpRng(pvpHash('cc:' + match.id)), desync: false};
+         chkL: {}, chkR: {}, stL: {}, stR: {}, bad: 0, evSw: -1, evMg: 0, D: PVP_DELAY, nextStamp: PVP_DELAY, winT: 0, winN: 0, calm: 0, menu: false, gotInp: false, rng: pvpRng(pvpHash('cc:' + match.id)), desync: false};
   const ch = cloud.sb.channel('match:' + match.id, {config: {broadcast: {self: false}}});
   ch.on('broadcast', {event: 'hs'}, m => pvpOnHs(m.payload))
     .on('broadcast', {event: 'inp'}, m => pvpOnInp(m.payload))
@@ -140,6 +141,7 @@ function pvpOnHs(p){
 function pvpBuild(){                                     // crea el combate (aún parado): los dos equipos salen de lo que mandó cada uno
   const P = pvp, hostT = P.me === 'p' ? P.mine : P.opp.team, guestT = P.me === 'p' ? P.opp.team : P.mine;
   const p = hostT.map(pvpFighter), e = guestT.map(pvpFighter);
+  LOCKW = PVP_W; resize();                                                                   // arena de ancho fijo: las posiciones de salida y los bordes dependen de W y tienen que ser iguales en los dos ordenadores
   p.forEach(f => { f.x = W * .25; f.y = H / 2 + 10; f.dir = 2; }); e.forEach(f => { f.x = W * .75; f.y = H / 2 + 10; f.dir = 6; });
   const hn = P.me === 'p' ? cloud.name : P.opp.name, gn = P.me === 'p' ? P.opp.name : cloud.name, ar = PVP_ARENAS[pvpHash('ar:' + P.match.id) % PVP_ARENAS.length];
   const o = {pvp: true, sub: (hn + ' VS ' + gn).toUpperCase().slice(0, 40), arena: ar, floor: 0, hm: 1, dm: 1, skill: 1, spdm: 1};
@@ -259,11 +261,11 @@ function pvpMega(side){
 // Huella: cada segundo se comparan los dos combates. Si difieren dos veces seguidas, algo se ha descuadrado
 // ---------------------------------------------------------------------
 function pvpState(){
-  return [g.pi, g.ei, ...g.p.concat(g.e).map(f => `${f.x.toFixed(1)},${f.y.toFixed(1)},${f.hp.toFixed(1)},${f.en.toFixed(1)}`)].join('|');
+  return [W, g.pi, g.ei, ...g.p.concat(g.e).map(f => `${f.x.toFixed(1)},${f.y.toFixed(1)},${f.hp.toFixed(1)},${f.en.toFixed(1)}`)].join('|');
 }
 function pvpCheck(){
   const P = pvp, t = P.tick, h = pvpHash(pvpState());
-  P.chkL[t] = h; pvpSend('chk', {t, h}); pvpCmp(t);
+  P.chkL[t] = h; P.stL[t] = pvpState(); pvpSend('chk', {t, h, s: pvpState()}); pvpCmp(t);
 }
 // ---------------------------------------------------------------------
 // Conexión directa entre los dos navegadores (WebRTC): sin pasar por el servidor de Irlanda, el camino es mucho más corto.
@@ -307,11 +309,12 @@ async function pvpOnRtc(p){
     }
   }catch(e){ console.warn('[pvp] rtc', e); }
 }
-function pvpOnChk(p){ const P = pvp; if(!P || !p || !pvpOk(p.t)) return; P.chkR[p.t] = p.h; pvpCmp(p.t); }
+function pvpOnChk(p){ const P = pvp; if(!P || !p || !pvpOk(p.t)) return; P.chkR[p.t] = p.h; P.stR[p.t] = typeof p.s === 'string' ? p.s.slice(0, 400) : ''; pvpCmp(p.t); }
 function pvpCmp(t){
   const P = pvp, a = P.chkL[t], b = P.chkR[t]; if(a === undefined || b === undefined) return;
-  delete P.chkL[t]; delete P.chkR[t];
+  const sl = P.stL[t], sr = P.stR[t]; delete P.chkL[t]; delete P.chkR[t]; delete P.stL[t]; delete P.stR[t];
   if(a === b){ P.bad = 0; return; }
+  console.warn('[pvp] huella distinta en el paso', t, '\n  yo:    ', sl, '\n  rival: ', sr);                       // para saber QUÉ campo difiere (W|pi|ei|x,y,hp,en de cada Pokémon)
   if(++P.bad >= 2 && !P.finished){ P.desync = true; console.warn('[pvp] desincronizado en el paso', t); pvpFinish(null, 'Los dos combates se han descuadrado y se ha cancelado. Si pasa siempre, recargad la página (Ctrl+F5) los dos.'); }
 }
 

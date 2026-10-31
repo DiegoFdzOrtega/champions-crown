@@ -1679,12 +1679,32 @@ button.leg:disabled{box-shadow:none}
 .frb.lock{opacity:.45}
 .frb u{position:absolute;right:.3rem;top:.2rem;text-decoration:none;font-size:.7rem}
 @property --fc{syntax:'<color>';inherits:true;initial-value:#3ea6ff}   /* registrada: así los marcos animados cambian de color suavemente */
-[class*="afr-"]{border-color:var(--fc)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--fc) 40%,#000),0 0 .9rem color-mix(in srgb,var(--fc) 55%,transparent)!important}
-.afr-bronce{--fc:#cd7f32}.afr-plata{--fc:#d5dcec}.afr-oro{--fc:#ffcc33}.afr-kanto{--fc:#e23b3b}.afr-johto{--fc:#f0b429}.afr-hoenn{--fc:#2bb3a3}
+@property --fa{syntax:'<angle>';inherits:false;initial-value:0deg}       /* ángulo del degradado giratorio (Arcoíris y Mewtwo) */
+/* MARCOS DE AVATAR: banda de metal con brillo en diagonal (luz arriba-izquierda, sombra abajo-derecha), línea oscura por fuera y por dentro, y un remache en cada esquina.
+   Cada marco solo cambia --fc (color) y, si quiere otro acabado, --fg (el degradado de la banda). Selector repetido 3 veces = gana siempre a los estilos del avatar (.profile .av, .ubar .av...). */
+[class*="afr-"][class*="afr-"][class*="afr-"]{
+  border:.55rem solid transparent;
+  background-image:linear-gradient(#0d1117,#0d1117),
+    radial-gradient(circle at 0 0,var(--rv,color-mix(in srgb,var(--fc) 25%,#fff)) 0 .5rem,#0000 .54rem),radial-gradient(circle at 100% 0,var(--rv,color-mix(in srgb,var(--fc) 25%,#fff)) 0 .5rem,#0000 .54rem),
+    radial-gradient(circle at 0 100%,var(--rv,color-mix(in srgb,var(--fc) 25%,#fff)) 0 .5rem,#0000 .54rem),radial-gradient(circle at 100% 100%,var(--rv,color-mix(in srgb,var(--fc) 25%,#fff)) 0 .5rem,#0000 .54rem),var(--fg,linear-gradient(135deg,color-mix(in srgb,var(--fc) 35%,#fff) 0%,var(--fc) 32%,color-mix(in srgb,var(--fc) 40%,#000) 64%,color-mix(in srgb,var(--fc) 70%,#fff) 100%));
+  background-clip:padding-box,border-box,border-box,border-box,border-box,border-box;
+  background-origin:border-box;background-repeat:no-repeat;
+  outline:.16rem solid color-mix(in srgb,var(--fc) 22%,#000);outline-offset:0;
+  box-shadow:inset 0 0 0 .16rem color-mix(in srgb,var(--fc) 30%,#000),inset 0 0 .5rem #0007,0 0 1rem color-mix(in srgb,var(--fc) 45%,transparent),0 .3rem .6rem #0009}
+.afr-bronce{--fc:#cd7f32;--fg:linear-gradient(135deg,#f7c998,#cd7f32 34%,#7a4416 60%,#e9ab70)}
+.afr-plata{--fc:#d5dcec;--fg:linear-gradient(135deg,#ffffff,#d5dcec 34%,#79829a 62%,#f3f6fd)}
+.afr-oro{--fc:#ffcc33;--fg:linear-gradient(135deg,#fff7c4,#ffcc33 34%,#a77808 62%,#ffe58a)}
+.afr-kanto{--fc:#e23b3b}.afr-johto{--fc:#f0b429}.afr-hoenn{--fc:#2bb3a3}
 .afr-sinnoh{--fc:#7b8cff}.afr-teselia{--fc:#b4bdd2}.afr-kalos{--fc:#ff7ab8}.afr-campo{--fc:#4ccf6a}
-.afr-brillo{--fc:#ffe26a;animation:afrbr 1.6s ease-in-out infinite}
-.afr-arcoiris{--fc:#ff7ad9;animation:afrrb 3s linear infinite}
-.afr-mewtwo{--fc:#4af0a8;animation:afrmw 2.6s ease-in-out infinite}
+/* Brillo: banda dorada con un destello blanco que la recorre */
+.afr-brillo{--fc:#ffe26a;--rv:#fff;--fg:linear-gradient(115deg,#b8902a 0 32%,#fffbe0 46%,#ffe26a 52%,#b8902a 66% 100%);
+  background-size:100% 100%,100% 100%,100% 100%,100% 100%,100% 100%,300% 100%;animation:afrbr 1.6s ease-in-out infinite,afrsh 2.4s linear infinite}
+/* Arcoíris: los colores giran alrededor del avatar */
+.afr-arcoiris{--fc:#ff7ad9;--rv:#fff;--fg:conic-gradient(from var(--fa),#ff5a5a,#ffb347,#f5ee5a,#5aff8a,#5ab8ff,#b05aff,#ff5a5a);animation:afrrb 3s linear infinite,afrsp 4s linear infinite}
+/* Mewtwo shiny: verde y morado que giran, con aura que late */
+.afr-mewtwo{--fc:#4af0a8;--rv:#fff;--fg:conic-gradient(from var(--fa),#4af0a8,#b36bff,#4af0a8 50%,#b36bff,#4af0a8);animation:afrmw 2.6s ease-in-out infinite,afrsp 6s linear infinite}
+@keyframes afrsp{to{--fa:360deg}}
+@keyframes afrsh{from{background-position:0 0,0 0,0 0,0 0,0 0,200% 0}to{background-position:0 0,0 0,0 0,0 0,0 0,-100% 0}}
 @keyframes afrmw{0%,100%{--fc:#4af0a8}50%{--fc:#b36bff}}
 @keyframes afrbr{0%,100%{--fc:#ffe26a}50%{--fc:#fffbe0}}
 @keyframes afrrb{0%{--fc:#ff5a5a}17%{--fc:#ffb347}33%{--fc:#f5ee5a}50%{--fc:#5aff8a}67%{--fc:#5ab8ff}83%{--fc:#b05aff}100%{--fc:#ff5a5a}}

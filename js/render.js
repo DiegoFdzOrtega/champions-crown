@@ -131,8 +131,18 @@ function hud(x, y, list, idx, col){
   }
 }
 
+// Dónde cae el mundo (W × H) dentro del lienzo. Normal: lo llena entero. Combate online: arena fija PVP_W × H, centrada y sin deformar (barras oscuras a los lados si la ventana es más ancha)
+const VIEW = {sx: 1, sy: 1, ox: 0, oy: 0};
+function viewCalc(){
+  if(LOCKW){ const s = Math.min(cv.width / W, cv.height / H); VIEW.sx = VIEW.sy = s; VIEW.ox = (cv.width - W * s) / 2; VIEW.oy = (cv.height - H * s) / 2; }
+  else{ VIEW.sx = cv.width / W; VIEW.sy = cv.height / H; VIEW.ox = VIEW.oy = 0; }
+}
 function draw(){
-  ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+  const want = g && g.pvp ? PVP_W : 0;
+  if(want !== LOCKW){ LOCKW = want; resize(); }                        // al entrar o salir de un combate online
+  viewCalc();
+  if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
+  ctx.setTransform(VIEW.sx, 0, 0, VIEW.sy, VIEW.ox, VIEW.oy);
   ctx.clearRect(0,0,W,H);
   if(!g){ menuBg(performance.now()/1000); return; }
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)

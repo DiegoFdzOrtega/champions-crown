@@ -3,6 +3,8 @@
    1) DATOS: aquí cambias Pokémon, pisos, ataques y carpeta de sprites
    ===================================================================== */
 let W = 960;                  // ancho lógico: se adapta a la ventana (lo calcula resize())
+const PVP_W = 960;            // ancho FIJO de la arena en un combate online (los dos jugadores deben simular exactamente el mismo campo, aunque sus ventanas sean distintas)
+let LOCKW = 0;                // si no es 0, W vale siempre esto (lo pone draw() mientras haya un combate online) y la imagen se centra con barras a los lados
 const H = 540;                // alto lógico fijo
 const ESCALA = 2;             // los sprites se dibujan 2 veces más grandes
 const CARPETA = 'pokemon';    // sprites: pokemon/<número de Pokédex>/Walk.png ...

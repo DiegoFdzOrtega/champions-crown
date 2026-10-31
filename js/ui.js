@@ -34,7 +34,7 @@ addEventListener('keydown', e=>{
 });
 addEventListener('keyup', e=> keys[e.code] = false);
 addEventListener('blur', ()=>{ for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; mouse.b = {}; });
-function setMouse(e){ const r = cv.getBoundingClientRect(); mouse.x = (e.clientX-r.left)*W/r.width; mouse.y = (e.clientY-r.top)*H/r.height; }
+function setMouse(e){ const r = cv.getBoundingClientRect(); viewCalc(); mouse.x = ((e.clientX-r.left)*cv.width/r.width - VIEW.ox) / VIEW.sx; mouse.y = ((e.clientY-r.top)*cv.height/r.height - VIEW.oy) / VIEW.sy; }
 cv.addEventListener('mousemove', e=>{ setMouse(e); const k = g && !g.paused ? hudIconAt(mouse.x, mouse.y) : -1; cv.style.cursor = k >= 0 && !myList()[k].dead && k !== myIdx() ? 'pointer' : ''; });   // manita sobre los cuadritos del equipo
 cv.addEventListener('mousedown', e=>{ setMouse(e);
   if(e.button===0 && g && !g.over && !g.paused && megaBadgeAt(mouse.x, mouse.y)){ megaPlayer(); return; }     // clic en el hueco de megaevolución

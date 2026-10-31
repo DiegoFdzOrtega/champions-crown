@@ -8,7 +8,7 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 // y ancho variable, así que llena toda la ventana sin deformarse.
 function resize(){
   const dpr = window.devicePixelRatio || 1, cw = window.innerWidth, ch = window.innerHeight;
-  W = Math.max(500, Math.round(cw * H / ch));
+  W = LOCKW || Math.max(500, Math.round(cw * H / ch));          // en un combate online W es fijo (LOCKW): si no, cada jugador tendría una arena distinta y se descuadraría
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
 }
 
