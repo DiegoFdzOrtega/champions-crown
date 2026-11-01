@@ -74,7 +74,18 @@ const CARD_BGS = [
   B('corelia',  '0012_00_corni',   ['corelia']),
   B('amaro',    '0023_00_momi',    ['amaro']),
   B('edel',     '0022_00_urup',    ['edel']),
-  B('narciso',  '0096_00_zumi',    ['narciso'])
+  B('narciso',  '0096_00_zumi',    ['narciso']),
+  // --- Alola (ilustraciones de Pokémon Masters; Ilima, Kiawe y Mallow no tienen todavía) ---
+  B('lana',     '0052_00_shizui',   ['lana'], '50% 50%', 'Prueba de Lana'),
+  B('sophocles','0036_00_mamane',   ['sophocles'], '50% 50%', 'Prueba de Sophocles'),
+  B('acerola',  '0007_00_acerola',  ['acerola', 'acerola_am'], '50% 50%', 'Prueba de Acerola'),
+  B('mina',     '0034_00_matsurika',['mina'], '50% 50%', 'Prueba de Mina'),
+  B('hala',     '0098_00_hau',      ['hala'], '50% 50%', 'Poblado Iki'),
+  B('hala2',    '0010_00_maximum',  ['hala'], '50% 50%', 'Ring de lucha junto al mar'),
+  B('olivia',   '0051_00_litchi',   ['olivia']),
+  B('olivia2',  '0013_00_hapu',     ['olivia'], '50% 50%', 'Ruinas de Alola'),
+  B('kahili',   '0058_00_kahiri',   ['kahili']),
+  B('kukui',    '0001_00_kukui',    ['kukui'], '50% 50%', 'Monte Lanakila')
 ];
 const CARD_BG = {};
 CARD_BGS.forEach(b => { CARD_BG[b.id] = b; });

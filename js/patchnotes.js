@@ -6,6 +6,12 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Fondos de tarjeta de Alola', date:'1 nov 2026', sections:[
+    {t:'Perfil', i:[
+      'Diez fondos nuevos para tu tarjeta de entrenador, de Alola: Prueba de Lana, Prueba de Sophocles, Prueba de Acerola (se consigue con la líder o con la del Alto Mando), Prueba de Mina, Poblado Iki y Ring de lucha junto al mar (Hala), Alto Mando: Olivia y Ruinas de Alola (Olivia), Alto Mando: Kahili y Monte Lanakila (Kukui).',
+      'Se desbloquean al derrotar a ese combate, igual que los de las otras regiones. Ilima, Kiawe y Mallow todavía no tienen ilustración.'
+    ]}
+  ]},
   {v:'Estadios de Alola', date:'1 nov 2026', sections:[
     {t:'Combates', i:[
       'Los 12 combates de Alola tienen ya su estadio propio, basado en los lugares de Sol y Luna: mansión de Ciudad Hau\'oli (Ilima), Colina Arroyuelo (Lana), Parque Volcán Wela (Kiawe), Selva Frondosa (Mallow), Observatorio Hokulani (Sophocles), Supermercado Ahorra Mucho abandonado (Acerola), Aldea Marina (Mina), Poblado Iki (Hala), Ruinas de la Vida (Olivia), la trastienda del súper (Acerola, Alto Mando), las alturas de Alola (Kahili) y el Estadio Manalo (Kukui).',
