@@ -191,7 +191,8 @@ const REWARD_REGION = {
   Hoenn: {chapa:5, chapaplata:5, tickets:10},
   Sinnoh: {chapa:5, chapaplata:5, tickets:10},
   'Unova / Teselia': {chapa:5, chapaplata:5, tickets:10},
-  Kalos: {chapa:5, chapaplata:5, tickets:10}
+  Kalos: {chapa:5, chapaplata:5, tickets:10},
+  Alola: {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', ticketsL:'tiradas legendarias', bp:'Puntos de Batalla (BP)'};
 const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]) : REWARD_REGION[F.region] || REWARD[F.kind];

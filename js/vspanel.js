@@ -118,7 +118,7 @@ function vsSide(cls, name, mons, setImg, shinyOf, tint, sub){
 }
 function vsIntro(o){
   if(vsState) return;
-  const me = vsSide('vs-me', trainerName(), team.slice(), el => setPlayerSkin(el), dex => useShiny(dex), null, 'Tu equipo'),
+  const me = vsSide('vs-me', trainerName(), team.slice(), el => setPlayerSkin(el), dex => useShiny(dex), null, ''),         // tu lado solo lleva tu nombre (sin el rótulo «Tu equipo»)
         tint = vsTint(o.enemies),
         foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, o.skin ? (im => setPlayerSkin(im, o.skin, true)) : (im => vsFoeImg(im, o)), o.shinyOf || null, tint, o.sub || (tint ? 'Tipo ' + tint.es : ''));        // o.skin = el rival es otro jugador (combate online): se enseña su personaje, mirando hacia ti
   const root = $('vs'); root.innerHTML = ''; foe.el.classList.toggle('mir', !!o.skin);

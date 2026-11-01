@@ -6,6 +6,146 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Estadios de Alola', date:'1 nov 2026', sections:[
+    {t:'Combates', i:[
+      'Los 12 combates de Alola tienen ya su estadio propio, basado en los lugares de Sol y Luna: mansión de Ciudad Hau\'oli (Ilima), Colina Arroyuelo (Lana), Parque Volcán Wela (Kiawe), Selva Frondosa (Mallow), Observatorio Hokulani (Sophocles), Supermercado Ahorra Mucho abandonado (Acerola), Aldea Marina (Mina), Poblado Iki (Hala), Ruinas de la Vida (Olivia), la trastienda del súper (Acerola, Alto Mando), las alturas de Alola (Kahili) y el Estadio Manalo (Kukui).',
+      'Todos tienen cosas que se mueven: cascadas, lava y brasas, luciérnagas, estrellas y chispas, tubos que parpadean y fantasmas, banderines, gaviotas, antorchas, runas que brillan, público y confeti.',
+      'El centro del campo está siempre despejado para que se vean bien los Pokémon.'
+    ]}
+  ]},
+  {v:'Pantalla VS y música de Alola', date:'1 nov 2026', sections:[
+    {t:'Pantalla VS', i:['En la pantalla VS, tu lado ya solo muestra tu nombre de entrenador (se quitó el rótulo «Tu equipo»).']},
+    {t:'Música', i:['Alola ya tiene su música: «Battle! Gym Leader» para los 7 líderes, «Battle! Elite Four» para el Alto Mando y «The Battle at the Summit!» para Kukui, con sus temas de victoria al ganar (carpeta musica/Alola/).']}
+  ]},
+  {v:'Alola: la séptima Liga', date:'1 nov 2026', sections:[
+    {t:'Historia', i:[
+      'Llega Alola: 7 líderes (Ilima, Lana, Kiawe, Mallow, Sophocles, Acerola y Mina), Alto Mando de 4 (Hala, Olivia, Acerola y Kahili) y el Campeón Kukui. 12 combates con 6 Pokémon cada uno, con EVs, IVs, naturaleza, habilidad, objeto y movimientos. Se abre al ser Campeón de Kalos.',
+      'Recompensa: 5 Chapas Doradas + 5 Plateadas + 10 tiradas por victoria.',
+      'Sustituciones por falta de sprite: Gumshoos → Raticate, Shiinotic → Vileplume, y Marowak y Raichu de Alola salen con su forma normal y movimientos de Fuego-Fantasma y Eléctrico-Psíquico.',
+      'De momento los combates usan el fondo y la música por defecto: los estadios y la música de Alola llegan después.',
+      'La Torre Batalla ahora pide ganar la Liga de Alola también (7 Ligas).']}
+  ]},
+  {v:'Hiperrayo rehecho', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Hiperrayo ya no se parece al Rayo Solar: carga una bola de fuego con anillos y rayitas que se cierran hacia ella; después sale un rayo naranja muy ancho con el borde dentado, una doble hélice que gira por dentro y arcos que avanzan por el rayo.',
+      'Al impactar ya no hay explosión: solo se ve el rayo.',
+      'Arreglado: el Hiperrayo a veces no salía (un error al empezar el rayo borraba la animación).'
+    ]}
+  ]},
+  {v:'Ataques fuertes (botón E) nuevos', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Hiperrayo: carga una bola naranja con motas que entran y dispara un rayo naranja con núcleo blanco y anillos; al impactar, estrella de fuego con ondas de choque y brasas.',
+      'Terremoto: una grieta oscura en zigzag avanza por el suelo con rocas que saltan y polvo marrón; al llegar, ondas en el suelo, grietas en abanico, rocas volando y polvo.',
+      'Cometa Draco: cometa azul con cola de llamas y destellos; al impactar caen meteoritos del cielo y estallan en estrellas azules con ondas.',
+      'Onda Certera: esfera azul y blanca con anillos que pulsan; al impactar, gran estrella azul con ondas y destellos.',
+      'Lanzamugre: bola de lodo violeta con gotas y burbujas; al impactar salpica con goteo, charco y burbujas.',
+      'Megacuerno: un cuerno taladro verde con rayas de velocidad; al impactar surgen cuernos en todas direcciones.',
+      'Pulso Noche: anillos oscuros con borde violeta; al impactar, ondas oscuras y llamas sombrías que suben desde los pies del rival.',
+      'Foco Resplandor: estrella plateada con estela de luz; al impactar, destello blanco con cuatro rayos cruzados y chispas.',
+      'Fuerza Lunar: esfera rosa con una luna dentro; al impactar, estrella rosa, una luna creciente sobre el rival y destellos que caen.'
+    ]}
+  ]},
+  {v:'Hidrobomba más pequeña', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Hidrobomba: el chorro es casi la mitad de ancho (de unos 90 px a unos 45 px en la punta), con el remolino de la boca, la espuma y las gotas también más pequeños. Mantiene el mismo aspecto: pálido con borde azul marino.'
+    ]}
+  ]},
+  {v:'Hidrobomba como en los juegos de DS', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Hidrobomba: ahora es un chorro grande y pálido, casi blanco por dentro, con el borde azul marino irregular, que se ensancha hacia el rival. Lleva un remolino de agua en la boca, vetas blancas que corren por el chorro, espuma en los bordes y gotas.'
+    ]}
+  ]},
+  {v:'Hipnosis mejorada', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Hipnosis (MT de estado): del Pokémon salen ondas moradas y rosas con contorno oscuro que avanzan hacia el rival. Al llegar, un remolino hipnótico gira sobre él y lo duerme, con grandes «Z» que suben.',
+      'Arreglo interno: los ataques de estado ahora se cargan antes que los efectos nuevos, para que Hipnosis y Onda Trueno usen sus efectos mejorados.'
+    ]}
+  ]},
+  {v:'Pájaro Osado y Vendaval', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Pájaro Osado: se usa igual que Envite Ígneo. El Pokémon se lanza sobre el rival envuelto en viento azul y blanco, con estela y plumas; al chocar hay una explosión con ondas de choque y plumas que salen volando.',
+      'Vendaval (nuevo, ataque fuerte del botón E, tipo Volador): lanza un tornado que crece sobre el rival y lo levanta por los aires un momento (solo visual, no cambia el daño). Se enseña con MT a los 78 Pokémon que pueden aprenderlo en los juegos, y 5 de serie (Tornadus, Noivern, Corviknight, Cramorant…).',
+      'Tornado (botón de disparo) se queda como estaba.'
+    ]}
+  ]},
+  {v:'Rayo Hielo y Lanzallamas como antes', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo Hielo y Lanzallamas vuelven a sus efectos originales, los que tenían antes de empezar con los cambios de estilo.',
+      'Envite Ígneo se queda con el nuevo: Pokémon envuelto en llamas que se lanza contra el rival.'
+    ]}
+  ]},
+  {v:'Rayo Hielo, Envite Ígneo y Lanzallamas como en la descripción', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo Hielo: primero acumula partículas de hielo en la boca, luego dispara un rayo con núcleo blanco y bordes azules con cristales y copos. Al impactar estallan cristales puntiagudos en todas direcciones y el rival queda un momento cubierto por una capa de hielo translúcida.',
+      'Envite Ígneo: el Pokémon va envuelto en llamas que crecen y sale disparado contra el rival (ahora se desplaza de verdad, como con Surf), con estela de fuego y chispas. Al chocar hay una explosión circular con ondas de choque y brasas.',
+      'Lanzallamas: acumula fuego en la boca y lanza un chorro ondulante más grueso, con pequeñas explosiones y brasas. Al impactar las llamas envuelven al rival y se apagan dejando humo y ceniza.'
+    ]}
+  ]},
+  {v:'Rayo Hielo mucho más grueso', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo Hielo: el rayo es casi el doble de grueso (de 24 a 46 px), con cristales de hielo más grandes en los bordes, el doble de copos de nieve y cristales que giran alrededor del rayo; el racimo de la boca también es mayor.'
+    ]}
+  ]},
+  {v:'Envite Ígneo, Ascuas e Hidropulso estilo HeartGold', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Envite Ígneo: al cargarlo el Pokémon queda envuelto en llamas, sale disparado como un cometa de fuego con colas de llama y chispas en espiral, y al impactar estalla en una estrella de llamas con onda de fuego.',
+      'Ascuas: ahora son tres bolitas de fuego con cola que se persiguen, más grandes que antes; al impactar prenden tres llamitas sobre el rival.',
+      'Hidropulso: esfera de agua con reflejo, ondas que salen de ella y burbujas que la rodean; al impactar suelta tres anillos de agua que se expanden y gotas.'
+    ]}
+  ]},
+  {v:'Rayo Hielo más ancho', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo Hielo rehecho: ya no es un rayo finito. Ahora es un rayo ancho azul claro con centro blanco, cristales de hielo en los bordes, copos de nieve y un racimo de cristales en la boca; al impactar levanta cristales de hielo del suelo.']}
+  ]},
+  {v:'Golpes y salpicaduras mejorados', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Látigo Cepa: lianas gordas que se curvan, restallan y sueltan una lluvia de hojas con una estrella verde al golpear.',
+      'Puño Fuego, Puño Hielo, Colmillo Ígneo y Colmillo Hielo: el puño y el colmillo se ven más grandes, rodeados de llamas o cristales de hielo, con un estallido más claro. Acua Cola: media luna de agua grande con gotas y salpicadura.',
+      'Pistola Agua, Hidropulso e Hidrobomba: al impactar sale una columna de agua con espuma en la base y corona de gotas.',
+      'Los golpes duran más para que se vean enteros, y los golpes cuerpo a cuerpo ya no llevan el destello genérico encima.']}
+  ]},
+  {v:'Rayo Solar y ataques más pequeños', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo Solar rehecho: primero la luz del sol baja del cielo y se junta en el Pokémon (rayos de luz, motas que entran y una bola de sol); después sale un rayo ancho dorado con centro blanco y destellos.',
+      'Todos los ataques de fuego, agua, hielo y planta, y también Llamarada, son más pequeños (Lanzallamas, Hidrobomba, Envite Ígneo, Ventisca...).',
+      'Para ajustar el tamaño: TP_W (corrientes) y TP_SZ (impactos) al principio de js/fxtipos.js.']}
+  ]},
+  {v:'Fuego, agua, planta y hielo como en los juegos', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Fuego: Ascuas, Lanzallamas, Envite Ígneo, Puño Fuego y Colmillo Ígneo rehechos: bolas y corrientes de fuego planas con contorno oscuro, lenguas de llama y estallido al impactar.',
+      'Agua: Pistola Agua, Hidropulso, Hidrobomba y Acua Cola: chorros con espuma, orbe de ondas y salpicadura con corona de gotas.',
+      'Planta: Látigo Cepa (dos lianas que restallan y sueltan hojas) y Rayo Solar (rayo ancho amarillo con hojas arrastradas y destello con rayos al impactar).',
+      'Hielo: Nieve Polvo (corriente de nieve con copos), Ventisca (nube de nieve que al impactar levanta cristales de hielo), Puño Hielo y Colmillo Hielo.',
+      'Todos los impactos van reducidos (TP_SZ en js/fxtipos.js). Si prefieres lo clásico: Ajustes › Pantalla › «Efectos de ataque mejorados».']}
+  ]},
+  {v:'Ataques eléctricos como en los juegos', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Rayo, Trueno, Impactrueno, Onda Trueno, Puño Trueno, Colmillo Rayo y Carga rehechos: rayos gruesos en zigzag, amarillo plano con contorno oscuro y centro claro, como en los juegos (antes eran rayos finos y luz difusa).',
+      'Trueno: al impactar cae un rayo gigante del cielo con un destello corto, un anillo en el suelo y rayos que corren por la hierba. Rayo: al impactar caen tres rayos sobre el rival. Onda Trueno: anillos amarillos alrededor del rival.',
+      'Más pequeños: los impactos y los rayos eléctricos miden ahora algo más de la mitad. Se puede retocar con EL_SZ y EL_W al principio de js/fxelec.js.',
+      'Si prefieres lo clásico: Ajustes › Pantalla › «Efectos de ataque mejorados».']}
+  ]},
+  {v:'Llamarada como en los juegos', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Llamarada rehecha: una bola de fuego grande con cola de llamas y contorno oscuro, como en los juegos. Al chocar estalla y deja una llama con forma del kanji «大» (el símbolo del Daimonji, la hoguera de Kioto) que se apaga con humo.',
+      'Si prefieres lo clásico: Ajustes › Pantalla › «Efectos de ataque mejorados».']}
+  ]},
+  {v:'MT Surf y menos brillo', date:'1 nov 2026', sections:[
+    {t:'Movimientos', i:[
+      'Nueva MT Surf (Agua, hueco de ataque fuerte, tecla E): una ola ancha como la de los juegos: bandas de agua (azul oscuro, azul, celeste, blanco) con el borde de espuma en forma de ondas y contorno oscuro. Tu Pokémon se monta en la ola y viaja con ella hasta el rival (como en el vídeo de referencia), y al impactar la ola «lava» al rival. Se compra en la tienda y la pueden aprender 228 Pokémon (datos de los juegos oficiales). El daño, la energía y la recarga son los de cualquier ataque fuerte; lo nuevo es que te acerca al rival.']},
+    {t:'Efectos de combate', i:[
+      'Los efectos de ataque brillan bastante menos (halos, destellos y luz de los impactos).',
+      'Rayo y Trueno ahora son rayos amarillos con contorno oscuro como en los juegos; Bola Sombra es la esfera morada con contorno negro; las hojas de Hoja Afilada llevan contorno.']}
+  ]},
+  {v:'Ataques más espectaculares', date:'1 nov 2026', sections:[
+    {t:'Efectos de combate', i:[
+      'Todos los ataques tienen un brillo suave, una carga de chispas antes de lanzar y un impacto con estrella, ondas y chispas. Cada tipo tiene su propio detalle: rayos pequeños, hojas, cristales de hielo, burbujas, trozos de roca, humo oscuro, brasas...',
+      'Los golpes fuertes hacen una micropausa y un destello en pantalla (en el combate online no hay pausa).',
+      'Los impactos dejan una marca en el suelo unos segundos: quemadura, charco, escarcha, mancha de veneno, sombra o grieta.',
+      'Lanzallamas e Hidrobomba se han rehecho: llama larga y ola con espuma.',
+      'Animaciones propias (rehechas enteras): Rayo, Trueno, Hoja Afilada, Bola Sombra, Roca Afilada, Psíquico y Rayo Hielo. El resto de ataques irán llegando.',
+      'Si va lento o prefieres el estilo clásico: Ajustes › Pantalla › «Efectos de ataque mejorados».']}
+  ]},
   {v:'Tirada variocolor', date:'31 oct 2026', sections:[
     {t:'Gachapon', i:[
       'Nueva tirada «Tirar variocolor»: gasta 1 Ticket Variocolor y te da un shiny que aún no tengas de la región que estés mirando. Se elige la rareza con las probabilidades de siempre, pero solo entre los shiny que te faltan.',

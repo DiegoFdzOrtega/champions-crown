@@ -21,7 +21,7 @@ const MOVESET = {
   lucha:    {1:['Golpe Roca'],                              2:['Esfera Aural'],                    3:['Corpulencia'],        4:['Onda Certera']},
   veneno:   {1:['Puya Nociva'],                             2:['Picotazo Veneno','Bomba Lodo'],    3:['Armadura Ácida'],     4:['Lanzamugre']},
   tierra:   {1:['Excavar'],                                 2:['Disparo Lodo'],                    3:['Tormenta de Arena'],  4:['Terremoto']},
-  volador:  {1:['Ataque Ala'],                              2:['Tajo Aéreo','Tornado'],            3:['Viento Afín'],        4:['Pájaro Osado']},
+  volador:  {1:['Ataque Ala'],                              2:['Tajo Aéreo','Tornado'],            3:['Viento Afín'],        4:['Pájaro Osado','Vendaval']},
   psiquico: {1:['Cabezazo Zen'],                            2:['Psicorrayo','Confusión'],          3:['Paz Mental'],         4:['Psíquico']},
   bicho:    {1:['Tijera X'],                                2:['Zumbido','Pin Misil'],             3:['Danza Aleteo'],       4:['Megacuerno']},
   roca:     {1:['Tumba Rocas'],                             2:['Lanzarrocas'],                     3:['Pulimento'],          4:['Roca Afilada']},
@@ -34,7 +34,7 @@ const MOVESET = {
 // Movimientos de los Pokémon con ataques propios (CUSTOM) que no están arriba. Tipo y hueco de cada uno.
 const EXTRA_MOVES = {
   'Cabezazo':['normal',1], 'Golpe Cuerpo':['normal',1], 'Doble Filo':['normal',2], 'Amnesia':['psiquico',3], 'Danza Espada':['normal',3],
-  'Agilidad':['psiquico',3], 'Refugio':['agua',3],
+  'Agilidad':['psiquico',3], 'Refugio':['agua',3], 'Surf':['agua',4],
   // Ataques de estado (hueco 3): no los tiene nadie de serie, solo se aprenden con MT (ver js/status.js)
   'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3]
 };
@@ -47,8 +47,8 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
   .forEach(n => { if(!MOVES[n]) console.warn('Falta el movimiento', n); });
 
 // Movimientos que de serie solo lleva quien de verdad los puede aprender en los juegos (datos de js/learnsets.js):
-// los PUÑOS (js/fxpunch.js) y el Shuriken de Agua (js/fxshuriken.js). El resto de Pokémon de ese tipo se queda con su ataque de siempre.
-const PUNCHES = new Set(['Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
+// los PUÑOS (js/fxpunch.js), el Shuriken de Agua (js/fxshuriken.js) y el Vendaval. El resto de Pokémon de ese tipo se queda con su ataque de siempre.
+const PUNCHES = new Set(['Vendaval', 'Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
 // Ataque propio de un Pokémon concreto: {nº Pokédex: {hueco: ataque}}. Greninja (siniestro) lleva el Shuriken de Agua, que es de agua.
 const SIGNATURE = {658: {2:'Shuriken de Agua'}};
 const learnHas = (n, dex) => {                      // ¿está el número de Pokédex en la lista de LEARN[n]? (LEARN_SET se crea después, en training.js)

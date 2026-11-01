@@ -166,7 +166,7 @@ FLOORS.forEach((F, i) => { F.region = 'Kanto'; F.idx = i; F.dn = i; });
 const floorsOf = region => FLOORS.filter(F => F.region === region);                    // combates de una región, en orden
 /* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
    Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
-const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false, Kalos: false};
+const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false, Kalos: false, Alola: false};
 // HISTORIA CON DOS AVANCES (js/dificultad.js): cada dificultad ('facil' / 'dificil') tiene su propio progreso y sus propias Ligas superadas.
 // Difícil usa los campos de siempre (save.record, save.prog, save.champ: así las partidas antiguas siguen intactas) y Fácil usa save.easy = {record, prog, champ}.
 // trk(m) devuelve el objeto de la dificultad m (por defecto, la que tienes activa en save.storyMode): trk().record · trk().prog · trk().champ
@@ -213,7 +213,9 @@ const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], mort
                      anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio'],
                      // Kalos: los archivos están en minúsculas con el nombre inglés (lideres/kalos/viola.png...) · Ástrid y Édel llevan tilde en el juego pero no en el archivo
                      violeta:['viola'], lino:['grant'], corelia:['korrina'], amaro:['ramos'], lem:['clemont'], valeria:['valerie'], astrid:['olympia'], edel:['wulfric'],
-                     narciso:['siebold'], tileo:['wikstrom'], agata:['agata', 'dracena', 'drasna'], dianta:['diantha']};
+                     narciso:['siebold'], tileo:['wikstrom'], agata:['agata', 'dracena', 'drasna'], dianta:['diantha'],
+                     // Alola: lideres/Alola/<nombre>.png en minúsculas · Acerola del Alto Mando (acerola_am) usa el mismo retrato que la líder
+                     acerola_am:['acerola']};
 // Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es lideres/Unova)
 const REGION_DIR = {'Unova / Teselia':'Unova', Kalos:'kalos'};
 

@@ -54,7 +54,7 @@ function arena(){ drawArena(g && g.o ? (g.o.arena || g.o.leader) : '', g ? g.t :
 function drawF(f, col){
   if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
   const I = idleInfo(f.m.dex);
-  const hid = f.hide > 0, lg = fxLunge(f);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
+  const hid = f.hide > 0, lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
   if(!hid && !drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny) && sheet(f.m.dex, 'Idle', false).bad){      // sin sprite (de verdad, no solo cargando): círculo
     ctx.fillStyle = TC[f.m.types[0]]; ctx.beginPath(); ctx.arc(f.x + lg.x, f.y + lg.y, 30, 0, 7); ctx.fill();
@@ -147,6 +147,7 @@ function draw(){
   if(!g){ menuBg(performance.now()/1000); return; }
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
   arena();
+  fxhdGround();                                    // marcas en el suelo de los ataques (js/fxhd3.js)
   const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
 
   [[P, gm ? '#ff5a5a' : '#4ccf6a'], [E, gm ? '#4ccf6a' : '#ff5a5a']].sort((a,b)=>a[0].y-b[0].y).forEach(([f,c]) => drawF(f,c));
@@ -156,7 +157,9 @@ function draw(){
     ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); ctx.restore();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.stroke();
   });
+  fxhdBegin();                                     // efectos HD (js/fxhd.js): guarda el cuadro antes de los efectos
   fxDraw();                                        // impactos, golpes, polvo y partículas
+  fxhdDraw(); fxhdEnd();                           // efectos HD: luces, golpes, carga y brillo (bloom)
   swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
   megaDraw();                                      // animación de megaevolución (js/mega.js)
   abDrawWeather();                                 // clima (sol, lluvia, granizo, arena): js/abilities.js
@@ -235,6 +238,8 @@ function draw(){
 let last = performance.now();
 function loop(now){
   const dt = Math.min(.05, (now-last)/1000); last = now;
-  if(g && g.pvp) pvpFrame(dt); else update(dt);    // combate online: pasos fijos sincronizados con el rival (js/pvp.js)
+  if(g && g.pvp) pvpFrame(dt);                     // combate online: pasos fijos sincronizados con el rival (js/pvp.js)
+  else if(fxhd.stop > 0 && g && !g.over){ fxhd.stop -= dt; }     // congelado del golpe (js/fxhd.js): el combate se queda quieto un instante
+  else update(dt);
   draw(); requestAnimationFrame(loop);
 }

@@ -220,6 +220,8 @@ function openSettings(){
     <h2>Pantalla</h2>
     <label class="chk"><input id="fs" type="checkbox"${fsOn() ? ' checked' : ''}${canFs ? '' : ' disabled'}> Pantalla completa</label>
     ${canFs ? '' : '<p class="help">Tu navegador no permite la pantalla completa en esta página.</p>'}
+    <label class="chk"><input id="fxhd" type="checkbox"${fxhd.on ? ' checked' : ''}> Efectos de ataque mejorados (brillos, marcas en el suelo)</label>
+    <p class="help">Desactívalo para volver al estilo clásico o si el juego va lento.</p>
     <h2>Audio</h2>
     <label>Volumen general: <b id="volN"></b><br><input id="vol" type="range" min="0" max="100" value="${save.vol}"></label>
     <label>Música del menú: <b id="volMN"></b><br><input id="volM" type="range" min="0" max="100" value="${save.volMenu}"></label>
@@ -236,6 +238,7 @@ function openSettings(){
   $('volS').oninput = e => { Music.setSfxVolume(e.target.value); pct('volSN', save.volSfx); };
   $('volS').onchange = () => Sfx.play('click');                                      // al soltar el deslizador de efectos se oye cómo suenan
   $('mute').onchange = e => Music.setMute(e.target.checked);
+  $('fxhd').onchange = e => fxhdSet(e.target.checked);
   $('fs').onchange = e => {
     const el = document.documentElement;
     if(e.target.checked){ const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if(r && r.catch) r.catch(() => { e.target.checked = false; toast('El navegador no ha permitido la pantalla completa.'); }); }

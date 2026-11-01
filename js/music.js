@@ -92,6 +92,15 @@ const MUSIC_TRACKS = {
                  synth:{seed:46, bpm:178, root:59, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   win_lider_kalos:  {name:'Victoria: Líderes y Alto Mando de Kalos', file:'Kalos/Victoria Lideres',  once:true, ref:'"Victory! Gym Leader" de Kalos (X/Y)'},
   win_campeon_kalos:{name:'Victoria: Campeona de Kalos',            file:'Kalos/Victoria Campeona', once:true, ref:'"Victory! Champion" de Kalos (X/Y)'},
+  // Alola: carpeta musica/Alola/ con los mismos nombres que Kalos (Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres, Victoria Campeon). Si falta un archivo suena la música generada de abajo
+  lider_alola:  {name:'Líderes de Alola', file:'Alola/Combate Lideres', win:'win_lider_alola',          ref:'"Battle! Trainer / Kahuna" de Alola (Sol y Luna)',
+                 synth:{seed:27, bpm:150, root:64, scale:'major',    prog:[0,3,4,5],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
+  alto_alola:   {name:'Alto Mando de Alola', file:'Alola/Combate Alto Mando', win:'win_lider_alola',  ref:'"Battle! Elite Four" de Alola (Sol y Luna)',
+                 synth:{seed:37, bpm:164, root:59, scale:'harmonic', prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.84}},
+  campeon_kukui:{name:'Campeón Kukui (Alola)', file:'Alola/Combate Campeon', win:'win_campeon_alola', ref:'"Battle! Champion" de Alola (Sol y Luna)',
+                 synth:{seed:47, bpm:176, root:62, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
+  win_lider_alola:  {name:'Victoria: Líderes y Alto Mando de Alola', file:'Alola/Victoria Lideres',  once:true, ref:'"Victory! Trainer" de Alola (Sol y Luna)'},
+  win_campeon_alola:{name:'Victoria: Campeón de Alola',            file:'Alola/Victoria Campeon', once:true, ref:'"Victory! Champion" de Alola (Sol y Luna)'},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -124,7 +133,11 @@ const MUSIC_BY_TRAINER = {
   // Kalos: 8 líderes, Alto Mando (4) y Campeona
   violeta:'lider_kalos', lino:'lider_kalos', corelia:'lider_kalos', amaro:'lider_kalos', lem:'lider_kalos', valeria:'lider_kalos', astrid:'lider_kalos', edel:'lider_kalos',
   malva:'alto_kalos', narciso:'alto_kalos', tileo:'alto_kalos', agata:'alto_kalos',
-  dianta:'campeon_dianta'
+  dianta:'campeon_dianta',
+  // Alola: 7 líderes, Alto Mando (4; Acerola del Alto Mando = acerola_am) y Campeón Kukui
+  ilima:'lider_alola', lana:'lider_alola', kiawe:'lider_alola', mallow:'lider_alola', sophocles:'lider_alola', acerola:'lider_alola', mina:'lider_alola',
+  hala:'alto_alola', olivia:'alto_alola', acerola_am:'alto_alola', kahili:'alto_alola',
+  kukui:'campeon_kukui'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){

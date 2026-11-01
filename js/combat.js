@@ -40,6 +40,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
     if(!robusto){ T.aguanteUsado = true; if(T.ab === 'Liviano' && T.ax){ T.ax.light = true; abPop(T, 'LIVIANO', '#ffe066'); } }
   }
   T.hp -= dealt;
+  if(mvn === 'Vendaval' && mult > 0 && T.hp > 0) T.lift = {t0:g.t, dur:1.1};                                  // Vendaval: el rival sale levantado por los aires un momento (solo visual: fxLift en fxtipos.js)
   if(A && A.item === 'roca' && mult > 0 && T.hp > 0) abFlinch(T, A, IFX.rocaProb, IFX.rocaStun);          // Roca del Rey: amedrenta (js/abilities.js: Foco Interno, Polvo Escudo, Dicha...)
   if(A && !A.dead){
     if(A.item === 'cascabel') A.hp = Math.min(A.max, A.hp + dealt*.15);                      // Cascabel Concha
@@ -93,7 +94,7 @@ function use(f, i, ang, mine){
   if(i === 2){ setAct(f,'Shoot',.4);   fxShotStart(f, shot(f, ang, m.dmg*d, 520, 9, t, mine), nm, false); }
   if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
   else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  qApply(f, nm); }      // mejora: cada ataque hace lo suyo (js/qmoves.js)
-  if(i === 4){ setAct(f,'Charge',.6);  fxShotStart(f, shot(f, ang, m.dmg*d, 380, 22, t, mine), nm, true); }
+  if(i === 4){ setAct(f,'Charge',.6);  const s4 = shot(f, ang, m.dmg*d, 380, 22, t, mine); fxShotStart(f, s4, nm, true); if(nm === 'Surf') f.ride = {s:s4, a:ang, t:1.4}; else if(nm === 'Envite Ígneo' || nm === 'Pájaro Osado') f.ride = {s:s4, a:ang, t:1.2}; }   // Surf: el Pokémon se monta en la ola y viaja con ella
 }
 
 function move(f, dx, dy, dt, k){
@@ -101,6 +102,11 @@ function move(f, dx, dy, dt, k){
   if(!g.pvp && g.e && g.e.includes(f)) boost = Math.min(boost, ENEMY_SPEED_BUFF_CAP);                // un rival no se hace imposible de cazar al sumar Agilidad + Pañuelo
   const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * boost * (f.st && f.st.k === 'par' ? STX.par.spd : 1);
   let vx = 0, vy = 0;
+  if(f.ride){                                                                  // montado en Surf: va pegado a la ola hasta que se acaba o choca
+    const r = f.ride; r.t -= dt;
+    if(r.t <= 0 || r.s.life <= 0 || f.dead || cant(f)) f.ride = null;
+    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); f.mv = true; return; }
+  }
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
   else if(l){ vx = dx/l*sp*k; vy = dy/l*sp*k; }

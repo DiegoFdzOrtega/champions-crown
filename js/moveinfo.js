@@ -36,7 +36,7 @@ const MOVE_DESC = {
   'Psicorrayo':'Un rayo extraño que puede confundir.', 'Lanzarrocas':'Lanza rocas pequeñas contra el rival.',
   'Pulso Umbrío':'Una onda de energía oscura que puede asustar.', 'Disparo Lodo':'Dispara barro que frena al rival.',
   'Bomba Lodo':'Lanza bolas de lodo que pueden envenenar.', 'Picotazo Veneno':'Pincha con un pico envenenado.',
-  'Tajo Aéreo':'Corta con una ráfaga de aire afilada.', 'Tornado':'Crea un remolino batiendo las alas.',
+  'Tajo Aéreo':'Corta con una ráfaga de aire afilada.', 'Tornado':'Crea un remolino batiendo las alas.', 'Vendaval':'Un tremendo torbellino que atrapa al rival y lo levanta por los aires.',
   // ---- Mejoras y estados (tecla Q) ----
   'Defensa Férrea':'Endurece el cuerpo como el acero: sube mucho la Defensa.', 'Danza Lluvia':'Un baile que hace llover.',
   'Refugio':'Se esconde en su caparazón: sube la Defensa.', 'Danza Aleteo':'Un baile de mariposa: sube Ataque Esp., Defensa Esp. y Velocidad.',
@@ -54,7 +54,7 @@ const MOVE_DESC = {
   'Tóxico':'Lanza veneno que intoxica al rival.', 'Viento Afín':'Un viento a favor que da más velocidad.',
   'Afilar':'Se afila el cuerpo: sube el Ataque.',
   // ---- Ataques fuertes (tecla E) ----
-  'Foco Resplandor':'Concentra una luz brillante de acero y la lanza.', 'Hidrobomba':'Un chorro de agua enorme y muy potente.',
+  'Foco Resplandor':'Concentra una luz brillante de acero y la lanza.', 'Hidrobomba':'Un chorro de agua enorme y muy potente.', 'Surf':'Una ola gigante que barre el campo y arrastra a todo lo que encuentra.',
   'Megacuerno':'Embiste con unos cuernos enormes.', 'Cometa Draco':'Hace caer meteoros del cielo con el poder de un dragón.',
   'Trueno':'Cae un rayo gigante sobre el rival.', 'Bola Sombra':'Lanza una bola de sombras que puede bajar la Defensa Especial.',
   'Envite Ígneo':'Una embestida envuelta en fuego; también hiere a quien la usa en los juegos.', 'Llamarada':'Una enorme explosión de fuego en forma de estrella.',
@@ -63,7 +63,7 @@ const MOVE_DESC = {
   'Rayo Solar':'Absorbe luz del sol y la dispara en un rayo.', 'Psíquico':'Una fuerte ola de energía mental que aplasta al rival.',
   'Roca Afilada':'Lanza rocas puntiagudas muy afiladas.', 'Pulso Noche':'Una onda de energía oscura que sale de su cuerpo.',
   'Terremoto':'Hace temblar la tierra bajo los pies del rival.', 'Lanzamugre':'Escupe una bola de lodo con veneno.',
-  'Pájaro Osado':'Se lanza como un pájaro envuelto en llamas; en los juegos se hace daño.', 'Bomba Imán':'Lanza bombas de acero que se pegan al rival.'
+  'Pájaro Osado':'Se lanza sobre el rival envuelto en viento y plumas; en los juegos también se hace daño.', 'Bomba Imán':'Lanza bombas de acero que se pegan al rival.'
 };
 // Lo que hace el ataque AQUÍ (sale de los números reales del juego)
 function moveInfo(n){
