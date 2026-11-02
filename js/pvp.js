@@ -20,7 +20,7 @@
    REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
    porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '4';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
+const PVP_VER = '5';                                    // (5: la Clasificatoria se juega en el Estadio: campo de 1250 de ancho con límites en perspectiva, js/pruebas.js · 2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
 const PVP_DELAY = 3, PVP_DMIN = 2, PVP_DMAX = 18, PVP_CALM = 10;     // retraso al empezar (3 pasos = 50 ms), mínimo (2 = 33 ms) y máximo; segundos yendo bien antes de bajarlo un paso                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
@@ -145,10 +145,11 @@ function pvpOnHs(p){
 function pvpBuild(){                                     // crea el combate (aún parado): los dos equipos salen de lo que mandó cada uno
   const P = pvp, hostT = P.me === 'p' ? P.mine : P.opp.team, guestT = P.me === 'p' ? P.opp.team : P.mine;
   const p = hostT.map(pvpFighter), e = guestT.map(pvpFighter);
-  LOCKW = PVP_W; resize();                                                                   // arena de ancho fijo: las posiciones de salida y los bordes dependen de W y tienen que ser iguales en los dos ordenadores
+  const EST = !!(P.match.ranked && typeof RANKED_ESTADIO !== 'undefined' && RANKED_ESTADIO);   // Clasificatoria: vista de Estadio (js/pruebas.js), igual en los dos ordenadores
+  LOCKW = EST ? PR.W : PVP_W; resize();                                                      // arena de ancho fijo: las posiciones de salida y los bordes dependen de W y tienen que ser iguales en los dos ordenadores
   p.forEach(f => { f.x = W * .25; f.y = H / 2 + 10; f.dir = 2; }); e.forEach(f => { f.x = W * .75; f.y = H / 2 + 10; f.dir = 6; });
   const hn = P.me === 'p' ? cloud.name : P.opp.name, gn = P.me === 'p' ? P.opp.name : cloud.name, ar = PVP_ARENAS[pvpHash('ar:' + P.match.id) % PVP_ARENAS.length];
-  const o = {pvp: true, sub: (hn + ' VS ' + gn).toUpperCase().slice(0, 40), arena: ar, floor: 0, hm: 1, dm: 1, skill: 1, spdm: 1};
+  const o = {pvp: true, estadio: EST, rival: P.opp.name, foeSkin: P.opp.sk, sub: (hn + ' VS ' + gn).toUpperCase().slice(0, 40), arena: ar, floor: 0, hm: 1, dm: 1, skill: 1, spdm: 1};
   g = {o, p, e, pi: 0, ei: 0, shots: [], pops: [], t: 0, clock: 0, count: 3, over: false, sw: [], swCd: 0, swCdE: 0, swNote: 0, pvp: true, me: P.me, inp: {p: PVP_EMPTY, e: PVP_EMPTY}};
   for(const k in keys) keys[k] = false; mouse.l = mouse.r = false;
   fxClear(); Music.battle({leader: 'azul'});
@@ -161,7 +162,7 @@ function pvpBuild(){                                     // crea el combate (aú
 function pvpVs(){
   const P = pvp; if(!P || P.vsShown) return; P.vsShown = true;
   const T = P.opp.team, sh = T.filter(d => d.shiny).map(d => d.m.dex);
-  vsIntro({name: P.opp.name, skin: P.opp.sk, sub: 'Rival online', enemies: T.map(d => d.m.dex), shinyOf: dex => sh.includes(dex), label: 'COMBATE ONLINE',
+  vsIntro({name: P.opp.name, skin: P.opp.sk, sub: 'Rival online', enemies: T.map(d => d.m.dex), shinyOf: dex => sh.includes(dex), hideFoe: !!P.match.ranked, label: P.match.ranked ? 'CLASIFICATORIA · EQUIPO RIVAL OCULTO' : 'COMBATE ONLINE',   // Clasificatoria: no se ve el equipo del rival hasta que saca cada Pokémon
     go: () => { const Q = pvp; if(!Q) return; Q.vsDone = true; if(!Q.running) pvpOverlay(`<h2>Todo listo</h2><p>Esperando a <b>${cloudEsc(pvpName())}</b>...</p>`, 'Cancelar', () => { pvpSend('bye', {from: cloud.user.id, why: 'cancel'}); pvpFail(''); }); pvpHs(); },
     cancel: () => { pvpSend('bye', {from: cloud.user.id, why: 'cancel'}); pvpFail(''); }});
 }
@@ -184,8 +185,9 @@ function pvpEvent(kind, i){                              // cambio de Pokémon (
 }
 function pvpSample(){
   const P = pvp, z = P.menu, h = id => !z && ctlHeld(id) ? 1 : 0;           // teclas configurables de cada jugador (js/controls.js): al rival solo le llega el resultado (dx, dy, l, r...), no tus teclas
+  const mw = typeof mouseWorld === 'function' ? mouseWorld() : mouse;     // la puntería, ya en coordenadas del campo (en el Estadio de la Clasificatoria el campo se ve reducido: js/pruebas.js)
   const i = {dx: h('right') - h('left'), dy: h('down') - h('up'),
-    mx: Math.round(mouse.x), my: Math.round(mouse.y), l: h('melee'), r: h('shot'), sp: h('dash'), q: h('buff'), e: h('strong'), sw: P.evSw, mg: P.evMg};
+    mx: Math.round(mw.x), my: Math.round(mw.y), l: h('melee'), r: h('shot'), sp: h('dash'), q: h('buff'), e: h('strong'), sw: P.evSw, mg: P.evMg};
   P.evSw = -1; P.evMg = 0; return i;
 }
 const pvpEnc = i => [i.dx, i.dy, i.mx, i.my, i.l | (i.r << 1) | (i.sp << 2) | (i.q << 3) | (i.e << 4), i.sw, i.mg];

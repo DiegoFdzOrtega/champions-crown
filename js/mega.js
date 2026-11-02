@@ -173,7 +173,7 @@ function megaDraw(){                                                            
   const f = m.f, t = m.t, T = MEGA_T, I = idleInfo(f.m.dex), cx = f.x, foot = f.y + I.foot * ESCALA, topY = f.y + I.top * ESCALA, mid = (foot + topY) / 2;
   const out = t > T.flash + .2 ? Math.max(0, 1 - (t - T.flash - .2) / .7) : 1, pre = t < T.flash;
   ctx.save();
-  ctx.fillStyle = `rgba(8,5,26,${Math.min(1, t / .35) * out * .68})`; ctx.fillRect(-30, -30, W + 60, H + 60);          // el escenario se oscurece
+  ctx.fillStyle = `rgba(8,5,26,${Math.min(1, t / .35) * out * .68})`; ctx.fillRect(-3000, -3000, W + 6000, H + 6000);  // el escenario se oscurece (de sobra: en el Campo de pruebas el campo va reducido)
   ctx.globalCompositeOperation = 'lighter';
   const ramp = Math.min(1, t / T.flash) * out;
   const beam = ctx.createLinearGradient(cx - 60, 0, cx + 60, 0); beam.addColorStop(0, 'rgba(255,255,255,0)'); beam.addColorStop(.5, `rgba(255,240,255,${.5 * ramp})`); beam.addColorStop(1, 'rgba(255,255,255,0)');
@@ -244,8 +244,9 @@ function megaTop(){                                                             
 // ---- Hueco «MEGAEVOLUCIÓN» en la barra de ataques (a la derecha de los 5 ataques; se puede pulsar) ----
 // Sale cuando el Pokémon del campo lleva su Megapiedra. Tres estados: LISTA (brilla), YA USADA (otro de tu equipo ya megaevolucionó) y SIN MEGA-ARO.
 function megaBadgeRect(){                                                        // posición EN PANTALLA (mundo del juego) para el clic, igual que la barra de ataques (render.js)
-  const k = HUD_SCALE, tw = 5 * 104 + 4 * 8 + 24, x0 = (W - tw) / 2, y0 = H - 82, lx = x0 + tw + 8, ly = y0, lw = 112, lh = 72;
-  return {x: W / 2 + (lx - W / 2) * k, y: H + (ly - H) * k, w: lw * k, h: lh * k, lx, ly, lw, lh};
+  const SW = typeof prOn === 'function' && prOn() ? PR.SW : W;                   // Campo de pruebas: el HUD va con el ancho de la pantalla (js/pruebas.js)
+  const k = HUD_SCALE, tw = 5 * 104 + 4 * 8 + 24, x0 = (SW - tw) / 2, y0 = H - 82, lx = x0 + tw + 8, ly = y0, lw = 112, lh = 72;
+  return {x: SW / 2 + (lx - SW / 2) * k, y: H + (ly - H) * k, w: lw * k, h: lh * k, lx, ly, lw, lh};
 }
 function megaBadgeState(){                                                       // 'ready' | 'used' | 'noring' | null (no se enseña)
   const P = g && myMon(); if(!P || P.dead || g.over || g.mega) return null;

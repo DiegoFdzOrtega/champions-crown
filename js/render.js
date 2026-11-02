@@ -74,8 +74,13 @@ function hudIconAt(mx, my){                      // nº del cuadrito que hay en 
   for(let i = 0; i < myList().length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
   return -1;
 }
+// EQUIPO RIVAL OCULTO (Clasificatoria y Campo de pruebas): los cuadritos del rival enseñan «?» hasta que ese Pokémon sale al campo.
+// Se apunta FUERA del estado del combate (WeakSet), así no cambia la huella del combate online (js/pvp.js).
+const FOE_SEEN = new WeakSet();
+function foeHidden(){ return !!(g && ((g.pvp && typeof pvp !== 'undefined' && pvp && pvp.match && pvp.match.ranked) || (g.o && g.o.pruebas))); }
 function hud(x, y, list, idx, col){
   const f = list[idx], w = 340, r = f.hp / f.max, side = list === g.p ? 'p' : 'e', t = performance.now() / 1000;
+  const hid = list !== myList() && foeHidden(); if(list !== myList()) FOE_SEEN.add(f);       // el que está en el campo ya se ha visto
   hudBox(x, y, w, HUD_H, f.m.isMega ? hue(t * 140, .85) : col);                                           // megaevolucionado: borde arcoíris
   ctx.fillStyle = '#0a0d15'; ctx.fillRect(x+8, y+10, 56, 56);                // retrato
   ctx.strokeStyle = f.m.isMega ? hue(t * 140 + 90, .9) : col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
@@ -106,6 +111,13 @@ function hud(x, y, list, idx, col){
     const px = x + i*52, py = y + ICON_DY;
     ctx.fillStyle = 'rgba(16,20,30,.9)'; ctx.fillRect(px, py, 46, 46);
     ctx.strokeStyle = i === idx ? '#ffcc33' : 'rgba(255,255,255,.25)'; ctx.lineWidth = i === idx ? 2 : 1; ctx.strokeRect(px+.5, py+.5, 45, 45);
+    if(hid && !FOE_SEEN.has(u)){                                               // aún no ha salido: Poké Ball gris con «?»
+      ctx.fillStyle = '#2a3148'; ctx.beginPath(); ctx.arc(px+23, py+21, 13, 0, 7); ctx.fill();
+      ctx.fillStyle = '#1a2033'; ctx.beginPath(); ctx.arc(px+23, py+21, 13, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = '#10131f'; ctx.fillRect(px+10, py+20, 26, 2); ctx.beginPath(); ctx.arc(px+23, py+21, 4, 0, 7); ctx.fill();
+      text('?', px+23, py+42, 9, '#8a94b0', 'center');
+      return;
+    }
     ctx.globalAlpha = u.dead ? .35 : 1;
     drawFrame(ctx, u.m.dex, 'Idle', 0, 0, px+23, py+20, 1, 34, u.shiny);
     bar(px+4, py+37, 38, 5, u.hp, u.max, '#4ccf6a'); ctx.globalAlpha = 1;
@@ -134,19 +146,21 @@ function hud(x, y, list, idx, col){
 // Dónde cae el mundo (W × H) dentro del lienzo. Normal: lo llena entero. Combate online: arena fija PVP_W × H, centrada y sin deformar (barras oscuras a los lados si la ventana es más ancha)
 const VIEW = {sx: 1, sy: 1, ox: 0, oy: 0};
 function viewCalc(){
-  if(LOCKW){ const s = Math.min(cv.width / W, cv.height / H); VIEW.sx = VIEW.sy = s; VIEW.ox = (cv.width - W * s) / 2; VIEW.oy = (cv.height - H * s) / 2; }
+  if(LOCKW){ const vw = typeof prOn === 'function' && prOn() ? PR.SW : W, s = Math.min(cv.width / vw, cv.height / H); VIEW.sx = VIEW.sy = s; VIEW.ox = (cv.width - vw * s) / 2; VIEW.oy = (cv.height - H * s) / 2; }   // Campo de pruebas (js/pruebas.js): la pantalla mide PR.SW aunque el mundo sea más ancho
   else{ VIEW.sx = cv.width / W; VIEW.sy = cv.height / H; VIEW.ox = VIEW.oy = 0; }
 }
 function draw(){
-  const want = g && g.pvp ? PVP_W : 0;
+  const PRV = typeof prOn === 'function' && prOn(), want = PRV ? PR.W : g && g.pvp ? PVP_W : 0;      // PRV = Campo de pruebas: vista de estadio (js/pruebas.js)
   if(want !== LOCKW){ LOCKW = want; resize(); }                        // al entrar o salir de un combate online
   viewCalc();
   if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
   ctx.setTransform(VIEW.sx, 0, 0, VIEW.sy, VIEW.ox, VIEW.oy);
   ctx.clearRect(0,0,W,H);
   if(!g){ menuBg(performance.now()/1000); return; }
+  const WW = W;                                    // ancho del mundo (en el Campo de pruebas es mayor que la pantalla)
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
-  arena();
+  if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
+  else arena();
   fxhdGround();                                    // marcas en el suelo de los ataques (js/fxhd3.js)
   const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
 
@@ -162,14 +176,17 @@ function draw(){
   fxhdDraw(); fxhdEnd();                           // efectos HD: luces, golpes, carga y brillo (bloom)
   swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
   megaDraw();                                      // animación de megaevolución (js/mega.js)
-  abDrawWeather();                                 // clima (sol, lluvia, granizo, arena): js/abilities.js
+  if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
+  if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
   if(!M.dead){                                                               // cruz de puntería
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
-  g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
+  if(PRV) g.pops.forEach(p => { const [sx, sy] = prW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, sy, p.s || 9, p.c || '#ffe066', 'center'); });   // números del daño: a su sitio en la pantalla
+  else g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
 
+  if(PRV) prTopBegin();                            // Campo de pruebas: los paneles de arriba van a la escala del estadio (js/pruebas.js)
   hudAt(0, 0, () => hud(10, 10, myList(), myIdx(), '#4a8cff'));
   hudAt(W, 0, () => hud(W-350, 10, oppList(), oppIdx(), '#ff4a5a'));
   abDrawHud();                                                               // clima activo (js/abilities.js)
@@ -178,7 +195,7 @@ function draw(){
   const s = g.clock | 0;
   hudAt(W/2, 0, () => {
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
-  text(g.pvp ? 'ONLINE' : g.o.torre ? 'TORRE · PISO ' + g.o.floor : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
+  text(g.pvp ? (g.o.estadio ? 'CLASIFICATORIA' : 'ONLINE') : g.o.pruebas ? 'PRUEBAS' : g.o.torre ? 'TORRE · PISO ' + g.o.floor : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
   text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
   { ctx.font = `8px ${FONT}`; const sw = ctx.measureText(g.o.sub).width + 16; ctx.fillStyle = 'rgba(8,10,20,.62)'; ctx.fillRect(W/2 - sw/2, 64, sw, 16); }       // fondo tras el subtítulo para que se lea
   textO(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
@@ -189,11 +206,13 @@ function draw(){
     ctx.imageSmoothingEnabled = false; ctx.drawImage(L, fx0 + 26 - w/2, 34 - h/2, w, h);
   }
   });
+  if(PRV) prTopEnd();
   text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
 
   // Barra de ataques, centrada abajo
   ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
+  if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás
   const bw = 104, gap = 8, tw = 5*bw + 4*gap + 24, x0 = (W - tw)/2, y0 = H - 82;
   // Barra de energía grande, siempre visible, con las marcas de Q (20) y E (40) y el tiempo que falta
   { const ey = y0 - 38, bx = x0 + 78, bwid = tw - 78 - 12, bh = 10, by = ey + 16;
@@ -230,9 +249,11 @@ function draw(){
     }
   });
   ctx.restore();
+  if(PRV){ ctx.save(); ctx.globalAlpha = PR.barA || 1; megaHud(); ctx.restore(); } else
   megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
   megaTop();                                       // destello y cartel de la megaevolución, encima de todo
   if(g.pvp) pvpDraw();                             // combate online: avisos de conexión (js/pvp.js)
+  if(PRV){ prFront(); W = WW; }                    // Campo de pruebas: cartel de megaevolución y línea de abajo; se repone el ancho del mundo
 }
 
 let last = performance.now();

@@ -31,8 +31,8 @@ function pauseBattle(on){
   }
 }
 function exitBattle(){                                           // sale del combate sin recompensa y vuelve a la pantalla de donde venías
-  const campo = g && g.o.campo, torre = g && g.o.torre; g = null; $('pause').classList.add('hide'); Music.duck(false);
-  if(torre) openTorre(); else if(campo) openCampo(); else goStory();
+  const campo = g && g.o.campo, torre = g && g.o.torre, prb = g && g.o.pruebas; g = null; $('pause').classList.add('hide'); Music.duck(false);
+  if(prb) goMain(); else if(torre) openTorre(); else if(campo) openCampo(); else goStory();
 }
 function restartBattle(){                                        // empieza el mismo combate desde cero (misma vida, energía y rival), sin recompensa de por medio
   const o = g.o; $('pause').classList.add('hide'); Music.duck(false); startBattle(o, true);
@@ -50,6 +50,7 @@ function endBattle(won){
   if(g.pvp) return pvpEnd(won);                                 // combate online: won = ¿ganó el bando 'p'? (js/pvp.js)
   if(g.o.torre) return torreEnd(won);                          // Torre Batalla: ver torre.js
   if(g.o.campo) return campoEnd(won);                          // Campo de Entrenamiento: ver campo.js
+  if(g.o.pruebas) return prEnd(won);                           // Campo de pruebas: sin premios (js/pruebas.js)
   g.over = true;
   const o = g.o, F = FLOORS[o.n], b = document.getElementById('rBtns'); b.innerHTML = '';
   const add = (t,fn,main)=>{ const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };

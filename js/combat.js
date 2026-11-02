@@ -105,13 +105,13 @@ function move(f, dx, dy, dt, k){
   if(f.ride){                                                                  // montado en Surf: va pegado a la ola hasta que se acaba o choca
     const r = f.ride; r.t -= dt;
     if(r.t <= 0 || r.s.life <= 0 || f.dead || cant(f)) f.ride = null;
-    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); f.mv = true; return; }
+    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); if(g.o.pruebas || g.o.estadio) prClamp(f); f.mv = true; return; }
   }
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
   else if(l){ vx = dx/l*sp*k; vy = dy/l*sp*k; }
   f.mv = l > 0 || f.dash > 0;
-  f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110);
+  f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110); if(g.o.pruebas || g.o.estadio) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
 }
 
 function update(dt){
@@ -129,7 +129,7 @@ function update(dt){
   if(!P.dead && !P.ghost){                       // ghost = en pleno cambio de Pokémon: sin controles hasta que termine la animación
     const dx = (ctlHeld('right')?1:0) - (ctlHeld('left')?1:0);            // teclas configurables (Ajustes › Controles, js/controls.js)
     const dy = (ctlHeld('down')?1:0) - (ctlHeld('up')?1:0);
-    const aim = Math.atan2(mouse.y-P.y, mouse.x-P.x);
+    const mw = typeof mouseWorld === 'function' ? mouseWorld() : mouse, aim = Math.atan2(mw.y-P.y, mw.x-P.x);   // mouseWorld: en el Campo de pruebas el ratón va en la pantalla y el campo está reducido (js/pruebas.js)
     move(P, dx, dy, dt, 1); P.dir = dirOf(aim);
     if(ctlHeld('melee')) use(P,1,aim,true);
     if(ctlHeld('shot')) use(P,2,aim,true);

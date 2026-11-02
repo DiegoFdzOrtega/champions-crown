@@ -20,6 +20,7 @@ const ICONS = {
   trophy:["##########","#.######.#","#.######.#","#.######.#",".#.####.#.","...####...","....##....","....##....","..######..","..######.."],
   lock:["..####..",".#....#.",".#....#.","########","########","###..###","###..###","########"]
 };
+ICONS.pruebas = ["..####..","...##...","...##...","..#..#..",".#....#.","#.####.#","#.####.#",".######."];   // matraz: Campo de pruebas
 ICONS.ach = ICONS.trophy;                       // el botón LOGROS usa el trofeo
 const AVATAR = ["....kkkk....","...krrrrk...","..krrrrrrk..","..krrwwrrk..",".kkkkkkkkkk.",".kssssssssk.",".kskssssksk.",
                 ".kssssssssk.","..kssssssk..",".kbbbbbbbbk.","kbbbwbbwbbbk","kbbbbbbbbbbk"];
@@ -45,7 +46,8 @@ const NAV = [
   {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}` + (save.ticketsS ? ` · Variocolor: ${save.ticketsS}` : '')},
   {k:'set',     n:'AJUSTES',         c:'#9aa6b8', d:'Nombre, volumen, controles y pantalla completa.',                         f:()=>'Ajusta el juego a tu gusto'},
   {k:'rank',    n:'CLASIFICATORIA',  c:'#ffcc33', d:'Combates online contra otros jugadores por puntos: sube de Bronce a Challenger. Necesitas una cuenta.', f:()=>{ const r = save.ranked || {pts:0}, t = typeof rkTier === 'function' ? rkTier(r.pts) : null; return t ? `Rango: ${t.n} · ${r.pts} PC` : 'Combates online por puntos'; }},
-  {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'Sube piso a piso sin parar: tus Pokémon se curan en cada piso, los rivales son cada vez más fuertes y cada piso da premios. Se desbloquea al vencer a los Campeones de todas las Ligas disponibles.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : `BLOQUEADA · Ligas superadas: ${leaguesAvail().length - towerNeed()} / ${leaguesAvail().length}`, get lock(){ return !towerOpen(); }}
+  {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'Sube piso a piso sin parar: tus Pokémon se curan en cada piso, los rivales son cada vez más fuertes y cada piso da premios. Se desbloquea al vencer a los Campeones de todas las Ligas disponibles.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : `BLOQUEADA · Ligas superadas: ${leaguesAvail().length - towerNeed()} / ${leaguesAvail().length}`, get lock(){ return !towerOpen(); }},
+  {k:'pruebas', n:'CAMPO DE PRUEBAS', c:'#b06cff', d:'Zona de pruebas: combate contra la IA con la nueva vista de estadio. No da recompensas ni cambia tu progreso.', f:()=>'Vista de estadio · en pruebas'}   // js/pruebas.js
 ];
 let navIdx = 0;
 const thumbs = [], dexThumbs = [];                // miniaturas que se dibujan cuando cargan los sprites
@@ -73,7 +75,7 @@ function buildMain(){
   refreshHud();
 }
 function enter(k){
-  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), friends:openFriends, bag:openBag, set:openSettings,
+  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), pruebas:openPruebas, friends:openFriends, bag:openBag, set:openSettings,
     tower:()=>towerOpen() ? openTorre() : toast(`La Torre Batalla se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).`)})[k]();
 }
 function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)

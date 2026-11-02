@@ -100,7 +100,7 @@ function vsTint(list){
   const k = Object.keys(n).sort((x, y) => n[y] - n[x])[0];
   return k && TC[k] && n[k] >= Math.ceil(list.length / 2) ? {type: k, color: TC[k], es: (typeof TYPE_ES !== 'undefined' && TYPE_ES[k]) || k} : null;
 }
-function vsSide(cls, name, mons, setImg, shinyOf, tint, sub){
+function vsSide(cls, name, mons, setImg, shinyOf, tint, sub, hide){                                              // hide = no se enseña qué Pokémon son (Clasificatoria: «?»)
   const d = document.createElement('div'); d.className = 'vs-side ' + cls;
   d.innerHTML = `<div class="vs-bg"></div><div class="vs-pic"><img alt=""></div><div class="vs-plate"><b class="vs-name"></b><small class="vs-sub"></small></div><div class="vs-mons"></div>`;
   if(tint) d.style.setProperty('--t', tint.color);                                                                  // el fondo del rival toma el color de su tipo
@@ -111,16 +111,21 @@ function vsSide(cls, name, mons, setImg, shinyOf, tint, sub){
   mons.forEach((e, i) => {
     const dex = typeof e === 'number' ? e : e.dex, w = document.createElement('div'), c = document.createElement('canvas'); c.width = c.height = 144;
     let tc = '#fff'; try{ tc = TC[mon(dex).types[0]] || '#fff'; }catch(err){}                                          // el aro de cada Pokémon lleva el color de su tipo
+    if(hide) tc = '#8a94b0';                                                                                            // oculto: aro gris (el color del tipo daría una pista)
     w.className = 'vs-mon'; w.style.setProperty('--i', i); w.style.setProperty('--tc', tc); w.appendChild(c); box.appendChild(w);
-    cv.push({c, dex, s: shinyOf ? shinyOf(dex) : false});
+    if(hide){ const x = c.getContext('2d'), m = c.width / 2;                                                            // Poké Ball gris con «?»
+      x.fillStyle = '#2a3148'; x.beginPath(); x.arc(m, m, 46, 0, 7); x.fill(); x.fillStyle = '#1a2033'; x.beginPath(); x.arc(m, m, 46, 0, Math.PI); x.fill();
+      x.fillStyle = '#10131f'; x.fillRect(m - 46, m - 4, 92, 8); x.beginPath(); x.arc(m, m, 14, 0, 7); x.fill(); x.fillStyle = '#8a94b0'; x.beginPath(); x.arc(m, m, 8, 0, 7); x.fill();
+      x.font = `28px ${FONT}`; x.textAlign = 'center'; x.fillStyle = '#c9d6f5'; x.fillText('?', m + 38, m - 30);
+    } else cv.push({c, dex, s: shinyOf ? shinyOf(dex) : false});
   });
   return {el: d, cv};
 }
 function vsIntro(o){
   if(vsState) return;
   const me = vsSide('vs-me', trainerName(), team.slice(), el => setPlayerSkin(el), dex => useShiny(dex), null, ''),         // tu lado solo lleva tu nombre (sin el rótulo «Tu equipo»)
-        tint = vsTint(o.enemies),
-        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, o.skin ? (im => setPlayerSkin(im, o.skin, true)) : (im => vsFoeImg(im, o)), o.shinyOf || null, tint, o.sub || (tint ? 'Tipo ' + tint.es : ''));        // o.skin = el rival es otro jugador (combate online): se enseña su personaje, mirando hacia ti
+        tint = o.hideFoe ? null : vsTint(o.enemies),                                                                    // hideFoe (Clasificatoria): sin el color del tipo del rival
+        foe = vsSide('vs-foe', String(o.name || '').toUpperCase(), o.enemies, o.skin ? (im => setPlayerSkin(im, o.skin, true)) : (im => vsFoeImg(im, o)), o.shinyOf || null, tint, o.sub || (tint ? 'Tipo ' + tint.es : ''), !!o.hideFoe);        // o.skin = el rival es otro jugador (combate online): se enseña su personaje, mirando hacia ti
   const root = $('vs'); root.innerHTML = ''; foe.el.classList.toggle('mir', !!o.skin);
   const vs = document.createElement('div'); vs.className = 'vs-vs'; vs.textContent = 'VS';
   const cut = document.createElement('div'); cut.className = 'vs-cut';
