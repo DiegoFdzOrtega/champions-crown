@@ -44,7 +44,7 @@ const NAV = [
   {k:'dex',     n:'POKÉDEX',         c:'#3ea6ff', d:'Tu colección de Pokémon desbloqueados.',                                  f:()=>`Desbloqueados: ${boxCount()} / ${DEX_SHOWN}`},
   {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}` + (save.ticketsS ? ` · Variocolor: ${save.ticketsS}` : '')},
   {k:'set',     n:'AJUSTES',         c:'#9aa6b8', d:'Nombre, volumen, controles y pantalla completa.',                         f:()=>'Ajusta el juego a tu gusto'},
-  {k:'rank',    n:'CLASIFICATORIA',  c:'#6d7899', d:'Combates online contra otros jugadores por puntos: sube de Bronce a Challenger. Necesitas una cuenta.', f:()=>'PRÓXIMAMENTE', soon:true},
+  {k:'rank',    n:'CLASIFICATORIA',  c:'#ffcc33', d:'Combates online contra otros jugadores por puntos: sube de Bronce a Challenger. Necesitas una cuenta.', f:()=>{ const r = save.ranked || {pts:0}, t = typeof rkTier === 'function' ? rkTier(r.pts) : null; return t ? `Rango: ${t.n} · ${r.pts} PC` : 'Combates online por puntos'; }},
   {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'Sube piso a piso sin parar: tus Pokémon se curan en cada piso, los rivales son cada vez más fuertes y cada piso da premios. Se desbloquea al vencer a los Campeones de todas las Ligas disponibles.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : `BLOQUEADA · Ligas superadas: ${leaguesAvail().length - towerNeed()} / ${leaguesAvail().length}`, get lock(){ return !towerOpen(); }}
 ];
 let navIdx = 0;
