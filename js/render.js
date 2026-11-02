@@ -137,22 +137,11 @@ function viewCalc(){
   if(LOCKW){ const s = Math.min(cv.width / W, cv.height / H); VIEW.sx = VIEW.sy = s; VIEW.ox = (cv.width - W * s) / 2; VIEW.oy = (cv.height - H * s) / 2; }
   else{ VIEW.sx = cv.width / W; VIEW.sy = cv.height / H; VIEW.ox = VIEW.oy = 0; }
 }
-// Combate online en pantalla ancha: en vez de barras negras, el estadio se dibuja también a los lados (solo decoración, oscurecido)
-// y una línea marca dónde acaba de verdad el campo. No toca el combate: W vuelve a su valor fijo enseguida.
-function arenaSides(){
-  const s = VIEW.sx, W0 = W, id = g.o ? (g.o.arena || g.o.leader) : '';
-  try{ W = Math.ceil(cv.width / s); ctx.setTransform(s, 0, 0, s, 0, VIEW.oy); drawArena(id, g.t, (ARENA_ALIAS[id] || id) + '#ancho'); }catch(e){}
-  W = W0; ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const x0 = VIEW.ox, x1 = VIEW.ox + W * s, hh = H * s;
-  ctx.fillStyle = 'rgba(4,6,14,.5)'; ctx.fillRect(0, VIEW.oy, x0, hh); ctx.fillRect(x1, VIEW.oy, cv.width - x1, hh);
-  const gl = ctx.createLinearGradient(x0 - 18, 0, x0, 0); gl.addColorStop(0, 'rgba(0,0,0,0)'); gl.addColorStop(1, 'rgba(0,0,0,.55)'); ctx.fillStyle = gl; ctx.fillRect(x0 - 18, VIEW.oy, 18, hh);
-  const gr = ctx.createLinearGradient(x1, 0, x1 + 18, 0); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(x1, VIEW.oy, 18, hh);
-}
 function draw(){
   const want = g && g.pvp ? PVP_W : 0;
   if(want !== LOCKW){ LOCKW = want; resize(); }                        // al entrar o salir de un combate online
   viewCalc();
-  if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); if(g && VIEW.ox > 2) arenaSides(); }
+  if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
   ctx.setTransform(VIEW.sx, 0, 0, VIEW.sy, VIEW.ox, VIEW.oy);
   ctx.clearRect(0,0,W,H);
   if(!g){ menuBg(performance.now()/1000); return; }

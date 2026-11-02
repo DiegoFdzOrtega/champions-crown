@@ -392,12 +392,12 @@ function arBuild(A, w){
   if(A.side) arSides(P, w, ah, wh, A.side);
   return {c, w, data};
 }
-function drawArena(id, t, ck){                                                                                                // ck = otra caché (la versión ancha de los lados en online)
-  id = ARENA_ALIAS[id] || id; const A = ARENAS[id]; ck = ck || id;
+function drawArena(id, t){
+  id = ARENA_ALIAS[id] || id; const A = ARENAS[id];
   if(!A){ arenaFallback(); return; }
   const S = A.h ? H / A.h : AR_S;                                                                                              // tamaño de cada píxel de arte en pantalla (x3 normal; A.h = 270 → x2, más fino)
-  const w = Math.ceil(W / S) + 1; let e = arCache[ck];
-  if(!e || e.w !== w) e = arCache[ck] = arBuild(A, w);                                                                         // solo se redibuja si cambia el ancho de la ventana
+  const w = Math.ceil(W / S) + 1; let e = arCache[id];
+  if(!e || e.w !== w) e = arCache[id] = arBuild(A, w);                                                                         // solo se redibuja si cambia el ancho de la ventana
   ctx.imageSmoothingEnabled = false; ctx.drawImage(e.c, 0, 0, w * S, H);
   if(A.anim){ ctx.save(); ctx.scale(S, S); try{ A.anim(ctx, t || 0, e.data, w); }catch(err){} ctx.restore(); }                // un fallo visual nunca para el juego
   ctx.fillStyle = `rgba(6,8,16,${A.dark === undefined ? .2 : A.dark})`; ctx.fillRect(0, 0, W, H);                             // luz ambiente oscura
