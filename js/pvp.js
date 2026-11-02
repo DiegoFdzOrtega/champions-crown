@@ -20,9 +20,9 @@
    REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
    porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '3';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W)
+const PVP_VER = '4';                                    // (2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
-const PVP_DELAY = 5, PVP_DMAX = 18;                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
+const PVP_DELAY = 3, PVP_DMIN = 2, PVP_DMAX = 18, PVP_CALM = 10;     // retraso al empezar (3 pasos = 50 ms), mínimo (2 = 33 ms) y máximo; segundos yendo bien antes de bajarlo un paso                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
 // el combate solo avanza (D tuyo + D del rival) pasos cada T. Si la conexión es lenta, el combate iría a cámara lenta; por eso, si en 1 s se calculan
 // menos de 54 de los 60 pasos, cada jugador sube SU retraso un paso (hasta PVP_DMAX) y lo baja otra vez tras 40 s yendo bien (pvpFrame).
@@ -38,7 +38,7 @@ let pvp = null;                                         // estado del combate on
 function pvpRng(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function pvpHash(str){ let h = 2166136261; for(let i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function pvpSeeded(fn){ const R = Math.random; Math.random = pvp.rng; try{ return fn(); } finally{ Math.random = R; } }
-const PVP_FAST = {inp: 1, chk: 1, bye: 1};                // mensajes que también van por la conexión directa (WebRTC), si está abierta
+const PVP_FAST = {inp: 1, chk: 1, bye: 1, png: 1, pon: 1};                // mensajes que también van por la conexión directa (WebRTC), si está abierta
 function pvpSend(ev, payload){                            // siempre por el canal de Supabase; además, por la conexión directa si ya existe (gana el que llegue antes; lo repetido se ignora)
   const P = pvp; if(!P) return;
   if(P.ch){ try{ P.ch.send({type: 'broadcast', event: ev, payload}); }catch(e){} }
@@ -98,6 +98,8 @@ function pvpStart(match){
     .on('broadcast', {event: 'inp'}, m => pvpOnInp(m.payload))
     .on('broadcast', {event: 'chk'}, m => pvpOnChk(m.payload))
     .on('broadcast', {event: 'bye'}, m => pvpOnBye(m.payload))
+    .on('broadcast', {event: 'png'}, m => pvpOnPing(m.payload))
+    .on('broadcast', {event: 'pon'}, m => pvpOnPong(m.payload))
     .on('broadcast', {event: 'rtc'}, m => pvpOnRtc(m.payload))
     .subscribe(st => { if(st === 'SUBSCRIBED' && pvp && pvp.ch === ch){ pvp.subscribed = true; pvpHs(); } });
   pvp.ch = ch;
@@ -216,9 +218,10 @@ function pvpFrame(dt){
   else if(now - P.winT >= 1000){
     const rate = P.winN * 1000 / (now - P.winT); P.winT = now; P.winN = 0;
     if(rate < 54 && P.D < PVP_DMAX){ P.D++; P.calm = 0; }
-    else if(rate >= 59){ if(++P.calm >= 40 && P.D > PVP_DELAY){ P.D--; P.calm = 0; } }
+    else if(rate >= 59){ if(++P.calm >= PVP_CALM && P.D > PVP_DMIN && (!P.rtt || P.rtt / 2 < (P.D - 1) * 1000 / 60)){ P.D--; P.calm = 0; } }     // baja si va fluido y la ida del ping cabe en un paso menos
     else P.calm = 0;
   }
+  if(!P.pingT || now - P.pingT > 2000){ P.pingT = now; pvpSend('png', {from: cloud.user.id, t: now}); }   // ping: cada 2 s
   if(stepped) P.wait = 0;
   else if(P.acc >= PVP_DT){
     P.wait += dt; pvpFlush();                                                                         // esperando al rival (la conexión tarda más que el retraso): el combate sigue en cuanto llegue
@@ -302,7 +305,7 @@ function pvpRtcDc(dc){
   dc.onmessage = ev => {
     if(pvp !== P) return; let m; try{ m = JSON.parse(ev.data); }catch(e){ return; }
     if(!m || !m.p) return;
-    if(m.e === 'inp') pvpOnInp(m.p); else if(m.e === 'chk') pvpOnChk(m.p); else if(m.e === 'bye') pvpOnBye(m.p);
+    if(m.e === 'inp') pvpOnInp(m.p); else if(m.e === 'chk') pvpOnChk(m.p); else if(m.e === 'bye') pvpOnBye(m.p); else if(m.e === 'png') pvpOnPing(m.p); else if(m.e === 'pon') pvpOnPong(m.p);
   };
 }
 async function pvpOnRtc(p){
@@ -320,6 +323,10 @@ async function pvpOnRtc(p){
     }
   }catch(e){ console.warn('[pvp] rtc', e); }
 }
+// Ping real: mando la hora, el rival me la devuelve tal cual y mido cuánto ha tardado en ir y volver (se queda con el más rápido de los dos caminos)
+function pvpOnPing(p){ const P = pvp; if(!P || !p || p.from !== P.match.opp.uid || !pvpOk(p.t)) return; pvpSend('pon', {from: cloud.user.id, t: p.t}); }
+function pvpOnPong(p){ const P = pvp; if(!P || !p || p.from !== P.match.opp.uid || !pvpOk(p.t) || p.t === P.pongT) return; P.pongT = p.t;
+  const r = performance.now() - p.t; if(r >= 0 && r < 5000) P.rtt = P.rtt ? Math.round(P.rtt * .6 + r * .4) : Math.round(r); }
 function pvpOnChk(p){ const P = pvp; if(!P || !p || !pvpOk(p.t)) return; P.chkR[p.t] = p.h; P.stR[p.t] = typeof p.s === 'string' ? p.s.slice(0, 400) : ''; pvpCmp(p.t); }
 function pvpCmp(t){
   const P = pvp, a = P.chkL[t], b = P.chkR[t]; if(a === undefined || b === undefined) return;
@@ -376,6 +383,6 @@ addEventListener('pagehide', () => { if(pvp && !pvp.finished && pvp.running) pvp
 function pvpDraw(){
   const P = pvp; if(!P) return;
   if(!P.running){ textO(P.opp ? 'CARGANDO EL COMBATE...' : 'CONECTANDO...', W / 2, H / 2 + 22, 14, '#ffcc33', 'center'); return; }
-  text(`RETRASO ${Math.round(P.D * 1000 / 60)} ms · ${P.dcOk ? 'CONEXIÓN DIRECTA' : 'POR SERVIDOR'}`, 14, H - 12, 6, '#6d7899');
+  text(`PING ${P.rtt ? P.rtt + ' ms' : '...'} · RETRASO ${Math.round(P.D * 1000 / 60)} ms · ${P.dcOk ? 'CONEXIÓN DIRECTA' : 'POR SERVIDOR'}`, 14, H - 12, 6, P.rtt > 150 ? '#ff9a3a' : '#6d7899');
   if(P.wait > .5) textO(`ESPERANDO A ${pvpName().toUpperCase()}... ${Math.floor(P.wait)} s`, W / 2, H / 2 + 22, 12, '#ff9a3a', 'center');
 }

@@ -6,6 +6,14 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Online más rápido', date:'2 nov 2026', sections:[
+    {t:'Combates online', i:[
+      'El retraso de los controles en los combates online baja de 83 ms a 50 ms al empezar, y puede bajar hasta 33 ms si la conexión va bien (antes nunca bajaba de 83 ms).',
+      'Cuando la conexión va fluida, el retraso se reduce a los 10 segundos (antes, a los 40). Si va a tirones, sigue subiendo solo para que el combate no se pare.',
+      'Abajo a la izquierda ahora se ve también el PING real (lo que tarda un mensaje en ir al rival y volver). Sale en naranja si pasa de 150 ms.',
+      'Importante: los dos jugadores tenéis que tener esta versión (Ctrl+F5) para poder jugar juntos.'
+    ]}
+  ]},
   {v:'Clasificatoria', date:'2 nov 2026', sections:[
     {t:'Nuevo modo', i:[
       'Llega la Clasificatoria: combates online contra otros jugadores por puntos (PC). Pulsa «Buscar contrincante» y el juego te empareja con otro jugador que esté buscando.',
