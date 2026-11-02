@@ -61,17 +61,18 @@ function hbTips(A){
   return out.slice(0, 4);
 }
 
-// ---- Fondo: la ilustración fondos/equipo.webp (1536x1024). Su círculo mágico está en (758, 208): se coloca y se amplía la imagen para que
-// ese círculo quede justo detrás de la carta del líder (centrado con ella), sea cual sea el tamaño de la pantalla. Lo hace hbBgFit().
-const HB_BG = {w:1536, h:1024, ex:758 / 1536, ey:208 / 1024};
+// ---- Fondo: la ilustración fondos/equipo.webp (2880x1921, ampliada x4 con Upscayl). Su círculo mágico está en el 49,7 % del ancho y el 20 % del alto.
+// hbBgFit() la pone a tamaño «cubrir» (lo mínimo para llenar la pantalla, así se ve lo más nítida posible) y la desplaza para que el círculo
+// quede alineado en vertical con la carta del líder (y lo más cerca posible de ella en altura, sin dejar huecos).
+const HB_BG = {w:2880, h:1921, ex:.4967, ey:.20};
 function hbBgSvg(){ return ''; }
 function hbBgFit(){
   const hub = $('tmHub'), lead = hub && $('hbCards').querySelector('.hb-mon[data-i="0"]'); if(!lead || !hub.offsetWidth) return;
-  const H = hub.getBoundingClientRect(), L = lead.getBoundingClientRect(), W = H.width, Hh = H.height;
-  const cx = L.left + L.width / 2 - H.left, cy = L.top + L.height / 2 - H.top, B = HB_BG;
-  const s = Math.max(W / B.w, Hh / B.h, cx / (B.ex * B.w), (W - cx) / ((1 - B.ex) * B.w), cy / (B.ey * B.h), (Hh - cy) / ((1 - B.ey) * B.h));   // lo justo para cubrir la pantalla
-  hub.style.setProperty('--bgs', `${Math.ceil(B.w * s)}px ${Math.ceil(B.h * s)}px`);
-  hub.style.setProperty('--bgp', `${Math.round(cx - B.ex * B.w * s)}px ${Math.round(cy - B.ey * B.h * s)}px`);
+  const H = hub.getBoundingClientRect(), L = lead.getBoundingClientRect(), W = H.width, Hh = H.height, B = HB_BG;
+  const cx = L.left + L.width / 2 - H.left, cy = L.top + L.height / 2 - H.top;
+  const s = Math.max(W / B.w, Hh / B.h, cx / (B.ex * B.w), (W - cx) / ((1 - B.ex) * B.w));                                // cubrir + lo justo para poder centrar en horizontal
+  const px = Math.round(cx - B.ex * B.w * s), py = Math.round(Math.min(0, Math.max(Hh - B.h * s, cy - B.ey * B.h * s)));
+  hub.style.setProperty('--bgs', `${Math.ceil(B.w * s)}px ${Math.ceil(B.h * s)}px`); hub.style.setProperty('--bgp', `${px}px ${py}px`);
 }
 addEventListener('resize', () => { if(hb.built && hbOn()) hbBgFit(); });
 
