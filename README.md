@@ -1168,3 +1168,19 @@ insert into public.gifts (user_id, bp, tickets, note)
 select id, 50000, 10000, 'Regalo de Diego' from public.profiles where username ilike 'NombreDelJugador';
 ```
   Para tickets legendarios añade la columna `tickets_l`. Para ver los regalos y si ya se cobraron: `select * from public.gifts order by created_at desc;`
+
+## Clasificatoria (js/ranked.js)
+- Pantalla `#rankv` (menú › Clasificatoria): tu rango y estadísticas, tu equipo, el botón «Buscar contrincante» (radar animado mientras buscas y cartel VS con cuenta atrás al encontrar rival), la escalera de rangos y la tabla de los mejores.
+- **Rangos** (`RK_TIERS`): Bronce 0 · Plata 150 · Oro 300 · Platino 450 · Diamante 600 · Maestro 750 · Challenger 1000 PC. Emblemas en `rangos/<id>.webp` (recortados de la imagen de Gemini).
+- **Fondo:** `fondos/clasificatoria.webp` (sala con 3 pedestales y una consola). `rkFit` lo pone a pantalla completa y coloca los Pokémon, el selector de equipo, el botón y los hitos en sus sitios de la imagen (`RK_BG`, en fracciones de su ancho y alto).
+- **Hitos de Temporada** (`RK_HITOS`): ganar 5 combates = 1000 BP · 10 = 10 tickets · 20 = 3 tickets legendarios (una vez; `save.ranked.hitos`).
+- **Puntos:** +30 al ganar, −15 al perder o abandonar (nunca bajan de 0). Desconexión = no cuenta. Se guardan en `save.ranked` {pts, w, l, streak, best} y se copian a `profiles` para la tabla.
+- **Emparejamiento:** canal Realtime «ranked» con presence {name, pts, since, v}. La cola se ordena por quién llegó antes y se empareja de dos en dos; el primero de la pareja manda «found», el otro contesta «ok» y empieza el combate online normal (pvp.js) con `match.ranked = true`. Solo se emparejan jugadores con el mismo `PVP_VER`.
+- **SQL necesario para la tabla de los mejores** (Supabase › SQL Editor, una vez):
+```sql
+alter table public.profiles add column if not exists rank_pts int not null default 0, add column if not exists rank_w int not null default 0, add column if not exists rank_l int not null default 0;
+revoke update on public.profiles from authenticated;
+grant update (rank_pts, rank_w, rank_l) on public.profiles to authenticated;
+create policy "cambiar mis puntos" on public.profiles for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+```
+- Pendiente: los puntos se calculan en el navegador de cada jugador (alguien con conocimientos podría hacer trampas); más adelante se puede validar en el servidor.

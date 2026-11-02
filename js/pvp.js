@@ -344,14 +344,18 @@ function pvpFinish(iWon, why){                           // iWon: true = ganas �
   P.finished = true; P.menu = false; pvpOverlay(''); if(g) g.over = true;
   clearInterval(P.hsT);
   const opp = pvpName(), oppUid = P.match.opp.uid, sk = P.opp ? P.opp.sk : 'm';
+  const RK = P.match.ranked && iWon !== null && typeof rkResult === 'function' ? rkResult(iWon) : null;     // Clasificatoria (js/ranked.js): suma o resta puntos
   setTimeout(() => {
     if(!g || !g.pvp) return;
-    const title = iWon === null ? 'Combate cancelado' : iWon ? '¡Has ganado a ' + opp + '!' : opp + ' ha ganado', note = 'Combate online amistoso: no da recompensas ni cambia tu progreso.';
-    if(iWon) victoryScreen({title, sub: why || '', skin: sk, chips: [{t: 'COMBATE ONLINE AMISTOSO · SIN RECOMPENSAS', c: '#3ea6ff'}]});      // el mismo cartel de victoria que en la Historia (js/victoria.js), con el personaje del rival
-    else{ resultClear(); document.getElementById('rTitle').textContent = title; document.getElementById('rText').textContent = why || note; }
+    const title = iWon === null ? 'Combate cancelado' : iWon ? '¡Has ganado a ' + opp + '!' : opp + ' ha ganado';
+    const note = RK ? 'Clasificatoria: ' + RK.text : P.match.ranked ? 'Clasificatoria: el combate no cuenta.' : 'Combate online amistoso: no da recompensas ni cambia tu progreso.';
+    const chip = RK ? {t: 'CLASIFICATORIA · ' + RK.text.toUpperCase(), c: RK.tier.c} : {t: 'COMBATE ONLINE AMISTOSO · SIN RECOMPENSAS', c: '#3ea6ff'};
+    if(iWon) victoryScreen({title, sub: why || '', skin: sk, chips: [chip]});      // el mismo cartel de victoria que en la Historia (js/victoria.js), con el personaje del rival
+    else{ resultClear(); document.getElementById('rTitle').textContent = title; document.getElementById('rText').textContent = (why ? why + ' ' : '') + note; }
     const b = document.getElementById('rBtns'); b.innerHTML = '';
     const add = (t, fn, main) => { const x = document.createElement('button'); x.textContent = t; if(main) x.className = 'main'; x.onclick = fn; b.appendChild(x); };
-    add('Revancha', () => { pvpLeave(); g = null; goMain(); const err = cloudChallenge({uid: oppUid, name: opp}); if(err && typeof toast === 'function') toast(err); }, true);
+    if(P.match.ranked) add('Buscar otro rival', () => { pvpLeave(); g = null; openRanked(true); }, true);
+    else add('Revancha', () => { pvpLeave(); g = null; goMain(); const err = cloudChallenge({uid: oppUid, name: opp}); if(err && typeof toast === 'function') toast(err); }, true);
     add('Menú', () => { pvpLeave(); g = null; goMain(); });
     show('result'); if(typeof Sfx !== 'undefined') Sfx.play(iWon ? 'win' : 'lose');
   }, iWon === null ? 300 : 1200);

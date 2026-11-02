@@ -124,7 +124,7 @@ function removeMon(dex){                                                        
   team = team.filter(x => x !== dex); delete save.equip[dex]; if(tm.selD === dex) tm.selD = team[0]; persist(); renderTeamSlots();
 }
 function openPick(){ const q = $('pcQ'); if(q) q.focus(); }                                      // (compatibilidad) lleva al buscador de la caja
-function closeTeam(){ closeData(true); closeDd(); slotDragEnd(true); teamBgStop(); tm.from === 'shop' ? openShop() : tm.from === 'story' ? goStory() : tm.from === 'campo' ? openCampo() : tm.from === 'torre' ? openTorre() : goMain(); }
+function closeTeam(){ closeData(true); closeDd(); slotDragEnd(true); teamBgStop(); tm.from === 'shop' ? openShop() : tm.from === 'story' ? goStory() : tm.from === 'campo' ? openCampo() : tm.from === 'torre' ? openTorre() : tm.from === 'rank' ? openRanked() : goMain(); }
 // Esc cierra primero lo de arriba (desplegable, ficha «Ver datos») y por último la pantalla del equipo
 addEventListener('keydown', e => {
   if(e.code !== 'Escape' || !tm.built || $('teamv').classList.contains('hide')) return;
@@ -442,7 +442,7 @@ function markBox(){                                                             
 
 function openTeam(from){                                                                          // from = 'shop' (Tienda), 'story' (Historia) o 'campo' (Campo de Entrenamiento): al cerrar se vuelve a esa pantalla
   if(!tm.built) buildTeamShell();
-  tm.from = from === 'shop' || from === 'story' || from === 'campo' || from === 'torre' ? from : '';
+  tm.from = from === 'shop' || from === 'story' || from === 'campo' || from === 'torre' || from === 'rank' ? from : '';
   const tv = $('teamv'); tv.classList.remove('casa', 'lista'); tv.classList.add('pcv');
   $('tmData').classList.add('hide'); closeDd();
   tm.selD = team[0] || null; tm.selSlot = null;

@@ -6,6 +6,16 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Clasificatoria', date:'2 nov 2026', sections:[
+    {t:'Nuevo modo', i:[
+      'Llega la Clasificatoria: combates online contra otros jugadores por puntos (PC). Pulsa «Buscar contrincante» y el juego te empareja con otro jugador que esté buscando.',
+      '7 rangos con su emblema: Bronce (0), Plata (150), Oro (300), Platino (450), Diamante (600), Maestro (750) y Challenger (1000 PC).',
+      'Ganar da +30 PC y perder resta 15 PC. Abandonar cuenta como derrota; si se corta la conexión, el combate no cuenta.',
+      'Tu rango, victorias, derrotas, racha y mejor puntuación se ven en la pantalla, junto a la tabla de los mejores jugadores. Necesitas una cuenta.',
+      'La pantalla es una sala de combate: tus 3 Pokémon salen sobre los pedestales y el botón «Buscar contrincante» está en la consola.',
+      'Hitos de Temporada: gana 5 combates (1000 BP), 10 combates (10 tickets) y 20 combates (3 tickets legendarios).'
+    ]}
+  ]},
   {v:'Logros de Alola', date:'1 nov 2026', sections:[
     {t:'Logros', i:[
       'Cuatro logros nuevos: Líderes de Alola (700 BP + 7 tickets), Alto Mando de Alola (600 BP + 5 tickets), Campeón de Alola (1400 BP + 14 tickets, con título y marco «Alola») y Maestro de siete Ligas (7000 BP + 40 tickets, con título y marco «Atardecer»).'
