@@ -6,6 +6,14 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Logros de Alola', date:'1 nov 2026', sections:[
+    {t:'Logros', i:[
+      'Cuatro logros nuevos: Líderes de Alola (700 BP + 7 tickets), Alto Mando de Alola (600 BP + 5 tickets), Campeón de Alola (1400 BP + 14 tickets, con título y marco «Alola») y Maestro de siete Ligas (7000 BP + 40 tickets, con título y marco «Atardecer»).'
+    ]}
+  ]},
+  {v:'Arreglo del Cazabichos', date:'1 nov 2026', sections:[
+    {t:'Campo de entrenamiento', i:['Arreglado: el Cazabichos no salía en el Campo de Entrenamiento (el juego buscaba una imagen con otro nombre). Ya aparece con su sprite.']}
+  ]},
   {v:'Fondos de tarjeta de Alola', date:'1 nov 2026', sections:[
     {t:'Perfil', i:[
       'Diez fondos nuevos para tu tarjeta de entrenador, de Alola: Prueba de Lana, Prueba de Sophocles, Prueba de Acerola (se consigue con la líder o con la del Alto Mando), Prueba de Mina, Poblado Iki y Ring de lucha junto al mar (Hala), Alto Mando: Olivia y Ruinas de Alola (Olivia), Alto Mando: Kahili y Monte Lanakila (Kukui).',

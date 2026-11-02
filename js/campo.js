@@ -32,7 +32,7 @@ function campoStats(T){
 
 const CAMPO = [
   // ===================== DIFICULTAD 1 · FÁCIL (3 Pokémon) =====================
-  {id:'cafetero', file:'cafemaster.png', name:'Maestro Cafetero', cls:'Maestro Café', theme:'Dulces y lácteos de cafetería', tier:1, arena:'erika', team:[
+  {id:'cafetero', file:'cafemaster.png', name:'Maestro Cafetero', cls:'Maestro Café', theme:'Dulces y lácteos de cafetería', tier:1, arena:'campo_prueba', team:[
     P(685, 'Modesta', 'Velo Dulce',     'gafaselec', {spa:252, spe:252, hp:4}, ['Carantoña',     'Voz Cautivadora', 'Campo Neblinoso', 'Fuerza Lunar']),    // Slurpuff: nata y caramelo
     P(584, 'Miedosa', 'Manto Níveo',    'gafasesp',  {spa:252, spe:252, hp:4}, ['Colmillo Hielo','Rayo Hielo',      'Neblina',         'Ventisca']),        // Vanilluxe: helado
     P( 40, 'Modesta', 'Competitivo',    'restos',    {hp:252, spa:252, def:4}, ['Golpe Cuerpo',  'Voz Cautivadora', 'Paz Mental',      'Fuerza Lunar'])     // Wigglytuff: algodón de azúcar (antes Blissey, demasiado dura para el nivel fácil)
@@ -77,7 +77,7 @@ const CAMPO = [
     P(398, 'Alegre',  'Intimidación',   'vidasfera', {atk:252, spe:252, hp:4}, ['Ataque Ala',   'Doble Filo',      'Danza Espada',    'Pájaro Osado']),    // Staraptor: el lanzamiento
     P(257, 'Alegre',  'Mar Llamas',     'periscopio',{atk:252, spe:252, hp:4}, ['Colmillo Ígneo','Esfera Aural',   'Danza Espada',    'Envite Ígneo'])     // Blaziken: el bateador
   ]},
-  {id:'cazabichos', file:'bugcatcher.png', opt:true, name:'Cazabichos', cls:'Cazabichos', theme:'Insectos', tier:1, arena:'erika', team:[
+  {id:'cazabichos', file:'cazabichos.png', opt:true, name:'Cazabichos', cls:'Cazabichos', theme:'Insectos', tier:1, arena:'erika', team:[
     P(212, 'Firme',   'Experto',        'cinturon',  {hp:252, atk:252, def:4}, ['Tijera X',     'Bomba Imán',      'Danza Espada',    'Megacuerno']),      // Scizor
     P( 12, 'Modesta', 'Ojo Compuesto',  'gafasesp',  {spa:252, spe:252, hp:4}, ['Ataque Ala',   'Zumbido',         'Danza Aleteo',    'Psíquico']),        // Butterfree
     P(469, 'Modesta', 'Cromolente',     'gafaselec', {spa:252, spe:252, hp:4}, ['Ataque Ala',   'Zumbido',         'Danza Aleteo',    'Megacuerno'])       // Yanmega
@@ -215,7 +215,7 @@ function campoFight(id){
   const T = campoById(id), S = campoStats(T);
   if(!campoOpen(T.tier)){ toast('Esta dificultad está bloqueada: supera antes la anterior.'); return; }
   const o = {
-    campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:'campo', portrait:'entrenadores/' + T.file,
+    campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:T.arena === 'campo_prueba' ? 'campo_prueba' : 'campo',     /* PRUEBA: el Maestro Cafetero usa el campo nuevo */ portrait:'entrenadores/' + T.file,
     title:'CAMPO DE ENTRENAMIENTO', sub:`${T.name.toUpperCase()} · ${CAMPO_TIER[T.tier].nombre.toUpperCase()}`,
     enemies:T.team, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
   };

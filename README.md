@@ -243,7 +243,7 @@ Zona para **farmear Chapas**. Se abre desde el menú principal (segundo botón).
 - **Equipos competitivos:** todos con IV 31 (los pone `P()`), EVs coherentes con el papel (atacante físico = Ataque + Velocidad, especial = At. Esp. + Velocidad, tanque = PS + Defensa; máx 252 por stat y 510 en total), naturaleza que sube lo que usan y objeto que encaja (Restos, Vidasfera, Cinta/Gafas Elección, Banda Aguante, Cinturón de Experto...). Se comprueba al cargar (`validateTeams()` ahora revisa también el Campo; 6 Pokémon en los líderes y 3-4 en el Campo). El «Mineral Evolutivo» no existe en este juego, así que no se usa (el juego solo tiene los 16 objetos de ITEMS).
 - **Fondo:** cada entrenador usa el estadio de su tema (`arena`: Montañero → Brock, Marinero/Surfista/Pescador → Misty, Médium/Jugador/Li → Sabrina...). Su retrato sale en el marcador del combate (`portrait`).
 - **Entrenadores nuevos de Difícil:** Ocultista (Gengar, Mismagius, Chandelure, Dusknoir) · Ivor (Conkeldurr, Infernape, Lucario, Annihilape: llevan los **puños** Hielo, Fuego, Trueno y Sombra) · Maestro Kamado (Coalossal, Typhlosion, Volcarona, Magmortar) · Chica Kimono (Milotic, Gardevoir, Lilligant, Ninetales) · Veterano (Charizard, Blastoise, Venusaur, Arcanine). (Palmer y el Duque Wikstrom se quitaron del Campo; sus imágenes siguen en `entrenadores/` por si se reutilizan.) Sus ataques de partida son de especies que de verdad pueden aprenderlos (salvo el golpe de Chandelure, que no tiene ninguno disponible).
-- **Añadir un entrenador:** copia una entrada de `CAMPO`, cambia sus datos y pon su imagen en `entrenadores/`. Ya hay una entrada para el **Cazabichos** (`bugcatcher.png`, marcada `opt:true`): solo aparece cuando existe esa imagen.
+- **Añadir un entrenador:** copia una entrada de `CAMPO`, cambia sus datos y pon su imagen en `entrenadores/`. Ya hay una entrada para el **Cazabichos** (`cazabichos.png`, marcada `opt:true`): solo aparece cuando existe esa imagen.
 
 ## Campo de Entrenamiento rediseñado (js/campo.js `openCampo`/`renderCampo`, final de css/style.css)
 - **Banner verde** (césped) con el título, la recompensa de cada victoria en iconos (×1 tirada y los BP y las chapas de la dificultad que estés viendo; cambia al pulsar cada pestaña), tus Chapas Plateadas y Doradas con icono y el botón «Equipo Pokémon →».
@@ -466,7 +466,7 @@ Teselia usa **el mismo sistema que las demás Ligas** (`FLOORS` con `region:'Uno
 - **Música:** `musica/Alola/` (Combate Lideres = SM 068, Combate Alto Mando = SM 150, Combate Campeon = SM 151, Victoria Lideres = SM 069 y Victoria Campeon = SM 152, reducidas a 96 kbps desde `musica/Musica2/Alola/`). Pistas `lider_alola`, `alto_alola`, `campeon_kukui` y sus temas de victoria en music.js; la SM 059 «Victory!» no se usa.
 - **Estadios (js/arenasalola.js)**: un fondo por combate, con el id del combate (ilima, lana, kiawe, mallow, sophocles, acerola, mina, hala, olivia, acerola_am, kahili, kukui): mansión de Hau'oli, Colina Arroyuelo, Parque Volcán Wela, Selva Frondosa, Observatorio Hokulani, Ahorra Mucho (y su trastienda en acerola_am), Aldea Marina, Poblado Iki, Ruinas de la Vida, alturas de Alola y Estadio Manalo. Mismo sistema que Kalos (centro del suelo libre, animaciones en `anim`). Ayudantes nuevos: `arPalm`, `arFrond`, `arTxt` (letras 3x5), `arDeck` (tablas largas), `arWave`. Se carga después de arenaskalos.js.
 - **Tarjetas de fondo (js/cardbg.js)**: 10 fondos de Alola (Lana, Sophocles, Acerola —también con la del Alto Mando—, Mina, Hala ×2, Olivia ×2, Kahili y Kukui), sacados de las ilustraciones de Pokémon Masters (`Locations`: shizui, mamane, acerola, matsurika, hau, maximum, litchi, hapu, kahiri, kukui). Faltan Ilima, Kiawe y Mallow (no hay ilustración). Para añadir más: WebP 512x512 en fondos/tarjeta/ y miniatura 128x128 en fondos/tarjeta/mini/.
-- **Pendiente:** logros de Alola.
+- **Logros (js/achievements.js):** lideres_alola, alto_alola, campeon_alola y siete_campeon (color naranja, marcos `alola` y `atardecer` en css/style.css).
 - **La Torre Batalla** pide ahora vencer a los Campeones de 7 Ligas (`leaguesAvail` cuenta las regiones con combates): se cierra hasta ganar Alola.
 
 ## Historia de Kalos (js/kalos.js, js/arenaskalos.js)
@@ -639,6 +639,8 @@ Campos: `metric` = qué se cuenta (`leaders`, `elite`, `champion`, `campo_wins`,
 | **Mega-Aro** | Ser Campeón de Teselia (entrega el Mega-Aro al completarlo) | 1000 BP + 10 tickets + Mega-Aro |
 | Líderes / Alto Mando / Campeona de Kalos | Los 8 gimnasios · los 4 del Alto Mando · vencer a Dianta | 600 BP + 6 · 500 BP + 4 · 1200 BP + 12 (tickets) |
 | Maestro de seis Ligas | Campeón de Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos | 6000 BP + 35 tickets |
+| Líderes / Alto Mando / Campeón de Alola | Los 7 líderes · los 4 del Alto Mando · vencer a Kukui (marco «Alola» y título) | 700 BP + 7 · 600 BP + 5 · 1400 BP + 14 (tickets) |
+| Maestro de siete Ligas | Campeón de las siete Ligas (marco «Atardecer» y título) | 7000 BP + 40 tickets |
 | Campo: 1 / 10 / 25 / 50 / 100 victorias | Vencer entrenadores del Campo | 50 · 200 · 300 + 2 · 500 + 5 · 1000 + 10 (BP + tickets) |
 | Campo: Fácil / Media / Difícil superada | Vencer a todos los de esa dificultad | 300 · 500 + 3 · 800 + 6 (BP + tickets) |
 | Colección: 10 / 25 / 50 / 100 / 250 Pokémon | Pokémon diferentes | 100 · 200 + 1 · 300 + 3 · 600 + 5 · 1500 + 15 (BP + tickets) |

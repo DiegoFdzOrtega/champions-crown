@@ -24,6 +24,44 @@ function arBall(P, x, y, s){                                       // Poké Ball
 
 Object.assign(ARENAS, {
 
+  // ---- PRUEBA (Maestro Cafetero): campo de fútbol visto desde arriba, más fino (píxel x2 en vez de x3) y más grande ----
+  // Franjas de césped verticales, líneas discontinuas (borde, línea del medio, círculo central) y dos áreas con tierra donde empieza cada Pokémon.
+  campo_prueba: {dark: .04, h: 270, wall: 40,
+    build(P, w, h, WH){
+      const mx = Math.round(w / 2);
+      for(let y = 0; y < 12; y++) P.rect(arMix('#4f9fe6', '#c4e6fa', y / 12), 0, y, w, 1);                                       // cielo
+      for(let x = 0; x < w; x += 2){ const hh = 2 + Math.round(Math.sin(x * .17) * 1.5 + Math.sin(x * .05) * 2 + 2); P.rect(x % 6 < 2 ? '#2f7a3a' : '#2a6a34', x, 12 - hh, 2, hh); }
+      const shirts = ['#d8352b', '#2b6bd8', '#f0c42a', '#f4f4f4', '#3aa84a', '#8a44c8', '#f08a2a'], skins = ['#f1c8a0', '#d89a6a', '#a8683a'], fans = [];
+      for(let r = 0; r < 4; r++){ const y = 12 + r * 5;                                                                            // grada con público
+        P.rect(r & 1 ? '#7d8392' : '#868c9b', 0, y, w, 5); P.alpha('#ffffff', .2, 0, y, w, 1);
+        for(let x = 1 + (r % 2) * 2; x < w - 3; x += 4){ if(P.r() < .15) continue; P.rect(shirts[(P.r() * 7) | 0], x, y + 3, 3, 2); P.rect(skins[(P.r() * 3) | 0], x + 1, y + 1, 1, 2); if(P.r() < .2) fans.push([x, y]); } }
+      P.rect('#1b3a82', 0, WH - 8, w, 7); for(let x = 0, k = 0; x < w; x += 24, k++){ P.rect(['#2358b8', '#c8302a', '#e8b82a'][k % 3], x + 1, WH - 7, 22, 5); arBall(P, x + 10, WH - 7, 5); }   // vallas
+      P.rect('#9a9eaa', 0, WH - 1, w, 1);
+      const sw = Math.max(20, Math.round(w / 16));                                                                                 // césped en franjas verticales
+      for(let x = 0, i = 0; x < w; x += sw, i++) P.rect(i & 1 ? '#3a873b' : '#43954a', x, WH, sw, h - WH);
+      arSpeck(P, 0, WH, w, h - WH, 2600, ['#4ea455', '#33783a', '#479c4c', '#3c8a40', '#2e6e34']);
+      const line = (x, y) => P.alpha('#eef6e8', .85, x, y, 1, 1);
+      const dashH = (x0, x1, y) => { for(let x = x0; x <= x1; x++) if(((x - x0) % 7) < 4) line(x, y); };
+      const dashV = (x, y0, y1) => { for(let y = y0; y <= y1; y++) if(((y - y0) % 7) < 4) line(x, y); };
+      const dashC = (cx, cy, r) => { const n = Math.round(r * 6.283); for(let k = 0; k < n; k++){ if((k % 7) >= 4) continue; const a = k / r; line(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r)); } };
+      const x0 = 10, x1 = w - 11, y0 = WH + 8, y1 = h - 7, cy = Math.round((y0 + y1) / 2);
+      dashH(x0, x1, y0); dashH(x0, x1, y1); dashV(x0, y0, y1); dashV(x1, y0, y1);                                                // borde del campo
+      dashV(mx, y0, y1); dashC(mx, cy, 50); dashC(mx, cy, 9);                                                                      // línea del medio y círculos
+      const sy = Math.round((H / 2 + 10) / (H / h));                                                                               // donde empiezan los Pokémon (W/4 y 3W/4, mitad de alto)
+      [Math.round(w * .25), Math.round(w * .75)].forEach(bx => {
+        for(let i = 0; i < 260; i++){ const a = P.r() * 6.283, d = Math.sqrt(P.r()), rx = 15 * d + (P.r() * 3), ry = 10 * d + (P.r() * 2);
+          P.alpha(['#9a6a3e', '#b07a48', '#8a5a32', '#c08a58'][(P.r() * 4) | 0], .9, Math.round(bx + Math.cos(a) * rx), Math.round(sy + 6 + Math.sin(a) * ry), 2, 2); }   // tierra pisada
+        dashH(bx - 30, bx + 30, sy - 16); dashH(bx - 30, bx + 30, sy + 28); dashV(bx - 30, sy - 16, sy + 28); dashV(bx + 30, sy - 16, sy + 28); });   // área
+      [0, w - 4].forEach((x, i) => { P.rect('#b8bcc4', x, WH, 4, h - WH); P.alpha('#000000', .3, i ? x : x + 3, WH, 1, h - WH); });  // muro lateral gris
+      P.rect('#b8bcc4', 0, h - 3, w, 3); P.alpha('#ffffff', .3, 0, h - 3, w, 1);
+      arOcclude(P, w, WH);
+      return {fans};
+    },
+    anim(c, t, d, w){
+      for(let i = 0; i < 4; i++){ const x = ((t * (4 + i * 1.5) + i * 120) % (w + 40)) - 20; arCloud(c, x, (i % 2) * 2, .3, .75); }
+      d.fans.forEach(([x, y], i) => { const up = Math.sin(t * 5 + i * 1.7) > 0; c.fillStyle = '#f1c8a0'; c.fillRect(x + (i & 1 ? 0 : 2), y - (up ? 1 : 0), 1, up ? 3 : 2); });
+    }},
+
   // ---- Campo de Entrenamiento: estadio de entrenamiento de día, con césped, público y material de entrenamiento ----
   campo: {dark: .06,
     build(P, w, h, WH){

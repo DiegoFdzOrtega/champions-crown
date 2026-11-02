@@ -66,7 +66,11 @@ const ACHIEVEMENT_DATA = [
   {"id":"lideres_kalos",    "cat":"historia", "name":"Líderes de Kalos",   "desc":"Derrota a los 8 Líderes de Gimnasio de Kalos.",                "icon":"story",  "metric":"leaders",  "region":"Kalos", "goal":8, "reward":{"bp":600, "tickets":6}},
   {"id":"alto_kalos",      "cat":"historia", "name":"Alto Mando de Kalos","desc":"Derrota a los 4 miembros del Alto Mando de Kalos.",            "icon":"tower",  "metric":"elite",    "region":"Kalos", "goal":4, "reward":{"bp":500, "tickets":4}},
   {"id":"campeon_kalos",   "cat":"historia", "name":"Campeona de Kalos",  "desc":"Derrota a Dianta y conviértete en la Campeona de Kalos.",       "icon":"trophy", "metric":"champion", "region":"Kalos", "goal":1, "reward":{"title":"Campeona de Kalos", "frame":"kalos", "bp":1200,"tickets":12}},
+  {"id":"lideres_alola",    "cat":"historia", "name":"Líderes de Alola",   "desc":"Derrota a los 7 Líderes de las pruebas de Alola.",             "icon":"story",  "metric":"leaders",  "region":"Alola", "goal":7, "reward":{"bp":700, "tickets":7}},
+  {"id":"alto_alola",      "cat":"historia", "name":"Alto Mando de Alola","desc":"Derrota a los 4 miembros del Alto Mando de Alola.",            "icon":"tower",  "metric":"elite",    "region":"Alola", "goal":4, "reward":{"bp":600, "tickets":5}},
+  {"id":"campeon_alola",   "cat":"historia", "name":"Campeón de Alola",   "desc":"Derrota al Profesor Kukui y conviértete en el Campeón de Alola.","icon":"trophy", "metric":"champion", "region":"Alola", "goal":1, "reward":{"title":"Campeón de Alola", "frame":"alola", "bp":1400,"tickets":14}},
   {"id":"seis_campeon",    "cat":"historia", "name":"Maestro de seis Ligas","desc":"Sé el Campeón de las seis Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos.","icon":"trophy", "metric":"champion", "goal":6,  "reward":{"title":"Maestro de las seis Ligas", "frame":"arcoiris", "bp":6000, "tickets":35}},
+  {"id":"siete_campeon",   "cat":"historia", "name":"Maestro de siete Ligas","desc":"Sé el Campeón de las siete Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos y Alola.","icon":"trophy", "metric":"champion", "goal":7,  "reward":{"title":"Maestro de las siete Ligas", "frame":"atardecer", "bp":7000, "tickets":40}},
 
   // ---------- CAMPO DE ENTRENAMIENTO ----------
   {"id":"campo_1",         "cat":"campo",    "name":"Primer entrenamiento","desc":"Vence a un entrenador del Campo de Entrenamiento.",           "icon":"campo",  "metric":"campo_wins", "goal":1,   "reward":{"bp":50,   "tickets":0}},
@@ -208,7 +212,7 @@ setTimeout(() => achSync(), 900);                                               
 // ---- Pantalla ----
 // Lista compacta: una fila por logro (medalla pequeña, nombre y descripción, barra, recompensa y botón). Pestañas por categoría, los listos arriba del todo
 // y los logros secretos como «???» hasta que los consigues. La medalla de cada logro se dibuja por código (achMedal), sin imágenes.
-const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8'};   // color de cada región
+const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8', Alola:'#ffa23a'};   // color de cada región
 const ACH_REG_NAME = {'Unova / Teselia':'Teselia'};                                          // cómo se escribe el grupo en pantalla
 const ACH_GROUP = {primer_gimnasio:'Primeros pasos', mega_aro:'Unova / Teselia'};            // logros que van a un grupo concreto (si no, se agrupan por región o por métrica)
 const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['coleccion', 'Colección'], ['entrenadores', 'Entrenadores'], ['secreto', 'Secretos']];
@@ -216,7 +220,7 @@ let achTab = 'all', achHideDone = false; const achJust = new Set();             
 
 // ---- Marcos de avatar y títulos de perfil: son recompensas especiales de algunos logros (reward.frame / reward.title) y se eligen en Perfil ----
 const ACH_FRAMES = {bronce:{n:'Bronce', c:'#cd7f32'}, plata:{n:'Plata', c:'#d5dcec'}, oro:{n:'Oro', c:'#ffcc33'}, kanto:{n:'Kanto', c:'#e23b3b'}, johto:{n:'Johto', c:'#f0b429'},
-  hoenn:{n:'Hoenn', c:'#2bb3a3'}, sinnoh:{n:'Sinnoh', c:'#7b8cff'}, teselia:{n:'Teselia', c:'#b4bdd2'}, kalos:{n:'Kalos', c:'#ff7ab8'}, campo:{n:'Campo', c:'#4ccf6a'},
+  hoenn:{n:'Hoenn', c:'#2bb3a3'}, sinnoh:{n:'Sinnoh', c:'#7b8cff'}, teselia:{n:'Teselia', c:'#b4bdd2'}, kalos:{n:'Kalos', c:'#ff7ab8'}, alola:{n:'Alola', c:'#ffa23a'}, atardecer:{n:'Atardecer', c:'#ffa23a'}, campo:{n:'Campo', c:'#4ccf6a'},
   brillo:{n:'Brillo', c:'#ffe26a'}, arcoiris:{n:'Arcoíris', c:'#ff7ad9'}, mewtwo:{n:'Mewtwo shiny', c:'#4af0a8'}};                  // el aspecto de cada uno está en css/style.css (.av.fr-<id>)
 const achFramesUnlocked = () => Object.keys(ACH_FRAMES).filter(f => ACHIEVEMENTS.some(a => a.reward && a.reward.frame === f && achGet(a.id).claimed));
 const achTitlesUnlocked = () => ACHIEVEMENTS.filter(a => a.reward && a.reward.title && achGet(a.id).claimed).map(a => ({id:a.id, text:a.reward.title}));
