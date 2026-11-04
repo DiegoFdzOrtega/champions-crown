@@ -52,7 +52,7 @@ function enemyBasic(E, P, dt){
     if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
   }
 }
-const aiReach = T => 90 + rad(T);                          // alcance real del golpe cuerpo a cuerpo (igual que en melee(), combat.js)
+const aiReach = T => MELEE.reach + rad(T);                          // alcance real del golpe cuerpo a cuerpo (igual que en melee(), combat.js)
 
 function aiStyle(E){
   if(E.style) return E.style;

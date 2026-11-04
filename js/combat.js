@@ -58,11 +58,14 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
   else if(mult > 0) setAct(T, 'Hurt', .3);
   abAfter(T, A, dealt, type, close, crit, big);                                                       // habilidades: efectos al contacto, venganzas, Autoestima...
 }
+// GOLPE CUERPO A CUERPO: alcance (además del tamaño del rival) y ángulo de acierto a cada lado de donde apuntas (en radianes; 1,3 ≈ 75°).
+// Antes era 90 y 1 (≈57°): costaba mucho acertar. La IA usa el mismo alcance (ai.js) y el online también (PVP_VER sube al cambiarlo).
+const MELEE = {reach:115, arc:1.3};
 function melee(f, ang, dmg, type, mine, mvn){
   const T = foe(mine), dx = T.x-f.x, dy = T.y-f.y;
-  if(T.dead || T.ghost || Math.hypot(dx,dy) > 90 + rad(T)) return;
+  if(T.dead || T.ghost || Math.hypot(dx,dy) > MELEE.reach + rad(T)) return;
   let d = Math.abs(Math.atan2(dy,dx) - ang); d = Math.min(d, 2*Math.PI - d);
-  if(d < 1) hit(T, dmg, type, f, true, false, mvn);
+  if(d < MELEE.arc) hit(T, dmg, type, f, true, false, mvn);
 }
 function shot(f, ang, dmg, speed, r, type, mine){
   const s = {x:f.x, y:f.y, vx:Math.cos(ang)*speed, vy:Math.sin(ang)*speed, dmg, r, type, mine, life:2, o:f, t0:g.t, acc:0};
