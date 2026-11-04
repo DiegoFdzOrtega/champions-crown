@@ -72,7 +72,7 @@ function ctlReset(){ save.controls = {}; persist(); }
 // ---------------------------------------------------------------------
 function ctlSettingsHtml(){
   return `<h2>Controles</h2>
-    <p class="help">Pulsa un recuadro y luego la tecla o el botón del ratón que quieras. <b>Esc</b> cancela y <b>Retroceso</b> lo deja vacío. Cada acción tiene dos huecos. (El clic izquierdo no se puede elegir al asignar; vuelve con «Restablecer».)</p>
+    <p class="help">Pulsa una tecla de la lista y después la tecla o el botón del ratón que quieras. <b>Esc</b> cancela y <b>Retroceso</b> la deja vacía. El clic izquierdo solo vuelve con «Restablecer».</p>
     <div id="ctlGrid">${CTL_ACTIONS.map(a => `<span class="ctlN">${a.n}</span>` + [0, 1].map(s => `<button class="ctlB" data-a="${a.id}" data-s="${s}"></button>`).join('')).join('')}</div>
     <div class="cbtns"><button id="ctlReset">Restablecer controles</button></div>`;
 }

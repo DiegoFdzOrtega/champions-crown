@@ -62,7 +62,7 @@ async function loadAvatars(){
 }
 
 // ---- Barra de usuario: avatar + nombre + migas de pan "Perfil › Logros › Amigos › Mochila" ----
-const CRUMBS = [['profile', 'Perfil'], ['ach', 'Logros'], ['friends', 'Amigos'], ['bag', 'Mochila']];
+const CRUMBS = [['profile', 'Perfil'], ['account', 'Cuenta'], ['ach', 'Logros'], ['friends', 'Amigos'], ['bag', 'Mochila']];      // Cuenta: js/cloudui.js (openAccount)
 const crumbsHtml = active => `<nav class="crumbs" aria-label="Secciones del jugador">` +
   CRUMBS.map(([k, n]) => `<button type="button" data-crumb="${k}"${k === active ? ' class="on" aria-current="page"' : ''}>${n}${k === 'ach' && typeof achReadyCount === 'function' && achReadyCount() ? `<em class="bdg">${achReadyCount()}</em>` : ''}</button>`).join('<i>›</i>') + '</nav>';
 const userBar = active => `<div class="ubar"><img class="av" alt="Avatar"><span class="uwho"><b class="uname">${esc(trainerName())}</b></span>${crumbsHtml(active)}</div>`;

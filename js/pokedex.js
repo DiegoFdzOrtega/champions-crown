@@ -54,7 +54,7 @@ function dexList(){
 // ---- Estructura de la pantalla (se crea una sola vez) ----
 function buildDexShell(){
   $('dexv').innerHTML = `<div class="dx">
-    <header class="dxh"><button id="dxBack">← Menú</button><h1>Pokédex</h1><span id="dxTotal"></span></header>
+    <header class="dxh"><button id="dxBack">← Menú</button><h1>Pokédex</h1><div id="dxTotal" class="dxprog"></div></header>
     <div class="dxc">
       <section class="dxl">
         <div id="dxTabs" class="tabs"></div>
@@ -79,6 +79,8 @@ function buildDexShell(){
     if(b.dataset.act === 'view'){ dx.view = b.dataset.v; renderDetail(); }
     if(b.dataset.act === 'anim'){ dx.anim = b.dataset.v; dx.t0 = performance.now(); renderDetail(); }
     if(b.dataset.act === 'gacha') openGacha();
+    if(b.dataset.act === 'tab'){ dx.tab = b.dataset.v; renderDetail(); }
+    if(b.dataset.act === 'go'){ dx.sel = +b.dataset.v; dx.view = 'normal'; dx.anim = 'Idle'; markSel(); renderDetail(); const c = $('dxGrid').querySelector(`.dcard[data-d="${dx.sel}"]`); if(c) c.scrollIntoView({block:'nearest', behavior:'smooth'}); }
     if(b.dataset.act === 'fav'){ const i = save.fav.indexOf(dx.sel); if(i < 0) save.fav.push(dx.sel); else save.fav.splice(i, 1); persist(); renderGrid(); renderDetail(); }
   };
   dx.io = new IntersectionObserver(es => es.forEach(en => { if(en.isIntersecting){ dx.io.unobserve(en.target); paintCard(en.target); } }), {root: $('dxGrid'), rootMargin: '300px'});
@@ -89,6 +91,33 @@ function paintCard(card){
   paintSprite(card.querySelector('canvas'), d, {sc:2, fit:56, shiny: o && save.shiny.includes(d), dark: !o});
 }
 
+// ---- Ayudantes visuales ----
+const LIGHT_T = new Set(['electrico', 'tierra', 'hielo', 'acero', 'normal', 'hada', 'roca', 'bicho', 'planta', 'volador']);   // tipos de color claro: llevan letra oscura para que se lean
+const tb = t => `<span class="tb${LIGHT_T.has(t) ? ' lt' : ''}" style="background:${TC[t]}">${TYPE_ES[t]}</span>`;
+const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 : 0;
+
+// Cadena evolutiva (js/evos.js): devuelve las etapas [[base], [fase 1...], [fase 2...]] sin los Pokémon ocultos
+function evoChain(d){
+  if(typeof EVO_PREV === 'undefined') return [];
+  let root = d; while(EVO_PREV[root]) root = EVO_PREV[root];
+  const kids = p => Object.keys(EVO_PREV).filter(k => EVO_PREV[k] === p).map(Number).filter(k => k <= DEX_TOTAL && !hidden(k));
+  const stages = []; let cur = [root];
+  while(cur.length){ stages.push(cur); cur = cur.flatMap(kids); }
+  return stages.length > 1 ? stages : [];
+}
+// Descripción de la ficha: la de LORE (data.js) si existe; si no, una hecha con sus datos
+function loreOf(m){
+  if(LORE[m.dex]) return LORE[m.dex];
+  const ty = m.types.map(t => TYPE_ES[t]).join(' y ');
+  const best = STAT_KEYS.reduce((a, k) => m.base[k] > m.base[a] ? k : a, 'hp');
+  const prev = typeof EVO_PREV !== 'undefined' && EVO_PREV[m.dex] && mon(EVO_PREV[m.dex]);
+  const kids = typeof EVO_PREV !== 'undefined' ? Object.keys(EVO_PREV).filter(k => EVO_PREV[k] === m.dex && +k <= DEX_TOTAL).map(k => mon(+k).name) : [];
+  return `Pokémon de tipo ${ty} originario de ${regionOf(m.dex)}.` +
+    (prev ? ` Evoluciona de ${prev.name}.` : '') +
+    (kids.length ? ` Puede evolucionar a ${kids.slice(0, 3).join(', ')}${kids.length > 3 ? ' y más' : ''}.` : '') +
+    ` Destaca por ${{hp:'sus PS', atk:'su Ataque', def:'su Defensa', spa:'su Ataque Especial', spd:'su Defensa Especial', spe:'su Velocidad'}[best]} (${m.base[best]}).`;
+}
+
 // ---- Partes que cambian ----
 function renderPills(){
   [...$('dxRar').children].forEach(b => { b.classList.toggle('on', dx.rar.has(b.dataset.k)); b.style.setProperty('--c', RAR[b.dataset.k].col); });
@@ -97,22 +126,26 @@ function renderPills(){
 function renderTabs(){
   const tabs = [['Todas', 1, DEX_TOTAL], ...REGIONS_DEX.map(r => [r.n, r.a, r.b])];
   $('dxTabs').innerHTML = tabs.map(([n, a, b]) => {
-    const have = save.box.filter(d => d >= a && d <= b && !hidden(d)).length;
-    return `<button class="tab${dx.region === n ? ' on' : ''}" data-r="${n}">${n} <small>${have}/${regionSize(a, b)}</small></button>`;
+    const have = save.box.filter(d => d >= a && d <= b && !hidden(d)).length, tot = regionSize(a, b);
+    return `<button class="tab${dx.region === n ? ' on' : ''}${have >= tot ? ' full' : ''}" data-r="${n}" style="--p:${pct(have, tot)}%">${n} <small>${have}/${tot}</small></button>`;
   }).join('');
   $('dxTabs').onclick = e => { const b = e.target.closest('.tab'); if(b){ dx.region = b.dataset.r; renderTabs(); renderGrid(); } };
+}
+function renderTotal(){
+  const have = boxCount(), sh = save.shiny.filter(d => !hidden(d)).length, p = pct(have, DEX_SHOWN);
+  $('dxTotal').innerHTML = `<span class="dxpN"><b>${have}</b> / ${DEX_SHOWN}<em>${p}%</em></span><span class="dxpBar"><i style="width:${p}%"></i></span><span class="dxpS">⭐ ${sh} shiny</span>`;
 }
 function renderGrid(){
   const l = dexList();
   $('dxCount').textContent = `${l.length} Pokémon`;
-  $('dxTotal').textContent = `Tienes ${boxCount()} de ${DEX_SHOWN} · ${save.shiny.filter(d => !hidden(d)).length} shiny`;
+  renderTotal();
   dx.io.disconnect();
   const g = $('dxGrid');
   g.innerHTML = l.map(m => {
-    const o = own(m.dex), r = RAR[m.rar];
-    return `<div class="dcard${o ? '' : ' no'}${m.dex === dx.sel ? ' sel' : ''}" data-d="${m.dex}" style="--c:${r.col}">
-      <i class="dn">#${pad(m.dex)}</i><canvas width="64" height="64"></canvas><b>${o ? esc(m.name) : '???'}</b>
-      ${o ? '<span class="ball"></span>' : ''}${save.fav.includes(m.dex) ? '<em class="fv">★</em>' : ''}${save.shiny.includes(m.dex) ? '<em class="sh">⭐</em>' : ''}</div>`;
+    const o = own(m.dex), r = RAR[m.rar], t1 = TC[m.types[0]], t2 = TC[m.types[1] || m.types[0]];
+    return `<div class="dcard${o ? '' : ' no'}${m.dex === dx.sel ? ' sel' : ''}" data-d="${m.dex}" style="--c:${r.col};--t1:${t1};--t2:${t2}" title="${o ? esc(m.name) : '???'}">
+      <i class="dn">${m.dex}</i><canvas width="64" height="64"></canvas><b>${o ? esc(m.name) : '???'}</b>
+      ${save.fav.includes(m.dex) ? '<em class="fv">★</em>' : ''}${save.shiny.includes(m.dex) ? '<em class="sh">✦</em>' : ''}</div>`;
   }).join('') || '<p class="empty">Ningún Pokémon coincide con los filtros.</p>';
   g.querySelectorAll('.dcard').forEach(c => dx.io.observe(c));
 }
@@ -124,45 +157,53 @@ function weakRows(types){
   Object.keys(CH).forEach(t => { const m = eff(t, types); if(g[m]) g[m].push(t); });
   const rows = [[4, '×4', 'Muy débil', 'w4'], [2, '×2', 'Débil', 'w2'], [.5, '×½', 'Resiste', 'r'], [.25, '×¼', 'Resiste mucho', 'r'], [0, '×0', 'Inmune', 'i']];
   return rows.filter(([k]) => g[k].length).map(([k, x, lab, cl]) =>
-    `<div class="wk ${cl}"><span class="wx">${x}</span><span class="wl">${lab}</span><span class="wt">${g[k].map(t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`).join('')}</span></div>`).join('');
+    `<div class="wk ${cl}"><span class="wx">${x}</span><span class="wl">${lab}</span><span class="wt">${g[k].map(tb).join('')}</span></div>`).join('');
 }
 const DX_ANIMS = [['Idle', 'Reposo'], ['Attack', 'Ataque'], ['Hurt', 'Herido']];
+const DX_TABS = [['stats', 'Datos'], ['weak', 'Combate'], ['moves', 'Ataques']];
 function renderDetail(){
-  const m = mon(dx.sel), o = own(m.dex), r = RAR[m.rar], nat = natureOf(m.dex), shiny = dx.view === 'shiny';
-  const stats = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'].map(k => {
-    const v = m.base[k], tag = !o ? '' : nat[1] === k ? '<u class="up">▲ +10%</u>' : nat[2] === k ? '<u class="dn2">▼ −10%</u>' : '';
+  const m = mon(dx.sel), o = own(m.dex), r = RAR[m.rar], nat = natureOf(m.dex), shiny = dx.view === 'shiny', fav = save.fav.includes(m.dex);
+  const t1 = TC[m.types[0]], t2 = TC[m.types[1] || m.types[0]];
+  const stats = STAT_KEYS.map(k => {
+    const v = m.base[k], tag = !o ? '' : nat[1] === k ? '<u class="up">▲</u>' : nat[2] === k ? '<u class="dn2">▼</u>' : '<u></u>';
     const col = v < 50 ? '#e8493a' : v < 80 ? '#f0903a' : v < 100 ? '#e8c33a' : v < 130 ? '#4ccf6a' : '#3ea6ff';
-    return `<div class="st"><span title="${STAT_NAMES[k]}">${STAT_SHORT[k]}</span><div class="bar"><i style="width:${o ? Math.min(100, v / 1.8) : 0}%;background:${col}"></i></div><b>${o ? v : '???'}</b>${tag}</div>`;
+    return `<div class="st"><span title="${STAT_NAMES[k]}">${STAT_SHORT[k]}</span><b>${o ? v : '?'}</b><div class="bar"><i style="width:${o ? Math.min(100, v / 1.8) : 0}%;background:${col}"></i></div>${tag}</div>`;
   }).join('');
   const total = STAT_KEYS.reduce((a, k) => a + m.base[k], 0);
-  const mv = o ? movesOf(m.dex) : m.mv;                                                  // los que tiene tu Pokémon ahora (con MT incluidos)
+  const mv = o ? movesOf(m.dex) : m.mv;
   const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0];
-    return o ? `<div class="mvrow"><span class="sl">${SLOT_SHORT[s]}</span><b>${esc(n)}</b><span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span></div>`
+    return o ? `<div class="mvrow" style="--t:${TC[t]}"><span class="sl">${SLOT_SHORT[s]}</span><b>${esc(n)}</b>${tb(t)}</div>`
              : `<div class="mvrow"><span class="sl">${SLOT_SHORT[s]}</span><b>???</b></div>`; }).join('');
-  const acts = !o ? `<button class="gob" data-act="gacha">Consíguelo en el Gachapon →</button>` : '';       // el equipo se arma en Equipo Pokémon; aquí solo el atajo al Gachapon para los que aún no tienes
-  $('dxDet').style.setProperty('--c', r.col);
+  const chain = evoChain(m.dex);
+  const evo = chain.length ? `<div class="dxevo${chain.some(st => st.length > 3) ? ' wide' : ''}">${chain.map(st => `<div class="evs${st.length > 3 ? ' many' : ''}">${st.map(d => { const ow = own(d);
+      return `<button class="evm${d === m.dex ? ' on' : ''}${ow ? '' : ' no'}" data-act="go" data-v="${d}" title="${ow ? esc(mon(d).name) : '???'}"><canvas width="56" height="56" data-evo="${d}"></canvas><small>${ow ? esc(mon(d).name) : '???'}</small></button>`; }).join('')}</div>`).join('<i class="evar">›</i>')}</div>` : '';
+  const tab = o ? dx.tab || 'stats' : 'stats';
+  const body = !o ? `<div class="dxlock"><p>Aún no tienes este Pokémon.</p><button class="gob" data-act="gacha">Consíguelo en el Gachapon →</button></div>`
+    : tab === 'weak' ? `<div class="dxw">${weakRows(m.types)}</div>`
+    : tab === 'moves' ? `<div class="dxmv">${moves}</div>`
+    : `<div class="stats">${stats}<div class="sttot"><span>Total</span><b>${total}</b></div></div>
+       <div class="dinfo"><p><span>Naturaleza</span> ${nat[0]}${nat[1] ? ` <small>▲ ${STAT_NAMES[nat[1]]} · ▼ ${STAT_NAMES[nat[2]]}</small>` : ' <small>(neutra)</small>'}</p>
+         <p><span>Habilidad</span> <em class="soft">${esc(abilityOf(m.dex))}</em></p></div>
+       <p class="lore">${esc(loreOf(m))}</p>`;
+  $('dxDet').style.setProperty('--c', r.col); $('dxDet').style.setProperty('--t1', t1); $('dxDet').style.setProperty('--t2', t2);
+  $('dxDet').classList.toggle('locked', !o);
   $('dxDet').innerHTML = `
-    <div class="dtop">
+    <div class="dhero">
+      <div class="dhtop"><span class="meta">Nº ${pad(m.dex)} · ${regionOf(m.dex)}</span>
+        ${o ? `<button class="favi${fav ? ' on' : ''}" data-act="fav" title="${fav ? 'Quitar de favoritos' : 'Marcar como favorito'}">${fav ? '★' : '☆'}</button>` : ''}</div>
       <div class="viewer${shiny && o ? ' shiny' : ''}"><canvas id="dxSpr" width="144" height="144"></canvas>${shiny && o ? '<s></s><s></s><s></s><s></s><s></s><s></s>' : ''}</div>
-      <div class="dwho">
-        <p class="meta">#${pad(m.dex)} · ${regionOf(m.dex)}</p>
-        <h2>${o ? esc(m.name) : '???'}</h2>
-        <div class="badges"><span class="rb" style="--c:${r.col}">${r.ic} ${r.n}</span>${o ? m.types.map(t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`).join('') : '<span class="tb unk">???</span>'}</div>
-        <div class="vbtn"><button data-act="view" data-v="normal" class="pill${shiny ? '' : ' on'}">Normal</button>
-          <button data-act="view" data-v="shiny" class="pill${shiny ? ' on' : ''}" ${o ? '' : 'disabled'}>⭐ Shiny${o && !save.shiny.includes(m.dex) ? ' (previa)' : ''}</button></div>
-      </div>
+      <h2>${o ? esc(m.name) : '???'}</h2>
+      <div class="badges"><span class="rb" style="--c:${r.col}">${r.ic} ${r.n}</span>${o ? m.types.map(tb).join('') : '<span class="tb unk">???</span>'}</div>
+      ${o ? `<div class="dctl"><div class="seg"><button data-act="view" data-v="normal" class="${shiny ? '' : 'on'}">Normal</button><button data-act="view" data-v="shiny" class="${shiny ? 'on' : ''}">✦ Shiny${save.shiny.includes(m.dex) ? '' : ' <small>(previa)</small>'}</button></div>
+        <div class="seg">${DX_ANIMS.map(([k, n]) => `<button data-act="anim" data-v="${k}" class="${dx.anim === k ? 'on' : ''}">${n}</button>`).join('')}</div></div>` : ''}
     </div>
-    <div class="dact${o ? ' solo' : ''}">${acts}<button class="favb${save.fav.includes(m.dex) ? ' on' : ''}" data-act="fav" ${o ? '' : 'disabled'}>${save.fav.includes(m.dex) ? '★ Favorito' : '⭐ Favorito'}</button></div>
-    ${o ? `<div class="anbtn"><span>Animación</span>${DX_ANIMS.map(([k, n]) => `<button data-act="anim" data-v="${k}" class="pill${dx.anim === k ? ' on' : ''}">${n}</button>`).join('')}</div>` : ''}
-    ${o ? `<h3>Debilidades y resistencias</h3><div class="dxw">${weakRows(m.types)}</div>` : ''}
-    <h3>Estadísticas base ${o ? `<small class="dxtot">Total ${total}</small>` : ''}</h3><div class="stats">${stats}</div>
-    <h3>Ataques</h3><div class="dxmv">${moves}</div>
-    <div class="dinfo"><p><span>Naturaleza</span> ${o ? `${nat[0]}${nat[1] ? ` <small>(▲ ${STAT_NAMES[nat[1]]} · ▼ ${STAT_NAMES[nat[2]]})</small>` : ' <small>(neutra)</small>'}` : '???'}</p>
-      <p><span>Habilidad</span> ${o ? `<em class="soft">${esc(abilityOf(m.dex))}</em>` : '???'}</p>
-      <p class="lore">${o ? esc(LORE[m.dex] || 'Sin descripción todavía. Puedes añadirla en LORE (data.js).') : 'Consíguelo en el Gachapon para ver sus datos.'}</p></div>`;
+    ${evo ? `<h3>Evolución</h3>${evo}` : ''}
+    ${o ? `<div class="dtabs">${DX_TABS.map(([k, n]) => `<button data-act="tab" data-v="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>` : ''}
+    <div class="dbody">${body}</div>`;
   dx.t0 = performance.now();
   dx.spr = $('dxSpr'); dx.sprO = o; dx.sprShiny = shiny && o;
   paintSprite(dx.spr, m.dex, {sc:3, fit:128, shiny: shiny && o, dark: !o});
+  $('dxDet').querySelectorAll('canvas[data-evo]').forEach(c => { const d = +c.dataset.evo; paintSprite(c, d, {sc:2, fit:52, dark: !own(d)}); });
 }
 // El sprite grande se anima (solo cuando la pantalla se ve)
 setInterval(() => {

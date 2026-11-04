@@ -75,7 +75,7 @@ function buildMain(){
   refreshHud();
 }
 function enter(k){
-  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), pruebas:openPruebas, friends:openFriends, bag:openBag, set:openSettings,
+  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), pruebas:openPruebas, friends:openFriends, account:openAccount, bag:openBag, set:openSettings,
     tower:()=>towerOpen() ? openTorre() : toast(`La Torre Batalla se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).`)})[k]();
 }
 function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)
@@ -213,34 +213,68 @@ function openRank(){
     `<tr><td>1</td><td id="rkName"></td><td>${save.record}</td></tr>` + [2,3,4,5].map(n=>`<tr><td>${n}</td><td>---</td><td>---</td></tr>`).join('') + `</table>`);
   $('rkName').textContent = trainerName();
 }
-// openFriends() (Amigos y cuenta) está en js/cloudui.js
+// openFriends() (Amigos) y openAccount() (Cuenta) están en js/cloudui.js
 // ---- AJUSTES: Pantalla completa, Audio (general, música del menú, música de combate, efectos y silenciar) y Controles (js/controls.js) ----
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+let stgTab = 'acc';                                                       // sección de Ajustes abierta (se recuerda mientras juegas)
+const STG_ICO = {
+  acc: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  pan: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
+  aud: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  ctl: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 10v4M5 12h4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/></svg>',
+  mus: '<svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+  sfx: '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+  swd: '<svg viewBox="0 0 24 24"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>'};
 function openSettings(){
   const canFs = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-  panel(`<h1>Ajustes</h1>
-    <h2>Pantalla</h2>
-    <label class="chk"><input id="fs" type="checkbox"${fsOn() ? ' checked' : ''}${canFs ? '' : ' disabled'}> Pantalla completa</label>
-    ${canFs ? '' : '<p class="help">Tu navegador no permite la pantalla completa en esta página.</p>'}
-    <label class="chk"><input id="fxhd" type="checkbox"${fxhd.on ? ' checked' : ''}> Efectos de ataque mejorados (brillos, marcas en el suelo)</label>
-    <p class="help">Desactívalo para volver al estilo clásico o si el juego va lento.</p>
-    <h2>Audio</h2>
-    <label>Volumen general: <b id="volN"></b><br><input id="vol" type="range" min="0" max="100" value="${save.vol}"></label>
-    <label>Música del menú: <b id="volMN"></b><br><input id="volM" type="range" min="0" max="100" value="${save.volMenu}"></label>
-    <label>Música de combate: <b id="volBN"></b><br><input id="volB" type="range" min="0" max="100" value="${save.volBattle}"></label>
-    <label>Efectos de sonido: <b id="volSN"></b><br><input id="volS" type="range" min="0" max="100" value="${save.volSfx}"></label>
-    <label class="chk"><input id="mute" type="checkbox"${save.mute ? ' checked' : ''}> Silenciar todo el audio (tecla M)</label>
-    ${ctlSettingsHtml()}`);
-  const pct = (id, v) => { $(id).textContent = v + '%'; };
-  pct('volN', save.vol); pct('volMN', save.volMenu); pct('volBN', save.volBattle); pct('volSN', save.volSfx);
-  $('vol').oninput  = e => { Music.setVolume(e.target.value); pct('volN', save.vol); };
-  $('volM').oninput = e => { Music.setMenuVolume(e.target.value); pct('volMN', save.volMenu); };
-  $('volB').oninput = e => { Music.setBattleVolume(e.target.value); pct('volBN', save.volBattle); };
+  const logged = typeof cloud !== 'undefined' && cloud.user, nm = logged && cloud.name;
+  const google = logged && typeof cloudHasGoogle === 'function' && cloudHasGoogle();
+  const sw = (id, on, t, d, dis) => `<label class="sw${dis ? ' dis' : ''}"><span class="swT"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</span><input id="${id}" type="checkbox"${on ? ' checked' : ''}${dis ? ' disabled' : ''}><i></i></label>`;
+  const sl = (id, ico, t, v) => `<div class="sl"><span class="slI">${STG_ICO[ico]}</span><span class="slT">${t}</span><input id="${id}" type="range" min="0" max="100" value="${v}"><b id="${id}N"></b></div>`;
+  const NAV = [['acc', 'Cuenta'], ['pan', 'Pantalla'], ['aud', 'Audio'], ['ctl', 'Controles']];
+  panel(`<div class="stg"><h1>Ajustes</h1>
+    <div class="stgL">
+      <nav class="stgNav">${NAV.map(([k, n]) => `<button data-s="${k}" class="${stgTab === k ? 'on' : ''}">${STG_ICO[k]}<span>${n}</span></button>`).join('')}</nav>
+      <div class="stgBody">
+        <section class="stgS" data-s="acc"><h2>Cuenta</h2>
+          <div class="stgAcc"><img class="av" alt=""><div class="stgWho"><b>${nm ? esc(nm) : logged ? 'Sin nombre de jugador' : 'Invitado'}</b>
+            <small class="${logged ? 'ok' : ''}">${logged ? '● Partida guardada en la nube' + (google ? ' · Google vinculado' : '') : 'Tu partida solo está en este navegador'}</small></div>
+            <button id="setAcc" class="${logged ? '' : 'main'}">${logged ? 'Gestionar cuenta' : 'Entrar o crear cuenta'}</button></div>
+          ${logged ? '' : '<p class="stgTip">Con una cuenta guardas tu progreso, juegas desde el móvil y puedes añadir amigos y jugar la Clasificatoria.</p>'}
+        </section>
+        <section class="stgS" data-s="pan"><h2>Pantalla</h2>
+          <div class="stgCard">
+            ${sw('fs', fsOn(), 'Pantalla completa', canFs ? 'Oculta las barras del navegador.' : 'Tu navegador no lo permite en esta página.', !canFs)}
+            ${sw('fxhd', fxhd.on, 'Efectos de ataque mejorados', 'Brillos y marcas en el suelo. Desactívalo si el juego va lento.')}
+          </div>
+        </section>
+        <section class="stgS" data-s="aud"><h2>Audio</h2>
+          <div class="stgCard">
+            ${sl('vol', 'aud', 'Volumen general', save.vol)}
+            ${sl('volM', 'mus', 'Música del menú', save.volMenu)}
+            ${sl('volB', 'swd', 'Música de combate', save.volBattle)}
+            ${sl('volS', 'sfx', 'Efectos de sonido', save.volSfx)}
+          </div>
+          <div class="stgCard">${sw('mute', save.mute, 'Silenciar todo', 'Atajo: tecla M')}</div>
+        </section>
+        <section class="stgS" data-s="ctl">${ctlSettingsHtml()}</section>
+      </div>
+    </div></div>`);
+  $('panelBody').classList.add('wide');
+  const showTab = k => { stgTab = k; document.querySelectorAll('.stgNav button').forEach(b => b.classList.toggle('on', b.dataset.s === k)); document.querySelectorAll('.stgS').forEach(x => x.classList.toggle('on', x.dataset.s === k)); };
+  document.querySelector('.stgNav').onclick = e => { const b = e.target.closest('button'); if(b) showTab(b.dataset.s); };
+  showTab(stgTab);
+  const pct = (id, v) => { $(id + 'N').textContent = v + '%'; $(id).style.setProperty('--v', v + '%'); };
+  [['vol', save.vol], ['volM', save.volMenu], ['volB', save.volBattle], ['volS', save.volSfx]].forEach(([id, v]) => pct(id, v));
+  $('vol').oninput  = e => { Music.setVolume(e.target.value); pct('vol', save.vol); };
+  $('volM').oninput = e => { Music.setMenuVolume(e.target.value); pct('volM', save.volMenu); };
+  $('volB').oninput = e => { Music.setBattleVolume(e.target.value); pct('volB', save.volBattle); };
   ctlSettingsBind();
-  $('volS').oninput = e => { Music.setSfxVolume(e.target.value); pct('volSN', save.volSfx); };
+  $('volS').oninput = e => { Music.setSfxVolume(e.target.value); pct('volS', save.volSfx); };
   $('volS').onchange = () => Sfx.play('click');                                      // al soltar el deslizador de efectos se oye cómo suenan
   $('mute').onchange = e => Music.setMute(e.target.checked);
   $('fxhd').onchange = e => fxhdSet(e.target.checked);
+  $('setAcc').onclick = openAccount;                                // Ajustes › Cuenta (js/cloudui.js)
   $('fs').onchange = e => {
     const el = document.documentElement;
     if(e.target.checked){ const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if(r && r.catch) r.catch(() => { e.target.checked = false; toast('El navegador no ha permitido la pantalla completa.'); }); }

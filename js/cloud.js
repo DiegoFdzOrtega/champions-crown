@@ -47,7 +47,7 @@ function cloudInit(){
     cloud.sb.auth.onAuthStateChange(ev => {                                                          // el enlace «Olvidé mi contraseña» del correo vuelve aquí con ev = PASSWORD_RECOVERY
       if(ev !== 'PASSWORD_RECOVERY') return;
       cloud.recovery = true; try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}   // quita el código de la dirección
-      setTimeout(() => { try{ if(typeof openFriends === 'function') openFriends(); }catch(e){} cloudRefresh(); }, 800);   // (no se llama a Supabase desde aquí dentro)
+      setTimeout(() => { try{ if(typeof openAccount === 'function') openAccount(); }catch(e){} cloudRefresh(); }, 800);   // (no se llama a Supabase desde aquí dentro)
     });
   }catch(e){ cloud.ok = false; cloud.ready = true; return; }
   cloud.sb.auth.getSession().then(({data}) => {
@@ -130,6 +130,22 @@ async function cloudRecoverPass(p1, p2){                                        
   if(error) return cloudErr(error);
   cloud.recovery = false; cloudUi.info = 'Contraseña cambiada. Ya estás dentro con la nueva.'; return '';
 }
+// ---- Vincular Google a una cuenta de email que ya existe (para entrar a la MISMA cuenta con «Continuar con Google») ----
+// Necesita en Supabase: Authentication › Sign In / Providers › «Allow manual linking» activado.
+// Si esa cuenta de Google ya se usó para crear OTRA cuenta del juego, Supabase no deja vincularla: hay que borrar antes esa otra cuenta.
+async function cloudGoogleIn(){                                                  // «Continuar con Google» (te lleva a Google y vuelve aquí ya dentro)
+  const {error} = await cloud.sb.auth.signInWithOAuth({provider: 'google', options: {redirectTo: CLOUD_HOME()}});
+  return error ? cloudErr(error) : '';
+}
+const cloudHasGoogle = () => !!(cloud.user && (cloud.user.identities || []).some(i => i.provider === 'google'));
+async function cloudLinkGoogle(){
+  if(!cloud.sb.auth.linkIdentity) return 'Tu versión de la conexión no permite vincular cuentas.';
+  const {error} = await cloud.sb.auth.linkIdentity({provider: 'google', options: {redirectTo: CLOUD_HOME()}});   // te lleva a Google y vuelve aquí
+  if(!error) return '';
+  const m = String(error.message || '');
+  if(/manual linking|linking is disabled/i.test(m)) return 'Falta activar «Allow manual linking» en Supabase (Authentication › Sign In / Providers).';
+  return cloudErr(error);
+}
 async function cloudSignOut(){
   clearTimeout(cloud.timer); cloudRtStop();
   if(cloud.user && !cloud.needName) await cloudPush().catch(() => {});                              // última subida antes de salir
@@ -197,12 +213,13 @@ async function cloudFriendsLoad(){
   try{
     const {data, error} = await cloud.sb.from('friendships').select('id, requester, addressee, status, created_at').or(`requester.eq.${me},addressee.eq.${me}`);
     if(error) throw error;
-    const rows = data || [], ids = [...new Set(rows.map(r => r.requester === me ? r.addressee : r.requester))], names = {};
+    const rows = data || [], ids = [...new Set(rows.map(r => r.requester === me ? r.addressee : r.requester))], names = {}, seen = {};
     if(ids.length){
-      const {data: ps, error: e2} = await cloud.sb.from('profiles').select('id, username').in('id', ids);
-      if(e2) throw e2; (ps || []).forEach(p => { names[p.id] = p.username; });
+      let q = await cloud.sb.from('profiles').select(cloud.noSeen ? 'id, username' : 'id, username, last_seen').in('id', ids);
+      if(q.error && /last_seen/.test(q.error.message || '')){ cloud.noSeen = true; q = await cloud.sb.from('profiles').select('id, username').in('id', ids); }   // aún no existe la columna (SQL del README): sin «última conexión»
+      if(q.error) throw q.error; (q.data || []).forEach(p => { names[p.id] = p.username; seen[p.id] = p.last_seen || null; });
     }
-    const row = r => { const other = r.requester === me ? r.addressee : r.requester; return {id: r.id, uid: other, name: names[other] || '(jugador)', at: r.created_at}; };
+    const row = r => { const other = r.requester === me ? r.addressee : r.requester; return {id: r.id, uid: other, name: names[other] || '(jugador)', at: r.created_at, seen: seen[other] || null}; };
     const byName = (a, b) => a.name.localeCompare(b.name);
     fr.friends = rows.filter(r => r.status === 'accepted').map(row).sort(byName);
     fr.incoming = rows.filter(r => r.status === 'pending' && r.addressee === me).map(row).sort(byName);
@@ -242,6 +259,15 @@ async function cloudFriendRemove(id){                                           
 // Un desafío dura 30 s. Solo se aceptan desafíos de AMIGOS. Al aceptarse se crea cloud.match y se llama a cloudOnMatch(match) (el combate online: js/pvp.js).
 cloud.rt = null; cloud.online = {}; cloud.chal = null; cloud.match = null;
 const CLOUD_CHAL_MS = 30000;
+// ÚLTIMA CONEXIÓN: se apunta en profiles.last_seen al conectarte, cada 2 minutos mientras juegas y al irte (para «Desconectado · hace 3 h» en Amigos).
+// Necesita la columna last_seen y poder actualizar tu propio perfil (SQL del README). Si no existe, no pasa nada: simplemente no se enseña.
+const CLOUD_SEEN_EVERY = 120000;
+async function cloudSeen(){
+  if(!cloud.ok || !cloud.user || !cloud.name || cloud.noSeen) return;
+  try{ const {error} = await cloud.sb.from('profiles').update({last_seen: new Date().toISOString()}).eq('id', cloud.user.id);
+    if(error && /last_seen/.test(error.message || '')) cloud.noSeen = true; }catch(e){}
+}
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'hidden') cloudSeen(); });   // al cambiar de pestaña, cerrar o bloquear el móvil
 function cloudRtStart(){
   if(!cloud.ok || !cloud.user || !cloud.name || cloud.rt) return;
   const ch = cloud.sb.channel('lobby', {config: {presence: {key: cloud.user.id}, broadcast: {self: false}}});
@@ -256,12 +282,13 @@ function cloudRtStart(){
     .subscribe((st, err) => {
       cloud.rtStatus = st; cloud.rtErr = (err && err.message) || '';                                  // para enseñar en Amigos si la conexión en línea falla
       if(st !== 'SUBSCRIBED') console.warn('[cloud] canal «lobby»:', st, err || '');
-      if(st === 'SUBSCRIBED') ch.track({name: cloud.name, at: Date.now()});
+      if(st === 'SUBSCRIBED'){ ch.track({name: cloud.name, at: Date.now()}); cloudSeen(); clearInterval(cloud.seenT); cloud.seenT = setInterval(cloudSeen, CLOUD_SEEN_EVERY); }
       if(typeof cloudRenderFriends === 'function') cloudRenderFriends();
     });
   cloud.rt = ch;
 }
 function cloudRtStop(){
+  clearInterval(cloud.seenT);
   if(cloud.chal) clearTimeout(cloud.chal.timer);
   if(cloud.rt){ try{ cloud.sb.removeChannel(cloud.rt); }catch(e){} }
   cloud.rt = null; cloud.rtStatus = ''; cloud.online = {}; cloud.chal = null; cloud.match = null; if(typeof cloudChalUi === 'function') cloudChalUi();

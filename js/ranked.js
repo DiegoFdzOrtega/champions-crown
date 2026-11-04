@@ -63,7 +63,7 @@ function rkBuild(){
   </div>`;
   $('rkBack').onclick = rkClose;
   const act = e => { const b = e.target.closest('[data-act]'); if(!b) return; const a = b.dataset.act;
-    if(a === 'search') rkSearch(); else if(a === 'cancel') rkCancel(); else if(a === 'team') openTeam('rank'); else if(a === 'login') (typeof openFriends === 'function' ? openFriends() : goMain()); };
+    if(a === 'search') rkSearch(); else if(a === 'cancel') rkCancel(); else if(a === 'team') openTeam('rank'); else if(a === 'login') (typeof openAccount === 'function' ? openAccount() : goMain()); };
   $('rkMid').addEventListener('click', act); $('rkStage').addEventListener('click', act);
   addEventListener('keydown', e => { if(e.code === 'Escape' && !$('rankv').classList.contains('hide')){ e.preventDefault(); rk.phase === 'search' ? rkCancel() : rk.phase === 'idle' && rkClose(); } });
   addEventListener('resize', () => { if(!$('rankv').classList.contains('hide')) rkFit(); });

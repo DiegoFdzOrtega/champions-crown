@@ -16,7 +16,8 @@ function lgClose(){                                                            /
   if(lg.done) return; lg.done = true;
   const el = $('login'); if(el) el.remove();
   goMain();
-  if(cloud.user && cloud.conflict && typeof openFriends === 'function') openFriends();     // tu cuenta y este navegador tienen partidas distintas: se elige allí
+  if(lg.err && typeof toast === 'function') toast(lg.err);                    // p. ej. un error al volver de vincular Google (ya estabas dentro, la pantalla se salta)
+  if(cloud.user && cloud.conflict && typeof openAccount === 'function') openAccount();     // tu cuenta y este navegador tienen partidas distintas: se elige allí
 }
 function lgGoogleErr(){                                                        // al volver de Google con un error, viene en la dirección (#error_description=...)
   const h = new URLSearchParams((location.hash || '').replace(/^#/, '') + '&' + (location.search || '').replace(/^\?/, ''));
@@ -24,6 +25,7 @@ function lgGoogleErr(){                                                        /
   if(!d) return '';
   try{ history.replaceState(null, '', location.pathname); }catch(e){}
   if(/provider is not enabled|Unsupported provider/i.test(d)) return 'El inicio de sesión con Google aún no está activado en el servidor (Supabase › Authentication › Providers › Google).';
+  if(/already linked|identity_already_exists|already exists/i.test(d)) return 'Esa cuenta de Google ya está usada en otra cuenta del juego, así que no se puede vincular a esta. Borra esa otra cuenta (Supabase › Authentication › Users) y vuelve a pulsar «Vincular mi cuenta de Google».';
   return 'No se pudo entrar con Google: ' + d.replace(/\+/g, ' ');
 }
 async function lgGoogle(){
@@ -54,7 +56,7 @@ function lgRender(force){
   if(s === 'in'){ lgClose(); return; }
   if(s === 'wait'){ el.innerHTML = `<p class="lg-wait">Conectando<span>.</span><span>.</span><span>.</span></p>`; return; }
   if(s === 'offline'){
-    el.innerHTML = `<p class="warn">No hay conexión con el servidor.</p><p class="help">Puedes jugar sin cuenta: tu partida se guarda en este navegador. Cuando vuelva la conexión, entra desde <b>Amigos</b>.</p>
+    el.innerHTML = `<p class="warn">No hay conexión con el servidor.</p><p class="help">Puedes jugar sin cuenta: tu partida se guarda en este navegador. Cuando vuelva la conexión, entra desde <b>Cuenta</b> (arriba, junto a tu nombre).</p>
       <button id="lgGuest" class="main lg-big">Jugar sin cuenta</button>`;
   }
   else if(s === 'choose'){
@@ -78,6 +80,7 @@ function lgRender(force){
     el.innerHTML = `<h2>Elige tu nombre de jugador</h2><p class="help">Es el nombre con el que te verán tus rivales y tus amigos. Tiene que ser único.</p>
       <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="16" placeholder="3-16 letras, números o _" autocomplete="off"></label>
       <button type="submit" class="main lg-big"${dis}>Empezar</button></form>${msg}
+      <p class="help lg-why">¿Ya tenías cuenta con email? Pulsa «Usar otra cuenta», entra con tu email y en <b>Cuenta</b> pulsa «Vincular mi cuenta de Google».</p>
       <button id="lgOut" class="linkbtn">Usar otra cuenta</button>`;
   }
   const by = id => document.getElementById(id);
@@ -116,8 +119,8 @@ function lgRender(force){
     #login .lg-card{width:min(30rem,92vw);margin:auto;padding:2.2rem 2.2rem 1.6rem;text-align:center;background:rgba(13,17,28,.92);border:2px solid #3a5a9c;box-shadow:0 0 2rem rgba(62,166,255,.35)}
     #login .lg-logo{font-size:2.3rem;line-height:1.3;margin:0;color:#fff;text-shadow:.22rem .22rem 0 #ff3ea5,-.12rem -.12rem 0 #3ea6ff}
     #login .lg-sub{font-size:.75rem;color:#8b98ad;margin:.8rem 0 1.8rem}
-    #login .lg-google{display:flex;align-items:center;justify-content:center;gap:.9rem;width:100%;margin:0 0 .8rem;padding:1rem;background:#fff!important;color:#1f1f1f!important;border:2px solid #fff!important;font-family:Roboto,"Segoe UI",system-ui,sans-serif;font-size:1.05rem;font-weight:600}
-    #login .lg-google:hover,#login .lg-google:focus{box-shadow:0 0 1.2rem rgba(255,255,255,.45)}
+    .lg-google{display:flex;align-items:center;justify-content:center;gap:.9rem;width:100%;max-width:30rem;margin:0 0 .8rem;padding:1rem;background:#fff!important;color:#1f1f1f!important;border:2px solid #fff!important;font-family:Roboto,"Segoe UI",system-ui,sans-serif;font-size:1.05rem;font-weight:600}
+    .lg-google:hover,.lg-google:focus{box-shadow:0 0 1.2rem rgba(255,255,255,.45)}
     #login .lg-alt,#login .lg-big{width:100%;margin:0 0 .8rem;padding:.95rem}
     #login form{text-align:left}#login form label{display:block;margin:.6rem 0}#login form input{width:100%;margin-top:.35rem}
     #login .lg-why{margin:1rem 0 .6rem;font-size:.7rem;line-height:1.7}
