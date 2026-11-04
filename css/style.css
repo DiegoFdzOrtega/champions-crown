@@ -2362,3 +2362,11 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 .rk-vsx{font-family:"Press Start 2P","Courier New",monospace;font-size:2.3em;color:#ff5a5a;text-shadow:0 0 .5em #ff5a5a,0 .1em 0 #5a0a0a;animation:rkPop .7s ease-out}
 .rk-cd{font-family:"Press Start 2P","Courier New",monospace;font-size:3em;color:#fff;text-shadow:0 0 .6em #7ab8ff}
 @media (prefers-reduced-motion:reduce){.rk *{animation:none!important}}
+
+/* MÓVIL (html.phone la pone index.html): botones de las cartas de Equipo Pokémon más grandes para el dedo */
+html.phone .hb-ma{gap:8px}
+html.phone .hb-ma button{position:relative;min-height:42px;padding:4px 12px;font-size:15px}
+html.phone .hb-ma button[data-act="rm"]{min-width:46px;font-size:22px!important;font-weight:bold;line-height:1;padding:2px 8px;border-color:#7a3446;color:#ff8a8a}
+html.phone .hb-ma button::after{content:"";position:absolute;inset:-8px -4px}                 /* zona de toque más grande que el botón */
+html.phone #hbClose{position:relative;min-width:52px;min-height:48px;font-size:22px!important}
+html.phone #hbClose::after{content:"";position:absolute;inset:-8px}
