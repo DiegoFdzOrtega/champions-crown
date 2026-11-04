@@ -11,7 +11,7 @@ function textO(t, x, y, size, col, align){                // texto con contorno 
   ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(3, size / 3); ctx.strokeStyle = 'rgba(8,10,20,.92)'; ctx.strokeText(t, x, y);
   text(t, x, y, size, col, align);
 }
-const HUD_SCALE = .74;                                   // tamaño del HUD en combate (1 = como antes; más pequeño = molesta menos)
+let HUD_SCALE = .74;      /* js/touch.js lo sube a .92 en pantallas táctiles */                                   // tamaño del HUD en combate (1 = como antes; más pequeño = molesta menos)
 function hudAt(ax, ay, fn){ ctx.save(); ctx.translate(ax, ay); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-ax, -ay); fn(); ctx.restore(); }   // dibuja fn() reducido desde la esquina (ax, ay)
 function bar(x, y, w, h, v, max, col){
   ctx.fillStyle = '#05070c'; ctx.fillRect(x, y, w, h);
@@ -139,7 +139,7 @@ function hud(x, y, list, idx, col){
     const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 + 12;
     if(g.swNote > 0) text(`ESPERA ${Math.ceil(myCd())} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
     else if(hv >= 0 && hv !== idx && !list[hv].dead) text(myCd() > 0 ? `ESPERA ${Math.ceil(myCd())} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
-    else if(g.clock < 8 && g.count <= 0 && !g.over) text(`CLIC EN UN CUADRO O TECLAS ${ctlShort('sw1')} · ${ctlShort('sw2')} · ${ctlShort('sw3')} PARA CAMBIAR`, x, ty, 6, 'rgba(201,214,245,.75)');
+    else if(g.clock < 8 && g.count <= 0 && !g.over) text(typeof TOUCH !== 'undefined' && TOUCH.on ? 'TOCA UN CUADRO PARA CAMBIAR' : `CLIC EN UN CUADRO O TECLAS ${ctlShort('sw1')} · ${ctlShort('sw2')} · ${ctlShort('sw3')} PARA CAMBIAR`, x, ty, 6, 'rgba(201,214,245,.75)');
   }
 }
 
@@ -179,7 +179,7 @@ function draw(){
   if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
   if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
-  if(!M.dead){                                                               // cruz de puntería
+  if(!M.dead && !(typeof touchUI === 'function' && touchUI())){             // cruz de puntería (con los dedos no se enseña)
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
@@ -207,9 +207,10 @@ function draw(){
   }
   });
   if(PRV) prTopEnd();
-  text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');
+  if(!(typeof touchUI === 'function' && touchUI())) text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');   // con los dedos está el botón II
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
 
+  if(!(typeof touchUI === 'function' && touchUI())){   // con pantalla táctil, la barra de ataques la sustituyen los botones (js/touch.js)
   // Barra de ataques, centrada abajo
   ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
   if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás
@@ -251,8 +252,10 @@ function draw(){
   ctx.restore();
   if(PRV){ ctx.save(); ctx.globalAlpha = PR.barA || 1; megaHud(); ctx.restore(); } else
   megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
+  }
   megaTop();                                       // destello y cartel de la megaevolución, encima de todo
   if(g.pvp) pvpDraw();                             // combate online: avisos de conexión (js/pvp.js)
+  if(typeof touchDraw === 'function') touchDraw();  // joystick y botones táctiles (js/touch.js)
   if(PRV){ prFront(); W = WW; }                    // Campo de pruebas: cartel de megaevolución y línea de abajo; se repone el ancho del mundo
 }
 

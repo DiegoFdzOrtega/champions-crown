@@ -32,7 +32,13 @@ const PR_ADS = [                                            // patrocinadores de
   {n: ['BALL', 'CORP.'], bg: '#c8302a', fg: '#ffffff', ic: 'ball'},
   {n: ['LIGA', 'CROWN'], bg: '#2a6fd0', fg: '#ffffff', ic: 'star'}
 ];
-function prImg(){ if(!PR.img){ PR.img = new Image(); PR.img.onload = () => PR.img.ok = true; PR.img.src = 'fondos/estadio_pruebas.webp'; } return PR.img; }
+const PR_BG = {ranked: 'fondos/estadio_pruebas.webp', pruebas: 'fondos/estadio_torre.webp'};   // fondo de cada modo (las dos imágenes tienen el MISMO encuadre: campo y pantallas en el mismo sitio)
+function prImg(src){
+  src = src || (g && g.o && g.o.pruebas ? PR_BG.pruebas : PR_BG.ranked);
+  const c = PR.imgs || (PR.imgs = {});
+  if(!c[src]){ const im = c[src] = new Image(); im.onload = () => im.ok = true; im.src = src; }
+  return c[src];
+}
 const prOn = () => !!(g && g.o && (g.o.pruebas || g.o.estadio));      // pruebas = Campo de pruebas (contra la IA) · estadio = Clasificatoria online
 // PANTALLA COMPLETA: la pantalla mide PR.SW × H (PR.SW sale de la forma de la ventana). El estadio se ve SIEMPRE entero (nunca se recorta el campo):
 //  - ventana más ancha que la imagen: la imagen ocupa todo el alto y los lados que sobran se rellenan con la grada de sus bordes (prSides);
@@ -64,7 +70,7 @@ let prLast = '';
 function openPruebas(){
   if(team.length < 3){ toast('Necesitas un equipo de 3 Pokémon (Equipo Pokémon).'); return; }
   const pool = CAMPO.filter(T => T.id !== prLast), T = pool[(Math.random() * pool.length) | 0]; prLast = T.id;
-  prImg();
+  prImg(PR_BG.pruebas);
   const S = campoStats(T), o = {
     pruebas: true, prId: T.id, floor: 0, n: -1, leader: '', arena: '', portrait: 'entrenadores/' + T.file,
     title: 'CAMPO DE PRUEBAS', sub: `${trainerName()} VS ${T.name}`.toUpperCase().slice(0, 34), rival: T.name,
@@ -105,7 +111,7 @@ function prBack(){                                           // fondo + pantalla
 }
 function prSides(im, R){                                      // ventana muy ancha: a los lados, el mismo estadio desenfocado y oscuro (sin estirar ni repetir nada)
   const bw = (PR.SW / R.k - PR.REF.w) / 2; if(bw <= 0) return;
-  const SW = Math.round(PR.SW), key = SW + 'x' + H;
+  const SW = Math.round(PR.SW), key = SW + 'x' + H + im.src;
   if(!PR.blur || PR.blurKey !== key){                                                  // se prepara UNA vez por tamaño de ventana (el desenfoque es caro)
     const c = document.createElement('canvas'), q = .25; c.width = Math.ceil(SW * q); c.height = Math.ceil(H * q);
     const x = c.getContext('2d'), s = Math.max(c.width / im.width, c.height / im.height), w = im.width * s, h = im.height * s;

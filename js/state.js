@@ -7,7 +7,8 @@ const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 // El lienzo usa la resolución real de la pantalla. El juego se dibuja en un mundo de alto 540
 // y ancho variable, así que llena toda la ventana sin deformarse.
 function resize(){
-  const dpr = window.devicePixelRatio || 1, cw = window.innerWidth, ch = window.innerHeight;
+  const vs = window.visualViewport ? Math.min(1, visualViewport.scale || 1) : 1;                  // móvil: la página se dibuja reducida (index.html) → no hace falta tanta resolución
+  const dpr = Math.min(2.5, (window.devicePixelRatio || 1) * vs), cw = window.innerWidth, ch = window.innerHeight;   // (máximo 2,5: en móviles con pantallas muy densas iría lento)
   W = LOCKW || Math.max(500, Math.round(cw * H / ch));          // en un combate online W es fijo (LOCKW): si no, cada jugador tendría una arena distinta y se descuadraría
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
 }
