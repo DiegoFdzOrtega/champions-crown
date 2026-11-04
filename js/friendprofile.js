@@ -27,6 +27,7 @@ function fpCard(){
     lg: REGIONS.filter(champAny), camp: fpNum(ACH_METRICS.campo_wins({})),
     fav: favSaved().map((d, i) => d ? [d, shV[i]] : null).filter(Boolean),
     rk: save.ranked ? [save.ranked.pts, save.ranked.w, save.ranked.l, save.ranked.best] : null,          // Clasificatoria: PC, victorias, derrotas y mejor PC
+    cf: save.cardFrame === 'avatar' ? 'a' : 'r',                                                        // borde: 'r' = marco del rango, 'a' = a juego con el marco del avatar
     tw: save.tower ? save.tower.best : 0,                                                                // Torre Batalla: récord de piso
     shl: (save.shiny.filter(d => !hidden(d)).slice(-1)[0]) || 0                                         // último shiny conseguido
   };
@@ -118,7 +119,8 @@ function fpViewNew(card, o){
   const favs = fav.map(([d, s]) => { const m = mon(d), t = TC[m.types[0]] || '#3ea6ff';
     return `<div class="tc-f${s ? ' shiny' : ''}" style="--t:${t}66"><canvas width="96" height="96" data-d="${d}" data-s="${s}"></canvas><b>${cloudEsc(m.name)}</b></div>`; }).join('');
   const nm = String(o.name || '');
-  return `<div class="tc-wrap"><div class="tc rk-${T.id}" style="--gl:${FP_RK_GLOW[T.id] || '#3ea6ff'}">
+  const plain = card.cf === 'a', ac = fr ? ACH_FRAMES[fr].c : '#3ea6ff';                        // borde a juego con el marco del avatar (o azul si no lleva marco)
+  return `<div class="tc-wrap"><div class="tc ${plain ? 'tc-plain' + (fr ? ' tcf-' + fr : '') : 'rk-' + T.id}" style="--gl:${plain ? ac : FP_RK_GLOW[T.id] || '#3ea6ff'};--ac:${ac}">
    <div class="tc-in"${bgD ? ` style="--bg:url(${new URL(cardBgUrl(bgD), document.baseURI).href});--bgpos:${bgD.pos}"` : ''}>
     <div class="tc-top"><span>Tarjeta de Entrenador</span><span><b>${cloudEsc(RK_SEASON)}</b> · Nº ${fpId(o.uid || (cloud.user && cloud.user.id) || o.name)}</span></div>
     <div class="tc-head">

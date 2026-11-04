@@ -65,7 +65,9 @@ function renderProfile(){
           <div class="pf-card"><h3>Personaje</h3><p class="help">Sale en tu tarjeta y en el panel VS antes de cada combate.</p><div class="gen-row" id="genRow">${genButtons()}</div></div>`)}
         ${sec('bg', 'Fondo de la tarjeta', 'Se desbloquean al derrotar a su líder, miembro del Alto Mando o Campeón. Los bloqueados dicen cómo conseguirlos.', `<div class="bg-count" id="bgCount"></div><div class="bg-grid" id="bgGrid"></div>`)}
         ${sec('av', 'Avatar', 'Los que tienen candado se desbloquean al conseguir ese Pokémon.', `<div class="av-grid" id="avGrid"></div><div class="pf-btns"><button id="avSave" class="main">Guardar avatar</button></div>`)}
-        ${sec('tf', 'Título y marco', 'Son recompensas de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.', `<div class="pf-card"><label class="pf-lab">Título<select id="titSel"></select></label></div><div class="pf-card"><h3>Marco del avatar</h3><div class="frames" id="frameRow"></div></div>`)}
+        ${sec('tf', 'Título y marco', 'Son recompensas de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.', `<div class="pf-card"><label class="pf-lab">Título<select id="titSel"></select></label></div><div class="pf-card"><h3>Marco del avatar</h3><div class="frames" id="frameRow"></div></div>
+          <div class="pf-card"><h3>Borde de la tarjeta</h3><p class="help">Elige si tu tarjeta lleva el marco de tu rango de la Clasificatoria o un borde a juego con el marco de tu avatar.</p>
+            <div class="pf-cf" id="cfRow"><button data-cf="rank" class="${save.cardFrame !== 'avatar' ? 'on' : ''}"><i class="cfp rk" style="background-image:url(fondos/marcos/${typeof rkTier === 'function' && save.ranked ? rkTier(save.ranked.pts).id : 'bronce'}.webp)"></i><span>Marco de rango</span></button><button data-cf="avatar" class="${save.cardFrame === 'avatar' ? 'on' : ''}"><i class="cfp av" style="--ac:${typeof achActiveFrame === 'function' && achActiveFrame() ? ACH_FRAMES[achActiveFrame()].c : '#3ea6ff'}"></i><span>A juego con el avatar</span></button></div></div>`)}
         ${sec('fav', 'Pokémon favoritos', 'Elige 3 Pokémon distintos. Si tienes su versión shiny, puedes enseñarla. Solo son para tu perfil: no cambian tu equipo.', `<div class="pf-slots" id="pfSlots"></div><p id="pfMsg" class="warn"></p><div class="pf-btns"><button id="pfSave" class="main">Guardar favoritos</button><button id="pfCancel">Cancelar cambios</button></div>`)}
         ${sec('priv', 'Privacidad', 'Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP ni tus tickets. Hace falta tener cuenta.', `<div class="pf-card"><label class="sw"><span class="swT"><b>Mostrar mi perfil a mis amigos</b><small>Si lo desactivas, nadie ve tu tarjeta.</small></span><input type="checkbox" id="pubChk"><i></i></label></div>`)}
       </div>
@@ -73,6 +75,8 @@ function renderProfile(){
   $('panelBody').classList.add('wide');
   document.querySelector('.pf-tabs').onclick = e => { const b = e.target.closest('button'); if(!b) return; pfTab = b.dataset.s;
     document.querySelectorAll('.pf-tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pfS').forEach(x => x.classList.toggle('on', x.dataset.s === pfTab)); };
+  $('cfRow').onclick = e => { const b = e.target.closest('button'); if(!b) return; save.cardFrame = b.dataset.cf; persist();
+    $('cfRow').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); renderMyCard(); if(typeof fpPublish === 'function') fpPublish(); };
   renderAvatarGrid(); renderTitleFrame(); renderMyCard(); renderBgGrid();
   $('nameIn').value = trainerName(); $('nameIn').disabled = nameLocked();                        // con cuenta, el nombre es el de la cuenta y no se toca
   $('nameHint').textContent = nameLocked() ? 'Tu nombre lo da tu cuenta: se elige al crearla y no se puede cambiar por ahora.' : 'Sin cuenta puedes poner el nombre que quieras. Si inicias sesión, se usará el nombre de tu cuenta.';
@@ -159,6 +163,7 @@ function renderTitleFrame(){
     const b = e.target.closest('.frb'); if(!b) return;
     if(b.classList.contains('lock')){ toast(b.title); return; }
     save.frame = b.dataset.f; persist(); refreshAvatars(); renderTitleFrame(); renderMyCard();
+    const sw = document.querySelector('#cfRow .cfp.av'); if(sw) sw.style.setProperty('--ac', achActiveFrame() ? ACH_FRAMES[achActiveFrame()].c : '#3ea6ff');
   };
   const pv = $('pfAv'); if(pv) pv.className = (pv.className.replace(/\s*\bafr-\S+/g, '') + (curF ? ' afr-' + curF : '')).trim();
 }

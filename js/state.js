@@ -20,7 +20,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
 const save = {record:0, bp:0, tickets:0, ticketsL:0, ticketsS:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
-              profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', cardBg:'', welcome:0, login:{streak:0, last:''}, firstWin:'',
+              profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', cardBg:'', cardFrame:'rank', welcome:0, login:{streak:0, last:''}, firstWin:'',
               iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, tower:{best:0, total:0, runs:0, ms:{}}, ranked:{pts:0, w:0, l:0, streak:0, best:0, hitos:{}}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, title:'', frame:'', pubProfile:true, storyMode:'facil', easy:{record:0, prog:{}, champ:{}}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
@@ -42,7 +42,8 @@ try{
     save.avatar = typeof s.avatar === 'string' ? s.avatar : '';
     save.title = typeof s.title === 'string' ? s.title : ''; save.frame = typeof s.frame === 'string' ? s.frame : '';      // título (id del logro) y marco de avatar elegidos (Perfil); se comprueban al usarlos (js/achievements.js)
     save.pubProfile = s.pubProfile !== false;                                       // ¿tus amigos pueden ver tu perfil? (js/friendprofile.js)
-    save.cardBg = /^[a-z0-9]{1,20}$/.test(s.cardBg || '') ? s.cardBg : '';                                          // fondo de la tarjeta de entrenador (js/cardbg.js)
+    save.cardBg = /^[a-z0-9]{1,20}$/.test(s.cardBg || '') ? s.cardBg : '';
+    save.cardFrame = s.cardFrame === 'avatar' ? 'avatar' : 'rank';                                                    // borde de la tarjeta: 'rank' = marco de la Clasificatoria, 'avatar' = a juego con el marco del avatar                                          // fondo de la tarjeta de entrenador (js/cardbg.js)
     save.gender = /^[a-z0-9-]{1,20}$/.test(s.gender || '') ? s.gender : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
     const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
     save.charms = obj(s.charms); save.keys = obj(s.keys); save.iv = obj(s.iv); save.ev = obj(s.ev); save.ivBase = obj(s.ivBase); save.evCap = obj(s.evCap); save.capUsed = obj(s.capUsed); save.abil = obj(s.abil); save.mv = obj(s.mv); save.mvHist = obj(s.mvHist); save.mtV = s.mtV || 1;

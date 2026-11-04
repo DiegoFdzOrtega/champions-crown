@@ -2663,3 +2663,25 @@ html.phone .stg{zoom:1}
 #myCard.fpBody{max-width:none;width:100%}
 @media (max-width:900px){.pf-ed{grid-template-columns:1fr}}
 #fpBody.fpBody{max-width:none;width:100%}
+/* Borde de la tarjeta "a juego con el avatar" (save.cardFrame = 'avatar'): banda de metal del color del marco del avatar */
+.tc.tc-plain{padding:7px;background:var(--fg,linear-gradient(135deg,color-mix(in srgb,var(--ac) 35%,#fff) 0%,var(--ac) 32%,color-mix(in srgb,var(--ac) 40%,#000) 64%,color-mix(in srgb,var(--ac) 70%,#fff) 100%));
+  box-shadow:0 0 0 2px #060a14,0 0 0 4px color-mix(in srgb,var(--ac) 40%,#000),0 0 2.4rem color-mix(in srgb,var(--ac) 40%,transparent),0 18px 50px #0009;border-radius:10px}
+.tc.tc-plain::after,.tc.tc-plain::before{display:none}
+.tc.tc-plain .tc-in{border-radius:5px}
+.tc.tc-plain .tc-top{padding:18px 30px 4px}
+.tc.tcf-bronce{--fg:linear-gradient(135deg,#f7c998,#cd7f32 34%,#7a4416 60%,#e9ab70)}
+.tc.tcf-plata{--fg:linear-gradient(135deg,#ffffff,#d5dcec 34%,#79829a 62%,#f3f6fd)}
+.tc.tcf-oro{--fg:linear-gradient(135deg,#fff7c4,#ffcc33 34%,#a77808 62%,#ffe58a)}
+.tc.tcf-atardecer{--fg:linear-gradient(135deg,#fff3c0,#ffa23a 30%,#d8402a 58%,#7a2a8a 78%,#ffd070)}
+.tc.tcf-brillo{--fg:linear-gradient(115deg,#b8902a 0 32%,#fffbe0 46%,#ffe26a 52%,#b8902a 66% 100%);background-size:300% 100%;animation:tcsh 2.4s linear infinite}
+@keyframes tcsh{from{background-position:200% 0}to{background-position:-100% 0}}
+.tc.tcf-arcoiris{--fg:conic-gradient(from var(--fa),#ff5a5a,#ffb347,#f5ee5a,#5aff8a,#5ab8ff,#b05aff,#ff5a5a);animation:afrsp 4s linear infinite}
+.tc.tcf-mewtwo{--fg:conic-gradient(from var(--fa),#4af0a8,#b36bff,#4af0a8 50%,#b36bff,#4af0a8);animation:afrsp 6s linear infinite}
+/* selector en Perfil › Título y marco */
+.pf-cf{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.8rem}
+.pf-cf button{display:flex;align-items:center;gap:.8rem;margin:0;padding:.8rem 1.1rem;border-radius:.6rem;background:#0e1730;border:2px solid #1f3466;color:#b9c8ec;font-size:.8rem}
+.pf-cf button:hover{border-color:#3e64b0;color:#fff}
+.pf-cf button.on{border-color:#ffcc33;color:#ffcc33;background:linear-gradient(90deg,#ffcc3318,#0e1730)}
+.cfp{display:block;width:3.4rem;height:2.4rem;border-radius:.3rem;flex:none}
+.cfp.rk{background:url(../fondos/marcos/diamante.webp) center/100% 100% no-repeat,#0a1226}
+.cfp.av{border:4px solid var(--ac);background:#0a1226;box-shadow:0 0 .6rem color-mix(in srgb,var(--ac) 50%,transparent)}
