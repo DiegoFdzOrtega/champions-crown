@@ -46,7 +46,7 @@ function victoryScreen(o){
   // tarjetas de recompensa
   const R = o.rewards && o.rewards.list && o.rewards.list.length ? o.rewards : null;
   if(R){
-    const grid = mk('div', 'vic-grid', 'vGrid');
+    const grid = mk('div', 'vic-grid' + (R.list.length > 3 ? ' many' : ''), 'vGrid');      // many: con 4 o más recompensas (Alto Mando, Campeón) las tarjetas son más pequeñas y caben en una fila
     const ORD = ['tickets', 'ticketsL', 'bp', 'chapa', 'chapaplata'], rank = id => ORD.includes(id) ? ORD.indexOf(id) : 99;      // siempre en el mismo orden: tiradas · BP · chapas
     R.list.slice().sort((a, b) => rank(a[0]) - rank(b[0])).forEach(([id, n], i) => {
       const L2 = RW_LOOK[id] || {c:'#3ea6ff', lab:REWARD_NAMES[id] || id, own:() => 0}, card = mk('div', 'rwc');

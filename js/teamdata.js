@@ -24,7 +24,7 @@ const mult = v => '×' + v.toFixed(2);
 const ownedChip = id => `<span class="own-chip"><img class="iimg" src="${imgOf(id)}" alt="">${CONS[id].n} <b>×${held(id)}</b></span>`;
 
 function renderData(){
-  const body = {main: dataMain, nature: dataNature, abil: dataAbil, moves: dataMoves, reset: dataReset}[dt.view]();
+  const body = {main: DT_NEW ? dataMainNew : dataMainOld, nature: dataNature, abil: dataAbil, moves: dataMoves, reset: dataReset}[dt.view]();
   $('tmDataB').innerHTML = body;
   const c = $('dtSpr'); if(c) paintSprite(c, dt.dex, {sc:5, fit:200, shiny: useShiny(dt.dex)});
 }
@@ -43,7 +43,7 @@ function dataHead(){
     <small class="dtn">Hueco ${i + 1}/${team.length}</small><button class="tmclose" data-act="close" title="Cerrar (Esc)">✕ Cerrar</button></header>`;
 }
 
-function dataMain(){
+function dataMainOld(){
   const d = dt.dex, m = mon(d), iv = ivOf(d), ev = evOf(d), nat = natureOf(d), ab = abilitiesOf(d), ai = abilIdx(d), cb = combatBoost(d), mv = movesOf(d);
   const chapa = held('chapa'), plata = held('chapaplata'), cap = capOf(d);
   // Izquierda: estadísticas normales (solo se miran). Total = Base + IV + EV (+ naturaleza), todo a nivel 50.
@@ -90,6 +90,98 @@ function dataMain(){
         <h3>Ataques ${movesChanged(d) ? '<button class="mini wide" data-act="reset">Restaurar originales</button>' : ''}</h3>
         <div class="dtmv">${moves}</div>
       </section></div>`;
+}
+
+// =====================================================================
+// FICHA NUEVA (DT_NEW = true): cabecera fija (sprite, naturaleza, habilidad, objeto, valor en combate, tus mejoras)
+// y 3 pestañas: Resumen (barras + radar), Entrenar (IV/EV con −/+, barras y presets) y Ataques (tarjetas con daño, energía y recarga).
+// La ficha antigua sigue entera en dataMainOld: para volver a ella, pon DT_NEW = false.
+// =====================================================================
+const DT_NEW = true;
+const DT_LT = new Set(['electrico', 'tierra', 'hielo', 'acero', 'normal', 'hada', 'roca', 'bicho', 'planta', 'volador']);     // tipos claros: letra oscura
+const dtChip = t => `<span class="tb${DT_LT.has(t) ? ' lt' : ''}" style="background:${TC[t]}">${TYPE_ES[t]}</span>`;
+const DT_PRESETS = {                                                     // reparto de EVs (se colocan las barras; se gasta al pulsar «Aplicar»)
+  spa:  {n:'Atacante especial', ev:{spa:252, spe:252, hp:6}},
+  atk:  {n:'Atacante físico',   ev:{atk:252, spe:252, hp:6}},
+  fast: {n:'Rápido',            ev:{spe:252, hp:128, def:128}},
+  tank: {n:'Tanque',            ev:{hp:252, def:128, spd:128}}
+};
+function dtHead(){
+  const d = dt.dex, m = mon(d), r = RAR[m.rar], i = team.indexOf(d), nat = natureOf(d), ab = abilitiesOf(d)[abilIdx(d)], cb = combatBoost(d);
+  const it = save.equip[d] && ITEMS[save.equip[d]];
+  const val = Math.round(((cb.hm + cb.dm + cb.spdm + cb.defm) / 4 - 1) * 100);
+  const own = ['chapa', 'chapaplata', 'menta', 'capsula'].map(id => `<span><img class="iimg" src="${imgOf(id)}" alt="">${CONS[id].n} <b>×${held(id)}</b></span>`).join('');
+  return `<div class="fd-h"><button class="nav" data-act="prev" title="Pokémon anterior"${team.length < 2 ? ' disabled' : ''}>◀</button><h1>${esc(m.name)}</h1>
+      <div class="chips"><span class="rar" style="background:${r.col}">${r.ic} ${r.n}</span>${m.types.map(dtChip).join('')}</div>
+      <button class="nav" data-act="next" title="Pokémon siguiente"${team.length < 2 ? ' disabled' : ''}>▶</button>
+      <span class="sp">${i >= 0 ? `Hueco ${i + 1}/${team.length}` : ''}</span><button class="close" data-act="close" title="Cerrar (Esc)">✕ Cerrar</button></div>
+    <div class="fd-hero"><div class="fd-spr" style="--t1a:${TC[m.types[0]]}55"><span class="no">Nº ${pad(m.dex)} · ${regionOf(m.dex)}</span>${save.fav.includes(d) ? '<span class="fav">★</span>' : ''}<canvas id="dtSpr" width="224" height="224"></canvas></div>
+      <div class="fd-info">
+        <div class="fd-card"><small>Naturaleza</small><div class="row"><b><img class="iimg mi" src="${mintImg(nat)}" alt=""> ${nat[0]}</b><button class="fd-mini" data-act="natview"${held('menta') < 1 ? ' disabled title="Necesitas Mentas (Tienda › Mejoras)"' : ''}>Cambiar · 1 Menta</button></div>
+          <p>${nat[1] ? `<span class="up">▲ ${STAT_NAMES[nat[1]]} +10 %</span> · <span class="dn">▼ ${STAT_NAMES[nat[2]]} −10 %</span>` : 'Neutra: no sube ni baja nada.'}</p></div>
+        <div class="fd-card"><small>Habilidad</small><div class="row"><b>${esc(ab)}</b><button class="fd-mini" data-act="abview"${held('capsula') < 1 ? ' disabled title="Necesitas Cápsulas de Habilidad (Tienda › Mejoras)"' : ''}>Cambiar · 1 Cápsula</button></div><p>${esc(abilDesc(ab))}</p></div>
+        <div class="fd-card"><small>Objeto equipado</small><div class="row"><b>${it ? `<img class="iimg" src="${imgOf(save.equip[d])}" alt=""> ${esc(it.n)}` : 'Sin objeto'}</b></div><p>${it ? esc(it.d || '') : 'Se equipa desde su hueco del equipo (botón del objeto).'}</p></div>
+        <div class="fd-card"><small>Valor en combate</small><div class="row"><b class="${val > 0 ? 'up' : val < 0 ? 'dn' : ''}">${val > 0 ? '+' : ''}${val} %</b></div><p>${val ? 'Media de lo que su entrenamiento y su naturaleza mejoran PS, daño, velocidad y resistencia.' : 'Sin entrenar: entrénalo para que rinda más en combate.'}</p></div>
+        <div class="fd-own">${own}<button class="fd-mini shop" data-act="shop">Ir a la Tienda →</button></div>
+      </div></div>
+    <div class="fd-tabs">${[['sum', 'Resumen'], ['tr', 'Entrenar'], ['mv', 'Ataques']].map(([k, n]) => `<button data-act="tab" data-v="${k}" class="${(dt.tab || 'sum') === k ? 'on' : ''}">${n}${k === 'tr' && (trChapasTotal(d, 'iv') + trChapasTotal(d, 'ev')) ? ' <i class="fd-dot"></i>' : ''}</button>`).join('')}
+      <button class="q${dt.help ? ' on' : ''}" data-act="help" title="Ayuda">?</button></div>`;
+}
+function dtSum(){
+  const d = dt.dex, m = mon(d), nat = natureOf(d), cb = combatBoost(d);
+  const pure = (k, i, e) => { const core = Math.floor((2 * m.base[k] + i + Math.floor(e / 4)) * .5); return k === 'hp' ? core + 60 : core + 5; };
+  const MAXV = 230, iv = ivOf(d), ev = evOf(d);
+  const rows = STAT_KEYS.map(k => {
+    const base = m.base[k], b0 = pure(k, 0, 0), tot = realStat(d, k), col = base < 50 ? '#e8493a' : base < 80 ? '#f0903a' : base < 100 ? '#e8c33a' : base < 130 ? '#4ccf6a' : '#3ea6ff';
+    const bw = Math.min(100, b0 / MAXV * 100), tw = Math.max(0, Math.min(100 - bw, (tot - b0) / MAXV * 100));
+    const ar = nat[1] === k ? '<em class="up">▲</em>' : nat[2] === k ? '<em class="dn">▼</em>' : '<em></em>';
+    return `<div class="fd-sr" title="Base de la especie ${base} · IV ${iv[k]} · EV ${ev[k]}"><span>${STAT_NAMES[k]}</span><div class="bar"><i style="width:${bw}%;background:${col}"></i><i class="tr" style="width:${tw}%;background-color:${col}"></i></div><b>${tot}</b>${ar}</div>`;
+  }).join('');
+  const tot = STAT_KEYS.reduce((s, k) => s + realStat(d, k), 0);
+  const cx = 125, cy = 112, R = 88, ord = ['hp', 'atk', 'def', 'spe', 'spd', 'spa'], lab = ['PS', 'ATQ', 'DEF', 'VEL', 'DEF.E', 'AT.E'];
+  const pt = (i, v) => { const a = -Math.PI / 2 + i * Math.PI / 3; return [cx + Math.cos(a) * R * v, cy + Math.sin(a) * R * v]; };
+  const poly = f => ord.map((k, i) => pt(i, Math.min(1, f(k) / MAXV)).map(n => n.toFixed(1)).join(',')).join(' ');
+  const tc = TC[m.types[0]];
+  const svg = `<svg viewBox="0 0 250 225">${[.25, .5, .75, 1].map(sc => `<polygon points="${ord.map((k, i) => pt(i, sc).join(',')).join(' ')}" fill="none" stroke="#2b4580"/>`).join('')}
+    ${ord.map((k, i) => { const [x, y] = pt(i, 1.17); return `<text x="${x}" y="${y + 3}" fill="#8fb3e8" font-size="8" text-anchor="middle">${lab[i]}</text>`; }).join('')}
+    <polygon points="${poly(k => pure(k, 0, 0))}" fill="${tc}55" stroke="${tc}" stroke-width="2"/><polygon points="${poly(k => realStat(d, k))}" fill="#ffffff1a" stroke="#fff" stroke-dasharray="4 3" stroke-width="1.5"/></svg>`;
+  const best = STAT_KEYS.reduce((a, k) => m.base[k] > m.base[a] ? k : a, 'hp');
+  const pc = v => { const p = Math.round((v - 1) * 100); return p ? `<b class="${p > 0 ? 'up' : 'dn'}">${p > 0 ? '+' : ''}${p} %</b>` : '<b>=</b>'; };
+  return `<div class="fd-sum"><div class="fd-st"><div class="fd-leg"><span><i style="background:#4ccf6a"></i>Base (nivel 50)</span><span><i style="background:repeating-linear-gradient(45deg,#fff8 0 3px,#fff3 3px 6px)"></i>Entrenamiento (IV + EV)</span><span class="up">▲▼ Naturaleza</span></div>
+      ${rows}<div class="fd-tot"><span>Total</span><b>${tot}</b></div></div>
+    <div class="fd-rad">${svg}<p>Su punto fuerte es ${{hp:'los <b>PS</b>', atk:'el <b>Ataque</b>', def:'la <b>Defensa</b>', spa:'el <b>Ataque Especial</b>', spd:'la <b>Defensa Especial</b>', spe:'la <b>Velocidad</b>'}[best]}.<br>Discontinua: con tu entrenamiento.</p></div>
+    <div class="fd-combat"><span>En combate:</span><span>PS ${pc(cb.hm)}</span><span>Daño ${pc(cb.dm)}</span><span>Velocidad ${pc(cb.spdm)}</span><span>Resistencia ${pc(cb.defm)}</span></div></div>`;
+}
+function dtTrain(){
+  const d = dt.dex, cap = capOf(d), g = trChapasTotal(d, 'iv'), sv = trChapasTotal(d, 'ev');
+  const row = (kind, k) => `<div class="fd-trw"><button data-act="trm" data-kind="${kind}" data-k="${k}" title="Bajar">−</button>${trRow(kind, k)}<button data-act="trp" data-kind="${kind}" data-k="${k}" title="Subir (1 chapa)">+</button></div>`;
+  const chg = [];
+  STAT_KEYS.forEach(k => { ['iv', 'ev'].forEach(kind => { const c = trCfg(kind), cur = c.cur(d, k), t = trWant(d, kind, k); if(t > cur) chg.push(`${kind.toUpperCase()} ${TR_SHORT[k]} ${cur}→${t}`); }); });
+  const cost = [g ? `${g} Chapa${g > 1 ? 's' : ''} Dorada${g > 1 ? 's' : ''}` : '', sv ? `${sv} Chapa${sv > 1 ? 's' : ''} Plateada${sv > 1 ? 's' : ''}` : ''].filter(Boolean).join(' y ');
+  return `<div class="fd-tr">
+    <div class="fd-tc"><h3>IVs <small>${ivSum(d)} / ${TRAIN.ivTotal} · cada + gasta 1 Chapa Dorada (+${TRAIN.chapaIV})</small></h3>${STAT_KEYS.map(k => row('iv', k)).join('')}
+      <div class="fd-pre"><button data-act="rsview" data-w="iv"${cap.gold < 1 ? ' disabled' : ''}>↺ Restablecer IVs <small>(devuelve ${cap.gold})</small></button></div></div>
+    <div class="fd-tc"><h3>EVs <small>${evSum(d)} / ${TRAIN.evTotal} · cada + gasta 1 Chapa Plateada (+${TRAIN.chapaEV})</small></h3>${STAT_KEYS.map(k => row('ev', k)).join('')}
+      <div class="fd-pre">${Object.entries(DT_PRESETS).map(([id, P]) => `<button data-act="preset" data-v="${id}">${P.n}</button>`).join('')}<button data-act="rsview" data-w="ev"${cap.silver < 1 ? ' disabled' : ''}>↺ Restablecer EVs <small>(devuelve ${cap.silver})</small></button></div></div>
+    <div class="fd-apply"><span>${chg.length ? 'Sin aplicar: ' + chg.join(' · ') : 'Pulsa + o arrastra una barra. No se gasta nada hasta que pulses «Aplicar».'}</span>
+      <button class="undo" data-act="trundo"${chg.length ? '' : ' disabled'}>Deshacer</button><button class="go" data-act="trapply"${chg.length ? '' : ' disabled'}>${cost ? 'Aplicar · gasta ' + cost : 'Aplicar'}</button></div></div>`;
+}
+function dtMoves(){
+  const d = dt.dex, m = mon(d), mv = movesOf(d);
+  return `${movesChanged(d) ? '<div class="fd-mvtop"><button class="fd-mini" data-act="reset">↺ Restaurar ataques originales</button></div>' : ''}<div class="fd-mv">${[1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], M = MV[s], inf = moveInfo(n), ch = (save.mv[d] || {})[s];
+    return `<div class="fd-m" style="--t:${TC[t]}"><div class="top"><span class="sl">${SLOT_SHORT[s].toUpperCase()}</span><span class="key">${{1: 'Clic izq.', 2: 'Clic dcho.', 3: 'Q', 4: 'E'}[s]}</span>${ch ? '<span class="mt">MT</span>' : ''}</div>
+      <h4>${esc(n)} ${dtChip(t)}</h4>
+      <div class="nums"><span>Daño<b>${s === 3 ? '—' : M.dmg}</b></span><span>Energía<b>${M.en}</b></span><span>Recarga<b>${String(M.cd).replace('.', ',')} s</b></span></div>
+      <p>${esc(inf.real)}</p><button class="chg" data-act="mtview" data-s="${s}" title="Aprender un MT o recuperar un ataque anterior">Cambiar</button></div>`; }).join('')}</div>`;
+}
+const DT_HELP = {
+  sum: 'Las estadísticas son a nivel 50. Total = Base + IV + EV, y la naturaleza sube un 10 % una y baja un 10 % otra. En combate se nota una parte de esa mejora.',
+  tr: 'IV: de 0 a 31 en cada estadística (cada Chapa Dorada +5). EV: hasta 252 en cada una y 510 en total (cada Chapa Plateada +10). Los presets solo colocan las barras: no se gasta nada hasta pulsar «Aplicar». Restablecer devuelve las chapas.',
+  mv: 'Cada Pokémon tiene 4 huecos: Golpe (cuerpo a cuerpo), Disparo (a distancia), Mejora (te potencia) y Fuerte (el que más daño hace). Para cambiar uno necesitas un MT de ese hueco o recuperar uno que ya olvidó.'
+};
+function dataMainNew(){
+  const tab = dt.tab || 'sum';
+  return `<div class="fd">${dtHead()}${dt.help ? `<p class="fd-help">${DT_HELP[tab]}</p>` : ''}${tab === 'tr' ? dtTrain() : tab === 'mv' ? dtMoves() : dtSum()}</div>`;
 }
 
 // ---- Vistas de elección (con barra de confirmación para no gastar un objeto sin querer) ----
@@ -215,6 +307,7 @@ document.addEventListener('input', e => {
   if(t > cur) dt.tr[kind][k] = t; else delete dt.tr[kind][k];
   trSync();
 });
+document.addEventListener('change', e => { if(DT_NEW && e.target.closest && e.target.closest('#tmDataB .trs input')) renderData(); });   // ficha nueva: al soltar la barra se actualiza el coste
 function trApply(){                                                   // gasta las chapas de las barras (una por una, con las mismas reglas de siempre)
   const d = dt.dex; let err = '', g = 0, s = 0;
   STAT_KEYS.forEach(k => {
@@ -226,7 +319,7 @@ function trApply(){                                                   // gasta l
 }
 
 // ---- Botones de la ficha (un solo controlador para toda la ventana) ----
-function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; dt.tr = {iv:{}, ev:{}}; }
+function dataStep(delta){ const i = team.indexOf(dt.dex); dt.dex = team[(i + delta + team.length) % team.length]; dt.view = 'main'; dt.pick = null; dt.tr = {iv:{}, ev:{}}; }   // (la pestaña abierta se mantiene)
 function confirmPick(){
   if(dt.pick === null && dt.view !== 'reset') return;                    // (Restablecer no elige nada: solo se confirma)
   const d = dt.dex; let err = '', ok = '';
@@ -251,6 +344,15 @@ document.addEventListener('click', e => {
   else if(a === 'back'){ dt.view = 'main'; dt.pick = null; }
   else if(a === 'chapa'){ const err = useChapa(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: IV +${TRAIN.chapaIV} (ahora ${ivOf(d)[b.dataset.k]}).`); }
   else if(a === 'chapap'){ const err = useChapaPlata(d, b.dataset.k); toast(err || `${STAT_NAMES[b.dataset.k]}: +${TRAIN.chapaEV} EV (ahora ${evOf(d)[b.dataset.k]}).`); }
+  else if(a === 'tab'){ dt.tab = b.dataset.v; }
+  else if(a === 'help'){ dt.help = !dt.help; }
+  else if(a === 'trp' || a === 'trm'){ const kind = b.dataset.kind, k = b.dataset.k, c = trCfg(kind), cur = c.cur(d, k), w = trWant(d, kind, k);
+    const t = a === 'trp' ? Math.min(trMax(d, kind, k), w + c.step) : Math.max(cur, w - c.step);
+    if(a === 'trp' && t <= w) toast(held(c.item) <= trChapasTotal(d, kind) ? `No te quedan ${c.item === 'chapa' ? 'Chapas Doradas' : 'Chapas Plateadas'} (Tienda › Mejoras).` : 'Ya está al máximo.');
+    if(t > cur) dt.tr[kind][k] = t; else delete dt.tr[kind][k]; }
+  else if(a === 'preset'){ const P = DT_PRESETS[b.dataset.v]; dt.tr.ev = {};
+    STAT_KEYS.filter(k => P.ev[k]).sort((x, y) => P.ev[y] - P.ev[x]).forEach(k => { const cur = evOf(d)[k], want = Math.max(cur, Math.min(P.ev[k], trMax(d, 'ev', k))); if(want > cur) dt.tr.ev[k] = want; });
+    toast(`${P.n}: barras colocadas. Pulsa «Aplicar» para gastar las chapas.`); }
   else if(a === 'trapply') trApply();
   else if(a === 'trundo') dt.tr = {iv:{}, ev:{}};
   else if(a === 'rsview'){ dt.view = 'reset'; dt.what = b.dataset.w; dt.pick = null; }
