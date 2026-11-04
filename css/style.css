@@ -2685,3 +2685,8 @@ html.phone .stg{zoom:1}
 .cfp{display:block;width:3.4rem;height:2.4rem;border-radius:.3rem;flex:none}
 .cfp.rk{background:url(../fondos/marcos/diamante.webp) center/100% 100% no-repeat,#0a1226}
 .cfp.av{border:4px solid var(--ac);background:#0a1226;box-shadow:0 0 .6rem color-mix(in srgb,var(--ac) 50%,transparent)}
+.stgPerf{cursor:default}
+.stg .seg{display:inline-flex;flex:none;background:#0a1226;border:2px solid #2d4a7c;border-radius:.6rem;padding:.15rem;gap:.15rem}
+.stg .seg button{margin:0;border:0;background:transparent;padding:.45rem .8rem;font-size:.75rem;border-radius:.45rem;color:#8fb3e8}
+.stg .seg button.on{background:#ffcc33;color:#1b1500}
+.stgPerf small em.ok{font-style:normal;color:#4ccf6a}

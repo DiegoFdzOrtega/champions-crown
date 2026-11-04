@@ -26,7 +26,7 @@ const hdCanvas = (w, h) => { const c = document.createElement('canvas'); c.width
 const fxhdLive = () => fx.list.length > 0 || fx.parts.length > 0 || fxhd.hits.length > 0 || fxhd.charges.length > 0 || !!fxhd.flash;
 
 function fxhdBegin(){
-  hdBl.on = fxhd.on && !!g && fxhdLive();
+  hdBl.on = fxhd.on && !LOWFX && !!g && fxhdLive();                                   // en modo rendimiento (state.js) no hay bloom: los halos de fxhdDraw siguen
   if(!hdBl.on) return;
   const w = cv.width >> 1, h = cv.height >> 1;
   if(!hdBl.A || hdBl.A.width !== w || hdBl.A.height !== h){ hdBl.A = hdCanvas(w, h); hdBl.H = hdCanvas(w, h); hdBl.S = hdCanvas(w >> 1, h >> 1); hdBl.S2 = hdCanvas(w >> 3, h >> 3); }
@@ -40,11 +40,12 @@ function fxhdEnd(){
     hc.globalCompositeOperation = 'difference'; hc.drawImage(hdBl.A, 0, 0);
     hc.globalCompositeOperation = 'source-over';
     const s1 = hdBl.S.getContext('2d'), s2 = hdBl.S2.getContext('2d');
-    s1.globalCompositeOperation = 'copy'; s1.filter = 'blur(2px) brightness(1.25)'; s1.drawImage(hdBl.H, 0, 0, hdBl.S.width, hdBl.S.height); s1.filter = 'none';
-    s2.globalCompositeOperation = 'copy'; s2.filter = 'blur(2px) brightness(1.4)'; s2.drawImage(hdBl.H, 0, 0, hdBl.S2.width, hdBl.S2.height); s2.filter = 'none';
-    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
-    ctx.globalAlpha = .6 * fxhd.glow; ctx.drawImage(hdBl.S, 0, 0, cv.width, cv.height);
-    ctx.globalAlpha = .5 * fxhd.glow; ctx.drawImage(hdBl.S2, 0, 0, cv.width, cv.height);
+    const fl = !LOWFX;                                                                 // en modo rendimiento sin filtros: el desenfoque sale solo de reducir y ampliar
+    s1.globalCompositeOperation = 'copy'; if(fl) s1.filter = 'blur(2px) brightness(1.25)'; s1.drawImage(hdBl.H, 0, 0, hdBl.S.width, hdBl.S.height); if(fl) s1.filter = 'none';
+    s2.globalCompositeOperation = 'copy'; if(fl) s2.filter = 'blur(2px) brightness(1.4)'; s2.drawImage(hdBl.H, 0, 0, hdBl.S2.width, hdBl.S2.height); if(fl) s2.filter = 'none';
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'lighter'; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = LOWFX ? 'low' : 'high';
+    ctx.globalAlpha = (fl ? .6 : .8) * fxhd.glow; ctx.drawImage(hdBl.S, 0, 0, cv.width, cv.height);
+    ctx.globalAlpha = (fl ? .5 : .7) * fxhd.glow; ctx.drawImage(hdBl.S2, 0, 0, cv.width, cv.height);
     ctx.restore();
   }catch(e){ hdBl.on = false; }
 }

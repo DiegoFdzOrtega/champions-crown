@@ -247,6 +247,8 @@ function openSettings(){
             ${sw('fs', fsOn(), 'Pantalla completa', canFs ? 'Oculta las barras del navegador.' : 'Tu navegador no lo permite en esta página.', !canFs)}
             ${sw('fxhd', fxhd.on, 'Efectos de ataque mejorados', 'Brillos y marcas en el suelo. Desactívalo si el juego va lento.')}
           </div>
+          <div class="stgCard"><div class="sw stgPerf"><span class="swT"><b>Modo rendimiento</b><small>Menos resolución y sin los brillos más pesados: el combate va mucho más fluido en móviles. ${LOWFX ? '<em class="ok">Ahora está activado.</em>' : 'Ahora está desactivado.'}</small></span>
+            <div class="seg" id="perfSeg">${[['auto', 'Auto'], ['1', 'Sí'], ['0', 'No']].map(([v, n]) => `<button data-v="${v}" class="${perfPref() === v ? 'on' : ''}">${n}</button>`).join('')}</div></div></div>
         </section>
         <section class="stgS" data-s="aud"><h2>Audio</h2>
           <div class="stgCard">
@@ -274,6 +276,10 @@ function openSettings(){
   $('volS').onchange = () => Sfx.play('click');                                      // al soltar el deslizador de efectos se oye cómo suenan
   $('mute').onchange = e => Music.setMute(e.target.checked);
   $('fxhd').onchange = e => fxhdSet(e.target.checked);
+  $('perfSeg').onclick = e => { const b = e.target.closest('button'); if(!b || b.classList.contains('on')) return; perfSet(b.dataset.v);   // modo rendimiento (state.js): se aplica al recargar
+    $('perfSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    const now = b.dataset.v === '1' || (b.dataset.v === 'auto' && perfAuto());
+    if(now !== LOWFX) toast('Recarga la página para aplicar el modo rendimiento.'); };
   $('setAcc').onclick = openAccount;                                // Ajustes › Cuenta (js/cloudui.js)
   $('fs').onchange = e => {
     const el = document.documentElement;

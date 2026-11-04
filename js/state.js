@@ -4,11 +4,23 @@
    ===================================================================== */
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 
+/* MODO RENDIMIENTO (para móviles). Ajustes › Pantalla › «Modo rendimiento»: 'auto' (por defecto: se activa solo en móviles), '1' siempre, '0' nunca.
+   Con él: el combate se dibuja a menos resolución (máx. 1,5× en vez de 2,5×), el brillo de los ataques se calcula en pequeño y sin filtros,
+   y en el lienzo principal se ignoran shadowBlur y filter (los halos con sombra difuminada son lo que más cuesta a la GPU de un móvil). */
+const PERF_KEY = 'arena2d_perf';
+function perfPref(){ try{ const v = localStorage.getItem(PERF_KEY); return v === '1' || v === '0' ? v : 'auto'; }catch(e){ return 'auto'; } }
+function perfAuto(){ try{ return document.documentElement.classList.contains('phone') || (matchMedia('(pointer:coarse)').matches && Math.min(screen.width, screen.height) <= 500); }catch(e){ return false; } }
+const LOWFX = perfPref() === '1' || (perfPref() === 'auto' && perfAuto());
+function perfSet(v){ try{ localStorage.setItem(PERF_KEY, v); }catch(e){} }   // se aplica al recargar la página (Ajustes lo avisa)
+if(LOWFX){
+  for(const k of ['shadowBlur', 'filter']) try{ Object.defineProperty(ctx, k, {get: () => k === 'filter' ? 'none' : 0, set(){}, configurable: true}); }catch(e){}
+}
+
 // El lienzo usa la resolución real de la pantalla. El juego se dibuja en un mundo de alto 540
 // y ancho variable, así que llena toda la ventana sin deformarse.
 function resize(){
   const vs = window.visualViewport ? Math.min(1, visualViewport.scale || 1) : 1;                  // móvil: la página se dibuja reducida (index.html) → no hace falta tanta resolución
-  const dpr = Math.min(2.5, (window.devicePixelRatio || 1) * vs), cw = window.innerWidth, ch = window.innerHeight;   // (máximo 2,5: en móviles con pantallas muy densas iría lento)
+  const dpr = Math.min(LOWFX ? 1.5 : 2.5, (window.devicePixelRatio || 1) * vs), cw = window.innerWidth, ch = window.innerHeight;   // (máximo 2,5: en móviles con pantallas muy densas iría lento)
   W = LOCKW || Math.max(500, Math.round(cw * H / ch));          // en un combate online W es fijo (LOCKW): si no, cada jugador tendría una arena distinta y se descuadraría
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
 }
