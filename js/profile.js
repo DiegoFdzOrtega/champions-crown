@@ -39,39 +39,40 @@ function genButtons(){
   const b = (g, name, lock) => `<button type="button" data-g="${g}"${lock ? ' class="lock" title="Bloqueado"' : ''}><img alt=""><span>${lock ? '🔒 ' : ''}${name}</span></button>`;
   return b('m', 'Chico') + b('f', 'Chica') + (skinAllowed('r') ? b('r', 'Red Masters') : '') + TRAINERS.map(t => b(t.id, t.name, !trainerUnlocked(t.id))).join('');
 }
+let pfTab = 'who';                                                 // pestaña abierta del editor del Perfil (se recuerda mientras juegas)
+const PF_TABS = [['who', 'Entrenador', 'user'], ['bg', 'Fondo', 'img'], ['av', 'Avatar', 'face'], ['tf', 'Título y marco', 'star'], ['fav', 'Favoritos', 'heart'], ['priv', 'Privacidad', 'lock']];
+const PF_ICO = {
+  user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
+  img: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>',
+  face: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8.5 15c1 1 2 1.5 3.5 1.5s2.5-.5 3.5-1.5"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>',
+  lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'};
 function openProfile(){ pfDraft = favSaved(); pfDraftS = favShinySaved(); avDraft = save.avatar || ''; renderProfile(); }
 
 function renderProfile(){
   const saved = favSaved();
   const savedS = favShinySaved(), dirty = pfDraft.some((d,i) => d !== saved[i] || pfDraftS[i] !== savedS[i]);
+  const T = PF_TABS.find(t => t[0] === pfTab) ? pfTab : 'who';
+  const sec = (k, title, help, body) => `<section class="pfS${T === k ? ' on' : ''}" data-s="${k}"><div class="pfS-h"><h2>${title}</h2>${help ? `<p class="help">${help}</p>` : ''}</div>${body}</section>`;
   panel(userBar('profile') + `<h1>Perfil</h1>
     <div id="myCard" class="fpBody"></div>
-    <p class="help">Esta es tu tarjeta de entrenador: la ven tus amigos desde Amigos (puedes ocultarla abajo). Se actualiza sola cuando cambias algo.</p>
-    <label>Nombre de entrenador<br><input id="nameIn" maxlength="10"></label>
-    <p class="help" id="nameHint"></p>
-    <h2>Personaje</h2>
-    <p class="help">Es el que sale en el panel VS antes de cada combate.</p>
-    <div class="gen-row" id="genRow">${genButtons()}</div>
-    <h2>Fondo de la tarjeta</h2>
-    <p class="help">Ilustración de fondo de tu tarjeta (la ven tus amigos). Se desbloquean al derrotar a su líder, miembro del Alto Mando o Campeón; los bloqueados dicen cómo conseguirlos.</p>
-    <div class="bg-count" id="bgCount"></div>
-    <div class="bg-grid" id="bgGrid"></div>
-    <h2>Avatar</h2>
-    <p class="help">Elige tu avatar. Los que tienen candado se desbloquean al conseguir ese Pokémon.</p>
-    <div class="av-grid" id="avGrid"></div>
-    <div class="pf-btns"><button id="avSave" class="main">Guardar / Seleccionar avatar activo</button></div>
-    <h2>Título y marco</h2>
-    <p class="help">Son recompensas especiales de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.</p>
-    <label>Título<br><select id="titSel"></select></label>
-    <div class="frames" id="frameRow"></div>
-    <h2>Pokémon favoritos</h2>
-    <p class="help">Elige 3 Pokémon distintos. Si tienes su versión shiny, puedes enseñarla en tu perfil. Son solo para tu perfil: no cambian tu equipo de combate.</p>
-    <div class="pf-slots" id="pfSlots"></div>
-    <p id="pfMsg" class="warn"></p>
-    <div class="pf-btns"><button id="pfSave" class="main">Guardar perfil</button><button id="pfCancel">Cancelar cambios</button></div>
-    <h2>Perfil para amigos</h2>
-    <p class="help">Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP o tickets. Hace falta tener cuenta (pantalla Amigos).</p>
-    <label class="chkrow"><input type="checkbox" id="pubChk"><span>Mostrar mi perfil a mis amigos</span></label>`);
+    <p class="help pf-cardhelp">Esta es tu tarjeta de entrenador: la ven tus amigos desde Amigos. Se actualiza sola cuando cambias algo.</p>
+    <div class="pf-ed">
+      <nav class="pf-tabs">${PF_TABS.map(([k, n, ic]) => `<button data-s="${k}" class="${T === k ? 'on' : ''}">${PF_ICO[ic]}<span>${n}</span>${k === 'fav' && dirty ? '<i class="pf-dot" title="Cambios sin guardar"></i>' : ''}</button>`).join('')}</nav>
+      <div class="pf-body">
+        ${sec('who', 'Entrenador', '', `<div class="pf-card"><label class="pf-lab">Nombre de entrenador<input id="nameIn" maxlength="10"></label><p class="help" id="nameHint"></p></div>
+          <div class="pf-card"><h3>Personaje</h3><p class="help">Sale en tu tarjeta y en el panel VS antes de cada combate.</p><div class="gen-row" id="genRow">${genButtons()}</div></div>`)}
+        ${sec('bg', 'Fondo de la tarjeta', 'Se desbloquean al derrotar a su líder, miembro del Alto Mando o Campeón. Los bloqueados dicen cómo conseguirlos.', `<div class="bg-count" id="bgCount"></div><div class="bg-grid" id="bgGrid"></div>`)}
+        ${sec('av', 'Avatar', 'Los que tienen candado se desbloquean al conseguir ese Pokémon.', `<div class="av-grid" id="avGrid"></div><div class="pf-btns"><button id="avSave" class="main">Guardar avatar</button></div>`)}
+        ${sec('tf', 'Título y marco', 'Son recompensas de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.', `<div class="pf-card"><label class="pf-lab">Título<select id="titSel"></select></label></div><div class="pf-card"><h3>Marco del avatar</h3><div class="frames" id="frameRow"></div></div>`)}
+        ${sec('fav', 'Pokémon favoritos', 'Elige 3 Pokémon distintos. Si tienes su versión shiny, puedes enseñarla. Solo son para tu perfil: no cambian tu equipo.', `<div class="pf-slots" id="pfSlots"></div><p id="pfMsg" class="warn"></p><div class="pf-btns"><button id="pfSave" class="main">Guardar favoritos</button><button id="pfCancel">Cancelar cambios</button></div>`)}
+        ${sec('priv', 'Privacidad', 'Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP ni tus tickets. Hace falta tener cuenta.', `<div class="pf-card"><label class="sw"><span class="swT"><b>Mostrar mi perfil a mis amigos</b><small>Si lo desactivas, nadie ve tu tarjeta.</small></span><input type="checkbox" id="pubChk"><i></i></label></div>`)}
+      </div>
+    </div>`);
+  $('panelBody').classList.add('wide');
+  document.querySelector('.pf-tabs').onclick = e => { const b = e.target.closest('button'); if(!b) return; pfTab = b.dataset.s;
+    document.querySelectorAll('.pf-tabs button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('.pfS').forEach(x => x.classList.toggle('on', x.dataset.s === pfTab)); };
   renderAvatarGrid(); renderTitleFrame(); renderMyCard(); renderBgGrid();
   $('nameIn').value = trainerName(); $('nameIn').disabled = nameLocked();                        // con cuenta, el nombre es el de la cuenta y no se toca
   $('nameHint').textContent = nameLocked() ? 'Tu nombre lo da tu cuenta: se elige al crearla y no se puede cambiar por ahora.' : 'Sin cuenta puedes poner el nombre que quieras. Si inicias sesión, se usará el nombre de tu cuenta.';
