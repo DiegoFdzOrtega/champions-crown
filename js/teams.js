@@ -195,14 +195,22 @@ const REWARD_REGION = {
   Alola: {chapa:5, chapaplata:5, tickets:10}
 };
 const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', ticketsL:'tiradas legendarias', bp:'Puntos de Batalla (BP)'};
-const rewardOf = F => F.kind === 'campo' ? Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]) : REWARD_REGION[F.region] || REWARD[F.kind];
+// Alto Mando y Campeón: la recompensa de un líder de su región multiplicada, más tiradas legendarias y BP (son los combates más difíciles).
+const REWARD_BOSS = {alto: {mult:2, add:{ticketsL:1, bp:100}}, campeon: {mult:3, add:{ticketsL:3, bp:500}}};
+const rewardOf = F => {
+  if(F.kind === 'campo') return Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]);
+  const base = REWARD_REGION[F.region] || REWARD.lider, B = REWARD_BOSS[F.kind];
+  if(!B) return base;
+  const r = {}; Object.entries(base).forEach(([k, n]) => r[k] = n * B.mult); Object.entries(B.add).forEach(([k, n]) => r[k] = (r[k] || 0) + n);
+  return r;
+};
 let lastReward = null;                                              // lo que ha dado la última victoria {list:[[id, cantidad]...], dbl} (lo enseña la pantalla de victoria, victoria.js)
 function giveReward(F, firstTime){
   lastReward = null;
   let r = rewardOf(F); if(!r || (REWARD.once && !firstTime)) return '';
   const dbl = r.tickets && typeof firstWinToday === 'function' && firstWinToday();            // primera victoria del día: tickets x2 (daily.js)
   if(dbl) r = Object.assign({}, r, {tickets:r.tickets * DAILY.firstWinMult});
-  Object.entries(r).forEach(([id, n]) => { if(id === 'tickets') save.tickets += n; else if(id === 'bp') save.bp += n; else save.items[id] = held(id) + n; });
+  Object.entries(r).forEach(([id, n]) => { if(id === 'tickets') save.tickets += n; else if(id === 'ticketsL') save.ticketsL += n; else if(id === 'bp') save.bp += n; else save.items[id] = held(id) + n; });
   lastReward = {list:Object.entries(r), dbl:!!dbl};
   return Object.entries(r).map(([id, n]) => `+${n} ${REWARD_NAMES[id]}`).join(' · ') + (dbl ? ` · ¡Primera victoria del día: tickets x${DAILY.firstWinMult}!` : '');
 }
