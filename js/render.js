@@ -179,7 +179,7 @@ function draw(){
   if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
   if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
-  if(!M.dead && !(typeof touchUI === 'function' && touchUI())){             // cruz de puntería (con los dedos no se enseña)
+  if(!M.dead && !(typeof TOUCH !== 'undefined' && TOUCH.on)){             // cruz de puntería (con los dedos no se enseña)
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
@@ -207,10 +207,10 @@ function draw(){
   }
   });
   if(PRV) prTopEnd();
-  if(!(typeof touchUI === 'function' && touchUI())) text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');   // con los dedos está el botón II
+  if(!(typeof TOUCH !== 'undefined' && TOUCH.on)) text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');   // con los dedos está el botón II
   if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
 
-  if(!(typeof touchUI === 'function' && touchUI())){   // con pantalla táctil, la barra de ataques la sustituyen los botones (js/touch.js)
+  if(!(typeof TOUCH !== 'undefined' && TOUCH.on)){   // con pantalla táctil, la barra de ataques la sustituyen los botones (js/touch.js)
   // Barra de ataques, centrada abajo
   ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
   if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás

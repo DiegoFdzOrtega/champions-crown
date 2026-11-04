@@ -103,7 +103,7 @@ function prBack(){                                           // fondo + pantalla
   if(im.ok){ ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(im, PR.REF.x, 0, PR.REF.w, PR.REF.h); prSides(im, R); ctx.imageSmoothingEnabled = false; }
   const t = performance.now() / 1000;
   prLive(t);                                                 // lo que se mueve: focos, haces de luz y flashes de cámara en la grada
-  if(!(typeof touchUI === 'function' && touchUI())){         // en el móvil no: ahí la vida y el equipo ocupan más y se montaban encima
+  if(!(typeof TOUCH !== 'undefined' && TOUCH.on)){         // en el móvil no: ahí la vida y el equipo ocupan más y se montaban encima
     prBoard(78, 122, 154, 94, '#4f8bff', t);                 // marcador izquierdo
     prBoard(738, 120, 155, 96, '#ff6a4a', t);                // marcador derecho
   }
