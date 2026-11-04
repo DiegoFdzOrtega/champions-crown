@@ -189,3 +189,56 @@ function touchDraw(){
   document.head.appendChild(st);
   const d = document.createElement('div'); d.id = 'tRotate'; d.innerHTML = '<b>⟳</b>Gira el móvil<br>para jugar en horizontal';
   document.body.appendChild(d); }
+
+// ---- ARRASTRAR Y SOLTAR EN LOS MENÚS CON EL DEDO (Equipo Pokémon: ordenar las cartas y meter Pokémon de la colección) ----
+// El «arrastrar y soltar» del navegador (draggable="true" + dragstart / dragover / drop) no existe en las pantallas táctiles.
+// Aquí se imita: MANTÉN PULSADO un momento sobre algo arrastrable (se levanta y vibra), muévelo y suéltalo encima de donde va.
+// Si mueves el dedo enseguida, no se arrastra: la lista se desplaza como siempre. Se lanzan los mismos eventos que con el ratón,
+// así que team / teamhub.js funcionan sin cambios.
+(() => {
+  const HOLD = 260;                                                                    // ms que hay que mantener el dedo para empezar a arrastrar
+  let st = null;                                                                       // {src, x0, y0, timer, on, dt, ghost, over}
+  const mkDT = () => { const d = {}; return {setData: (k, v) => { d[k] = String(v); }, getData: k => d[k] || '', clearData(){}, effectAllowed: 'all', dropEffect: 'move', types: []}; };
+  const fire = (el, type, dt) => { if(!el) return true; const ev = new Event(type, {bubbles: true, cancelable: true}); Object.defineProperty(ev, 'dataTransfer', {value: dt}); return el.dispatchEvent(ev); };
+  function begin(){
+    if(!st) return;
+    st.dt = mkDT();
+    if(!fire(st.src, 'dragstart', st.dt)){ st = null; return; }                        // el juego puede cancelarlo (p. ej. sobre el menú del objeto)
+    st.on = true;
+    const r = st.src.getBoundingClientRect(), gh = st.src.cloneNode(true);
+    st.src.querySelectorAll('canvas').forEach((c, i) => { const k = gh.querySelectorAll('canvas')[i]; if(k){ k.width = c.width; k.height = c.height; try{ k.getContext('2d').drawImage(c, 0, 0); }catch(e){} } });   // los dibujos no se copian solos
+    Object.assign(gh.style, {position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: 0, zIndex: 9998, pointerEvents: 'none', opacity: .85,
+      transform: 'scale(1.06) rotate(-2deg)', boxShadow: '0 1rem 2rem rgba(0,0,0,.6)', transition: 'none'});
+    document.body.appendChild(gh); st.ghost = gh; st.gx = st.x0 - r.left; st.gy = st.y0 - r.top;
+    if(navigator.vibrate) try{ navigator.vibrate(15); }catch(e){}
+  }
+  document.addEventListener('touchstart', e => {
+    if((g && !g.over) || e.touches.length !== 1) return;                               // en combate no (ahí manda el joystick)
+    const src = e.target.closest && e.target.closest('[draggable="true"]'); if(!src) return;
+    const t = e.touches[0]; st = {src, x0: t.clientX, y0: t.clientY, on: false, over: null};
+    st.timer = setTimeout(begin, HOLD);
+  }, {passive: true});
+  document.addEventListener('touchmove', e => {
+    if(!st) return; const t = e.touches[0];
+    if(!st.on){ if(Math.hypot(t.clientX - st.x0, t.clientY - st.y0) > 10){ clearTimeout(st.timer); st = null; } return; }   // se movió antes de tiempo: era desplazar la lista
+    e.preventDefault();
+    st.ghost.style.left = (t.clientX - st.gx) + 'px'; st.ghost.style.top = (t.clientY - st.gy) + 'px';
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    if(el !== st.over){ if(st.over) fire(st.over, 'dragleave', st.dt); st.over = el; }
+    if(el) fire(el, 'dragover', st.dt);
+  }, {passive: false});
+  const end = e => {
+    if(!st) return; clearTimeout(st.timer);
+    if(st.on){
+      e.preventDefault();                                                              // que no cuente también como un toque (clic)
+      if(e.type === 'touchend' && st.over && st.over !== st.src && !st.src.contains(st.over)) fire(st.over, 'drop', st.dt);
+      fire(st.src, 'dragend', st.dt); st.ghost.remove();
+    }
+    st = null;
+  };
+  document.addEventListener('touchend', end, {passive: false});
+  document.addEventListener('touchcancel', end, {passive: false});
+  const css = document.createElement('style');                                         // sin menú del navegador ni selección de texto al mantener pulsado
+  css.textContent = 'html.phone [draggable="true"],body.touch [draggable="true"]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}';
+  document.head.appendChild(css);
+})();
