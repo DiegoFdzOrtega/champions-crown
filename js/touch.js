@@ -154,10 +154,15 @@ function touchDraw(){
       const total = Math.max(m.cd, cost / EN_REGEN, .01), fr = Math.min(1, wait / total);
       ctx.fillStyle = 'rgba(5,7,12,.7)'; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.arc(b.x, b.y, b.r - 3, -Math.PI / 2, -Math.PI / 2 + fr * Math.PI * 2); ctx.closePath(); ctx.fill();
     }
-    const nm = mvName(M, i).toUpperCase(), fs = b.r > 40 ? 10 : 8;
-    ctx.font = `${fs}px ${FONT}`; let s = nm; while(ctx.measureText(s).width > b.r * 1.75 && s.length > 4) s = s.slice(0, -1);
-    textO(s, b.x, b.y + (m.en ? 0 : 3), fs, ok ? '#fff' : '#8a94b0', 'center');
-    if(m.en) text('EN ' + cost, b.x, b.y + fs + 8, 7, M.en >= cost ? '#4fb3ff' : '#e8493a', 'center');
+    const nm = mvName(M, i).toUpperCase(), fs = b.r > 40 ? 10 : 8, maxW = b.r * 1.7;
+    ctx.font = `${fs}px ${FONT}`;
+    let lines = [nm];                                                                    // nombre largo: en dos líneas (antes se cortaba: «LATIGO C»)
+    if(ctx.measureText(nm).width > maxW){ const w = nm.split(' ');
+      lines = w.length > 1 ? [w.slice(0, Math.ceil(w.length / 2)).join(' '), w.slice(Math.ceil(w.length / 2)).join(' ')] : [nm];
+      lines = lines.map(l => { let x = l; while(ctx.measureText(x).width > maxW && x.length > 3) x = x.slice(0, -1); return x === l ? l : x.slice(0, -1) + '.'; }); }
+    const lh = fs + 3, y0 = b.y + (m.en ? 0 : 3) - (lines.length - 1) * lh / 2 - (lines.length > 1 && m.en ? 4 : 0);
+    lines.forEach((l, k) => textO(l, b.x, y0 + k * lh, fs, ok ? '#fff' : '#8a94b0', 'center'));
+    if(m.en) text('EN ' + cost, b.x, y0 + (lines.length - 1) * lh + fs + 8, 7, M.en >= cost ? '#4fb3ff' : '#e8493a', 'center');
     if(!ok) textO(wait.toFixed(1), b.x, b.y - b.r * .42, 9, cdWait >= enWait ? '#fff' : '#4fb3ff', 'center');
   });
   // flecha de puntería mientras se arrastra un ataque
