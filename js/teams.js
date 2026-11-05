@@ -194,9 +194,9 @@ const REWARD_REGION = {
   Kalos: {chapa:5, chapaplata:5, tickets:10},
   Alola: {chapa:5, chapaplata:5, tickets:10}
 };
-const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', ticketsL:'tiradas legendarias', bp:'Puntos de Batalla (BP)'};
+const REWARD_NAMES = {chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', tickets:'tiradas de Gachapon', ticketsL:'tiradas legendarias', bp:'Puntos de Batalla (BP)', estrella:'Estrellas de Invocación', estrella_t:'Estrellas temáticas'};
 // Alto Mando y Campeón: la recompensa de un líder de su región multiplicada, más tiradas legendarias y BP (son los combates más difíciles).
-const REWARD_BOSS = {alto: {mult:2, add:{ticketsL:1, bp:100}}, campeon: {mult:3, add:{ticketsL:3, bp:500}}};
+const REWARD_BOSS = {alto: {mult:2, add:{ticketsL:1, bp:100, estrella:1}}, campeon: {mult:3, add:{ticketsL:3, bp:500, estrella_t:1}}};
 const rewardOf = F => {
   if(F.kind === 'campo') return Object.assign({}, REWARD.campo, REWARD_CAMPO[F.tier || 1]);
   const base = REWARD_REGION[F.region] || REWARD.lider, B = REWARD_BOSS[F.kind];

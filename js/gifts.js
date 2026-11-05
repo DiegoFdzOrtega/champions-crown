@@ -19,7 +19,7 @@ const gift = {busy:false, last:0};
 
 const giftNum = v => Math.min(GIFT_MAX, Math.max(0, Math.floor(Number(v)) || 0));
 const giftFmt = n => n.toLocaleString('es-ES');
-const giftClean = g => ({id:String((g && g.id) || '').slice(0, 40), bp:giftNum(g && g.bp), tickets:giftNum(g && g.tickets), ticketsL:giftNum(g && (g.tickets_l != null ? g.tickets_l : g.ticketsL)), note:String((g && g.note) || '').slice(0, 80)});
+const giftClean = g => ({id:String((g && g.id) || '').slice(0, 40), bp:giftNum(g && g.bp), tickets:giftNum(g && g.tickets), ticketsL:giftNum(g && (g.tickets_l != null ? g.tickets_l : g.ticketsL)), estrella:giftNum(g && g.estrella), estrellaT:giftNum(g && (g.estrella_t != null ? g.estrella_t : g.estrellaT)), note:String((g && g.note) || '').slice(0, 80)});
 function giftQGet(){ try{ const q = JSON.parse(localStorage.getItem(GIFT_Q) || '[]'); return Array.isArray(q) ? q : []; }catch(e){ return []; } }
 function giftSeenGet(){ try{ const q = JSON.parse(localStorage.getItem(GIFT_SEEN) || '[]'); return Array.isArray(q) ? q : []; }catch(e){ return []; } }
 function giftQSet(q){ try{ if(q.length) localStorage.setItem(GIFT_Q, JSON.stringify(q)); else localStorage.removeItem(GIFT_Q); }catch(e){} }
@@ -28,9 +28,11 @@ function giftQSet(q){ try{ if(q.length) localStorage.setItem(GIFT_Q, JSON.string
 function giftApplyQ(){
   if(typeof cloud !== 'undefined' && cloud.lock) return;
   const q = giftQGet().map(giftClean); if(!q.length) return;
-  const tot = {bp:0, tickets:0, ticketsL:0}, notes = [];
-  q.forEach(g => { tot.bp += g.bp; tot.tickets += g.tickets; tot.ticketsL += g.ticketsL; if(g.note) notes.push(g.note); });
+  const tot = {bp:0, tickets:0, ticketsL:0, estrella:0, estrellaT:0}, notes = [];
+  q.forEach(g => { tot.bp += g.bp; tot.tickets += g.tickets; tot.ticketsL += g.ticketsL; tot.estrella += g.estrella || 0; tot.estrellaT += g.estrellaT || 0; if(g.note) notes.push(g.note); });
   save.bp += tot.bp; save.tickets += tot.tickets; save.ticketsL += tot.ticketsL;
+  if(tot.estrella) save.items.estrella = (save.items.estrella || 0) + tot.estrella;                 // Estrellas de la Invocación (invocacion.js)
+  if(tot.estrellaT) save.items.estrella_t = (save.items.estrella_t || 0) + tot.estrellaT;
   persist(); giftQSet([]);                                                                         // primero se guarda la partida, después se vacía la cola
   try{ localStorage.setItem(GIFT_SEEN, JSON.stringify(giftSeenGet().concat(q.map(g => g.id).filter(Boolean)).slice(-50))); }catch(e){}
   if(typeof refreshHud === 'function') refreshHud();
@@ -63,7 +65,8 @@ function giftShow(t, notes){
   const old = document.getElementById('giftOv'); if(old) old.remove();
   const o = document.createElement('div'); o.id = 'giftOv'; o.className = 'dlOv';
   const row = (id, txt) => `<div class="gf-row"><canvas id="${id}"></canvas><b>${txt}</b></div>`;
-  const rows = (t.bp ? row('gfCoin', `+${giftFmt(t.bp)} <small>Puntos de Batalla</small>`) : '') + (t.tickets ? row('gfTk', `+${giftFmt(t.tickets)} <small>Tickets de Gachapon</small>`) : '') + (t.ticketsL ? row('gfTkL', `+${giftFmt(t.ticketsL)} <small>Tickets legendarios</small>`) : '');
+  const rows = (t.bp ? row('gfCoin', `+${giftFmt(t.bp)} <small>Puntos de Batalla</small>`) : '') + (t.tickets ? row('gfTk', `+${giftFmt(t.tickets)} <small>Tickets de Gachapon</small>`) : '') + (t.ticketsL ? row('gfTkL', `+${giftFmt(t.ticketsL)} <small>Tickets legendarios</small>`) : '')
+    + (t.estrella ? `<div class="gf-row"><img src="iconos/estrella.webp" alt=""><b>+${giftFmt(t.estrella)} <small>Estrellas de Invocación</small></b></div>` : '') + (t.estrellaT ? `<div class="gf-row"><img src="iconos/estrella_t.webp" alt=""><b>+${giftFmt(t.estrellaT)} <small>Estrellas temáticas</small></b></div>` : '');
   o.innerHTML = `<div class="dlBox gfBox"><canvas id="gfIcon" class="gf-icon"></canvas><h2>¡Has recibido un regalo!</h2>
     ${notes.length ? `<p class="gf-note">${notes.map(n => cloudEsc(n)).join(' · ')}</p>` : ''}<div class="gf-rows">${rows}</div>
     <button class="main" id="giftOk">Aceptar</button></div>`;

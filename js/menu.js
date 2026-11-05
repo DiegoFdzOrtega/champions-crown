@@ -231,6 +231,7 @@ function openRank(){
 const fsOn = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
 let stgTab = 'acc';                                                       // sección de Ajustes abierta (se recuerda mientras juegas)
 const STG_ICO = {
+  cred: '<svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
   acc: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>',
   pan: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>',
   aud: '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
@@ -244,7 +245,7 @@ function openSettings(){
   const google = logged && typeof cloudHasGoogle === 'function' && cloudHasGoogle();
   const sw = (id, on, t, d, dis) => `<label class="sw${dis ? ' dis' : ''}"><span class="swT"><b>${t}</b>${d ? `<small>${d}</small>` : ''}</span><input id="${id}" type="checkbox"${on ? ' checked' : ''}${dis ? ' disabled' : ''}><i></i></label>`;
   const sl = (id, ico, t, v) => `<div class="sl"><span class="slI">${STG_ICO[ico]}</span><span class="slT">${t}</span><input id="${id}" type="range" min="0" max="100" value="${v}"><b id="${id}N"></b></div>`;
-  const NAV = [['acc', 'Cuenta'], ['pan', 'Pantalla'], ['aud', 'Audio'], ['ctl', 'Controles']];
+  const NAV = [['acc', 'Cuenta'], ['pan', 'Pantalla'], ['aud', 'Audio'], ['ctl', 'Controles'], ['cred', 'Créditos']];
   panel(`<div class="stg"><h1>Ajustes</h1>
     <div class="stgL">
       <nav class="stgNav">${NAV.map(([k, n]) => `<button data-s="${k}" class="${stgTab === k ? 'on' : ''}">${STG_ICO[k]}<span>${n}</span></button>`).join('')}</nav>
@@ -273,6 +274,14 @@ function openSettings(){
           <div class="stgCard">${sw('mute', save.mute, 'Silenciar todo', 'Atajo: tecla M')}</div>
         </section>
         <section class="stgS" data-s="ctl">${ctlSettingsHtml()}</section>
+        <section class="stgS" data-s="cred"><h2>Créditos</h2>
+          <div class="stgCard stgCred">
+            <p><b>Champions Crown</b> es un juego de fans, gratuito y sin ánimo de lucro, hecho por Diego Fernández Ortega.</p>
+            <p><b>Sprites de entrenadores</b> (Invocación): <a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">Pokémon Showdown</a> y los artistas que los dibujaron.</p>
+            <p><b>Datos de Pokémon, movimientos y evoluciones:</b> <a href="https://github.com/smogon/pokemon-showdown" target="_blank" rel="noopener">Pokémon Showdown</a> (Smogon).</p>
+            <p class="stgTip">Pokémon y sus personajes son © Nintendo, Game Freak, Creatures y The Pokémon Company. Este juego no está afiliado a ellos.</p>
+          </div>
+        </section>
       </div>
     </div></div>`);
   $('panelBody').classList.add('wide');

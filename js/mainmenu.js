@@ -17,7 +17,7 @@ const MM_ICO = {
   set: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
 };
 const mmSvg = k => `<svg viewBox="0 0 24 24">${MM_ICO[k]}</svg>`;
-const mmIcon = (k, c) => { if(CUR_IMG && (k === 'coin' || k === 'ticket')) return CUR_SRC[k === 'coin' ? 'bp' : 'ticket']; const cv = document.createElement('canvas'); bitmap(cv, ICONS[k], c); return cv.toDataURL(); };
+const mmIcon = (k, c) => { if(k === 'inv') return 'iconos/estrella.webp'; if(CUR_IMG && (k === 'coin' || k === 'ticket')) return CUR_SRC[k === 'coin' ? 'bp' : 'ticket']; const cv = document.createElement('canvas'); bitmap(cv, ICONS[k], c); return cv.toDataURL(); };
 const mmNum = n => Number(n || 0).toLocaleString('es-ES');
 
 // Siguiente combate de la Historia: la primera región abierta que no está terminada
@@ -98,6 +98,7 @@ function mmRender(){
         ${mmTile('team', '#3ea6ff', 'EQUIPO', '', `${team.length} / 3`, `<span class="m2-mini">${team.map(id => `<canvas width="64" height="64" data-d="${id}"></canvas>`).join('')}</span>`)}
         ${mmTile('dex', '#3ea6ff', 'POKÉDEX', '', `${dex} / ${DEX_SHOWN}`, `<span class="pb"><i style="width:${dex / DEX_SHOWN * 100}%"></i></span>`)}
         ${mmTile('gacha', '#ff3ea5', 'GACHAPON', '', `${mmNum(save.tickets)} tickets`)}
+        ${typeof openInv === 'function' ? mmTile('inv', '#b36bff', 'INVOCACIÓN', '', `${mmNum((save.items.estrella || 0) + (save.items.estrella_t || 0))} estrellas`) : ''}
         ${mmTile('shop', '#ffcc33', 'TIENDA', '', `${mmNum(save.bp)} BP`)}
       </div>
     </div>

@@ -36,12 +36,13 @@ const TRAINERS = [
   {id: 'n-masters',  name: 'N Masters',  file: 'n-masters.png',  masters: true, dex: [571, 601, 643, 584, 581, 567]}           // Zoroark, Klinklang, Reshiram, Vanilluxe, Swanna, Archeops
 ];
 const VS_SKINS = Object.assign({m: 'red-gen3.png', r: 'red-masters.png'}, ...TRAINERS.map(t => ({[t.id]: t.file})));
-const vsKnown = g => typeof g === 'string' && Object.prototype.hasOwnProperty.call(VS_SKINS, g);       // ¿es un personaje que existe? (se usa para validar lo que llega de fuera)
+const invSkin = g => typeof g === 'string' && g.startsWith('i:') && typeof INV_BY !== 'undefined' && !!INV_BY[g.slice(2)];   // personaje de la Invocación ('i:<archivo>', invocacion.js)
+const vsKnown = g => typeof g === 'string' && (Object.prototype.hasOwnProperty.call(VS_SKINS, g) || invSkin(g));       // ¿es un personaje que existe? (se usa para validar lo que llega de fuera)
 const VS_SKIN_FILES = [VS_SKIN_FILE, ...Object.values(VS_SKINS)];       // (no salen en la lista de avatares: loadAvatars las salta)
 const VS_MASTERS_USER = 'yumbax';
 const skinAllowed = g => g !== 'r' || (typeof cloud !== 'undefined' && !!cloud.name && cloud.name.toLowerCase() === VS_MASTERS_USER);   // es solo un detalle de adorno: se mira el nombre de la cuenta (Amigos)
 const trainerOpen = id => typeof trainerUnlocked === 'function' && trainerUnlocked(id);          // ¿ya has reclamado el logro de ese personaje? (achievements.js)
-const skinOf = g => { g = g || save.gender; return g === 'f' ? 'f' : (g === 'r' ? (skinAllowed('r') ? 'r' : 'm') : (vsKnown(g) && g !== 'm' && trainerOpen(g) ? g : 'm')); };      // el personaje que se usa de verdad (si no lo tienes, el chico)
+const skinOf = g => { g = g || save.gender; if(invSkin(g)) return invOwns(g.slice(2)) ? g : 'm'; return g === 'f' ? 'f' : (g === 'r' ? (skinAllowed('r') ? 'r' : 'm') : (vsKnown(g) && g !== 'm' && trainerOpen(g) ? g : 'm')); };      // el personaje que se usa de verdad (si no lo tienes, el chico)
 const VS_AUTO_MS = 4600, VS_MIN_MS = 700;                  // se cierra solo a los 4,6 s · no se puede saltar en los primeros 0,7 s (evita dobles clics)
 // Arte VS de los rivales (como el de la pantalla VS de los juegos): si existe lideres/<región>/VS_<Nombre>.webp (o .png / vs_<nombre>), se usa en vez del retrato pequeño.
 // Solo se busca en las regiones de esta lista (así no se piden archivos que no existen).  Si no está, se usa el retrato de siempre.
@@ -79,7 +80,7 @@ function setPlayerSkin(el, g, raw){                              // cambia 'el' 
     const probe = new Image(); probe.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; probe.src = VS_SKIN_URL;
     return;
   }
-  const url = 'avatares/' + VS_SKINS[g]; sp.classList.add('one'); sp.style.backgroundImage = `url("${url}")`;
+  const url = invSkin(g) ? invUrl(g.slice(2)) : 'avatares/' + VS_SKINS[g]; sp.classList.add('one'); sp.style.backgroundImage = `url("${url}")`;
   const probe = new Image(); probe.onload = () => vsTrim(sp, probe);
   probe.onerror = () => { sp.classList.remove('one'); sp.dataset.g = 'm'; sp.style.backgroundImage = `url("${VS_SKIN_URL}")`;       // sin la imagen nueva: la mitad izquierda de la antigua
     const old = new Image(); old.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; old.src = VS_SKIN_URL; };

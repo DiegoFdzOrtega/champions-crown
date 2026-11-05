@@ -1037,6 +1037,7 @@ Enlaces y detalle en `musica/LEEME.txt`. Los efectos de sonido (`Sfx`) también 
   - Sprites de Pokémon: estilo *Pokémon Mundo Misterioso* de **PMD SpriteCollab** (PMDCollab), https://github.com/PMDCollab/SpriteCollab, obtenidos a través del proyecto PokéSurvivor de JPTER78 (https://github.com/JPTER78/pokesurvivor). Son obra de la comunidad de artistas de SpriteCollab (más de 150 personas; la lista de autores con los números de Pokédex de cada uno está en el `CREDITS.md` de PokéSurvivor y en los archivos de créditos de SpriteCollab). Licencia **CC BY-NC 4.0**: hay que dar crédito a los artistas y **no se puede usar con fines comerciales**. Los diseños originales siguen siendo de Nintendo / Game Freak.
   - Sprites de entrenadores: _autor / fuente / licencia: …_
   - Personajes del panel VS (`avatares/red-gen3.png`, `avatares/red-masters.png`, `avatares/RED Y LEAF.png`): sprites de entrenadores de **Pokémon Showdown**, https://play.pokemonshowdown.com/sprites/trainers/ (Red de 3.ª generación y Red Masters). Los personajes de Pokémon son © Nintendo / Creatures / GAME FREAK / The Pokémon Company, y el dibujo de cada sprite es de sus autores originales; Pokémon Showdown no indica ahí una licencia de reutilización. El juego es un proyecto de fan sin ánimo de lucro y no está afiliado a Nintendo ni a Pokémon Showdown.
+  - Entrenadores de la **Invocación** (`Sprites entrenadores/`, 1292 sprites; fuera los de dos personas y Samina con Nihilego): también de **Pokémon Showdown**, https://play.pokemonshowdown.com/sprites/trainers/, y de los artistas que los dibujaron. Se han quitado las colaboraciones y los de broma. El crédito sale en el juego (Ajustes › Créditos y la pantalla de la Invocación).
   - Avatares y objetos: _autor / fuente / licencia: …_
 
 **Tipografía:** [Press Start 2P](https://fonts.google.com/specimen/Press+Start+2P), de CodeMan38, licencia SIL Open Font License, cargada desde Google Fonts.
@@ -1167,7 +1168,7 @@ grant execute on function public.claim_gifts() to authenticated;
 insert into public.gifts (user_id, bp, tickets, note)
 select id, 50000, 10000, 'Regalo de Diego' from public.profiles where username ilike 'NombreDelJugador';
 ```
-  Para tickets legendarios añade la columna `tickets_l`. Para ver los regalos y si ya se cobraron: `select * from public.gifts order by created_at desc;`
+  Para tickets legendarios añade la columna `tickets_l`. Para Estrellas de la Invocación: columnas `estrella` (azules) y `estrella_t` (rosas); se añaden con el SQL de «Regalos de Estrellas» de abajo. Para ver los regalos y si ya se cobraron: `select * from public.gifts order by created_at desc;`
 
 ## Clasificatoria (js/ranked.js)
 - Pantalla `#rankv` (menú › Clasificatoria): tu rango y estadísticas, tu equipo, el botón «Buscar contrincante» (radar animado mientras buscas y cartel VS con cuenta atrás al encontrar rival), la escalera de rangos y la tabla de los mejores.
@@ -1184,3 +1185,27 @@ grant update (rank_pts, rank_w, rank_l) on public.profiles to authenticated;
 create policy "cambiar mis puntos" on public.profiles for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
 ```
 - Pendiente: los puntos se calculan en el navegador de cada jugador (alguien con conocimientos podría hacer trampas); más adelante se puede validar en el servidor.
+
+## Invocación de entrenadores (js/invocacion.js · js/invdata.js)
+- Tiradas de entrenadores al estilo de los deseos de Genshin Impact. Lo que sacas se usa como personaje en la tarjeta de entrenador y en el panel VS (Perfil › Entrenador, o «Usar» en la colección). Se guarda como `save.gender = 'i:<archivo>'`.
+- `INV_DATA` (invdata.js): `[archivo, rango C/R/E/L, etiquetas, nombre, variante]`. Etiquetas de 2 letras: ch Campeones · am Alto Mando · vi Villanos · gy Líderes · he Héroes · pa Pasarela · re Retro · ma Masters · co Conquest · an Anime.
+- Probabilidades base: Legendario 1,5 % · Épico 8 % · Raro 28 % · Común 62,5 %. Épico o mejor garantizado cada 10; Legendario a las 80 (sube desde la 66). Repetidos: 15 / 40 / 120 / 400 BP.
+- Banners: estándar (Estrella azul, `estrella`) y temático semanal (Estrella rosa, `estrella_t`, cambia cada lunes por `INV_THEMES`, con 3 destacados).
+- Estrellas: Alto Mando +1 azul, Campeón +1 rosa (teams.js · REWARD_BOSS), cada logro +1 azul (secretos +1 rosa). Regalo de bienvenida: 10 azules + 3 rosas + las de los logros ya reclamados.
+- **Bonus del personaje:** si llevas a un entrenador de la Invocación, los Pokémon que usa en los juegos tienen +10 % PS, +10 % daño y +5 % resistencia (`INV_BUFF`). Sus Pokémon salen de su equipo en `TEAMS` (con `INV_TEAM_KEY` para pasar de inglés a español) o de `INV_SIG_X`. No cuenta en combates online (`pvpTeamDesc`).
+- **Masters:** salen 8 veces menos que los demás de su rango (`INV_MA_W`), salvo en el banner temático de Masters.
+- **Regalos de Estrellas (SQL, una vez):**
+```sql
+alter table public.gifts add column if not exists estrella int not null default 0 check (estrella >= 0);
+alter table public.gifts add column if not exists estrella_t int not null default 0 check (estrella_t >= 0);
+drop function if exists public.claim_gifts();
+create function public.claim_gifts()
+returns table(id uuid, bp int, tickets int, tickets_l int, estrella int, estrella_t int, note text)
+language sql security definer set search_path = public as $$
+  update public.gifts g set claimed_at = now()
+  where g.user_id = auth.uid() and g.claimed_at is null
+  returning g.id, g.bp, g.tickets, g.tickets_l, g.estrella, g.estrella_t, g.note;
+$$;
+revoke all on function public.claim_gifts() from public, anon;
+grant execute on function public.claim_gifts() to authenticated;
+```

@@ -15,7 +15,9 @@ const RW_LOOK = {                                   // aspecto de cada recompens
   ticketsL:  {c:'#ffcc33', icon:'ticket', own:() => save.ticketsL,      lab:'Tiradas legendarias'},
   bp:        {c:'#ffcc33', icon:'coin',   own:() => save.bp,            lab:'Puntos de Batalla'},
   chapa:     {c:'#ffcc33', item:'chapa',  own:() => held('chapa'),      lab:'Chapas Doradas'},
-  chapaplata:{c:'#c9d6f5', item:'chapaplata', own:() => held('chapaplata'), lab:'Chapas Plateadas'}
+  chapaplata:{c:'#c9d6f5', item:'chapaplata', own:() => held('chapaplata'), lab:'Chapas Plateadas'},
+  estrella:  {c:'#5aa8ff', img:'iconos/estrella.webp',   own:() => held('estrella'),   lab:'Estrellas de Invocación'},
+  estrella_t:{c:'#ff7ad9', img:'iconos/estrella_t.webp', own:() => held('estrella_t'), lab:'Estrellas temáticas'}
 };
 
 function resultClear(){                             // derrota (o antes de una victoria): quita tarjetas y etiquetas de la victoria anterior
@@ -27,7 +29,7 @@ function resultClear(){                             // derrota (o antes de una v
 function rwIcon(id, col){                           // icono pequeño de una recompensa
   const L = RW_LOOK[id] || {}, box = document.createElement('div'); box.className = 'ico';
   const fallback = () => { const c = document.createElement('canvas'); bitmap(c, ICONS[L.icon] || ICONS.coin, col); box.innerHTML = ''; box.appendChild(c); };
-  if(L.item){ const im = new Image(); im.alt = ''; im.src = imgOf(L.item); im.onerror = fallback; box.appendChild(im); }
+  if(L.img || L.item){ const im = new Image(); im.alt = ''; im.src = L.img || imgOf(L.item); im.onerror = fallback; box.appendChild(im); }
   else fallback();
   return box;
 }

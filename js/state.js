@@ -56,8 +56,9 @@ try{
     save.pubProfile = s.pubProfile !== false;                                       // ¿tus amigos pueden ver tu perfil? (js/friendprofile.js)
     save.cardBg = /^[a-z0-9]{1,20}$/.test(s.cardBg || '') ? s.cardBg : '';
     save.cardFrame = s.cardFrame === 'avatar' ? 'avatar' : 'rank';                                                    // borde de la tarjeta: 'rank' = marco de la Clasificatoria, 'avatar' = a juego con el marco del avatar                                          // fondo de la tarjeta de entrenador (js/cardbg.js)
-    save.gender = /^[a-z0-9-]{1,20}$/.test(s.gender || '') ? s.gender : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
+    save.gender = /^(i:)?[a-z0-9-]{1,40}$/.test(s.gender || '') ? s.gender : 'm';                                     // personaje del panel VS: 'm' = chico · 'f' = chica
     const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+    save.inv = obj(s.inv);                                                          // Invocación de entrenadores (js/invocacion.js): {own, pity, n, gift}
     save.charms = obj(s.charms); save.keys = obj(s.keys); save.iv = obj(s.iv); save.ev = obj(s.ev); save.ivBase = obj(s.ivBase); save.evCap = obj(s.evCap); save.capUsed = obj(s.capUsed); save.abil = obj(s.abil); save.mv = obj(s.mv); save.mvHist = obj(s.mvHist); save.mtV = s.mtV || 1;
     if((s.trainV || 1) < 2){                                                        // v2: todos los Pokémon vuelven a IV 0 y EV 0 y se devuelven las chapas gastadas
       Object.values(save.capUsed).forEach(c => { save.items.chapa = (save.items.chapa || 0) + (c.gold || 0); save.items.chapaplata = (save.items.chapaplata || 0) + (c.silver || 0); });

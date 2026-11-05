@@ -144,7 +144,7 @@ function achGet(id){                                // estado de un logro (no mo
 }
 const achClaimedCount = () => ACHIEVEMENTS.filter(a => achGet(a.id).claimed).length;
 const achReadyCount = () => ACHIEVEMENTS.filter(a => { const s = achGet(a.id); return s.done && !s.claimed; }).length;
-const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : '', r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key] ? KEY_ITEMS[r.key].n : '', r.title ? `título «${r.title}»` : '', r.frame && typeof ACH_FRAMES !== 'undefined' && ACH_FRAMES[r.frame] ? `marco ${ACH_FRAMES[r.frame].n}` : '', r.trainer ? `personaje ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}` : ''].filter(Boolean).join(' + ') : '';
+const achRewardText = r => r ? [r.bp ? `${r.bp} BP` : '', r.tickets ? `${r.tickets} ticket${r.tickets > 1 ? 's' : ''} de Gachapon` : '', r.charm ? `Amuleto Arcoíris de ${r.charm}` : '', r.key && typeof KEY_ITEMS !== 'undefined' && KEY_ITEMS[r.key] ? KEY_ITEMS[r.key].n : '', r.title ? `título «${r.title}»` : '', r.frame && typeof ACH_FRAMES !== 'undefined' && ACH_FRAMES[r.frame] ? `marco ${ACH_FRAMES[r.frame].n}` : '', r.trainer ? `personaje ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}` : '', r.estrella ? `${r.estrella} Estrella${r.estrella > 1 ? 's' : ''} de Invocación` : '', r.estrella_t ? `${r.estrella_t} Estrella${r.estrella_t > 1 ? 's' : ''} temática${r.estrella_t > 1 ? 's' : ''}` : ''].filter(Boolean).join(' + ') : '';
 
 // ---- Recompensa: Puntos de Batalla y/o tickets de Gachapon ----
 function achGrant(r){
@@ -152,6 +152,8 @@ function achGrant(r){
   if(r.bp) save.bp += r.bp;
   if(r.tickets) save.tickets += r.tickets;
   if(r.charm) save.charms[r.charm] = true;
+  if(r.estrella) save.items.estrella = (save.items.estrella || 0) + r.estrella;          // Estrellas de la Invocación (invocacion.js)
+  if(r.estrella_t) save.items.estrella_t = (save.items.estrella_t || 0) + r.estrella_t;
   if(typeof refreshHud === 'function') refreshHud();
 }
 function achComplete(id){                           // marca el logro como completado (NO da la recompensa: hay que reclamarla)
@@ -170,7 +172,7 @@ function achClaim(id, quiet){                       // RECLAMAR: entrega la reco
 function achClaimAll(){
   const got = ACHIEVEMENTS.filter(a => achClaim(a.id, true));
   if(got.length){
-    const tot = got.reduce((t, d) => ({bp:t.bp + (d.reward.bp || 0), tickets:t.tickets + (d.reward.tickets || 0)}), {bp:0, tickets:0});
+    const tot = got.reduce((t, d) => ({bp:t.bp + (d.reward.bp || 0), tickets:t.tickets + (d.reward.tickets || 0), estrella:t.estrella + (d.reward.estrella || 0), estrella_t:t.estrella_t + (d.reward.estrella_t || 0)}), {bp:0, tickets:0, estrella:0, estrella_t:0});
     toast(`🏆 ${got.length} recompensa${got.length > 1 ? 's' : ''} reclamada${got.length > 1 ? 's' : ''} · +${achRewardText(tot)}`); if(typeof Sfx !== 'undefined') Sfx.play('logro');
   }
   return got.length;
@@ -308,6 +310,8 @@ function achChips(r, hidden){
   if(hidden){ chip('ky', 'Recompensa: ???'); return w; }
   if(r.bp) chip('bp', `${r.bp} BP`, 'coin', '#ffcc33');
   if(r.tickets) chip('tk', `${r.tickets} ticket${r.tickets > 1 ? 's' : ''}`, 'ticket', '#ff8ad8');
+  if(r.estrella) chip('tk', `${r.estrella} Estrella${r.estrella > 1 ? 's' : ''}`, null, null, 'iconos/estrella.webp');
+  if(r.estrella_t) chip('tk', `${r.estrella_t} Estrella${r.estrella_t > 1 ? 's' : ''} rosa${r.estrella_t > 1 ? 's' : ''}`, null, null, 'iconos/estrella_t.webp');
   if(r.title) chip('ti', `Título: ${r.title}`);
   if(r.frame && ACH_FRAMES[r.frame]) chip('fr', `Marco ${ACH_FRAMES[r.frame].n}`, null, null, null, ACH_FRAMES[r.frame].c);
   if(r.trainer) chip('ti', `Personaje: ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}`);

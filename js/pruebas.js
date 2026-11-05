@@ -182,7 +182,7 @@ function prPic(src, half){                                    // carga la imagen
   P.im.src = src;
   return P;
 }
-function prSkinPic(g){ return g === 'f' ? prPic(VS_SKIN_URL, 'r') : prPic('avatares/' + (VS_SKINS[g] || VS_SKINS.m)); }   // personaje de un jugador (el mismo de la pantalla VS)
+function prSkinPic(g){ if(typeof invSkin === 'function' && invSkin(g)) return prPic(invUrl(g.slice(2))); return g === 'f' ? prPic(VS_SKIN_URL, 'r') : prPic('avatares/' + (VS_SKINS[g] || VS_SKINS.m)); }   // personaje de un jugador (el mismo de la pantalla VS)
 function prMePic(){ return prSkinPic(typeof skinOf === 'function' ? skinOf() : 'm'); }
 function prFoePic(){                                           // el rival: otro jugador (Clasificatoria: su personaje) o un entrenador del Campo (su imagen)
   if(g.pvp){ const sk = g.o.foeSkin; return prSkinPic(sk === 'f' || (typeof vsKnown === 'function' && vsKnown(sk)) ? sk : 'm'); }

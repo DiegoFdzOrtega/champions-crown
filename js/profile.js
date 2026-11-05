@@ -37,7 +37,7 @@ function renderBgGrid(){
 // Botones de Personaje: Chico y Chica (gratis), Red Masters (solo su cuenta) y los de TRAINERS (vspanel.js), que salen con candado hasta reclamar su logro (categoría «Entrenadores»)
 function genButtons(){
   const b = (g, name, lock) => `<button type="button" data-g="${g}"${lock ? ' class="lock" title="Bloqueado"' : ''}><img alt=""><span>${lock ? '🔒 ' : ''}${name}</span></button>`;
-  return b('m', 'Chico') + b('f', 'Chica') + (skinAllowed('r') ? b('r', 'Red Masters') : '') + TRAINERS.map(t => b(t.id, t.name, !trainerUnlocked(t.id))).join('');
+  return b('m', 'Chico') + b('f', 'Chica') + (skinAllowed('r') ? b('r', 'Red Masters') : '') + TRAINERS.map(t => b(t.id, t.name, !trainerUnlocked(t.id))).join('');   // (los de la Invocación van aparte, con filtros: invPickRender)
 }
 let pfTab = 'who';                                                 // pestaña abierta del editor del Perfil (se recuerda mientras juegas)
 const PF_TABS = [['who', 'Entrenador', 'user'], ['bg', 'Fondo', 'img'], ['av', 'Avatar', 'face'], ['tf', 'Título y marco', 'star'], ['fav', 'Favoritos', 'heart'], ['priv', 'Privacidad', 'lock']];
@@ -62,7 +62,7 @@ function renderProfile(){
       <nav class="pf-tabs">${PF_TABS.map(([k, n, ic]) => `<button data-s="${k}" class="${T === k ? 'on' : ''}">${PF_ICO[ic]}<span>${n}</span>${k === 'fav' && dirty ? '<i class="pf-dot" title="Cambios sin guardar"></i>' : ''}</button>`).join('')}</nav>
       <div class="pf-body">
         ${sec('who', 'Entrenador', '', `<div class="pf-card"><label class="pf-lab">Nombre de entrenador<input id="nameIn" maxlength="10"></label><p class="help" id="nameHint"></p></div>
-          <div class="pf-card"><h3>Personaje</h3><p class="help">Sale en tu tarjeta y en el panel VS antes de cada combate.</p><div class="gen-row" id="genRow">${genButtons()}</div></div>`)}
+          <div class="pf-card"><h3>Personaje</h3><p class="help">Sale en tu tarjeta y en el panel VS antes de cada combate.</p><div class="gen-row" id="genRow">${genButtons()}</div><div class="pf-inv" id="pfInv"></div></div>`)}
         ${sec('bg', 'Fondo de la tarjeta', 'Se desbloquean al derrotar a su líder, miembro del Alto Mando o Campeón. Los bloqueados dicen cómo conseguirlos.', `<div class="bg-count" id="bgCount"></div><div class="bg-grid" id="bgGrid"></div>`)}
         ${sec('av', 'Avatar', 'Los que tienen candado se desbloquean al conseguir ese Pokémon.', `<div class="av-grid" id="avGrid"></div><div class="pf-btns"><button id="avSave" class="main">Guardar avatar</button></div>`)}
         ${sec('tf', 'Título y marco', 'Son recompensas de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.', `<div class="pf-card"><label class="pf-lab">Título<select id="titSel"></select></label></div><div class="pf-card"><h3>Marco del avatar</h3><div class="frames" id="frameRow"></div></div>
@@ -83,8 +83,9 @@ function renderProfile(){
   document.querySelectorAll('#genRow button').forEach(b => {                       // personaje del panel VS (vspanel.js): chico o chica
     const lock = b.classList.contains('lock'); setPlayerSkin(b.querySelector('img'), b.dataset.g, lock); b.classList.toggle('on', !lock && skinOf() === b.dataset.g);
     if(lock){ b.onclick = () => { const a = achDef('tr_' + b.dataset.g); toast(a ? `Se desbloquea con el logro «${a.name}» (Logros › Entrenadores): ${a.desc.split('. ')[0]}.` : 'Personaje bloqueado.'); }; return; }
-    b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); renderMyCard(); };          // (y la tarjeta de arriba cambia al momento)
+    b.onclick = () => { save.gender = b.dataset.g; persist(); document.querySelectorAll('#genRow button').forEach(x => x.classList.toggle('on', x === b)); document.querySelectorAll('#pfInv [data-ig]').forEach(x => x.classList.remove('on')); renderMyCard(); };          // (y la tarjeta de arriba cambia al momento)
   });
+  if(typeof invPickRender === 'function') invPickRender($('pfInv'));                // entrenadores de la Invocación (invocacion.js)
   $('nameIn').oninput = e => { if(nameLocked()) return; save.name = e.target.value.toUpperCase().slice(0,10) || 'ENTRENADOR'; persist(); refreshHud(); renderMyCard(); };
   const box = $('pfSlots');
   pfDraft.forEach((dex, i) => {
