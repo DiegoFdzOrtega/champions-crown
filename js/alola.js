@@ -143,6 +143,6 @@ FLOORS.push(
   AF('olivia',     'Olivia',    'Roca',     'alto',  166, 19, 'Liga Pokémon'),
   AF('acerola_am', 'Acerola',   'Fantasma', 'alto',  167, 19, 'Liga Pokémon'),
   AF('kahili',     'Kahili',    'Volador',  'alto',  168, 20, 'Liga Pokémon'),
-  AF('kukui',      'Kukui',     'Campeón',  'campeon', 175, 23, 'Liga Pokémon')
+  AF('kukui',      'Kukui',     'Campeón',  'campeon', 170, 22, 'Liga Pokémon')        // (antes 175 · 23: era el más difícil del juego; ahora igual que Dianta)
 );
 floorsOf(ALOLA).forEach((F, i) => F.idx = i);                           // posición dentro de Alola (0 = Ilima)
