@@ -39,7 +39,8 @@ function openGacha(){
 function renderGacha(){
   const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = regionSize(a, b), col = REG_COL[reg];
   $('gachav').style.setProperty('--c', col);
-  $('gcTop').innerHTML = `<i class="gchip">🎟 <b>${save.tickets}</b> tickets</i><i class="gchip sp">🌟 <b>${save.ticketsL}</b> especiales</i>${save.ticketsS ? `<i class="gchip sv">✨ <b>${save.ticketsS}</b> variocolor</i>` : ''}<i class="gchip">🪙 <b>${save.bp}</b> PB</i>`;
+  const ci = (k, e) => CUR_IMG ? `<img class="gcimg" src="${CUR_SRC[k]}" alt="">` : e;                     // iconos nuevos (menu.js)
+  $('gcTop').innerHTML = `<i class="gchip">${ci('ticket', '🎟')} <b>${save.tickets}</b> tickets</i><i class="gchip sp">${ci('ticket_l', '🌟')} <b>${save.ticketsL}</b> especiales</i>${save.ticketsS ? `<i class="gchip sv">${ci('ticket_s', '✨')} <b>${save.ticketsS}</b> variocolor</i>` : ''}<i class="gchip">${ci('bp', '🪙')} <b>${save.bp}</b> PB</i>`;
   $('gcTabs').innerHTML = REGIONS_DEX.map(r =>
     `<button class="tab${r.n === reg ? ' on' : ''}" style="--rc:${REG_COL[r.n]}" data-r="${r.n}">${r.n} <small>${ownedIn(r.n)}/${regionSize(r.a, r.b)}</small></button>`).join('');
 
@@ -71,7 +72,7 @@ function renderGacha(){
       </div>
     </div>`;
   drawMachine($('gcMach'));
-  $('gcLeft').querySelectorAll('canvas.ic').forEach(c => ticketIcon(c, c.dataset.sv === '1' ? '#06222b' : c.dataset.sp === '1' ? '#1b1500' : '#ffffff'));
+  $('gcLeft').querySelectorAll('canvas.ic').forEach(c => ticketIcon(c, CUR_IMG ? (c.dataset.sv === '1' ? '#7af0ff' : c.dataset.sp === '1' ? '#ffcc33' : '#ff3ea5') : (c.dataset.sv === '1' ? '#06222b' : c.dataset.sp === '1' ? '#1b1500' : '#ffffff')));
   $('gcLeft').querySelectorAll('.fc canvas').forEach(c => paintSprite(c, +c.dataset.d, {sc:8, fit:150}));
   gcStart(col);
 

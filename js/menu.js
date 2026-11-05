@@ -30,7 +30,20 @@ const GACHA = [".....kkkkkk.....","...kkaaaaaakk...","..kaaapaaayaak..",".kaappp
   ".krrkddddddkrrk.",".krrkddddddkrrk.",".krrrkkkkkkrrrk.",".krrrrrwwrrrrrk.",".krrrrrrrrrrrrk.",".kkkkkkkkkkkkkk."];
 const PAL_GACHA = {k:'#0a0d14', a:'#8fd3ff', p:'#ff3ea5', y:'#ffcc33', w:'#ffffff', r:'#e23b3b', d:'#05070c'};
 
+// ICONOS NUEVOS de monedas y tickets (carpeta iconos/): si se pide el dibujo de la moneda o del ticket, se pinta la imagen en su lugar.
+// Color del ticket: rosa = normal, dorado = legendario, cian = variocolor. CUR_IMG = false vuelve a los iconos pixelados de siempre.
+const CUR_IMG = true;
+const CUR_SRC = {bp:'iconos/bp.webp', ticket:'iconos/ticket.webp', ticket_l:'iconos/ticket_l.webp', ticket_s:'iconos/ticket_s.webp'};
+const CUR_IM = {}; if(CUR_IMG) for(const k in CUR_SRC){ const im = new Image(); im.src = CUR_SRC[k]; CUR_IM[k] = im; }
+const curKey = (rows, col) => !CUR_IMG || typeof ICONS === 'undefined' ? '' : rows === ICONS.coin ? 'bp' : rows === ICONS.ticket ? (/^#(ffcc33|ffd|ffe)/i.test(col || '') ? 'ticket_l' : /^#(7af0ff|3ee0c8)/i.test(col || '') ? 'ticket_s' : 'ticket') : '';
 function bitmap(c, rows, col, pal){
+  const ck = curKey(rows, col);
+  if(ck){                                                     // icono nuevo (imagen): se dibuja en cuanto carga
+    c.width = c.height = 64; c.classList.add('curimg');
+    const im = CUR_IM[ck], draw = () => { const x = c.getContext('2d'); x.clearRect(0, 0, 64, 64); x.imageSmoothingEnabled = true; x.drawImage(im, 0, 0, 64, 64); };
+    if(im.complete && im.naturalWidth) draw(); else im.addEventListener('load', draw, {once:true});
+    return;
+  }
   c.width = rows[0].length; c.height = rows.length;
   const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height);
   rows.forEach((row,j)=>[...row].forEach((ch,i)=>{ const k = pal ? pal[ch] : (ch === '#' ? col : null); if(k){ x.fillStyle = k; x.fillRect(i,j,1,1); } }));
