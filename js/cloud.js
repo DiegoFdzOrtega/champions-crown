@@ -84,6 +84,9 @@ function cloudErr(e){
   if(/already registered|already been registered/i.test(m)) return 'Ese email ya tiene una cuenta. Entra con «Entrar».';
   if(/at least 6|Password should/i.test(m)) return 'La contraseña debe tener al menos 6 caracteres.';
   if(/valid email|invalid format|Unable to validate email/i.test(m)) return 'El email no es válido.';
+  if(/email.*rate limit|rate limit.*email/i.test(m)) return 'El servidor ya ha mandado demasiados correos esta hora. Prueba dentro de un rato (o entra con Google).';
+  if(/not confirmed/i.test(m)) return 'Tu email aún no está confirmado: abre el correo que te mandamos al crear la cuenta (mira también en Spam) y pulsa el enlace. Después pulsa «Entrar».';
+  if(/disallowed_useragent|in-app|webview/i.test(m)) return 'Google no deja entrar desde el navegador de esta app. Abre el juego en Safari o Chrome.';
   if(/rate limit/i.test(m)) return 'Demasiados intentos. Espera un poco y prueba otra vez.';
   if(/schema cache|does not exist|friendships/i.test(m) && /relation|table|schema/i.test(m)) return 'Falta crear la tabla de amistades en Supabase (el SQL de «friendships» del README).';
   if(/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'No hay conexión con el servidor. Mira tu internet.';

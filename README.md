@@ -1190,10 +1190,10 @@ create policy "cambiar mis puntos" on public.profiles for update to authenticate
 - Tiradas de entrenadores al estilo de los deseos de Genshin Impact. Lo que sacas se usa como personaje en la tarjeta de entrenador y en el panel VS (Perfil › Entrenador, o «Usar» en la colección). Se guarda como `save.gender = 'i:<archivo>'`.
 - `INV_DATA` (invdata.js): `[archivo, rango C/R/E/L, etiquetas, nombre, variante]`. Etiquetas de 2 letras: ch Campeones · am Alto Mando · vi Villanos · gy Líderes · he Héroes · pa Pasarela · re Retro · ma Masters · co Conquest · an Anime.
 - Probabilidades base: Legendario 1,5 % · Épico 8 % · Raro 28 % · Común 62,5 %. Épico o mejor garantizado cada 10; Legendario a las 80 (sube desde la 66). Repetidos: 15 / 40 / 120 / 400 BP.
-- Banners: estándar (Estrella azul, `estrella`) y temático semanal (Estrella rosa, `estrella_t`, cambia cada lunes por `INV_THEMES`, con 3 destacados).
+- Banners: estándar (Estrella azul, `estrella`) y temático diario (Estrella rosa, `estrella_t`, cambia cada día a las 00:00 UTC por `INV_THEMES`, con 3 destacados).
 - Estrellas: Alto Mando +1 azul, Campeón +1 rosa (teams.js · REWARD_BOSS), cada logro +1 azul (secretos +1 rosa). Regalo de bienvenida: 10 azules + 3 rosas + las de los logros ya reclamados.
 - **Bonus del personaje:** si llevas a un entrenador de la Invocación, los Pokémon que usa en los juegos tienen +10 % PS, +10 % daño y +5 % resistencia (`INV_BUFF`); su versión Masters +15 / +15 / +8 % (`INV_BUFF_M`); los entrenadores genéricos dan +5 / +5 / +3 % a los Pokémon del tipo de su clase (`INV_BUFF_G`, tipos en `INV_CLASS_T`). Sus Pokémon salen de su equipo en `TEAMS` (con `INV_TEAM_KEY` para pasar de inglés a español) o de `INV_SIG_X`. No cuenta en combates online (`pvpTeamDesc`).
-- **Masters:** solo salen en el banner «Pokémon Masters» (Estrellas rosas): cada semana 3 versiones (`invMaWeek`, rotan por las 185 de `INV_MA_ROT`, unas 62 semanas). Cada Legendario de ese banner es uno de los 3.
+- **Masters:** solo salen en el banner «Pokémon Masters» (Estrellas rosas): cada día 3 versiones (`invMaWeek`, rotan por las 185 de `INV_MA_ROT`, unos 62 días). Cada Legendario de ese banner es uno de los 3.
 - **Regalos de Estrellas (SQL, una vez):**
 ```sql
 alter table public.gifts add column if not exists estrella int not null default 0 check (estrella >= 0);
@@ -1209,3 +1209,4 @@ $$;
 revoke all on function public.claim_gifts() from public, anon;
 grant execute on function public.claim_gifts() to authenticated;
 ```
+- **Personaje:** en Perfil › Entrenador solo están Chico y Chica; el resto sale de la Invocación. Los personajes antiguos (logros de Entrenadores y Red Masters) se convierten en su entrenador de la Invocación (`invMigrate`). La ficha de cada entrenador (`invDetail`) enseña los Pokémon que potencia (en verde los de tu equipo).

@@ -57,7 +57,8 @@ function mmHero(){
     <div class="row"><button class="m2-go" data-mm="go" data-k="story">JUGAR</button></div></div></div>`;
 }
 function mmTile(k, c, name, sub, st, extra, cls){
-  return `<button class="m2-t ${cls || ''}" style="--c:${c}" data-mm="go" data-k="${k}"><span class="h"><img src="${mmIcon(k, c)}" alt=""><b>${name}</b></span>${sub ? `<small>${sub}</small>` : ''}${extra || ''}<span class="st">${st}</span></button>`;
+  const ic = mmIcon(k, c);
+  return `<button class="m2-t ${cls || ''}" style="--c:${c};--ic:url('${ic}')" data-mm="go" data-k="${k}"><span class="h"><img src="${ic}" alt=""><b>${name}</b></span>${sub ? `<small>${sub}</small>` : ''}${extra || ''}<span class="st">${st}</span></button>`;
 }
 function mmRender(){
   const m = $('main'); if(!m) return;

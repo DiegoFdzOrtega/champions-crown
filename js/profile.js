@@ -37,7 +37,7 @@ function renderBgGrid(){
 // Botones de Personaje: Chico y Chica (gratis), Red Masters (solo su cuenta) y los de TRAINERS (vspanel.js), que salen con candado hasta reclamar su logro (categoría «Entrenadores»)
 function genButtons(){
   const b = (g, name, lock) => `<button type="button" data-g="${g}"${lock ? ' class="lock" title="Bloqueado"' : ''}><img alt=""><span>${lock ? '🔒 ' : ''}${name}</span></button>`;
-  return b('m', 'Chico') + b('f', 'Chica') + (skinAllowed('r') ? b('r', 'Red Masters') : '') + TRAINERS.map(t => b(t.id, t.name, !trainerUnlocked(t.id))).join('');   // (los de la Invocación van aparte, con filtros: invPickRender)
+  return b('m', 'Chico') + b('f', 'Chica');   // solo los dos de siempre: los demás personajes salen de la Invocación (invPickRender, con filtros)
 }
 let pfTab = 'who';                                                 // pestaña abierta del editor del Perfil (se recuerda mientras juegas)
 const PF_TABS = [['who', 'Entrenador', 'user'], ['bg', 'Fondo', 'img'], ['av', 'Avatar', 'face'], ['tf', 'Título y marco', 'star'], ['fav', 'Favoritos', 'heart'], ['priv', 'Privacidad', 'lock']];

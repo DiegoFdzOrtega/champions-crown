@@ -28,6 +28,8 @@ function lgGoogleErr(){                                                        /
   if(/already linked|identity_already_exists|already exists/i.test(d)) return 'Esa cuenta de Google ya está usada en otra cuenta del juego, así que no se puede vincular a esta. Borra esa otra cuenta (Supabase › Authentication › Users) y vuelve a pulsar «Vincular mi cuenta de Google».';
   return 'No se pudo entrar con Google: ' + d.replace(/\+/g, ' ');
 }
+// Navegadores de dentro de apps (Instagram, Facebook, TikTok, Snapchat...): Google NO deja iniciar sesión ahí (error 403 disallowed_useragent)
+const LG_INAPP = /Instagram|FBAN|FBAV|FB_IAB|musical_ly|Bytedance|TikTok|Snapchat|Line\/|MicroMessenger|Twitter|; wv\)/i.test(navigator.userAgent || '');
 async function lgGoogle(){
   lg.err = ''; lg.busy = true; lgRender();
   const {error} = await cloud.sb.auth.signInWithOAuth({provider: 'google', options: {redirectTo: CLOUD_HOME()}});   // te lleva a la página de Google
@@ -60,7 +62,7 @@ function lgRender(force){
       <button id="lgGuest" class="main lg-big">Jugar sin cuenta</button>`;
   }
   else if(s === 'choose'){
-    el.innerHTML = `<button id="lgGoogle" class="lg-google"${dis}>${G_LOGO}<span>Continuar con Google</span></button>
+    el.innerHTML = `${LG_INAPP ? '<p class="warn lg-inapp">Estás en el navegador de otra app (Instagram, TikTok...). Ahí <b>Google no deja entrar</b>: toca ⋯ y elige <b>«Abrir en el navegador»</b> (Safari o Chrome), o entra con email.</p>' : ''}<button id="lgGoogle" class="lg-google"${dis}>${G_LOGO}<span>Continuar con Google</span></button>
       <button id="lgEmail" class="lg-alt"${dis}>Entrar con email</button>${msg}
       <p class="help lg-why">Con una cuenta tu partida se guarda en internet: juega en el móvil y en el ordenador, añade amigos y compite en la Clasificatoria.</p>
       <button id="lgGuest" class="linkbtn">Jugar sin cuenta</button>`;
@@ -77,7 +79,10 @@ function lgRender(force){
       <button id="lgBack" class="linkbtn">← Volver</button>`;
   }
   else if(s === 'name'){
-    el.innerHTML = `<h2>Elige tu nombre de jugador</h2><p class="help">Es el nombre con el que te verán tus rivales y tus amigos. Tiene que ser único.</p>
+    const via = cloudHasGoogle() ? 'Google' : 'email', em = String((cloud.user && cloud.user.email) || '').replace(/[<&>"]/g, '');
+    el.innerHTML = `<h2>Elige tu nombre de jugador</h2>
+      <p class="warn lg-new">Has entrado con ${via} como <b>${em}</b>, y esa cuenta todavía <b>no tiene jugador</b>. Si ya tenías uno, seguramente lo creaste de otra forma (con email o con otro Google): pulsa «Usar otra cuenta» abajo y entra como la primera vez.</p>
+      <p class="help">Si es tu primera vez, elige el nombre con el que te verán tus rivales y tus amigos. Tiene que ser único.</p>
       <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="16" placeholder="3-16 letras, números o _" autocomplete="off"></label>
       <button type="submit" class="main lg-big"${dis}>Empezar</button></form>${msg}
       <p class="help lg-why">¿Ya tenías cuenta con email? Pulsa «Usar otra cuenta», entra con tu email y en <b>Cuenta</b> pulsa «Vincular mi cuenta de Google».</p>
