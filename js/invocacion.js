@@ -22,14 +22,13 @@ const INV_PITY = {e:10, l:80, soft:65};
 const INV_LIST = INV_DATA.map(([f, t, tags, n, v]) => ({f, t, tags, n, v, full: v ? `${n} · ${v}` : n}));
 const INV_BY = Object.fromEntries(INV_LIST.map(x => [x.f, x]));
 const invUrl = f => INV_DIR + encodeURIComponent(f) + '.png';
-const invHas = (x, tag) => { for(let i = 0; i < x.tags.length; i += 2) if(x.tags.substr(i, 2) === tag) return true; return false; };
+const invHas = (x, tag) => { if(!tag) return true; for(let i = 0; i < x.tags.length; i += 2) if(x.tags.substr(i, 2) === tag) return true; return false; };
 const INV_THEMES = [
   {tag:'ch', n:'Campeones de la Liga', d:'Los más fuertes de cada región, con sus versiones Masters.', c1:'#ffcc33', c2:'#7a4a00'},
   {tag:'vi', n:'Villanos',             d:'Jefes y reclutas de los equipos malvados.',                 c1:'#ff4d6d', c2:'#3a0a1a'},
   {tag:'am', n:'Alto Mando',           d:'Los cuatro guardianes de cada Liga.',                       c1:'#a35cff', c2:'#22084a'},
   {tag:'pa', n:'Pasarela',             d:'Trajes especiales: Concursos, festival, uniformes…',        c1:'#ff7ad9', c2:'#4a0a3a'},
   {tag:'gy', n:'Líderes de Gimnasio',  d:'Líderes y capitanes de todas las regiones.',                c1:'#4ccf6a', c2:'#08321a'},
-  {tag:'ma', n:'Pokémon Masters',      d:'Solo versiones Masters: el banner de lujo.',                 c1:'#7af0ff', c2:'#08304a'},
   {tag:'he', n:'Héroes y rivales',     d:'Protagonistas y rivales de todos los juegos.',               c1:'#3ea6ff', c2:'#0a1e4a'},
   {tag:'re', n:'Retro',                d:'Versiones clásicas de cada generación.',                    c1:'#ffb35a', c2:'#3a1e08'},
   {tag:'an', n:'Anime',                d:'Personajes y versiones de la serie.',                       c1:'#ff9a3a', c2:'#3a1a08'},
@@ -40,15 +39,19 @@ const invWeek = () => Math.floor((Date.now() - INV_EPOCH) / 604800000);
 const invTheme = () => INV_THEMES[((invWeek() % INV_THEMES.length) + INV_THEMES.length) % INV_THEMES.length];
 function invSeeded(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function invFeatured(th){                                                 // los 3 destacados de la semana (los mismos para todos los jugadores)
-  const pool = INV_LIST.filter(x => invHas(x, th.tag) && (th.tag === 'ma' || !invHas(x, 'ma'))), R = invSeeded(invWeek() * 97 + 13);
+  const pool = INV_LIST.filter(x => invHas(x, th.tag) && !invHas(x, 'ma')), R = invSeeded(invWeek() * 97 + 13);
   const src = pool.map(x => [x, R()]).sort((a, b) => (INV_RANK[b[0].t] - INV_RANK[a[0].t]) || (a[1] - b[1])).map(p => p[0]);   // los de más rango primero (barajados dentro de cada rango)
   const seen = new Set(), out = [];
   for(const x of src){ const b = x.f.split('-')[0]; if(seen.has(b)) continue; seen.add(b); out.push(x); if(out.length === 3) break; }   // 3 personajes distintos
   return out;
 }
+// Banner MASTERS: las versiones Masters SOLO salen aquí. Cada semana hay 3 disponibles (van rotando por todas: INV_MA_ROT) y salen al sacar un Legendario.
+const INV_MA_ROT = (() => { const L = INV_LIST.filter(x => invHas(x, 'ma')), R = invSeeded(20261105); return L.map(x => [x, R()]).sort((a, b) => a[1] - b[1]).map(p => p[0]); })();
+const invMaWeek = () => { const n = INV_MA_ROT.length, w = ((invWeek() % Math.ceil(n / 3)) + Math.ceil(n / 3)) % Math.ceil(n / 3); return [0, 1, 2].map(i => INV_MA_ROT[(w * 3 + i) % n]); };
 const INV_BANNERS = () => { const th = invTheme(); return [
   {id:'thm', cur:'estrella_t', n:th.n, d:th.d, tag:th.tag, c1:th.c1, c2:th.c2, feat:invFeatured(th)},
-  {id:'std', cur:'estrella', n:'Invocación estándar', d:'Pueden salir todos los entrenadores. Siempre disponible.', tag:null, c1:'#3ea6ff', c2:'#0a1a3a', feat:['cynthia-masters', 'red-masters', 'lance-masters'].map(f => INV_BY[f]).filter(Boolean)}
+  {id:'ma', cur:'estrella_t', n:'Pokémon Masters', d:'Las versiones Masters solo salen en este banner, y cada semana hay 3 distintas.', tag:null, ma:true, c1:'#7af0ff', c2:'#08304a', feat:invMaWeek()},
+  {id:'std', cur:'estrella', n:'Invocación estándar', d:'Pueden salir todos los entrenadores (menos los Masters). Siempre disponible.', tag:null, c1:'#3ea6ff', c2:'#0a1a3a', feat:invFeatured({tag:''})}
 ]; };
 
 // ---- Partida ----
@@ -56,7 +59,7 @@ function invSave(){
   const s = save.inv && typeof save.inv === 'object' ? save.inv : {};
   if(!s.own || typeof s.own !== 'object') s.own = {};
   if(!s.pity || typeof s.pity !== 'object') s.pity = {};
-  ['std', 'thm'].forEach(k => { const p = s.pity[k] || {}; s.pity[k] = {e: Math.max(0, +p.e || 0), l: Math.max(0, +p.l || 0)}; });
+  ['std', 'thm', 'ma'].forEach(k => { const p = s.pity[k] || {}; s.pity[k] = {e: Math.max(0, +p.e || 0), l: Math.max(0, +p.l || 0)}; });
   s.n = Math.max(0, +s.n || 0);
   Object.keys(s.own).forEach(f => { if(!INV_BY[f]){ save.bp += 120 * s.own[f]; delete s.own[f]; if(save.gender === 'i:' + f) save.gender = 'm'; } });   // entrenadores retirados del juego (parejas...): se devuelven en BP if(!s.t0) s.t0 = Date.now();             // t0 = cuándo llegó la Invocación a esta partida (los logros reclamados antes se pagan en el regalo)
   save.inv = s; return s;
@@ -72,18 +75,17 @@ function invGift(){                                                       // la 
 }
 
 // ---- Una tirada ----
-const INV_MA_W = .12;                                                     // los Masters salen 8 veces menos que los demás de su rango (salvo en su banner temático, donde todos lo son)
-const invW = x => invHas(x, 'ma') ? INV_MA_W : 1;
-function invPick(list){ let s = 0; list.forEach(x => s += invW(x)); let r = Math.random() * s; for(const x of list){ r -= invW(x); if(r < 0) return x; } return list[list.length - 1]; }
+function invPick(list){ return list[Math.floor(Math.random() * list.length)]; }
 function invRoll(bn){
   const s = invSave(), P = s.pity[bn.id]; P.e++; P.l++;
   const lr = P.l >= INV_PITY.l ? 1 : P.l > INV_PITY.soft ? INV_TIER.L.p + (P.l - INV_PITY.soft) * .06 : INV_TIER.L.p;
   const r = Math.random();
   let t = r < lr ? 'L' : (P.e >= INV_PITY.e || r < lr + INV_TIER.E.p) ? 'E' : r < lr + INV_TIER.E.p + INV_TIER.R.p ? 'R' : 'C';
   if(t === 'L'){ P.l = 0; P.e = 0; } else if(t === 'E') P.e = 0;
-  const all = INV_LIST.filter(x => x.t === t);
+  const all = INV_LIST.filter(x => x.t === t && !invHas(x, 'ma'));          // los Masters no salen en los banners normales
   let x = null;
-  if(bn.tag){
+  if(bn.ma && t === 'L') x = invPick(bn.feat);                               // banner Masters: el Legendario es uno de los 3 de la semana
+  else if(bn.tag){
     const ft = bn.feat.filter(y => y.t === t), tp = all.filter(y => invHas(y, bn.tag));
     if((t === 'E' || t === 'L') && ft.length && Math.random() < .5) x = invPick(ft);
     else if(tp.length && Math.random() < .5) x = invPick(tp);
@@ -108,13 +110,13 @@ function openInv(){
   const B = INV_BANNERS(), bn = B.find(b => b.id === invSel) || B[0], s = invSave(), P = s.pity[bn.id];
   const days = 7 - Math.floor(((Date.now() - INV_EPOCH) % 604800000) / 86400000);
   const star = (k, n) => `<span class="ivc"><img src="iconos/${k === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><b>${n}</b></span>`;
-  const feat = bn.feat.map((x, i) => `<figure class="ivf ivf${i}" style="--c:${INV_TIER[x.t].c}"><img src="${invUrl(x.f)}" alt=""><figcaption><b>${esc(x.n)}</b>${x.v ? `<small>${esc(x.v)}</small>` : ''}<i>${'★'.repeat(INV_TIER[x.t].st)}</i></figcaption></figure>`).join('');
+  const feat = bn.feat.map((x, i) => { const tt = bn.ma ? 'L' : x.t; return `<figure class="ivf ivf${i}" style="--c:${INV_TIER[tt].c}"><img src="${invUrl(x.f)}" alt=""><figcaption><b>${esc(x.n)}</b>${x.v ? `<small>${esc(x.v)}</small>` : ''}<i>${'★'.repeat(INV_TIER[tt].st)}</i></figcaption></figure>`; }).join('');
   panel(`<div class="iv">
     <div class="iv-top"><h1>Invocación</h1><div class="iv-cur">${star('estrella', held('estrella'))}${star('estrella_t', held('estrella_t'))}<button class="iv-colb" id="ivCol">Colección · ${invCount()} / ${INV_LIST.length}</button></div></div>
-    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Esta semana' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
+    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Esta semana' : b.id === 'ma' ? '3 por semana' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
     <div class="iv-ban" style="--c1:${bn.c1};--c2:${bn.c2}">
-      <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner temático · quedan ${days} día${days === 1 ? '' : 's'}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
-        ${bn.id === 'thm' ? '<p class="up">+ Más probabilidad de los 3 destacados al sacar un Épico o Legendario.</p>' : ''}
+      <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner temático · quedan ${days} día${days === 1 ? '' : 's'}` : bn.id === 'ma' ? `Rotación semanal · cambian en ${days} día${days === 1 ? '' : 's'}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
+        ${bn.id === 'thm' ? '<p class="up">+ Más probabilidad de los 3 destacados al sacar un Épico o Legendario.</p>' : bn.id === 'ma' ? `<p class="up">Cada Legendario es uno de estos 3. Hay ${INV_MA_ROT.length} versiones Masters: van saliendo de 3 en 3.</p>` : ''}
         <div class="iv-pity"><span>Épico garantizado en <b>${Math.max(1, INV_PITY.e - P.e)}</b></span><span>Legendario garantizado en <b>${Math.max(1, INV_PITY.l - P.l)}</b></span></div></div>
       <div class="iv-feat">${feat}</div>
     </div>
@@ -122,7 +124,7 @@ function openInv(){
       <button class="iv-pull" data-n="1"><span>Invocar ×1</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×1</em></button>
       <button class="iv-pull x10" data-n="10"><span>Invocar ×10</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×10</em></button>
     </div>
-    <p class="iv-rates">Probabilidades base: <b style="color:${INV_TIER.L.c}">Legendario 1,5 %</b> · <b style="color:${INV_TIER.E.c}">Épico 8 %</b> · <b style="color:${INV_TIER.R.c}">Raro 28 %</b> · <b style="color:${INV_TIER.C.c}">Común 62,5 %</b> · <b style="color:#7af0ff">Los Masters son muy raros</b> · Repetido: +${INV_TIER.C.dup} / ${INV_TIER.R.dup} / ${INV_TIER.E.dup} / ${INV_TIER.L.dup} BP según el rango.</p>
+    <p class="iv-rates">Probabilidades base: <b style="color:${INV_TIER.L.c}">Legendario 1,5 %</b> · <b style="color:${INV_TIER.E.c}">Épico 8 %</b> · <b style="color:${INV_TIER.R.c}">Raro 28 %</b> · <b style="color:${INV_TIER.C.c}">Común 62,5 %</b> · <b style="color:#7af0ff">Los Masters solo salen en su banner (al sacar Legendario)</b> · Repetido: +${INV_TIER.C.dup} / ${INV_TIER.R.dup} / ${INV_TIER.E.dup} / ${INV_TIER.L.dup} BP según el rango.</p>
     <p class="iv-cred">Sprites de entrenadores: <a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">Pokémon Showdown</a> y sus artistas · Pokémon © Nintendo / Game Freak / The Pokémon Company.</p>
   </div>`);
   $('panelBody').classList.add('wide');
@@ -149,9 +151,9 @@ function invFiltBind(root, F, redraw){
   q.oninput = () => { F.q = q.value.trim().toLowerCase(); clearTimeout(invFiltBind.t); invFiltBind.t = setTimeout(() => { redraw(); const q2 = root.querySelector('.ivf-q'); if(q2){ q2.focus(); q2.setSelectionRange(q2.value.length, q2.value.length); } }, 250); };
   root.querySelectorAll('[data-fk]').forEach(b => b.onclick = () => { const k = b.dataset.fk, v = b.dataset.fv; F[k] = k === 'b' ? !F.b : (F[k] === v ? '' : v); redraw(); });
 }
-const invBuffTxt = f => { const L = invSigOf(f); return L.length ? 'Potencia a: ' + L.slice(0, 6).map(d => mon(d) ? mon(d).name : d).join(', ') : ''; };
+const invBuffTxt = f => { const I = invBuffInfo(f); return (I.L ? 'Potencia a: ' + I.L.slice(0, 6).map(d => mon(d) ? mon(d).name : d).join(', ') : 'Potencia a los tipo ' + I.T.map(t => TYPE_ES[t] || t).join(' y ')) + ` (${invPct(I.B)})`; };
 function invUse(f){ save.gender = 'i:' + f; persist(); if(typeof fpPublish === 'function') fpPublish();
-  const L = invBuffs(f); toast(`Personaje: ${INV_BY[f].full}.` + (L.length ? ` Potencia a ${L.map(d => mon(d).name).join(', ')} de tu equipo (+${Math.round((INV_BUFF.hm - 1) * 100)} % PS y daño).` : ' Sale en tu tarjeta y en el panel VS.')); }
+  const L = invBuffs(f); toast(`Personaje: ${INV_BY[f].full}.` + (L.length ? ` Potencia a ${L.map(d => mon(d).name).join(', ')} de tu equipo (${invPct(invBuffInfo(f).B)}).` : ' Sale en tu tarjeta y en el panel VS.')); }
 
 // ---- Colección ----
 const invColF = {q:'', t:'', g:'', b:false};
@@ -180,7 +182,7 @@ function invPickRender(box){
     <div class="pf-invg">${list.slice(0, more ? 9999 : MAX).map(x => `<button type="button" data-ig="${esc(x.f)}" class="${cur === 'i:' + x.f ? 'on' : ''}" style="--c:${INV_TIER[x.t].c}" title="${esc(x.full + (invBuffTxt(x.f) ? ' · ' + invBuffTxt(x.f) : ''))}">
       <img loading="lazy" src="${invUrl(x.f)}" alt=""><b>${esc(x.n)}</b><small>${esc(x.v || INV_TIER[x.t].n)}</small>${invBuffs(x.f).length ? '<i class="ivbf">▲</i>' : ''}</button>`).join('') || '<p class="help">Ninguno con esos filtros.</p>'}</div>
     ${list.length > MAX && !more ? `<button type="button" class="pf-invmore">Ver los ${list.length}</button>` : ''}
-    <p class="help">▲ = potencia a algún Pokémon de tu equipo (+${Math.round((INV_BUFF.hm - 1) * 100)} % PS y daño, +${Math.round((INV_BUFF.defm - 1) * 100)} % resistencia) si lo llevas como personaje. No cuenta en los combates online.</p>`;
+    <p class="help">▲ = potencia a algún Pokémon de tu equipo si lo llevas como personaje: sus Pokémon de los juegos +10 % PS y daño (Masters +15 %); los entrenadores genéricos, a los de su tipo +5 %. Pasa el ratón por encima para verlo. No cuenta en los combates online.</p>`;
   invFiltBind(box, invPfF, () => invPickRender(box));
   const m = box.querySelector('.pf-invmore'); if(m) m.onclick = () => { box.dataset.more = '1'; invPickRender(box); };
   box.querySelectorAll('[data-ig]').forEach(b => b.onclick = () => {
@@ -231,7 +233,23 @@ invSave();
 
 // ---- Bonus del personaje: si llevas a un entrenador de la Invocación, SUS Pokémon (los que usa en los juegos) van un poco más fuertes ----
 // No cuenta en los combates online (pvpTeamDesc), para que la Clasificatoria sea justa.
-const INV_BUFF = {hm:1.10, dm:1.10, defm:1.05, spdm:1};              // +10 % PS · +10 % daño · +5 % resistencia
+const INV_BUFF   = {hm:1.10, dm:1.10, defm:1.05, spdm:1};            // personaje con nombre (Azul, Cynthia...): sus Pokémon · +10 % PS · +10 % daño · +5 % resistencia
+const INV_BUFF_M = {hm:1.15, dm:1.15, defm:1.08, spdm:1};            // su versión MASTERS: un poco más
+const INV_BUFF_G = {hm:1.05, dm:1.05, defm:1.03, spdm:1};            // entrenador genérico (Pescador, Montañero...): los Pokémon del TIPO de su clase, menos
+// Entrenadores genéricos → tipos que potencian (por el tipo de Pokémon que usan en los juegos). Los que no están aquí: Normal.
+const INV_CLASS_T = {fisherman:['agua'], fisher:['agua'], sailor:['agua', 'lucha'], swimmer:['agua'], swimmerf:['agua'], swimmerf2:['agua'], swimmerm:['agua'], tuber:['agua'], tuberf:['agua'], scubadiver:['agua'], freediver:['agua'], surfer:['agua'],
+  triathleteswimmer:['agua'], triathleteswimmerf:['agua'], triathleteswimmerm:['agua'], aquasuit:['agua', 'siniestro'], aquagrunt:['agua', 'siniestro'], aquagruntf:['agua', 'siniestro'], teamaquabeta:['agua', 'siniestro'], teamaquagruntf:['agua', 'siniestro'], teamaquagruntm:['agua', 'siniestro'], parasollady:['agua'], firefighter:['agua'],
+  bugcatcher:['bicho'], bugmaniac:['bicho'], hiker:['roca', 'tierra'], ruinmaniac:['tierra', 'roca'], worker:['lucha', 'acero'], worker2:['lucha', 'acero'], workerf:['lucha', 'acero'], workerice:['hielo'], roughneck:['siniestro', 'veneno'], engineer:['acero', 'electrico'],
+  birdkeeper:['volador'], skytrainer:['volador'], skytrainerf:['volador'], pilot:['volador'], blackbelt:['lucha'], battlegirl:['lucha'], crushgirl:['lucha'], crushkin:['lucha'], bodybuilder:['lucha'], bodybuilderf:['lucha'], striker:['lucha'], linebacker:['lucha'],
+  psychic:['psiquico'], psychicf:['psiquico'], psychicfjp:['psiquico'], clown:['psiquico'], harlequin:['psiquico'], juggler:['psiquico'], medium:['fantasma'], channeler:['fantasma'], hexmaniac:['fantasma'],
+  firebreather:['fuego'], kindler:['fuego'], magmasuit:['fuego', 'tierra'], magmagrunt:['fuego', 'tierra'], magmagruntf:['fuego', 'tierra'], teammagmagruntf:['fuego', 'tierra'], teammagmagruntm:['fuego', 'tierra'], flaregrunt:['fuego', 'siniestro'], flaregruntf:['fuego', 'siniestro'],
+  guitarist:['electrico'], rocker:['electrico'], gamer:['electrico'], supernerd:['electrico', 'acero'], scientist:['electrico', 'veneno'], scientistf:['electrico', 'veneno'],
+  aromalady:['planta'], picnicker:['planta'], gardener:['planta'], pokemonranger:['planta'], pokemonrangerf:['planta'], rancher:['planta', 'normal'], skier:['hielo'], skierf:['hielo'], boarder:['hielo'], acetrainersnow:['hielo'], acetrainersnowf:['hielo'],
+  dragontamer:['dragon'], veteran:['dragon'], veteranf:['dragon'], ninjaboy:['veneno'], kunoichi:['veneno', 'fantasma'], kunoichi2:['veneno', 'fantasma'], cueball:['veneno'], biker:['veneno'], burglar:['fuego'],
+  punkguy:['siniestro'], punkgirl:['siniestro'], delinquent:['siniestro'], delinquentf:['siniestro'], delinquentf2:['siniestro'], ruffian:['siniestro'], streetthug:['siniestro'], hooligans:['siniestro'],
+  rocketgrunt:['veneno'], rocketgruntf:['veneno'], teamrocketgruntf:['veneno'], teamrocketgruntm:['veneno'], rainbowrocketgrunt:['veneno', 'siniestro'], rainbowrocketgruntf:['veneno', 'siniestro'], galacticgrunt:['veneno', 'siniestro'], galacticgruntf:['veneno', 'siniestro'],
+  plasmagrunt:['siniestro'], plasmagruntf:['siniestro'], skullgrunt:['veneno', 'siniestro'], skullgruntf:['veneno', 'siniestro'], yellgrunt:['siniestro'], yellgruntf:['siniestro'], stargrunt:['siniestro'], stargruntf:['siniestro'],
+  fairytalegirl:['hada'], idol:['hada'], dancer:['hada'], policeman:['fuego'], kimonogirl:['psiquico', 'siniestro'], furisodegirl:['psiquico', 'hada']};
 // Nombre en inglés del archivo → id de su equipo en TEAMS (teams.js usa los nombres en español)
 const INV_TEAM_KEY = {ltsurge:'lt_surge', blue:'azul', falkner:'pegaso', bugsy:'anton', whitney:'blanca', morty:'morti', chuck:'anibal', jasmine:'yasmina', pryce:'fredo', clair:'debora', will:'mento',
   roxanne:'petra', brawly:'marcial', wattson:'erico', flannery:'candela', winona:'alana', tate:'vitoleti', liza:'vitoleti', juan:'galano', sidney:'sixto', phoebe:'fatima', glacia:'nivea', drake:'dracon', wallace:'plubio',
@@ -260,8 +278,17 @@ function invSigOf(f){
   if(!L.length && typeof TRAINERS !== 'undefined'){ const t = TRAINERS.find(t => t.id === f || t.id === base); if(t) L = t.dex; }
   return (INV_SIG[f] = [...new Set(L)].filter(d => typeof mon === 'function' && mon(d)));
 }
-const invBuffs = f => { const L = invSigOf(f); return typeof team !== 'undefined' && team ? team.filter(d => L.includes(d)) : []; };   // los de TU equipo que potencia
+// Qué potencia un entrenador: sus Pokémon (si tiene equipo conocido) o los de un tipo (genéricos)
+function invBuffInfo(f){
+  const L = invSigOf(f);
+  if(L.length) return {L, B: invHas(INV_BY[f], 'ma') ? INV_BUFF_M : INV_BUFF};
+  const base = f.split('-')[0], T = INV_CLASS_T[base] || ['normal'];
+  return {T, B: INV_BUFF_G};
+}
+const invMatches = (f, d) => { const I = invBuffInfo(f); if(I.L) return I.L.includes(d); const m = mon(d); return !!m && m.types.some(t => I.T.includes(t)); };
+const invBuffs = f => typeof team !== 'undefined' && team ? team.filter(d => invMatches(f, d)) : [];   // los de TU equipo que potencia
+const invPct = B => `+${Math.round((B.hm - 1) * 100)} % PS y daño`;
 let invNoBuff = false;
-function invBuffFor(d){ if(invNoBuff || !invSkin(save.gender) || !invOwns(save.gender.slice(2))) return null; return invSigOf(save.gender.slice(2)).includes(d) ? INV_BUFF : null; }
+function invBuffFor(d){ if(invNoBuff || !invSkin(save.gender) || !invOwns(save.gender.slice(2))) return null; const f = save.gender.slice(2); return invMatches(f, d) ? invBuffInfo(f).B : null; }
 { const _cb = combatBoost; combatBoost = function(d){ const b = _cb(d), B = invBuffFor(d); if(B){ b.hm *= B.hm; b.dm *= B.dm; b.defm *= B.defm; b.spdm *= B.spdm; b.invBuff = true; } return b; }; }
 if(typeof pvpTeamDesc === 'function'){ const _pd = pvpTeamDesc; pvpTeamDesc = function(){ invNoBuff = true; try{ return _pd.apply(this, arguments); } finally{ invNoBuff = false; } }; }
