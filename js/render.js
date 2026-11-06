@@ -67,8 +67,9 @@ function drawF(f, col){
 }
 
 // Cuadritos del equipo (debajo de tu tarjeta): posición en el mundo del juego. La usan hud() para dibujarlos y ui.js para saber si hiciste clic en uno.
+const ICON_K = 1.3;                                       // tamaño de TUS cuadritos del equipo (1 = pequeños como antes; más = más grandes, y se separan solos)
 const HUD_H = 90, ICON_DY = 98;                           // alto de la tarjeta de Pokémon y dónde empiezan los cuadritos del equipo (debajo de ella)
-function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52) * k, y:(10 + ICON_DY) * k, w:46 * k, h:46 * k}; }
+function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52*ICON_K) * k, y:(10 + ICON_DY) * k, w:46 * ICON_K * k, h:46 * ICON_K * k}; }
 function hudIconAt(mx, my){                      // nº del cuadrito que hay en (mx, my), o -1
   if(!g || g.over) return -1;
   for(let i = 0; i < myList().length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
@@ -108,7 +109,8 @@ function hud(x, y, list, idx, col){
       text(ab, x+80, y+81, 6, '#9be29b'); }
   }
   list.forEach((u,i)=>{                                                      // mini-iconos del equipo
-    const px = x + i*52, py = y + ICON_DY;
+    const K = list === myList() ? ICON_K : 1, px = x + i*52*K, py = y + ICON_DY;
+    ctx.save(); ctx.translate(px, py); ctx.scale(K, K); ctx.translate(-px, -py);          // tus cuadritos se dibujan más grandes
     ctx.fillStyle = 'rgba(16,20,30,.9)'; ctx.fillRect(px, py, 46, 46);
     ctx.strokeStyle = i === idx ? '#ffcc33' : 'rgba(255,255,255,.25)'; ctx.lineWidth = i === idx ? 2 : 1; ctx.strokeRect(px+.5, py+.5, 45, 45);
     if(hid && !FOE_SEEN.has(u)){                                               // aún no ha salido: Poké Ball gris con «?»
@@ -116,7 +118,7 @@ function hud(x, y, list, idx, col){
       ctx.fillStyle = '#1a2033'; ctx.beginPath(); ctx.arc(px+23, py+21, 13, 0, Math.PI); ctx.fill();
       ctx.fillStyle = '#10131f'; ctx.fillRect(px+10, py+20, 26, 2); ctx.beginPath(); ctx.arc(px+23, py+21, 4, 0, 7); ctx.fill();
       text('?', px+23, py+42, 9, '#8a94b0', 'center');
-      return;
+      ctx.restore(); return;
     }
     ctx.globalAlpha = u.dead ? .35 : 1;
     drawFrame(ctx, u.m.dex, 'Idle', 0, 0, px+23, py+20, 1, 34, u.shiny);
@@ -134,9 +136,10 @@ function hud(x, y, list, idx, col){
       if(hov && can){ ctx.strokeStyle = wait ? '#ff9a3a' : '#7dffa0'; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, 44, 44); }
       text(ctlShort('sw' + (i + 1)).slice(0, 3), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
     }
+    ctx.restore();
   });
   if(list === myList()){                                                          // mensajes bajo los cuadritos
-    const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 + 12;
+    const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 * ICON_K + 12;
     if(g.swNote > 0) text(`ESPERA ${Math.ceil(myCd())} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
     else if(hv >= 0 && hv !== idx && !list[hv].dead) text(myCd() > 0 ? `ESPERA ${Math.ceil(myCd())} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
     else if(g.clock < (typeof TOUCH !== 'undefined' && TOUCH.on ? 4 : 8) && g.count <= 0 && !g.over) text(typeof TOUCH !== 'undefined' && TOUCH.on ? 'TOCA UN CUADRO PARA CAMBIAR' : `CLIC EN UN CUADRO O TECLAS ${ctlShort('sw1')} · ${ctlShort('sw2')} · ${ctlShort('sw3')} PARA CAMBIAR`, x, ty, 6, 'rgba(201,214,245,.75)');

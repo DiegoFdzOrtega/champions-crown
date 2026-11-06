@@ -3786,3 +3786,19 @@ html.phone .cp2-sub{font-size:7px;line-height:1.5}
 .cp2-hero .hteam .cp-team{margin:0;width:100%;padding:8px;font-size:9px;background:transparent;border:2px solid #3d5c9e;color:#c3d0ee;box-shadow:none}
 .cp2-hero .hteam .cp-team:hover{border-color:#8fb8ff;color:#fff}
 html.phone .cp2-hero .htm canvas{width:40px;height:40px}
+
+.ivwait{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#02030a;color:#8fb8ff;font-size:12px;letter-spacing:2px;animation:ivTw 1s ease-in-out infinite alternate}
+
+/* ===== v20261360: tarjetas x10 más grandes + icono Torre sin chocar con el texto ===== */
+.ivgrid{--cw:min(11vw,calc((100vh - 170px)*.28));grid-template-columns:repeat(5,var(--cw));gap:clamp(8px,1.2vw,16px);justify-content:center}
+.ivfc{container-type:inline-size}
+.ivfc .fr{gap:2%;padding:4% 2%}
+.ivfc .fr img{width:92%;height:62%}
+.ivfc .fr i{font-size:9cqw}.ivfc .fr b{font-size:7.5cqw;line-height:1.15}.ivfc .fr em{font-size:8cqw}
+html.phone .ivgrid{--cw:min(11vw,calc((100vh - 120px)*.28));grid-template-columns:repeat(5,var(--cw));gap:6px}
+html.phone .ivfc .fr{gap:2%;padding:4% 2%}
+html.phone .ivfc .fr img{height:62%}
+html.phone .ivfc .fr b{font-size:7.5cqw}html.phone .ivfc .fr i{font-size:9cqw}html.phone .ivfc .fr em{font-size:8cqw}
+.m2-hero img.tw-art{max-width:100%;min-width:0}
+html.phone .m2-hero img.tw-art{height:96px;max-width:90px}
+@media (max-width:700px){.m2-hero img.tw-art{height:96px;max-width:90px}}

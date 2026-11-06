@@ -219,7 +219,20 @@ function invPickRender(box){
 // 2) explosión de luz. 3) una tirada: sale el personaje de la silueta. Tirada ×10: 10 cartas boca abajo que se giran de una en una (o todas a la vez).
 // Animación que se usa al invocar: 'templo' (rayo del cielo que cae en la fuente) o 'circulo' (la anterior, círculo mágico). Para volver a la anterior basta cambiar esta línea.
 const INV_ANIM = 'templo';
-function invAnim(res){ return (INV_ANIM === 'templo' ? invAnimTemplo : invAnimCirculo)(res); }
+// Antes de enseñar el templo se esperan las 3 imágenes (templo, sala y rayo). Si alguna no carga (no está subida, mala conexión...), se usa la animación del círculo en vez de dejar la pantalla en negro.
+let invScenesOk = null;
+function invScenes(){
+  if(invScenesOk) return invScenesOk;
+  const load = n => new Promise(ok => { const im = new Image(); im.onload = () => ok(true); im.onerror = () => ok(false); im.src = 'iconos/' + n + '.webp'; });
+  const wait = new Promise(ok => setTimeout(() => ok(false), 8000));
+  invScenesOk = Promise.race([Promise.all(['inv_templo', 'inv_sala', 'inv_rayo'].map(load)).then(a => a.every(Boolean)), wait]).then(ok => { if(!ok) invScenesOk = null; return ok; });
+  return invScenesOk;
+}
+function invAnim(res){
+  if(INV_ANIM !== 'templo') return invAnimCirculo(res);
+  const w = document.createElement('div'); w.className = 'ivwait'; w.textContent = 'Invocando…'; document.body.appendChild(w);
+  invScenes().then(ok => { w.remove(); (ok ? invAnimTemplo : invAnimCirculo)(res); });
+}
 
 function invAnimCirculo(res){
   const best = res.reduce((a, r) => INV_RANK[r.t] > INV_RANK[a] ? r.t : a, 'C'), col = INV_TIER[best].c, many = res.length > 1;
