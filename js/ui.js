@@ -3,7 +3,7 @@
    7) PANTALLAS, TECLADO Y RATÓN
    ===================================================================== */
 const $ = id => document.getElementById(id);
-const VIEWS = ['main','regions','tower','panel','result','dexv','gachav','teamv','rankv'];
+const VIEWS = ['main','regions','tower','panel','result','dexv','gachav','teamv','rankv','torrev'];
 function show(w){ VIEWS.forEach(v => $(v).classList.toggle('hide', v !== w)); Music.scene(w); }          // la música cambia sola según la pantalla (music.js)
 
 setInterval(()=>{                                 // dibuja las miniaturas cuando cargan los sprites

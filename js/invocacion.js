@@ -3,7 +3,7 @@
    INVOCACIÓN: tiradas de ENTRENADORES (como los deseos de Genshin Impact)
    - Datos: js/invdata.js (INV_DATA). Imágenes: carpeta «Sprites entrenadores/», sprites de Pokémon Showdown y sus artistas.
    - Rangos: Común · Raro · Épico · Legendario. Repetidos = BP (INV_TIER.dup).
-   - Banners: «Estándar» (Estrella azul, iconos/estrella.webp) y uno TEMÁTICO que cambia cada lunes (Estrella rosa, iconos/estrella_t.webp).
+   - Banners: «Estándar» (Estrella azul, iconos/estrella.webp) y uno TEMÁTICO que cambia CADA DÍA (a medianoche, hora de España) (Estrella rosa, iconos/estrella_t.webp).
      En el temático, al salir un Épico o Legendario hay un 50 % de que sea uno de los 3 destacados.
    - Garantías: un Épico o mejor cada 10 tiradas como mucho, y un Legendario a las 80 (desde la 66 la probabilidad sube).
    - Lo que sacas se usa como PERSONAJE en la tarjeta de entrenador y en el panel VS (Perfil › Entrenador, o «Usar» en la colección).
@@ -31,26 +31,26 @@ const INV_THEMES = [
   {tag:'gy', n:'Líderes de Gimnasio',  d:'Líderes y capitanes de todas las regiones.',                c1:'#4ccf6a', c2:'#08321a'},
   {tag:'he', n:'Héroes y rivales',     d:'Protagonistas y rivales de todos los juegos.',               c1:'#3ea6ff', c2:'#0a1e4a'},
   {tag:'re', n:'Retro',                d:'Versiones clásicas de cada generación.',                    c1:'#ffb35a', c2:'#3a1e08'},
-  {tag:'an', n:'Anime',                d:'Personajes y versiones de la serie.',                       c1:'#ff9a3a', c2:'#3a1a08'},
-  {tag:'co', n:'Señores de la guerra', d:'Los héroes y señores de Pokémon Conquest.',                  c1:'#e8c33a', c2:'#3a2a08'}
+  {tag:'an', n:'Anime',                d:'Personajes y versiones de la serie.',                       c1:'#ff9a3a', c2:'#3a1a08'}
 ];
-const INV_EPOCH = Date.UTC(2026, 0, 5);                                   // un lunes: los banners cambian cada lunes
-const invWeek = () => Math.floor((Date.now() - INV_EPOCH) / 604800000);
-const invTheme = () => INV_THEMES[((invWeek() % INV_THEMES.length) + INV_THEMES.length) % INV_THEMES.length];
+const INV_EPOCH = Date.UTC(2026, 0, 5) - 3600000;                         // medianoche en España (UTC+1): los banners cambian cada día a esa hora
+const INV_DAY = 86400000;
+const invDay = () => Math.floor((Date.now() - INV_EPOCH) / INV_DAY);
+const invTheme = () => INV_THEMES[((invDay() % INV_THEMES.length) + INV_THEMES.length) % INV_THEMES.length];
 function invSeeded(seed){ let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-function invFeatured(th){                                                 // los 3 destacados de la semana (los mismos para todos los jugadores)
-  const pool = INV_LIST.filter(x => invHas(x, th.tag) && !invHas(x, 'ma')), R = invSeeded(invWeek() * 97 + 13);
+function invFeatured(th){                                                 // los 3 destacados del día (los mismos para todos los jugadores)
+  const pool = INV_LIST.filter(x => invHas(x, th.tag) && !invHas(x, 'ma')), R = invSeeded(invDay() * 97 + 13);
   const src = pool.map(x => [x, R()]).sort((a, b) => (INV_RANK[b[0].t] - INV_RANK[a[0].t]) || (a[1] - b[1])).map(p => p[0]);   // los de más rango primero (barajados dentro de cada rango)
   const seen = new Set(), out = [];
   for(const x of src){ const b = x.f.split('-')[0]; if(seen.has(b)) continue; seen.add(b); out.push(x); if(out.length === 3) break; }   // 3 personajes distintos
   return out;
 }
-// Banner MASTERS: las versiones Masters SOLO salen aquí. Cada semana hay 3 disponibles (van rotando por todas: INV_MA_ROT) y salen al sacar un Legendario.
+// Banner MASTERS: las versiones Masters SOLO salen aquí. Cada día hay 3 disponibles (van rotando por todas: INV_MA_ROT) y salen al sacar un Legendario.
 const INV_MA_ROT = (() => { const L = INV_LIST.filter(x => invHas(x, 'ma')), R = invSeeded(20261105); return L.map(x => [x, R()]).sort((a, b) => a[1] - b[1]).map(p => p[0]); })();
-const invMaWeek = () => { const n = INV_MA_ROT.length, w = ((invWeek() % Math.ceil(n / 3)) + Math.ceil(n / 3)) % Math.ceil(n / 3); return [0, 1, 2].map(i => INV_MA_ROT[(w * 3 + i) % n]); };
+const invMaWeek = () => { const n = INV_MA_ROT.length, w = ((invDay() % Math.ceil(n / 3)) + Math.ceil(n / 3)) % Math.ceil(n / 3); return [0, 1, 2].map(i => INV_MA_ROT[(w * 3 + i) % n]); };
 const INV_BANNERS = () => { const th = invTheme(); return [
   {id:'thm', cur:'estrella_t', n:th.n, d:th.d, tag:th.tag, c1:th.c1, c2:th.c2, feat:invFeatured(th)},
-  {id:'ma', cur:'estrella_t', n:'Pokémon Masters', d:'Las versiones Masters solo salen en este banner, y cada semana hay 3 distintas.', tag:null, ma:true, c1:'#7af0ff', c2:'#08304a', feat:invMaWeek()},
+  {id:'ma', cur:'estrella_t', n:'Pokémon Masters', d:'Las versiones Masters solo salen en este banner, y cada día hay 3 distintas.', tag:null, ma:true, c1:'#7af0ff', c2:'#08304a', feat:invMaWeek()},
   {id:'std', cur:'estrella', n:'Invocación estándar', d:'Pueden salir todos los entrenadores (menos los Masters). Siempre disponible.', tag:null, c1:'#3ea6ff', c2:'#0a1a3a', feat:invFeatured({tag:''})}
 ]; };
 
@@ -85,7 +85,7 @@ function invRoll(bn){
   if(t === 'L'){ P.l = 0; P.e = 0; } else if(t === 'E') P.e = 0;
   const all = INV_LIST.filter(x => x.t === t && !invHas(x, 'ma'));          // los Masters no salen en los banners normales
   let x = null;
-  if(bn.ma && t === 'L') x = invPick(bn.feat);                               // banner Masters: el Legendario es uno de los 3 de la semana
+  if(bn.ma && t === 'L') x = invPick(bn.feat);                               // banner Masters: el Legendario es uno de los 3 del día
   else if(bn.tag){
     const ft = bn.feat.filter(y => y.t === t), tp = all.filter(y => invHas(y, bn.tag));
     if((t === 'E' || t === 'L') && ft.length && Math.random() < .5) x = invPick(ft);
@@ -109,14 +109,15 @@ let invSel = 'thm';
 function openInv(){
   invGift();
   const B = INV_BANNERS(), bn = B.find(b => b.id === invSel) || B[0], s = invSave(), P = s.pity[bn.id];
-  const days = 7 - Math.floor(((Date.now() - INV_EPOCH) % 604800000) / 86400000);
+  const left = INV_DAY - ((Date.now() - INV_EPOCH) % INV_DAY), lh = Math.floor(left / 3600000), lm = Math.floor(left % 3600000 / 60000);
+  const cuando = lh ? `${lh} h ${lm} min` : `${lm} min`;                // lo que falta para el cambio de medianoche
   const star = (k, n) => `<span class="ivc"><img src="iconos/${k === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><b>${n}</b></span>`;
   const feat = bn.feat.map((x, i) => { const tt = bn.ma ? 'L' : x.t; return `<figure class="ivf ivf${i}" style="--c:${INV_TIER[tt].c}"><img src="${invUrl(x.f)}" alt=""><figcaption><b>${esc(x.n)}</b>${x.v ? `<small>${esc(x.v)}</small>` : ''}<i>${'★'.repeat(INV_TIER[tt].st)}</i></figcaption></figure>`; }).join('');
   panel(`<div class="iv">
     <div class="iv-top"><h1>Invocación</h1><div class="iv-cur">${star('estrella', held('estrella'))}${star('estrella_t', held('estrella_t'))}<button class="iv-colb" id="ivCol">Colección · ${invCount()} / ${INV_LIST.length}</button></div></div>
-    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Esta semana' : b.id === 'ma' ? '3 por semana' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
+    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Hoy' : b.id === 'ma' ? '3 cada día' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
     <div class="iv-ban" style="--c1:${bn.c1};--c2:${bn.c2}">
-      <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner temático · quedan ${days} día${days === 1 ? '' : 's'}` : bn.id === 'ma' ? `Rotación semanal · cambian en ${days} día${days === 1 ? '' : 's'}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
+      <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner del día · cambia en ${cuando}` : bn.id === 'ma' ? `Rotación diaria · cambian en ${cuando}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
         ${bn.id === 'thm' ? '<p class="up">+ Más probabilidad de los 3 destacados al sacar un Épico o Legendario.</p>' : bn.id === 'ma' ? `<p class="up">Cada Legendario es uno de estos 3. Hay ${INV_MA_ROT.length} versiones Masters: van saliendo de 3 en 3.</p>` : ''}
         <div class="iv-pity"><span>Épico garantizado en <b>${Math.max(1, INV_PITY.e - P.e)}</b></span><span>Legendario garantizado en <b>${Math.max(1, INV_PITY.l - P.l)}</b></span></div></div>
       <div class="iv-feat">${feat}</div>
@@ -135,7 +136,7 @@ function openInv(){
 }
 
 // ---- Filtros (los usan la Colección y Perfil › Entrenador) ----
-const INV_TAGS = [['ch', 'Campeones'], ['am', 'Alto Mando'], ['gy', 'Líderes'], ['vi', 'Villanos'], ['he', 'Héroes'], ['ma', 'Masters'], ['pa', 'Pasarela'], ['an', 'Anime'], ['re', 'Retro'], ['co', 'Conquest']];
+const INV_TAGS = [['ch', 'Campeones'], ['am', 'Alto Mando'], ['gy', 'Líderes'], ['vi', 'Villanos'], ['he', 'Héroes'], ['ma', 'Masters'], ['pa', 'Pasarela'], ['an', 'Anime'], ['re', 'Retro']];
 const invFilt = (F, own) => INV_LIST.filter(x => (!own || invOwns(x.f)) && (!F.t || x.t === F.t) && (!F.g || invHas(x, F.g))
   && (!F.b || invBuffs(x.f).length) && (!F.q || x.full.toLowerCase().includes(F.q)))
   .sort((a, b) => (invOwns(b.f) - invOwns(a.f)) || (INV_RANK[b.t] - INV_RANK[a.t]) || a.full.localeCompare(b.full));

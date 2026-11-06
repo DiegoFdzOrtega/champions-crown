@@ -34,12 +34,12 @@ const PR_ADS = [                                            // patrocinadores de
 ];
 const PR_BG = {ranked: 'fondos/estadio_pruebas.webp', pruebas: 'fondos/estadio_torre.webp'};   // fondo de cada modo (las dos imágenes tienen el MISMO encuadre: campo y pantallas en el mismo sitio)
 function prImg(src){
-  src = src || (g && g.o && g.o.pruebas ? PR_BG.pruebas : PR_BG.ranked);
+  src = src || (g && g.o && (g.o.pruebas || g.o.estTorre) ? PR_BG.pruebas : PR_BG.ranked);
   const c = PR.imgs || (PR.imgs = {});
   if(!c[src]){ const im = c[src] = new Image(); im.onload = () => im.ok = true; im.src = src; }
   return c[src];
 }
-const prOn = () => !!(g && g.o && (g.o.pruebas || g.o.estadio));      // pruebas = Campo de pruebas (contra la IA) · estadio = Clasificatoria online
+const prOn = () => !!(g && g.o && (g.o.pruebas || g.o.estadio || g.o.estTorre));      // pruebas = Campo de pruebas (contra la IA) · estadio = Clasificatoria online · estTorre = Torre Batalla
 // PANTALLA COMPLETA: la pantalla mide PR.SW × H (PR.SW sale de la forma de la ventana). El estadio se ve SIEMPRE entero (nunca se recorta el campo):
 //  - ventana más ancha que la imagen: la imagen ocupa todo el alto y los lados que sobran se rellenan con la grada de sus bordes (prSides);
 //  - ventana más estrecha: la imagen ocupa todo el ancho y queda una franja oscura abajo, detrás de la barra de ataques.
@@ -289,5 +289,5 @@ function prFront(){                                           // encima del HUD:
     ctx.restore();
     ctx.restore();
   }
-  if(!g.pvp) text('CAMPO DE PRUEBAS · RIVAL: IA · SIN RECOMPENSAS', 14, H - 12, 6, '#6d7899');   // online: ahí va el ping (js/pvp.js)
+  if(!g.pvp) text(g.o.estTorre ? `TORRE · PISO ${g.o.torreFloor}${g.o.boss ? ' · JEFE' : ''} · RÉCORD ${save.tower.best}` : 'CAMPO DE PRUEBAS · RIVAL: IA · SIN RECOMPENSAS', 14, H - 12, 6, '#6d7899');   // online: ahí va el ping (js/pvp.js)
 }

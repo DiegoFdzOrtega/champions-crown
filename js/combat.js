@@ -108,13 +108,13 @@ function move(f, dx, dy, dt, k){
   if(f.ride){                                                                  // montado en Surf: va pegado a la ola hasta que se acaba o choca
     const r = f.ride; r.t -= dt;
     if(r.t <= 0 || r.s.life <= 0 || f.dead || cant(f)) f.ride = null;
-    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); if(g.o.pruebas || g.o.estadio) prClamp(f); f.mv = true; return; }
+    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); if(prOn()) prClamp(f); f.mv = true; return; }
   }
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
   else if(l){ vx = dx/l*sp*k; vy = dy/l*sp*k; }
   f.mv = l > 0 || f.dash > 0;
-  f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110); if(g.o.pruebas || g.o.estadio) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
+  f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110); if(prOn()) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
 }
 
 function update(dt){

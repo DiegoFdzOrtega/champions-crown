@@ -59,6 +59,10 @@ function vsFoeImg(im, o){
   im.onerror = () => { if(++k < list.length) im.src = list[k]; else { im.onload = null; fallback(); } };
   im.src = list[0];
 }
+function vsFitSkin(sp, ar){                                  // si el personaje es más ancho que su hueco, se ajusta al ancho (y no al alto) para no taparle nada a la tarjeta
+  const p = sp.parentElement; if(!p) return;
+  const pw = p.clientWidth, ph = p.clientHeight; if(pw && ph) sp.classList.toggle('wide', ar > pw / ph);
+}
 function vsTrim(sp, im){                                     // recorta el margen transparente de la imagen para que el personaje salga grande (mira dónde empiezan y acaban los píxeles dibujados)
   try{
     const W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -68,6 +72,7 @@ function vsTrim(sp, im){                                     // recorta el marge
     if(x1 < 0) return;
     const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
     sp.style.aspectRatio = bw + '/' + bh; sp.style.backgroundSize = `${W / bw * 100}% ${H / bh * 100}%`;
+    requestAnimationFrame(() => vsFitSkin(sp, bw / bh));                  // los personajes anchos (con capa, brazos abiertos...) se encogen para no salirse de su hueco
     sp.style.backgroundPosition = `${W > bw ? x0 / (W - bw) * 100 : 0}% ${H > bh ? y0 / (H - bh) * 100 : 0}%`;
   }catch(e){}                                                // (si el navegador lo impide, se ve entera con su margen)
 }

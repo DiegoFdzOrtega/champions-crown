@@ -101,6 +101,8 @@ const MUSIC_TRACKS = {
                  synth:{seed:47, bpm:176, root:62, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   win_lider_alola:  {name:'Victoria: Líderes y Alto Mando de Alola', file:'Alola/Victoria Lideres',  once:true, ref:'"Victory! Trainer" de Alola (Sol y Luna)'},
   win_campeon_alola:{name:'Victoria: Campeón de Alola',            file:'Alola/Victoria Campeon', once:true, ref:'"Victory! Champion" de Alola (Sol y Luna)'},
+  torre:        {name:'Torre Batalla', file:'Kalos/Combate Alto Mando', win:'win_lider_kalos', ref:'"Battle! Elite Four" de Kalos (X/Y): épica, para subir piso a piso',
+                 synth:{seed:58, bpm:150, root:57, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.85}},
   campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
@@ -141,7 +143,8 @@ const MUSIC_BY_TRAINER = {
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){
-  if(o.campo || (o.torre && !o.boss)) return 'campo';                       // Torre Batalla: música del Campo (los jefes llevan la suya)
+  if(o.torre && !o.boss) return 'torre';                                    // Torre Batalla: su propia pista (los jefes llevan la suya)
+  if(o.campo) return 'campo';
   if(MUSIC_BY_TRAINER[o.leader]) return MUSIC_BY_TRAINER[o.leader];
   const F = FLOORS.find(x => x.id === o.leader), k = F ? ({lider:'lider', alto:'alto', campeon:'campeon'})[F.kind] : 'lider', r = F ? F.region.toLowerCase() : 'kanto';
   return [`${k}_${r}`, `${k}_kanto`, 'lider_kanto'].find(id => MUSIC_TRACKS[id]);

@@ -59,7 +59,7 @@ const NAV = [
   {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}` + (save.ticketsS ? ` · Variocolor: ${save.ticketsS}` : '')},
   {k:'set',     n:'AJUSTES',         c:'#9aa6b8', d:'Nombre, volumen, controles y pantalla completa.',                         f:()=>'Ajusta el juego a tu gusto'},
   {k:'rank',    n:'CLASIFICATORIA',  c:'#ffcc33', d:'Combates online contra otros jugadores por puntos: sube de Bronce a Challenger. Necesitas una cuenta.', f:()=>{ const r = save.ranked || {pts:0}, t = typeof rkTier === 'function' ? rkTier(r.pts) : null; return t ? `Rango: ${t.n} · ${r.pts} PC` : 'Combates online por puntos'; }},
-  {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'Sube piso a piso sin parar: tus Pokémon se curan en cada piso, los rivales son cada vez más fuertes y cada piso da premios. Se desbloquea al vencer a los Campeones de todas las Ligas disponibles.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : `BLOQUEADA · Ligas superadas: ${leaguesAvail().length - towerNeed()} / ${leaguesAvail().length}`, get lock(){ return !towerOpen(); }}
+  {k:'tower',   n:'TORRE BATALLA',   c:'#ff9a3a', d:'50 pisos contra personajes del mundo Pokémon (héroes, rivales, villanos, anime...) y un Campeón cada 10 pisos. Tus Pokémon se curan en cada piso y cada piso da premios. Se abre al ser Campeón de Kanto.', f:()=>towerOpen() ? `Tu récord: piso ${save.tower.best}` : 'BLOQUEADA · Sé Campeón de Kanto', get lock(){ return !towerOpen(); }}
   // {k:'pruebas', n:'CAMPO DE PRUEBAS', c:'#b06cff', d:'Zona de pruebas: combate contra la IA en el estadio nuevo (Torre Batalla). No da recompensas ni cambia tu progreso.', f:()=>'Estadio nuevo · en pruebas'}   // js/pruebas.js · OCULTO: quita las // (y pon una coma al final de la línea de arriba) para volver a enseñarlo
 ];
 let navIdx = 0;
@@ -89,7 +89,7 @@ function buildMain(){
 }
 function enter(k){
   ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), pruebas:openPruebas, friends:openFriends, account:openAccount, bag:openBag, set:openSettings,
-    tower:()=>towerOpen() ? openTorre() : toast(`La Torre Batalla se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).`)})[k]();
+    tower:()=>towerOpen() ? openTorre() : toast('La Torre Batalla se abre al ser Campeón de Kanto.')})[k]();
 }
 function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)
 function goStory(){ buildStory(); show('tower'); }
@@ -131,7 +131,7 @@ const leaguesWon = () => REGIONS.filter(champAny).length;      // Ligas superada
 function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
   storyToggle($('rMode'), buildRegions);                                                            // botón Fácil / Difícil, cada una con su avance (js/dificultad.js)
-  $('rTower').textContent = !towerOpen() ? `Torre Batalla: se desbloquea al derrotar a los Campeones de todas las Ligas disponibles (${leaguesAvail().length - towerNeed()}/${leaguesAvail().length} superadas).` : 'Torre Batalla: ¡abierta! Pulsa «Torre Batalla» en el menú principal.';
+  $('rTower').textContent = !towerOpen() ? 'Torre Batalla: se abre al ser Campeón de Kanto.' : 'Torre Batalla: ¡abierta! Pulsa «Torre Batalla» en el menú principal.';
   REGIONS.forEach((n,i)=>{
     const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
     const open = playable && (i === 0 || champOf(prev) || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior

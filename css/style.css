@@ -2029,19 +2029,6 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 .gf-row small{display:block;font-size:.8rem;color:#8b98ad;margin-top:.3rem}
 @media (prefers-reduced-motion:reduce){.gf-icon{animation:none}}
 
-/* =====================================================================
-   TORRE BATALLA (js/torre.js): pantalla de la Torre y premios únicos
-   ===================================================================== */
-.twbanner{border-color:#ff9a3a}
-.twbanner h1{color:#ff9a3a}
-.tw-go{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap;margin:1.4rem 0}
-.tw-go .main{padding:1.1rem 2.2rem;font-size:1.3rem;background:#ff9a3a;color:#1b0f00;border-color:#fff}
-.tw-hitos{display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem;margin:1rem 0 2rem}
-.tw-h{display:flex;flex-direction:column;gap:.5rem;padding:1.1rem 1.3rem;background:#161b2c;border:2px solid #2d3a5c;font-size:.95rem;line-height:1.5}
-.tw-h b{color:#ff9a3a;font-size:1.15rem;font-weight:normal}
-.tw-h span{color:#fff}
-.tw-h em{font-style:normal;color:#8b98ad;font-size:.85rem}
-.tw-h.got{border-color:#4ccf6a;background:#13241a}.tw-h.got em{color:#4ccf6a}
 
 /* =====================================================================
    Equipo · vista nueva (PRUEBA, js/teamhub.js). Todo va bajo #tmHub / #teamv.hubv. Para quitarla: borrar este bloque.
@@ -3084,9 +3071,6 @@ html.phone .stg{zoom:1}
 #mm2 .m2-daily,#mm2 .m2-daily *{color:#2a1a00;opacity:1}
 #mm2 .m2-daily{font-size:10px}
 @media (max-height:760px){.m2-foot{display:none}.m2-hero .m2-link{display:none}}
-html.phone .m2-body{grid-template-columns:minmax(0,1fr) 300px}
-html.phone .m2-right{justify-content:flex-start}
-html.phone .m2-news{width:300px}
 /* iconos nuevos de BP y tickets (iconos/, menu.js · bitmap): son imágenes suaves, no pixel art escalado */
 canvas.curimg{image-rendering:auto!important;object-fit:contain}
 .gcimg{width:1.3em;height:1.3em;vertical-align:middle;margin-right:.15em}
@@ -3260,88 +3244,151 @@ html.phone .ivinfo .ivbuff{max-width:300px}html.phone .ivinfo .ivbm canvas{width
 .ivinfo .ivbh b{font-size:8px;text-shadow:none}
 
 
-/* ===== Menú principal en el MÓVIL: compacto y pegado abajo, para que se vea el fondo (la torre) arriba =====
-   Izquierda: continuar + diaria + parche · Derecha: los 4 modos y la colección. Paneles semitransparentes y más bajos. */
-html.phone #mm2{padding:8px 14px 10px;gap:6px}
-/* barra de arriba */
-html.phone .m2-top{gap:6px}
-html.phone .m2-me{padding:3px 10px 3px 3px;gap:7px;border-radius:10px;background:#0a122699}
-html.phone .m2-me img.av{width:30px;height:30px;border-width:1px}
-html.phone .m2-me .who{gap:3px}
-html.phone .m2-me b{font-size:10px}
-html.phone .m2-me .rk{font-size:7px;gap:4px}html.phone .m2-me .rk img{width:16px;height:16px}
-html.phone .m2-ic{gap:4px;margin-left:0}
-html.phone .m2-ic button{width:32px;height:32px;border-radius:9px;background:#0a122699}
-html.phone .m2-ic svg{width:15px;height:15px}
-html.phone .m2-cur{gap:6px}
-html.phone .m2-cur span{padding:4px 9px;gap:5px;border-radius:9px;background:#0a122699;box-shadow:none}
-html.phone .m2-cur > span > span{font-size:10px}
-html.phone .m2-cur > span > span small{display:none}
-html.phone #mm2 .m2-cur img{width:18px;height:18px}
-/* cuerpo: una fila vacía arriba (se ve el fondo) y todo lo demás abajo */
-html.phone .m2-body{display:grid;grid-template-columns:290px minmax(0,1fr);grid-template-rows:1fr auto auto auto auto;
-  grid-template-areas:". ." "hero secp" "hero play" "side secc" "side col";column-gap:12px;row-gap:5px;min-height:0}
-html.phone .m2-left{display:contents}
+
+/* ===== Menú principal en el MÓVIL: el MISMO diseño que en el ordenador (columna a la izquierda, torre a la derecha),
+   solo que un poco más pequeño (zoom) para que quepa entero en la pantalla del móvil sin tapar el fondo. ===== */
+html.phone #mm2{zoom:.85}
 html.phone .m2-brand{display:none}
-html.phone .m2-left > .m2-hero{grid-area:hero;align-self:end}
-html.phone .m2-left > .m2-sec:nth-child(3){grid-area:secp}
-html.phone .m2-left > .m2-play{grid-area:play}
-html.phone .m2-left > .m2-sec:nth-child(5){grid-area:secc}
-html.phone .m2-left > .m2-col{grid-area:col}
-html.phone .m2-right{grid-area:side;align-self:end;align-items:stretch;justify-content:flex-end;gap:5px}
-html.phone .m2-sec{margin:0;font-size:7px;text-shadow:0 1px 2px #000}
-/* paneles semitransparentes */
-html.phone .m2-t{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 20%,#0a122699),#0a1226a6 70%)}
-html.phone .m2-hero{background:linear-gradient(90deg,rgba(40,28,6,.45),rgba(10,18,38,.72) 60%),var(--map) center/cover}
-html.phone .m2-hero.tw{background:linear-gradient(90deg,rgba(60,26,6,.6),rgba(10,18,38,.75) 60%)}
-/* continuar: tarjeta baja con el retrato a la izquierda */
-html.phone .m2-hero{grid-template-columns:58px 1fr;gap:9px;padding:8px 10px;border-radius:11px;align-items:center;box-shadow:none}
-html.phone .m2-hero img.por,html.phone .m2-hero img.ico{width:58px;height:58px;margin:0}
-html.phone .m2-hero .k{font-size:6px}
-html.phone .m2-hero h2{font-size:11px;margin:3px 0 5px}
 html.phone .m2-hero p{display:none}
-html.phone .m2-hero .bar{height:4px;margin-bottom:6px}
-html.phone .m2-go{padding:6px 12px;font-size:9px;box-shadow:0 3px 0 #8a6500}
-html.phone .m2-hero .row{gap:6px}
-html.phone .m2-hero .row small{font-size:6px}
-/* modos: 4 cartas bajas en fila */
-html.phone .m2-play{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-html.phone .m2-t{min-height:0;border-radius:10px}
-html.phone .m2-play .m2-t{padding:8px 9px 7px;gap:5px;min-height:74px}
-html.phone .m2-play .m2-t .h{flex-direction:row;align-items:center;gap:7px}
-html.phone .m2-play .m2-t .h img{width:22px;height:22px}
-html.phone .m2-play .m2-t b{font-size:8px;line-height:1.4;overflow-wrap:anywhere}
-html.phone .m2-t small{display:none}
-html.phone .m2-t .st{font-size:6px;white-space:normal;line-height:1.4}
-html.phone .m2-t .big{display:none}
-html.phone .m2-play .m2-t .pb{width:100%;height:3px;margin-top:0}
-/* colección: 5 botones finos (icono + nombre + dato) */
-html.phone .m2-col{gap:6px}
-html.phone .m2-col .m2-t{padding:6px 8px;gap:3px;min-height:0}
-html.phone .m2-col .m2-t .h{flex-direction:row;align-items:center;gap:6px}
-html.phone .m2-col .m2-t .h img{width:16px;height:16px}
-html.phone .m2-col .m2-t b{font-size:7px}
-html.phone .m2-col .m2-t .pb{display:none}
-html.phone .m2-mini{display:none}
-/* diaria y parche: dos franjas finas */
-html.phone .m2-daily{padding:6px 10px;gap:8px;border-radius:10px;box-shadow:0 3px 0 #8a6500}
-html.phone #mm2 .m2-daily{font-size:7px}
-html.phone .m2-daily b{font-size:8px}html.phone .m2-daily small{font-size:6px;margin-top:2px}
-html.phone .m2-daily .gift{font-size:15px}
-html.phone .m2-news{width:auto;padding:6px 10px;gap:3px;border-radius:10px;background:#0a122699}
-html.phone .m2-news ul,html.phone .m2-news .a{display:none}
-html.phone .m2-news b{font-size:7px}
-html.phone .m2-news .h{font-size:6px}
-html.phone .m2-news .h i{font-size:6px;padding:2px 5px}
-html.phone .m2-foot{display:none}
-html.phone .m2-hero .bar{display:none}
-html.phone .m2-hero .row{flex-wrap:nowrap}
-html.phone .m2-body{grid-template-rows:1fr 12px auto 12px auto}
-html.phone .m2-left > .m2-sec{align-self:end}
-html.phone .m2-left > .m2-play,html.phone .m2-left > .m2-col{align-self:stretch}
-/* parche en una sola línea */
-html.phone .m2-news{flex-direction:row;align-items:center;gap:8px}
-html.phone .m2-news .h{flex:0 0 auto;gap:6px}
-html.phone .m2-news b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-html.phone .m2-news .h i{order:2}
-html.phone .m2-hero .row small{white-space:normal;line-height:1.5;min-width:0}
+html.phone .m2-left{overflow:visible}
+/* Personajes anchos de la Invocación (capas, brazos abiertos, motos...): se ajustan al ancho de su hueco en vez de salirse (vspanel.js · vsFitSkin) */
+.tc .tc-tr .fp-trainer{width:100%}
+.skin.one.wide{height:auto!important;width:100%!important;max-height:100%}
+
+/* =====================================================================
+   TORRE BATALLA (js/torre.js · openTorre). Todo va bajo #torrev / .tw2.
+   Fondo: fondos/torre_dia.webp (8:00-19:59) o torre_noche.webp (20:00-7:59), colocado por twFit (--bgs / --bgp).
+   Los pisos (.tw-glass) van encima del cristal de la torre; a su derecha las flechas y la barra de zonas (.tw-nav).
+   ===================================================================== */
+#torrev:not(.hide){display:flex}
+#torrev{font:700 clamp(9px,1.4vh,16px)/1.35 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#eef2ff;text-align:left;overflow:hidden}
+.tw2{--gold:#d8b25a;--navy:rgba(13,20,46,.9);position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(16em,22em) minmax(0,1fr) minmax(16em,22em);
+  grid-template-rows:auto minmax(0,1fr);gap:.7em 1.2em;padding:.7em 1.1em 1em;background:#0b1030 var(--bgp,center)/var(--bgs,cover) no-repeat}
+.tw2.day{background-image:url(../fondos/torre_dia.webp);background-color:#5fb4f0}
+.tw2.night{background-image:url(../fondos/torre_noche.webp)}
+.tw2 h1,.tw2 h3{margin:0;font-weight:900}
+.tw2 button{margin:0;font:inherit;cursor:pointer}
+.tw2 svg{width:1.2em;height:1.2em;flex:none}
+/* cabecera */
+.tw-top{grid-column:1/-1;display:flex;align-items:flex-start;gap:1em;position:relative;z-index:3;min-height:3.6em}
+.tw-btn{padding:.5em 1em;border-radius:.7em;border:2px solid var(--gold);background:var(--navy);color:#fff;box-shadow:0 .2em .6em #0006}
+.tw-btn:hover{border-color:#ffe08a;background:#1b2a5e}.tw-btn.wide{flex:1 1 100%}
+.tw-banner{position:absolute;left:50%;top:-.2em;transform:translateX(-50%);padding:.35em 2.2em .45em;border-radius:.6em;background:linear-gradient(180deg,#26345e,#121a3a);
+  border:3px solid var(--gold);box-shadow:0 0 0 2px #6a4e14,0 .4em 1.2em #000a}
+.tw-banner::before,.tw-banner::after{content:'';position:absolute;top:50%;width:1.2em;height:1.2em;transform:translateY(-50%) rotate(45deg);background:var(--gold);box-shadow:0 0 0 2px #6a4e14}
+.tw-banner::before{left:-.75em}.tw-banner::after{right:-.75em}
+.tw-banner h1{font:900 2.1em/1 "Arial Black","Segoe UI Black","Segoe UI",sans-serif!important;color:#ffe6a0;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;text-shadow:0 .1em 0 #7a5410,0 0 .5em #ffcc3366}
+.tw-rec{margin-left:auto;padding:.5em 1em;border-radius:.8em;border:2px solid var(--gold);background:var(--navy);box-shadow:0 .2em .6em #0006}
+.tw-rec b{color:#ffe08a}
+/* paneles */
+.tw-left,.tw-right{display:flex;flex-direction:column;gap:.65em;min-height:0;overflow:auto;scrollbar-width:none;position:relative;z-index:2}
+.tw-left::-webkit-scrollbar,.tw-right::-webkit-scrollbar{display:none}
+.tw-panel{padding:.7em .9em;border-radius:.9em;background:var(--navy);border:2px solid var(--gold);box-shadow:0 .3em 1em #0007,inset 0 0 0 1px #ffffff10}
+.tw-panel h3{font-size:1.05em;color:#fff;text-align:center;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6em}
+/* equipo */
+.tw-team{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:.45em;align-items:end}
+.tw-mon{position:relative;display:flex;flex-direction:column;align-items:center;gap:.2em;padding:.35em .2em .4em;border-radius:.6em;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c1) 35%,#1a2448),#121a3a);border:2px solid color-mix(in srgb,var(--c1) 60%,var(--gold))}
+.tw-mon canvas{width:100%;aspect-ratio:1;image-rendering:pixelated}
+.tw-mon b{font-size:.85em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tw-mon small{font-size:.72em;color:#ffe08a;margin-top:-.2em}
+.tw-mon.lead{border-color:#ffd45a;box-shadow:0 0 1em #ffcc3355}
+.tw-mon.lead::before{content:'★';position:absolute;top:-.55em;right:-.3em;width:1.4em;height:1.4em;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#ffd45a;color:#5a3a00;font-size:.95em;box-shadow:0 0 .5em #ffcc33}
+.tw-mon.empty{aspect-ratio:.8;justify-content:center;border-style:dashed;color:#9fb0dc;font-size:.8em;--c1:#33406e}
+.tw-row{display:flex;gap:.5em;margin-top:.6em;flex-wrap:wrap}
+.tw-sel{flex:1 1 100%;display:flex}
+.tw-sel select{flex:1;min-width:0;font:inherit;padding:.45em .6em;border-radius:.6em;background:#1a2550;color:#fff;border:2px solid #4a5d9a}
+/* reglas */
+.tw-rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.45em;font-size:.88em;color:#d5def7;font-weight:600}
+.tw-rules li{display:flex;gap:.6em;align-items:flex-start}
+.tw-rules i{flex:none;width:1.6em;height:1.6em;display:flex;align-items:center;justify-content:center;border-radius:.4em;background:#22305e;color:#ff7a8a;font-style:normal}
+.tw-rules i.o{color:#ffb347}.tw-rules li:last-child i{color:#ffd45a}
+.tw-rules b{color:#fff}.tw-rules b.o{color:#ffb347}
+/* botón de subir */
+.tw-start{display:flex;flex-direction:column;gap:.5em;margin-top:auto}
+.tw-go{display:flex;flex-direction:column;align-items:center;gap:.1em;padding:.5em 1em .6em;border-radius:2em;border:3px solid #ffe7a6;color:#fff;
+  background:linear-gradient(180deg,#ffb23a,#f2661c);box-shadow:0 .3em 0 #9a3a0a,0 0 1.6em #ff8a2a88;animation:twPulse 2.2s ease-in-out infinite}
+.tw-go span{font:900 2em/1.05 "Arial Black","Segoe UI Black","Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.03em;text-shadow:0 .08em 0 #8a2a00}
+.tw-go small{font-size:.8em;opacity:.9}
+.tw-go:hover{transform:translateY(-2px)}
+.tw-go:disabled{filter:grayscale(.8) brightness(.6);animation:none;cursor:default;transform:none}
+@keyframes twPulse{50%{box-shadow:0 .3em 0 #9a3a0a,0 0 2.6em #ff8a2acc}}
+.tw-warn{margin:0;padding:.45em .7em;border-radius:.6em;background:rgba(70,10,24,.92);border:1px solid #ff4d6d;color:#ffd0d8;font-size:.82em}
+/* derecha */
+.tw-stats{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;padding:.6em .4em}
+.tw-stats .st{display:flex;flex-direction:column;align-items:center;gap:.1em;padding:0 .2em;margin:0;background:none;border:0;min-width:0}
+.tw-stats .st + .st{border-left:1px solid #ffffff22}
+.tw-stats .st b{font-size:1.9em;color:#ffe08a;line-height:1.1}.tw-stats .st small{color:#c7d1ee;font-size:.78em;text-transform:uppercase}
+.tw-goals{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
+.tw-goal{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.3em;padding:.5em .3em;border-radius:.6em;background:#ffffff0a}
+.tw-goal svg{width:2em;height:2em}.tw-goal span{display:flex;flex-direction:column;font-size:.8em;color:#c7d1ee}.tw-goal b{font-size:1.3em;color:#fff}
+.tw-goal.boss{color:#ffb347}.tw-goal.gift{color:#ffd45a}
+.tw-rws{display:flex;flex-direction:column;gap:.25em}
+.tw-rw{display:flex;justify-content:space-between;gap:.6em;font-size:.82em;padding:.3em .5em;border-radius:.45em;background:#ffffff08}
+.tw-rw b{color:#fff;white-space:nowrap}.tw-rw span{color:#dce4fb;text-align:right}.tw-rw.boss b{color:#ffb347}
+.tw-h{padding:.45em .55em;border-radius:.6em;background:#ffffff08;margin-bottom:.35em;font-size:.82em;border:1px solid #ffffff14}
+.tw-h .hd{display:flex;justify-content:space-between}.tw-h .hd b{color:#ffe08a}.tw-h .hd em{font-style:normal;color:#aab6dc}
+.tw-h span{display:block;color:#dce4fb;margin:.2em 0 .35em}
+.tw-h .hp{display:block;height:.4em;border-radius:1em;background:#0a1028;overflow:hidden}.tw-h .hp s{display:block;height:100%;background:linear-gradient(90deg,#f2661c,#ffd45a)}
+.tw-h.fin{border-color:var(--gold);background:linear-gradient(90deg,#3a2a0a88,#ffffff08)}
+.tw-h.got{opacity:.7}.tw-h.got .hd em{color:#5ee07a}
+/* ===== los pisos, dentro del cristal ===== */
+.tw-glass{position:absolute;z-index:1;display:flex;flex-direction:column;padding:0 .7em}
+.tw-zn{height:var(--fl);display:flex;align-items:center;justify-content:center}
+.tw-zn span{padding:.2em .8em;border-radius:1em;background:linear-gradient(90deg,var(--z2),var(--z1),var(--z2));border:2px solid #fff8;color:#fff;font-size:.82em;white-space:nowrap;text-shadow:0 1px 2px #000a;box-shadow:0 0 .8em color-mix(in srgb,var(--z1) 60%,transparent)}
+.tw-fls{flex:1;display:flex;flex-direction:column;gap:2px;min-height:0}
+.tw-fl{position:relative;flex:1;min-height:0;display:flex;align-items:center;gap:.4em;padding:0 .45em;border-radius:.35em;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--z2) 85%,#000),color-mix(in srgb,var(--z2) 60%,#0a1030) 50%,color-mix(in srgb,var(--z2) 85%,#000));
+  border:1px solid color-mix(in srgb,var(--z1) 55%,#0000);box-shadow:inset 0 1px 0 #ffffff1a;opacity:.92}
+.tw-fl .no{flex:none;min-width:1.9em;padding:.05em .3em;border-radius:.35em;background:#0a1028cc;border:1px solid color-mix(in srgb,var(--z1) 70%,#fff);color:#fff;font-size:1.05em;text-align:center}
+.tw-fl .win{flex:1;display:flex;gap:.35em;justify-content:center}
+.tw-fl .win i{width:.75em;height:1em;border-radius:.15em .15em 0 0;background:#0a1028;box-shadow:inset 0 0 0 1px #ffffff18}
+.tw-fl .ok{color:#7af08a;font-size:.9em}
+.tw-fl .gf{color:#ffd45a;display:flex}.tw-fl .gf.got{opacity:.5}
+.tw-fl .tag{position:absolute;right:calc(100% + .5em);top:50%;transform:translateY(-50%);white-space:nowrap;padding:.2em .6em;border-radius:.5em;font-size:.8em;box-shadow:0 .2em .5em #0007}
+.tw-fl .tag.nx{background:#ffd45a;color:#3a2400}.tw-fl .tag.rec{background:#ff3ea5;color:#fff}.tw-fl .tag.bs{background:#a8243a;color:#ffe08a;border:1px solid var(--gold)}
+/* superados: ventanas encendidas */
+.tw-fl.done{opacity:1;background:linear-gradient(90deg,var(--z2),color-mix(in srgb,var(--z1) 65%,var(--z2)) 50%,var(--z2))}
+.tw-fl.done .win i{background:linear-gradient(180deg,#fff2b0,#ffc24a);box-shadow:0 0 .4em #ffc24a99}
+/* jefe: placa roja y dorada con la silueta del rival */
+.tw-fl.boss{flex:1.35;margin:0 -.4em;border:2px solid var(--gold);background:linear-gradient(90deg,#4a0d18,#8a1a2a 50%,#4a0d18);opacity:1}
+.tw-fl.boss .no{border-color:var(--gold);color:#ffe08a}
+.tw-fl.boss .crown{color:#ffd45a;display:flex;filter:drop-shadow(0 0 .3em #ffcc33)}
+.tw-fl.boss .who{flex:1;display:flex;justify-content:flex-end;color:#0a0410;align-self:flex-end;height:90%}
+.tw-fl.boss .who svg{height:100%;width:auto;filter:drop-shadow(0 0 .3em #ff6a6a88)}
+.tw-fl.top{background:linear-gradient(90deg,#6a4a0a,#d8a22a 50%,#6a4a0a)}
+/* tu reto */
+.tw-fl.next{opacity:1;outline:3px solid #ffd45a;outline-offset:-1px;z-index:1;box-shadow:0 0 1.4em #ffd45a99;animation:twNext 1.6s ease-in-out infinite}
+@keyframes twNext{50%{box-shadow:0 0 2.4em #ffd45acc}}
+/* flechas y barra de zonas */
+.tw-nav{position:absolute;z-index:2;display:flex;flex-direction:column;align-items:center;gap:.4em;width:3.6em}
+.tw-arr{width:2.6em;height:2.2em;border-radius:.6em;border:2px solid var(--gold);background:var(--navy);color:#ffe08a;display:flex;align-items:center;justify-content:center}
+.tw-arr:disabled{opacity:.35;cursor:default}
+.tw-zbar{flex:1;display:flex;flex-direction:column;gap:.3em;width:100%;padding:.35em .25em;border-radius:.7em;background:var(--navy);border:2px solid var(--gold)}
+.tw-zbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1em;border-radius:.45em;border:2px solid transparent;background:#ffffff0a;color:#c7d1ee;padding:0}
+.tw-zbar button i{font-style:normal;font-size:1.05em}.tw-zbar button small{font-size:.62em}
+.tw-zbar button.part{background:color-mix(in srgb,var(--z1) 25%,transparent)}
+.tw-zbar button.full{background:color-mix(in srgb,var(--z1) 45%,transparent);color:#fff}
+.tw-zbar button.on{border-color:var(--z1);box-shadow:0 0 .7em var(--z1);color:#fff}
+/* pantallas estrechas y móvil */
+@media (max-width:1100px){.tw2{grid-template-columns:minmax(14em,18em) minmax(0,1fr) minmax(14em,18em)}}
+html.phone #torrev{font-size:8.5px}
+html.phone .tw-banner h1{font-size:1.7em}
+html.phone .tw-hits .tw-h span{display:none}
+.tw-left{grid-column:1;grid-row:2}.tw-right{grid-column:3;grid-row:2}
+html.phone .tw-sel select{font-size:1em;padding:.3em .5em}
+/* Torre: pisos por RIVALES (sin zonas de colores) */
+.tw-glass{--z1:#6aa8ff;--z2:#14244e}
+.tw-zbar button{--z1:#ffd45a}.tw-zbar button i{color:#ffd45a;display:flex}.tw-zbar button i svg{width:1em;height:1em}
+.tw-fl .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.9em;color:#fff;text-shadow:0 1px 2px #000}
+.tw-fl .pic{flex:none;height:150%;align-self:flex-end;max-width:34%;object-fit:contain;object-position:bottom;image-rendering:pixelated;margin-right:-.2em;filter:drop-shadow(0 0 .25em #0008)}
+.tw-fl .pic.sil{filter:brightness(0) drop-shadow(0 0 .3em #6aa8ff88);opacity:.85}
+.tw-fl{overflow:visible}
+.tw-fl.done .nm{color:#fff2b0}
+.tw-fl.boss .nm{color:#ffe08a}
+.tw-fl.boss .who{flex:none;height:90%}
+.tw-fl.next .nm{color:#ffe08a}
+.tw-fl .win{display:none}
+.tw-fl .pic{height:115%;max-width:30%}
+.tw-fl .pic.sil{opacity:.6}
+.tw-rw{flex-direction:column;gap:.1em}.tw-rw span{text-align:left}

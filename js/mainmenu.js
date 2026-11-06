@@ -41,7 +41,7 @@ function mmHero(){
     const map = new URL('region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[nx.r]) || nx.r) + '.webp', document.baseURI).href;
     return `<div class="m2-hero" style="--map:url(&quot;${map}&quot;)"><img class="por" id="mmPor" alt="">
       <div class="m2-hi"><span class="k">Continuar · Liga de ${esc(reg)}</span><h2>${kind} ${esc(F.leader)}</h2>
-        <p>${last && !towerOpen() ? 'Es tu último combate de la Historia. ¡Gánale para abrir la Torre Batalla!' : q ? '«' + esc(q) + '»' : `Combate ${nx.done + 1} de ${nx.total} en ${esc(reg)}.`}</p>
+        <p>${nx.F.region === 'Kanto' && nx.F.kind === 'campeon' && !towerOpen() ? '¡Gánale para abrir la Torre Batalla!' : q ? '«' + esc(q) + '»' : `Combate ${nx.done + 1} de ${nx.total} en ${esc(reg)}.`}</p>
         <div class="bar"><i style="width:${Math.min(100, done / total * 100)}%"></i></div>
         <div class="row"><button class="m2-go" data-mm="fight" data-gi="${nx.gi}" data-r="${esc(nx.r)}">¡COMBATIR!</button><button class="m2-link" data-mm="liga" data-r="${esc(nx.r)}">Ver la Liga →</button>
           <small>${done} / ${total} combates · ${save.storyMode === 'facil' ? 'Fácil' : 'Difícil'}</small></div></div></div>`;
@@ -72,7 +72,7 @@ function mmRender(){
     .map(([k, n, b]) => `<button data-mm="go" data-k="${k}" title="${n}" aria-label="${n}">${mmSvg(k)}${b ? `<i>${b}</i>` : ''}<em>${n}</em></button>`).join('');
   const dex = boxCount(), lockT = !towerOpen(), need = towerNeed();
   const nx = mmNext();
-  const towerSt = lockT ? `🔒 ${nx && progTotal() + 1 >= FLOORS.length ? 'Vence a ' + esc(nx.F.leader) + ' para abrirla' : `Te faltan ${need} Liga${need === 1 ? '' : 's'}`}` : `Récord: piso ${(save.tower && save.tower.best) || 0}`;
+  const towerSt = lockT ? '🔒 Sé Campeón de Kanto para abrirla' : `Récord: piso ${(save.tower && save.tower.best) || 0}`;
   const daily = typeof dailyState === 'function' ? dailyState() : null;
   const P = typeof PATCHES !== 'undefined' && PATCHES[0], pNew = P && save.patchSeen !== patchLatest();
   const pItems = P ? P.sections.flatMap(s => s.i).slice(0, 3).map(t => `<li>${esc(String(t).split(/[.:(]/)[0].slice(0, 70))}</li>`).join('') : '';
