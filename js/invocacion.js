@@ -61,7 +61,8 @@ function invSave(){
   if(!s.pity || typeof s.pity !== 'object') s.pity = {};
   ['std', 'thm', 'ma'].forEach(k => { const p = s.pity[k] || {}; s.pity[k] = {e: Math.max(0, +p.e || 0), l: Math.max(0, +p.l || 0)}; });
   s.n = Math.max(0, +s.n || 0);
-  Object.keys(s.own).forEach(f => { if(!INV_BY[f]){ save.bp += 120 * s.own[f]; delete s.own[f]; if(save.gender === 'i:' + f) save.gender = 'm'; } });   // entrenadores retirados del juego (parejas...): se devuelven en BP if(!s.t0) s.t0 = Date.now();             // t0 = cuándo llegó la Invocación a esta partida (los logros reclamados antes se pagan en el regalo)
+  Object.keys(s.own).forEach(f => { if(!INV_BY[f]){ save.bp += 120 * s.own[f]; delete s.own[f]; if(save.gender === 'i:' + f) save.gender = 'm'; } });   // entrenadores retirados del juego (parejas...): se devuelven en BP
+  if(!s.t0) s.t0 = Date.now();             // t0 = cuándo llegó la Invocación a esta partida (los logros reclamados antes se pagan en el regalo)
   save.inv = s; return s;
 }
 const invOwns = f => !!(save.inv && save.inv.own && save.inv.own[f]);

@@ -207,7 +207,7 @@ function renderDetail(){
 }
 // El sprite grande se anima (solo cuando la pantalla se ve)
 setInterval(() => {
-  if($('dexv').classList.contains('hide') || !dx.spr || !dx.spr.isConnected || !dx.sprO) return;
+  if(typeof $ !== 'function' || !$('dexv') || $('dexv').classList.contains('hide') || !dx.spr || !dx.spr.isConnected || !dx.sprO) return;
   const x = dx.spr.getContext('2d'), t = (performance.now() - dx.t0) / 1000;
   const idle = sheet(dx.sel, 'Idle', dx.sprShiny), I = idle && idle.ok && idle.info;       // la escala sale de la hoja de Reposo: así el Pokémon no se encoge en Ataque/Herido (sus fotogramas son más grandes)
   const sc = I ? Math.min(3, 128 / Math.max(I.fw, I.fh)) : 3;

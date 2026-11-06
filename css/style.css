@@ -3259,82 +3259,89 @@ html.phone .ivd>img{width:52px;height:52px}html.phone .ivd .ivbuff{grid-column:1
 html.phone .ivinfo .ivbuff{max-width:300px}html.phone .ivinfo .ivbm canvas{width:28px;height:28px}
 .ivinfo .ivbh b{font-size:8px;text-shadow:none}
 
-/* ===== Menú principal en el MÓVIL: dos columnas ordenadas (izquierda: continuar + diaria + parche · derecha: modos y colección) ===== */
-html.phone #mm2{padding:10px 16px 10px;gap:8px}
-html.phone .m2-top{gap:8px}
-html.phone .m2-me{padding:4px 10px 4px 4px;gap:8px;border-radius:10px}
-html.phone .m2-me img.av{width:34px;height:34px}
-html.phone .m2-me b{font-size:11px}
-html.phone .m2-me .rk{font-size:7px}
-html.phone .m2-ic{gap:5px;margin-left:2px}
-html.phone .m2-ic button{width:36px;height:36px;border-radius:10px}
-html.phone .m2-ic svg{width:17px;height:17px}
+
+/* ===== Menú principal en el MÓVIL: compacto y pegado abajo, para que se vea el fondo (la torre) arriba =====
+   Izquierda: continuar + diaria + parche · Derecha: los 4 modos y la colección. Paneles semitransparentes y más bajos. */
+html.phone #mm2{padding:8px 14px 10px;gap:6px}
+/* barra de arriba */
+html.phone .m2-top{gap:6px}
+html.phone .m2-me{padding:3px 10px 3px 3px;gap:7px;border-radius:10px;background:#0a122699}
+html.phone .m2-me img.av{width:30px;height:30px;border-width:1px}
+html.phone .m2-me .who{gap:3px}
+html.phone .m2-me b{font-size:10px}
+html.phone .m2-me .rk{font-size:7px;gap:4px}html.phone .m2-me .rk img{width:16px;height:16px}
+html.phone .m2-ic{gap:4px;margin-left:0}
+html.phone .m2-ic button{width:32px;height:32px;border-radius:9px;background:#0a122699}
+html.phone .m2-ic svg{width:15px;height:15px}
 html.phone .m2-cur{gap:6px}
-html.phone .m2-cur span{padding:5px 10px;gap:6px;border-radius:10px}
-html.phone .m2-cur > span > span{font-size:11px}
+html.phone .m2-cur span{padding:4px 9px;gap:5px;border-radius:9px;background:#0a122699;box-shadow:none}
+html.phone .m2-cur > span > span{font-size:10px}
 html.phone .m2-cur > span > span small{display:none}
-html.phone #mm2 .m2-cur img{width:22px;height:22px}
-html.phone .m2-body{display:grid;grid-template-columns:340px minmax(0,1fr);grid-template-rows:auto 1fr auto auto;
-  grid-template-areas:"hero secp" "hero play" "side secc" "side col";column-gap:14px;row-gap:6px;min-height:0}
+html.phone #mm2 .m2-cur img{width:18px;height:18px}
+/* cuerpo: una fila vacía arriba (se ve el fondo) y todo lo demás abajo */
+html.phone .m2-body{display:grid;grid-template-columns:290px minmax(0,1fr);grid-template-rows:1fr auto auto auto auto;
+  grid-template-areas:". ." "hero secp" "hero play" "side secc" "side col";column-gap:12px;row-gap:5px;min-height:0}
 html.phone .m2-left{display:contents}
 html.phone .m2-brand{display:none}
-html.phone .m2-left > .m2-hero{grid-area:hero;align-self:stretch}
+html.phone .m2-left > .m2-hero{grid-area:hero;align-self:end}
 html.phone .m2-left > .m2-sec:nth-child(3){grid-area:secp}
 html.phone .m2-left > .m2-play{grid-area:play}
 html.phone .m2-left > .m2-sec:nth-child(5){grid-area:secc}
 html.phone .m2-left > .m2-col{grid-area:col}
-html.phone .m2-right{grid-area:side;align-items:stretch;justify-content:flex-start;gap:6px}
-html.phone .m2-sec{margin:0;font-size:7px}
-/* continuar */
-html.phone .m2-hero{grid-template-columns:72px 1fr;gap:10px;padding:10px 12px;border-radius:12px;align-content:center}
-html.phone .m2-hero img.por{width:72px;height:72px}
-html.phone .m2-hero img.ico{width:60px;height:60px}
-html.phone .m2-hero .k{font-size:7px}
-html.phone .m2-hero h2{font-size:13px;margin:4px 0}
-html.phone .m2-hero p{font-size:7px;line-height:1.6;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-html.phone .m2-hero .bar{height:6px;margin-bottom:8px}
-html.phone .m2-go{padding:9px 14px;font-size:10px}
+html.phone .m2-right{grid-area:side;align-self:end;align-items:stretch;justify-content:flex-end;gap:5px}
+html.phone .m2-sec{margin:0;font-size:7px;text-shadow:0 1px 2px #000}
+/* paneles semitransparentes */
+html.phone .m2-t{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 20%,#0a122699),#0a1226a6 70%)}
+html.phone .m2-hero{background:linear-gradient(90deg,rgba(40,28,6,.45),rgba(10,18,38,.72) 60%),var(--map) center/cover}
+html.phone .m2-hero.tw{background:linear-gradient(90deg,rgba(60,26,6,.6),rgba(10,18,38,.75) 60%)}
+/* continuar: tarjeta baja con el retrato a la izquierda */
+html.phone .m2-hero{grid-template-columns:58px 1fr;gap:9px;padding:8px 10px;border-radius:11px;align-items:center;box-shadow:none}
+html.phone .m2-hero img.por,html.phone .m2-hero img.ico{width:58px;height:58px;margin:0}
+html.phone .m2-hero .k{font-size:6px}
+html.phone .m2-hero h2{font-size:11px;margin:3px 0 5px}
+html.phone .m2-hero p{display:none}
+html.phone .m2-hero .bar{height:4px;margin-bottom:6px}
+html.phone .m2-go{padding:6px 12px;font-size:9px;box-shadow:0 3px 0 #8a6500}
 html.phone .m2-hero .row{gap:6px}
-html.phone .m2-hero .row small{font-size:7px}
-/* modos */
-html.phone .m2-play{gap:7px;grid-auto-rows:1fr}
-html.phone .m2-t{min-height:0;padding:8px 10px;gap:4px;border-radius:11px}
-html.phone .m2-t b{font-size:10px}
-html.phone .m2-t img{width:20px;height:20px}
-html.phone .m2-t .h{gap:7px}
+html.phone .m2-hero .row small{font-size:6px}
+/* modos: 4 cartas bajas en fila */
+html.phone .m2-play{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+html.phone .m2-t{min-height:0;border-radius:10px}
+html.phone .m2-play .m2-t{padding:8px 9px 7px;gap:5px;min-height:74px}
+html.phone .m2-play .m2-t .h{flex-direction:row;align-items:center;gap:7px}
+html.phone .m2-play .m2-t .h img{width:22px;height:22px}
+html.phone .m2-play .m2-t b{font-size:8px;line-height:1.4;overflow-wrap:anywhere}
 html.phone .m2-t small{display:none}
-html.phone .m2-t .st{font-size:7px}
-html.phone .m2-t .big{width:34px;height:34px;right:8px;bottom:6px}
-html.phone .m2-t .pb{width:60%}
+html.phone .m2-t .st{font-size:6px;white-space:normal;line-height:1.4}
+html.phone .m2-t .big{display:none}
+html.phone .m2-play .m2-t .pb{width:100%;height:3px;margin-top:0}
+/* colección: 5 botones finos (icono + nombre + dato) */
 html.phone .m2-col{gap:6px}
-html.phone .m2-col .m2-t{min-height:0;padding:7px 7px}
-html.phone .m2-col .m2-t b{font-size:8px}
-html.phone .m2-col .m2-t .h img{width:18px;height:18px}
-html.phone .m2-mini canvas{width:20px;height:20px}
-/* diaria y parche */
-html.phone .m2-daily{padding:8px 12px;gap:8px;border-radius:11px}
-html.phone #mm2 .m2-daily{font-size:8px}
-html.phone .m2-daily b{font-size:9px}html.phone .m2-daily small{font-size:7px;margin-top:2px}
-html.phone .m2-daily .gift{font-size:18px}
-html.phone .m2-news{width:auto;padding:8px 12px;gap:4px;border-radius:11px}
-html.phone .m2-news ul{display:none}
-html.phone .m2-news b{font-size:8px}
-html.phone .m2-news .h{font-size:7px}
+html.phone .m2-col .m2-t{padding:6px 8px;gap:3px;min-height:0}
+html.phone .m2-col .m2-t .h{flex-direction:row;align-items:center;gap:6px}
+html.phone .m2-col .m2-t .h img{width:16px;height:16px}
+html.phone .m2-col .m2-t b{font-size:7px}
+html.phone .m2-col .m2-t .pb{display:none}
+html.phone .m2-mini{display:none}
+/* diaria y parche: dos franjas finas */
+html.phone .m2-daily{padding:6px 10px;gap:8px;border-radius:10px;box-shadow:0 3px 0 #8a6500}
+html.phone #mm2 .m2-daily{font-size:7px}
+html.phone .m2-daily b{font-size:8px}html.phone .m2-daily small{font-size:6px;margin-top:2px}
+html.phone .m2-daily .gift{font-size:15px}
+html.phone .m2-news{width:auto;padding:6px 10px;gap:3px;border-radius:10px;background:#0a122699}
+html.phone .m2-news ul,html.phone .m2-news .a{display:none}
+html.phone .m2-news b{font-size:7px}
+html.phone .m2-news .h{font-size:6px}
+html.phone .m2-news .h i{font-size:6px;padding:2px 5px}
 html.phone .m2-foot{display:none}
-/* móvil: los 4 modos en fila (cartas altas con icono grande) y "continuar" en columna */
-html.phone .m2-play{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:auto;align-self:stretch}
-html.phone .m2-play .m2-t{justify-content:flex-start;padding:12px 10px 10px;gap:8px}
-html.phone .m2-play .m2-t .h{flex-direction:column;align-items:flex-start;gap:10px}
-html.phone .m2-play .m2-t .h img{width:40px;height:40px}
-html.phone .m2-play .m2-t b{font-size:10px;line-height:1.5}
-html.phone .m2-play .m2-t small{display:block;font-size:7px;line-height:1.6;color:#aebbd9}
-html.phone .m2-play .m2-t .pb{width:100%}
-html.phone .m2-play .m2-t .big{width:40px;height:40px}
-html.phone .m2-hero{grid-template-columns:1fr;justify-items:start;align-content:center;gap:6px}
-html.phone .m2-hero img.por,html.phone .m2-hero img.ico{width:96px;height:96px;margin:0}
-html.phone .m2-col .m2-t{padding:9px 9px;gap:5px}
-html.phone .m2-col .m2-t .h img{width:22px;height:22px}
-html.phone .m2-play .m2-t::after{content:'';position:absolute;right:-14px;bottom:18px;width:120px;height:120px;background:var(--ic) center/contain no-repeat;opacity:.13;image-rendering:pixelated;pointer-events:none;transform:rotate(-8deg)}
-html.phone .m2-play .m2-t > *{position:relative;z-index:1}
-html.phone .m2-play .m2-t::after{width:84px;height:84px;right:8px;bottom:34px;opacity:.09;transform:none}
-html.phone .m2-play .m2-t .st{white-space:normal;line-height:1.5}html.phone .m2-play .m2-t b{font-size:9px;overflow-wrap:anywhere}
+html.phone .m2-hero .bar{display:none}
+html.phone .m2-hero .row{flex-wrap:nowrap}
+html.phone .m2-body{grid-template-rows:1fr 12px auto 12px auto}
+html.phone .m2-left > .m2-sec{align-self:end}
+html.phone .m2-left > .m2-play,html.phone .m2-left > .m2-col{align-self:stretch}
+/* parche en una sola línea */
+html.phone .m2-news{flex-direction:row;align-items:center;gap:8px}
+html.phone .m2-news .h{flex:0 0 auto;gap:6px}
+html.phone .m2-news b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.phone .m2-news .h i{order:2}
+html.phone .m2-hero .row small{white-space:normal;line-height:1.5;min-width:0}
