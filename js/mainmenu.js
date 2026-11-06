@@ -61,6 +61,7 @@ const MM_TOWER = 'iconos/torre.webp';
 const MM_ART = {};                                                                           // (ilustraciones grandes a la derecha de un cuadro: ahora ninguna)
 const MM_COL = {team:'iconos/mm_equipo.webp', dex:'iconos/mm_pokedex.webp', gacha:'iconos/mm_gachapon.webp', inv:'iconos/mm_invocacion.webp', shop:'iconos/mm_tienda.webp'};   // cuadros de Colección: la ilustración hace de icono
 const MM_HEAD = {story:'iconos/ic_historia.webp', rank:'iconos/ic_rank.webp', campo:'iconos/ic_campo.webp', tower:MM_TOWER, ...MM_COL};     // icono pequeño ilustrado de los cuadros de Jugar (si falta el archivo, vale el de píxeles)
+Object.keys(MM_HEAD).forEach(k => { if(k !== 'tower') MM_HEAD[k] += '?v=2'; });         // (v=2: iconos reencuadrados; así el navegador no usa los antiguos guardados)
 function mmTile(k, c, name, sub, st, extra, cls){
   const ic = mmIcon(k, c), hd = MM_HEAD[k] ? `<img class="hd${MM_COL[k] ? ' col' : ''}" src="${MM_HEAD[k]}" alt="" onerror="this.onerror=null;this.classList.remove('hd','col');this.src='${ic}'">` : `<img src="${ic}" alt="">`, art = MM_ART[k] ? `<img class="art" src="${MM_ART[k]}" alt="" onerror="this.parentNode.classList.remove('hasart');this.remove()">` : '';
   return `<button class="m2-t ${art ? 'hasart ' : ''}${cls || ''}" style="--c:${c};--ic:url('${ic}')" data-mm="go" data-k="${k}"><span class="h">${hd}<b>${name}</b></span>${sub ? `<small>${sub}</small>` : ''}${extra || ''}<span class="st">${st}</span>${art}</button>`;
