@@ -361,6 +361,44 @@ const Music = (() => {
                {f:140, to:45, x:1, at:.26, d:.26, w:'sine', v:.9}, {n:1, ft:'lowpass', f:1400, to:200, at:.26, d:.2, v:.5}],                 // ...y sale con un 'bum'                                          // 'fiuuu' de esquiva
     faint:    [{f:640, to:70, x:1, at:0, d:.5, w:'triangle', v:.55}, {f:320, to:50, x:1, at:0, d:.55, w:'sine', v:.5}, {n:1, ft:'lowpass', f:1200, to:150, at:0, d:.35, v:.25}]   // se debilita: baja y se apaga
   };
+  // ---- Invocación (animación del templo): todo generado por código, sin archivos ----
+  // Cada nota suena con un golpe y luego se apaga, así que lo que "crece" (la carga) se hace con muchos trocitos cada vez más fuertes y agudos.
+  const invSfx = (() => {
+    const T = {}, CH = {C:1.5, R:2.1, E:2.8, L:3.6}, P = [784, 880, 1047, 1175, 1319, 1568, 1760, 2093];   // notas de la escala (pentatónica)
+    const bell = (f, at, d, v) => [{f, at, d, w:'sine', v}, {f:f * 2, at, d:d * .7, w:'sine', v:v * .35}, {f:f * 3.01, at, d:d * .4, w:'triangle', v:v * .12}];
+    const lerp = (a, b, k) => a * Math.pow(b / a, k);
+    T.inv_open = [{n:1, ft:'lowpass', f:250, to:1100, q:.7, at:0, d:1.1, v:.3}, {f:110, at:0, d:1.1, w:'sine', v:.3}, {f:165, at:.1, d:1, w:'triangle', v:.15}, ...bell(1319, .3, .8, .12), ...bell(1760, .55, .8, .1)];
+    for(const t in CH){
+      const s = CH[t], n = [], K = Math.round(s / .09);
+      for(let i = 0; i < K; i++){ const k = i / K, at = i * .09;
+        n.push({f:lerp(110, 900, k), at, d:.13, w:'sine', v:.1 + .3 * k});                          // tono que sube
+        n.push({f:lerp(55, 330, k), at, d:.13, w:'sawtooth', v:.03 + .09 * k});                     // grave que sube
+        n.push({n:1, ft:'bandpass', f:lerp(300, 4500, k), q:1.6, at, d:.13, v:.08 + .25 * k});     // viento que sube
+      }
+      const B = 8 + Math.round(s * 6);
+      for(let i = 0; i < B; i++){ const at = s * (1 - Math.pow(1 - i / B, 2)); n.push({f:130, to:48, x:1, at, d:.12, w:'sine', v:.3 + .5 * i / B}); }   // latidos cada vez más seguidos
+      if(t === 'E' || t === 'L') for(let at = s * .4, i = 0; at < s - .1; at += .13, i++) n.push(...bell(P[(i * 3) % 8], at, .35, .1 + .08 * (at / s)));    // destellos
+      if(t === 'L') for(let i = 0; i < K; i++){ const k = i / K; n.push({f:lerp(220, 1800, k), at:i * .09, d:.13, w:'triangle', v:.04 + .16 * k}); }    // segunda subida más aguda
+      T['inv_ch_' + t] = n;
+    }
+    T.inv_win = [0, 1, 2, 3, 4].flatMap(i => bell([784, 988, 1175, 1319, 1568][i], i * .09, .7, .24));                        // las 5 ventanas se encienden
+    T.inv_boom = [{f:160, to:38, x:1, at:0, d:1.1, w:'sine', v:1}, {n:1, ft:'lowpass', f:3500, to:150, q:.8, at:0, d:1.2, v:.85}, {n:1, ft:'bandpass', f:5000, to:1200, q:.8, at:0, d:.18, v:.6},
+      ...bell(2093, .12, 1, .16), ...bell(2637, .2, 1, .14), ...bell(3136, .3, 1, .12), ...bell(4186, .42, 1, .1),
+      ...[.55, .75, .95, 1.2].map((at, i) => ({f:1300 - i * 120, to:650, x:1, at, d:.18, w:'sine', v:.24 - i * .03}))];                // gotas en el agua
+    T.inv_rev_C = [...bell(784, 0, .5, .3), ...bell(1047, .12, .6, .3)];
+    T.inv_rev_R = [523, 659, 784, 1047].flatMap((f, i) => bell(f, i * .09, .7, .28));
+    T.inv_rev_E = [{f:523, at:0, d:1.4, w:'triangle', v:.28}, {f:659, at:0, d:1.4, w:'triangle', v:.24}, {f:784, at:0, d:1.4, w:'triangle', v:.24}, ...[0, 1, 2, 3, 4].flatMap(i => bell(P[i + 2], .1 + i * .09, .6, .2)), {n:1, ft:'highpass', f:6000, at:.1, d:1, v:.1}];
+    T.inv_rev_L = [{f:65, at:0, d:2, w:'sine', v:.55}, ...[262, 330, 392, 523].map(f => ({f, at:0, d:2.4, w:'triangle', v:.26})), ...[262, 330, 392, 523].map(f => ({f:f * 2, at:.25, d:2, w:'sine', v:.14})),
+      ...Array.from({length:12}, (_, i) => bell(P[i % 8] * (i > 7 ? 2 : 1), .15 + i * .085, .5, .16)).flat(), ...bell(2093, 1.1, 1.6, .3), {n:1, ft:'highpass', f:6000, at:.2, d:1.5, v:.12}];
+    const whoosh = [{n:1, ft:'bandpass', f:600, to:2800, q:1.2, at:0, d:.12, v:.22}];
+    T.inv_flip_C = [...whoosh, {f:880, at:.04, d:.07, w:'sine', v:.2}];
+    T.inv_flip_R = [...whoosh, ...bell(1047, .05, .5, .26)];
+    T.inv_flip_E = [...whoosh, ...[784, 988, 1175].flatMap((f, i) => bell(f, .05 + i * .07, .6, .22)), {n:1, ft:'highpass', f:6000, at:.05, d:.4, v:.1}];
+    T.inv_flip_L = [...whoosh, {f:90, to:40, x:1, at:.04, d:.5, w:'sine', v:.6}, ...[0, 1, 2, 3, 4].flatMap(i => bell(P[i + 3], .08 + i * .07, .7, .2)), {n:1, ft:'highpass', f:6000, at:.05, d:.6, v:.12}];
+    T.inv_deal = [{n:1, ft:'bandpass', f:500, to:3000, q:1, at:0, d:.35, v:.3}, ...[0, 1, 2, 3, 4].map(i => ({f:880 + i * 110, at:.05 + i * .06, d:.06, w:'sine', v:.1}))];
+    return T;
+  })();
+  Object.assign(SFX, invSfx);
   const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
   function sfx(name, k){                                                           // k (opcional, 0-1): lo bajito que suena (los ataques del rival de la Historia suenan más suaves)
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;

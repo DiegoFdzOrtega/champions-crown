@@ -116,6 +116,7 @@ function openInv(){
   panel(`<div class="iv">
     <div class="iv-top"><h1>Invocación</h1><div class="iv-cur">${star('estrella', held('estrella'))}${star('estrella_t', held('estrella_t'))}<button class="iv-colb" id="ivCol">Colección · ${invCount()} / ${INV_LIST.length}</button></div></div>
     <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Hoy' : b.id === 'ma' ? '3 cada día' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
+    <div class="iv-cols"><div class="iv-main">
     <div class="iv-ban" style="--c1:${bn.c1};--c2:${bn.c2}">
       <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner del día · cambia en ${cuando}` : bn.id === 'ma' ? `Rotación diaria · cambian en ${cuando}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
         ${bn.id === 'thm' ? '<p class="up">+ Más probabilidad de los 3 destacados al sacar un Épico o Legendario.</p>' : bn.id === 'ma' ? `<p class="up">Cada Legendario es uno de estos 3. Hay ${INV_MA_ROT.length} versiones Masters: van saliendo de 3 en 3.</p>` : ''}
@@ -126,8 +127,26 @@ function openInv(){
       <button class="iv-pull" data-n="1"><span>Invocar ×1</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×1</em></button>
       <button class="iv-pull x10" data-n="10"><span>Invocar ×10</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×10</em></button>
     </div>
-    <p class="iv-rates">Probabilidades base: <b style="color:${INV_TIER.L.c}">Legendario 1,5 %</b> · <b style="color:${INV_TIER.E.c}">Épico 8 %</b> · <b style="color:${INV_TIER.R.c}">Raro 28 %</b> · <b style="color:${INV_TIER.C.c}">Común 62,5 %</b> · <b style="color:#7af0ff">Los Masters solo salen en su banner (al sacar Legendario)</b> · Repetido: +${INV_TIER.C.dup} / ${INV_TIER.R.dup} / ${INV_TIER.E.dup} / ${INV_TIER.L.dup} BP según el rango.</p>
-    <p class="iv-cred">Sprites de entrenadores: <a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">Pokémon Showdown</a> y sus artistas · Pokémon © Nintendo / Game Freak / The Pokémon Company.</p>
+    </div>
+    <aside class="iv-side">
+      <h3>Probabilidades</h3>
+      <table class="ptbl">
+        <tr><th>Rango</th><th>Prob.</th><th>Repetido</th></tr>
+        <tr style="--c:${INV_TIER.L.c}"><td>${'★'.repeat(INV_TIER.L.st)} Legendario</td><td class="pc">1,5 %</td><td>+${INV_TIER.L.dup} BP</td></tr>
+        <tr style="--c:${INV_TIER.E.c}"><td>${'★'.repeat(INV_TIER.E.st)} Épico</td><td class="pc">8 %</td><td>+${INV_TIER.E.dup} BP</td></tr>
+        <tr style="--c:${INV_TIER.R.c}"><td>${'★'.repeat(INV_TIER.R.st)} Raro</td><td class="pc">28 %</td><td>+${INV_TIER.R.dup} BP</td></tr>
+        <tr style="--c:${INV_TIER.C.c}"><td>${'★'.repeat(INV_TIER.C.st)} Común</td><td class="pc">62,5 %</td><td>+${INV_TIER.C.dup} BP</td></tr>
+      </table>
+      <h3>Reglas</h3>
+      <ul class="rules">
+        <li>Los <b>Masters</b> solo salen en su banner, al sacar un <b>Legendario</b>.</li>
+        <li><b>Épico</b> asegurado cada ${INV_PITY.e} tiradas y <b>Legendario</b> cada ${INV_PITY.l}.</li>
+        <li>Los <b>repetidos</b> te dan monedas (BP) según su rango.</li>
+        <li>Las estrellas se ganan en el Alto Mando, el Campeón y los logros.</li>
+      </ul>
+      <p class="iv-cred">Sprites: <a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">Pokémon Showdown</a> y sus artistas · Pokémon © Nintendo / Game Freak / The Pokémon Company.</p>
+    </aside>
+    </div>
   </div>`);
   $('panelBody').classList.add('wide');
   document.querySelectorAll('.iv-tabs button').forEach(b => b.onclick = () => { invSel = b.dataset.b; openInv(); });
@@ -195,36 +214,154 @@ function invPickRender(box){
 }
 
 // ---- Animación (estrella fugaz + revelación) ----
-function invAnim(res){
-  const best = res.reduce((a, r) => INV_RANK[r.t] > INV_RANK[a] ? r.t : a, 'C'), col = INV_TIER[best].c;
-  const o = document.createElement('div'); o.id = 'invOv'; o.className = 'ivov t' + best; o.style.setProperty('--c', col);
-  o.innerHTML = `<div class="ivsky"></div><div class="ivmet"><i></i></div><div class="ivflash"></div><div class="ivstage"></div><button class="ivskip">Saltar »</button>`;
+// ---- ANIMACIÓN DE LA INVOCACIÓN (al estilo de abrir un cofre: círculo mágico → carga → explosión → revelar) ----
+// 1) aparece un círculo mágico y se carga; el color anuncia la rareza más alta (azul / morado / dorado / arcoíris) y cuanto mejor es, más dura la carga.
+// 2) explosión de luz. 3) una tirada: sale el personaje de la silueta. Tirada ×10: 10 cartas boca abajo que se giran de una en una (o todas a la vez).
+// Animación que se usa al invocar: 'templo' (rayo del cielo que cae en la fuente) o 'circulo' (la anterior, círculo mágico). Para volver a la anterior basta cambiar esta línea.
+const INV_ANIM = 'templo';
+function invAnim(res){ return (INV_ANIM === 'templo' ? invAnimTemplo : invAnimCirculo)(res); }
+
+function invAnimCirculo(res){
+  const best = res.reduce((a, r) => INV_RANK[r.t] > INV_RANK[a] ? r.t : a, 'C'), col = INV_TIER[best].c, many = res.length > 1;
+  const CH = {C:1500, R:2100, E:2800, L:3600}[best];                      // ms de carga: cuanto mejor es lo que viene, más se hace esperar
+  const o = document.createElement('div'); o.id = 'invOv'; o.className = 'ivov t' + best; o.style.setProperty('--c', col); o.style.setProperty('--ch', CH + 'ms');
+  o.style.setProperty('--amp', {C:1, R:2, E:3.5, L:5}[best] + 'px');
+  const star = Array.from({length:16}, (_, k) => { const r = k % 2 ? 24 : 64, a = k * Math.PI / 8 - Math.PI / 2; return (Math.cos(a) * r).toFixed(1) + ',' + (Math.sin(a) * r).toFixed(1); }).join(' ');
+  const runes = Array.from({length:24}, (_, k) => `<line x1="0" y1="-87" x2="0" y2="${k % 3 ? -81 : -76}" transform="rotate(${k * 15})"/>`).join('');
+  const circ = cls => `<svg class="ivcirc ${cls}" viewBox="-100 -100 200 200"><circle class="r0" r="95"/><g class="g1"><circle class="r1" r="86" stroke-dasharray="3 4"/>${runes}</g><g class="g2"><circle class="r2" r="66"/><polygon class="st" points="${star}"/></g><circle class="r3" r="24"/></svg>`;
+  o.innerHTML = `<div class="ivsky"></div><div class="ivgrd">${circ('base')}${circ('tint')}</div><div class="ivbeam"></div><div class="ivpart"></div><div class="ivshock"><i></i><i></i></div><div class="ivflash"></div><div class="ivstage"></div><button class="ivskip">Saltar »</button>`;
   document.body.appendChild(o);
-  if(typeof Sfx !== 'undefined') try{ Sfx.play('logro'); }catch(e){}
-  let i = -1, done = false;
-  const stage = o.querySelector('.ivstage');
-  const card = r => `<div class="ivcard t${r.t}" style="--c:${INV_TIER[r.t].c}"><div class="ivglow"></div><img src="${invUrl(r.x.f)}" alt="">
-      <div class="ivinfo"><i>${'★'.repeat(INV_TIER[r.t].st)}</i><b>${esc(r.x.n)}</b>${r.x.v ? `<small>${esc(r.x.v)}</small>` : ''}<span class="ivt">${INV_TIER[r.t].n}</span>
-      ${r.dup ? `<em class="dup">Repetido · +${r.bp} BP</em>` : '<em class="new">¡NUEVO!</em>'}</div></div>`;
-  const summary = () => {
-    done = true; o.classList.add('ivdone'); o.querySelector('.ivskip').remove();
-    stage.innerHTML = `<div class="ivsum">${res.map(r => `<div class="ivsc t${r.t}" style="--c:${INV_TIER[r.t].c}"><img src="${invUrl(r.x.f)}" alt=""><i>${'★'.repeat(INV_TIER[r.t].st)}</i><b>${esc(r.x.n)}</b>${r.dup ? `<em>+${r.bp} BP</em>` : '<em class="new">NUEVO</em>'}</div>`).join('')}</div>
-      <div class="ivsumb"><button id="ivAgain">Volver a la Invocación</button></div>`;
-    stage.querySelector('#ivAgain').onclick = close;
+  const sfx = (n, k) => { try{ if(typeof Sfx !== 'undefined') Sfx.play(n, k); }catch(e){} };
+  const stage = o.querySelector('.ivstage'), part = o.querySelector('.ivpart'), T = [], at = (ms, fn) => T.push(setTimeout(fn, ms));
+  let phase = 0, revealed = false, flipped = new Set();
+  const stars = r => `<i>${Array.from({length:INV_TIER[r.t].st}, (_, k) => `<s style="--k:${k}">★</s>`).join('')}</i>`;
+  const tag = r => r.dup ? `<em class="dup">Repetido · +${r.bp} BP</em>` : '<em class="new">¡NUEVO!</em>';
+  const card = r => `<div class="ivcard t${r.t}" style="--c:${INV_TIER[r.t].c}"><div class="ivrays"></div><div class="ivglow"></div><img class="sil" src="${invUrl(r.x.f)}" alt="">
+      <div class="ivinfo">${stars(r)}<b>${esc(r.x.n)}</b>${r.x.v ? `<small>${esc(r.x.v)}</small>` : ''}<span class="ivt">${INV_TIER[r.t].n}</span>${tag(r)}</div></div>`;
+  const close = () => { T.forEach(clearTimeout); o.remove(); removeEventListener('keydown', key, true); openInv(); };
+  const spark = () => {                                                    // chispas que vuelan hacia el círculo mientras carga
+    const W = innerWidth, H = innerHeight, n = Math.round(28 + CH / 45);
+    part.innerHTML = Array.from({length:n}, () => { const a = Math.random() * 6.283, d = (.28 + Math.random() * .5) * Math.min(W, H) * 1.1;
+      return `<i style="--x:${Math.round(Math.cos(a) * d * 1.5)}px;--y:${Math.round(Math.sin(a) * d * .8)}px;--d:${Math.round(Math.random() * CH * .85)}ms;--s:${(3 + Math.random() * 5).toFixed(1)}px"></i>`; }).join('');
   };
-  const next = () => {
-    if(done) return;
-    i++;
-    if(i >= res.length){ if(res.length > 1) summary(); else close(); return; }
-    stage.innerHTML = card(res[i]) + `<p class="ivhint">${res.length > 1 ? `${i + 1} / ${res.length} · ` : ''}Pulsa para continuar</p>`;
+  const reveal = () => {
+    if(revealed) return; revealed = true; T.forEach(clearTimeout);
+    o.classList.add('hit', 'go'); o.classList.remove('shk', 'charge'); part.innerHTML = '';
+    if(!many){
+      stage.innerHTML = card(res[0]) + '<p class="ivhint">Pulsa para continuar</p>';
+      o.querySelector('.ivskip').remove();
+      const im = stage.querySelector('img.sil'); at(520, () => { im.classList.remove('sil'); o.classList.add('shine'); sfx(best === 'L' ? 'win' : 'crit'); });
+      return;
+    }
+    stage.innerHTML = `<p class="ivgt">Pulsa una carta para girarla</p><div class="ivgrid">${res.map((r, k) => `<button class="ivfc t${r.t}" data-k="${k}" style="--c:${INV_TIER[r.t].c};--k:${k}"><span class="in"><span class="bk"><i></i></span>
+        <span class="fr"><img src="${invUrl(r.x.f)}" alt="">${stars(r)}<b>${esc(r.x.n)}</b>${r.dup ? `<em>+${r.bp} BP</em>` : '<em class="new">¡NUEVO!</em>'}</span></span></button>`).join('')}</div>
+      <div class="ivsumb"><button id="ivAll">Girar todas</button></div>`;
+    stage.querySelectorAll('.ivfc').forEach(b => b.onclick = e => { e.stopPropagation(); flip(+b.dataset.k); });
+    stage.querySelector('#ivAll').onclick = e => { e.stopPropagation(); flipAll(); };
   };
-  const close = () => { o.remove(); removeEventListener('keydown', key, true); openInv(); };
-  const key = e => { if(e.code === 'Escape'){ e.stopImmediatePropagation(); close(); } else if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); e.stopImmediatePropagation(); if(o.classList.contains('go')) next(); } };
+  const finish = () => {                                                   // todas giradas: botón para volver
+    const bx = stage.querySelector('.ivsumb'); if(bx) bx.innerHTML = '<button id="ivAgain">Volver a la Invocación</button>';
+    const a = stage.querySelector('#ivAgain'); if(a) a.onclick = close;
+    const s = o.querySelector('.ivskip'); if(s) s.remove(); const g = stage.querySelector('.ivgt'); if(g) g.remove();
+  };
+  const flip = k => {
+    if(flipped.has(k)) return; flipped.add(k);
+    const b = stage.querySelector(`.ivfc[data-k="${k}"]`); if(!b) return; b.classList.add('flip');
+    const t = res[k].t; sfx(t === 'L' ? 'win' : t === 'E' ? 'mega' : t === 'R' ? 'crit' : 'click');
+    if(INV_RANK[t] >= 2){ b.classList.add('burst'); o.classList.remove('pulse'); void o.offsetWidth; o.classList.add('pulse'); }
+    if(flipped.size === res.length) at(500, finish);
+  };
+  const flipAll = () => { let d = 0; res.forEach((r, k) => { if(!flipped.has(k)){ at(d, () => flip(k)); d += 130; } }); };
+  const key = e => {
+    if(e.code === 'Escape'){ e.stopImmediatePropagation(); close(); }
+    else if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); e.stopImmediatePropagation();
+      if(!revealed) return reveal();
+      if(!many) return close();
+      const k = res.findIndex((r, i) => !flipped.has(i)); if(k >= 0) flip(k); else close(); }
+  };
   addEventListener('keydown', key, true);
-  o.querySelector('.ivskip').onclick = e => { e.stopPropagation(); if(res.length > 1) summary(); else { i = res.length - 1; next(); } };
-  o.onclick = e => { if(!o.classList.contains('go') || e.target.closest('button')) return; next(); };
-  setTimeout(() => o.classList.add('hit'), 1500);                           // la estrella llega al centro: destello
-  setTimeout(() => { o.classList.add('go'); next(); }, 1900);
+  o.querySelector('.ivskip').onclick = e => { e.stopPropagation(); if(!revealed) reveal(); else if(many) flipAll(); };
+  o.onclick = e => { if(e.target.closest('button')) return; if(!revealed) return; if(!many) close(); };
+  sfx('logro');
+  at(40, () => o.classList.add('p1'));                                     // aparece el círculo
+  at(900, () => { o.classList.add('charge'); spark(); sfx('sendout'); });  // carga: gira cada vez más rápido y el color anuncia la rareza
+  at(900 + CH * .62, () => o.classList.add('shk'));                        // y la pantalla empieza a temblar
+  at(900 + CH, () => { o.classList.add('boom'); sfx(INV_RANK[best] >= 2 ? 'mega' : 'crit'); });   // explosión de luz
+  at(900 + CH + 520, reveal);
+}
+
+
+function invAnimTemplo(res){
+  const best = res.reduce((a, r) => INV_RANK[r.t] > INV_RANK[a] ? r.t : a, 'C'), col = INV_TIER[best].c, many = res.length > 1;
+  const CH = {C:1500, R:2100, E:2800, L:3600}[best];                      // ms de carga: cuanto mejor es lo que viene, más se hace esperar
+  const o = document.createElement('div'); o.id = 'invOv'; o.className = 'ivov t' + best; o.style.setProperty('--c', col); o.style.setProperty('--ch', CH + 'ms');
+  o.style.setProperty('--amp', {C:1, R:2, E:3.5, L:5}[best] + 'px');
+  o.classList.add('tpov');
+  ['inv_templo', 'inv_sala', 'inv_rayo'].forEach(n => { new Image().src = 'iconos/' + n + '.webp'; });
+  o.innerHTML = `<div class="ivsky"></div>
+    <div class="tp-s tp-out"><img class="tp-bg" src="iconos/inv_templo.webp" alt=""><div class="tp-swirl"></div><div class="tp-hole"></div><div class="ivpart"></div><div class="tp-cone"></div><div class="tp-wins"><i style="--x:43.9%"></i><i style="--x:47.1%"></i><i style="--x:50.4%"></i><i style="--x:53.7%"></i><i style="--x:57%"></i></div></div>
+    <div class="tp-s tp-in"><img class="tp-bg" src="iconos/inv_sala.webp" alt=""><div class="tp-wglow"></div><div class="tp-rip"><i></i><i></i><i></i></div><img class="tp-beam" src="iconos/inv_rayo.webp" alt=""><div class="ivshock"><i></i><i></i></div></div>
+    <div class="ivflash"></div><div class="ivstage"></div><button class="ivskip">Saltar »</button>`;
+  document.body.appendChild(o);
+  const sfx = (n, k) => { try{ if(typeof Sfx !== 'undefined') Sfx.play(n, k); }catch(e){} };
+  const stage = o.querySelector('.ivstage'), part = o.querySelector('.ivpart'), T = [], at = (ms, fn) => T.push(setTimeout(fn, ms));
+  let phase = 0, revealed = false, flipped = new Set();
+  const stars = r => `<i>${Array.from({length:INV_TIER[r.t].st}, (_, k) => `<s style="--k:${k}">★</s>`).join('')}</i>`;
+  const tag = r => r.dup ? `<em class="dup">Repetido · +${r.bp} BP</em>` : '<em class="new">¡NUEVO!</em>';
+  const card = r => `<div class="ivcard t${r.t}" style="--c:${INV_TIER[r.t].c}"><div class="ivrays"></div><div class="ivglow"></div><img class="sil" src="${invUrl(r.x.f)}" alt="">
+      <div class="ivinfo">${stars(r)}<b>${esc(r.x.n)}</b>${r.x.v ? `<small>${esc(r.x.v)}</small>` : ''}<span class="ivt">${INV_TIER[r.t].n}</span>${tag(r)}</div></div>`;
+  const close = () => { T.forEach(clearTimeout); o.remove(); removeEventListener('keydown', key, true); openInv(); };
+  const spark = () => {                                                    // chispas que vuelan hacia el círculo mientras carga
+    const W = innerWidth, H = innerHeight, n = Math.round(28 + CH / 45);
+    part.innerHTML = Array.from({length:n}, () => { const a = Math.random() * 6.283, d = (.28 + Math.random() * .5) * Math.min(W, H) * 1.1;
+      return `<i style="--x:${Math.round(Math.cos(a) * d * 1.5)}px;--y:${Math.round(Math.sin(a) * d * .8)}px;--d:${Math.round(Math.random() * CH * .85)}ms;--s:${(3 + Math.random() * 5).toFixed(1)}px"></i>`; }).join('');
+  };
+  const reveal = () => {
+    if(revealed) return; revealed = true; T.forEach(clearTimeout);
+    o.classList.add('hit', 'go'); o.classList.remove('shk', 'charge'); part.innerHTML = '';
+    if(!many){
+      stage.innerHTML = card(res[0]) + '<p class="ivhint">Pulsa para continuar</p>';
+      o.querySelector('.ivskip').remove();
+      const im = stage.querySelector('img.sil'); at(520, () => { im.classList.remove('sil'); o.classList.add('shine'); sfx('inv_rev_' + best); });
+      return;
+    }
+    sfx('inv_deal');
+    stage.innerHTML = `<p class="ivgt">Pulsa una carta para girarla</p><div class="ivgrid">${res.map((r, k) => `<button class="ivfc t${r.t}" data-k="${k}" style="--c:${INV_TIER[r.t].c};--k:${k}"><span class="in"><span class="bk"><i></i></span>
+        <span class="fr"><img src="${invUrl(r.x.f)}" alt="">${stars(r)}<b>${esc(r.x.n)}</b>${r.dup ? `<em>+${r.bp} BP</em>` : '<em class="new">¡NUEVO!</em>'}</span></span></button>`).join('')}</div>
+      <div class="ivsumb"><button id="ivAll">Girar todas</button></div>`;
+    stage.querySelectorAll('.ivfc').forEach(b => b.onclick = e => { e.stopPropagation(); flip(+b.dataset.k); });
+    stage.querySelector('#ivAll').onclick = e => { e.stopPropagation(); flipAll(); };
+  };
+  const finish = () => {                                                   // todas giradas: botón para volver
+    const bx = stage.querySelector('.ivsumb'); if(bx) bx.innerHTML = '<button id="ivAgain">Volver a la Invocación</button>';
+    const a = stage.querySelector('#ivAgain'); if(a) a.onclick = close;
+    const s = o.querySelector('.ivskip'); if(s) s.remove(); const g = stage.querySelector('.ivgt'); if(g) g.remove();
+  };
+  const flip = k => {
+    if(flipped.has(k)) return; flipped.add(k);
+    const b = stage.querySelector(`.ivfc[data-k="${k}"]`); if(!b) return; b.classList.add('flip');
+    const t = res[k].t; sfx('inv_flip_' + t);
+    if(INV_RANK[t] >= 2){ b.classList.add('burst'); o.classList.remove('pulse'); void o.offsetWidth; o.classList.add('pulse'); }
+    if(flipped.size === res.length) at(500, finish);
+  };
+  const flipAll = () => { let d = 0; res.forEach((r, k) => { if(!flipped.has(k)){ at(d, () => flip(k)); d += 130; } }); };
+  const key = e => {
+    if(e.code === 'Escape'){ e.stopImmediatePropagation(); close(); }
+    else if(e.code === 'Space' || e.code === 'Enter'){ e.preventDefault(); e.stopImmediatePropagation();
+      if(!revealed) return reveal();
+      if(!many) return close();
+      const k = res.findIndex((r, i) => !flipped.has(i)); if(k >= 0) flip(k); else close(); }
+  };
+  addEventListener('keydown', key, true);
+  o.querySelector('.ivskip').onclick = e => { e.stopPropagation(); if(!revealed) reveal(); else if(many) flipAll(); };
+  o.onclick = e => { if(e.target.closest('button')) return; if(!revealed) return; if(!many) close(); };
+  sfx('inv_open');
+  at(40, () => o.classList.add('p1'));                                     // aparece el templo de noche
+  at(900, () => { o.classList.add('charge'); spark(); sfx('inv_ch_' + best); });  // carga: gira cada vez más rápido y el color anuncia la rareza
+  at(900 + CH * .62, () => o.classList.add('shk'));                        // y la pantalla empieza a temblar
+  at(900 + CH * .72, () => sfx('inv_win'));                                 // las ventanas se encienden
+  at(900 + CH, () => { o.classList.add('boom'); sfx('inv_boom'); });   // explosión de luz
+  at(900 + CH + 520, reveal);
 }
 
 // ---- Conexiones con el resto del juego ----
