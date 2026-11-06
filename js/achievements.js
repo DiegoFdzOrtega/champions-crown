@@ -82,6 +82,51 @@ const ACHIEVEMENT_DATA = [
   {"id":"campo_media",     "cat":"campo",    "name":"Campo: Media superada","desc":"Vence a todos los entrenadores de la dificultad Media.",     "icon":"campo",  "metric":"campo_tier", "tier":2, "goal":1, "reward":{"bp":500, "tickets":3}},
   {"id":"campo_dificil",   "cat":"campo",    "name":"Campo: Difícil superada","desc":"Vence a todos los entrenadores de la dificultad Difícil.", "icon":"campo",  "metric":"campo_tier", "tier":3, "goal":1, "reward":{"title":"Duro del Campo", "bp":800, "tickets":6}},
 
+  // ---------- TORRE BATALLA ----------
+  {"id":"torre_5",    "cat":"torre", "name":"Primeros pisos",       "desc":"Llega al piso 5 de la Torre Batalla.",             "icon":"tower", "metric":"tower_best", "goal":5,  "reward":{"bp":200, "tickets":1}},
+  {"id":"torre_10",   "cat":"torre", "name":"Campeón del piso 10",  "desc":"Supera el piso 10 de la Torre Batalla.",           "icon":"tower", "metric":"tower_best", "goal":10, "reward":{"bp":500, "estrella":2}},
+  {"id":"torre_20",   "cat":"torre", "name":"Escalando",            "desc":"Supera el piso 20 de la Torre Batalla.",           "icon":"tower", "metric":"tower_best", "goal":20, "reward":{"bp":800, "estrella":3}},
+  {"id":"torre_30",   "cat":"torre", "name":"Cerca de la cima",     "desc":"Supera el piso 30 de la Torre Batalla.",           "icon":"tower", "metric":"tower_best", "goal":30, "reward":{"bp":1200, "estrella":4, "title":"Escalador de la Torre"}},
+  {"id":"torre_40",   "cat":"torre", "name":"Casi en lo más alto",  "desc":"Supera el piso 40 de la Torre Batalla.",           "icon":"tower", "metric":"tower_best", "goal":40, "reward":{"bp":1600, "estrella":5}},
+  {"id":"torre_50",   "cat":"torre", "name":"Conquistador de la Torre","desc":"Supera los 50 pisos de la Torre Batalla.",       "icon":"tower", "metric":"tower_best", "goal":50, "reward":{"title":"Conquistador de la Torre", "frame":"oro", "bp":3000, "estrella_t":5}},
+  {"id":"torre_t50",  "cat":"torre", "name":"Escalador constante",  "desc":"Supera 50 pisos en total (los repetidos cuentan).","icon":"tower", "metric":"tower_total", "goal":50,  "reward":{"bp":500, "tickets":3}},
+  {"id":"torre_t200", "cat":"torre", "name":"Incansable de la Torre","desc":"Supera 200 pisos en total.",                      "icon":"tower", "metric":"tower_total", "goal":200, "reward":{"bp":1500, "estrella":5}},
+  {"id":"torre_t1000","cat":"torre", "name":"Leyenda de la Torre",  "desc":"Supera 1000 pisos en total.",                      "icon":"tower", "metric":"tower_total", "goal":1000,"reward":{"title":"Leyenda de la Torre", "bp":5000, "estrella_t":8}},
+  {"id":"torre_r10",  "cat":"torre", "name":"Siempre de vuelta",    "desc":"Empieza 10 subidas a la Torre Batalla.",           "icon":"tower", "metric":"tower_runs",  "goal":10,   "reward":{"bp":400, "tickets":2}},
+  {"id":"torre_rey",  "cat":"torre", "name":"¡Rey de la Torre!",    "desc":"Vence a un Campeón de la Torre y consigue un trono (o vence al Rey que lo ocupa).", "icon":"tower", "metric":"tower_king", "goal":1, "reward":{"title":"Rey de la Torre", "bp":1000, "estrella_t":3}},
+  {"id":"torre_rey5", "cat":"torre", "name":"Reyes de todos los pisos","desc":"Consigue 5 tronos de la Torre Batalla.",        "icon":"tower", "metric":"tower_king", "goal":5, "reward":{"title":"Rey de reyes", "frame":"platino", "bp":3000, "estrella_t":10}},
+
+  // ---------- CLASIFICATORIA ----------
+  {"id":"rk_1",    "cat":"ranked", "name":"Primera victoria online","desc":"Gana tu primer combate de la Clasificatoria.",      "icon":"trophy", "metric":"ranked_w", "goal":1,   "reward":{"bp":200, "tickets":1}},
+  {"id":"rk_10",   "cat":"ranked", "name":"Duelista",             "desc":"Gana 10 combates de la Clasificatoria.",             "icon":"trophy", "metric":"ranked_w", "goal":10,  "reward":{"bp":500, "estrella":2}},
+  {"id":"rk_50",   "cat":"ranked", "name":"Veterano online",      "desc":"Gana 50 combates de la Clasificatoria.",             "icon":"trophy", "metric":"ranked_w", "goal":50,  "reward":{"bp":1500, "estrella":5, "title":"Duelista"}},
+  {"id":"rk_100",  "cat":"ranked", "name":"Leyenda online",       "desc":"Gana 100 combates de la Clasificatoria.",            "icon":"trophy", "metric":"ranked_w", "goal":100, "reward":{"bp":3000, "estrella_t":5, "title":"Leyenda online"}},
+  {"id":"rk_plata",    "cat":"ranked", "name":"Rango Plata",      "desc":"Llega a 150 PC en la Clasificatoria.",               "icon":"trophy", "metric":"ranked_best", "goal":150,  "reward":{"frame":"plata", "bp":300}},
+  {"id":"rk_oro",      "cat":"ranked", "name":"Rango Oro",        "desc":"Llega a 300 PC en la Clasificatoria.",               "icon":"trophy", "metric":"ranked_best", "goal":300,  "reward":{"frame":"oro", "bp":600, "estrella":2}},
+  {"id":"rk_platino",  "cat":"ranked", "name":"Rango Platino",    "desc":"Llega a 450 PC en la Clasificatoria.",               "icon":"trophy", "metric":"ranked_best", "goal":450,  "reward":{"frame":"platino", "bp":900, "estrella":3}},
+  {"id":"rk_diamante", "cat":"ranked", "name":"Rango Diamante",   "desc":"Llega a 600 PC en la Clasificatoria.",               "icon":"trophy", "metric":"ranked_best", "goal":600,  "reward":{"bp":1500, "estrella":4, "title":"Diamante"}},
+  {"id":"rk_maestro",  "cat":"ranked", "name":"Rango Maestro",    "desc":"Llega a 750 PC en la Clasificatoria.",               "icon":"trophy", "metric":"ranked_best", "goal":750,  "reward":{"bp":2500, "estrella_t":3, "title":"Maestro de la Clasificatoria"}},
+  {"id":"rk_challenger","cat":"ranked","name":"Challenger",       "desc":"Llega a 1000 PC en la Clasificatoria.",              "icon":"trophy", "metric":"ranked_best", "goal":1000, "reward":{"bp":5000, "estrella_t":8, "title":"Challenger"}},
+
+  // ---------- INVOCACIÓN ----------
+  {"id":"inv_1",    "cat":"invocacion", "name":"Primera invocación",   "desc":"Haz tu primera tirada en la Invocación.",           "icon":"gacha", "metric":"inv_pulls", "goal":1,   "reward":{"bp":100, "estrella":1}},
+  {"id":"inv_10",   "cat":"invocacion", "name":"Invocador",            "desc":"Haz 10 tiradas en la Invocación.",                  "icon":"gacha", "metric":"inv_pulls", "goal":10,  "reward":{"bp":200, "estrella":2}},
+  {"id":"inv_50",   "cat":"invocacion", "name":"Invocador habitual",   "desc":"Haz 50 tiradas en la Invocación.",                  "icon":"gacha", "metric":"inv_pulls", "goal":50,  "reward":{"bp":500, "estrella":4}},
+  {"id":"inv_100",  "cat":"invocacion", "name":"Maestro invocador",    "desc":"Haz 100 tiradas en la Invocación.",                 "icon":"gacha", "metric":"inv_pulls", "goal":100, "reward":{"bp":1000, "estrella":6, "title":"Maestro invocador"}},
+  {"id":"inv_300",  "cat":"invocacion", "name":"Pasión por invocar",   "desc":"Haz 300 tiradas en la Invocación.",                 "icon":"gacha", "metric":"inv_pulls", "goal":300, "reward":{"bp":2500, "estrella_t":5, "title":"Pasión por invocar"}},
+  {"id":"invc_10",  "cat":"invocacion", "name":"Un pequeño elenco",    "desc":"Consigue 10 personajes distintos.",                 "icon":"gacha", "metric":"inv_unique", "goal":10,  "reward":{"bp":200, "estrella":1}},
+  {"id":"invc_50",  "cat":"invocacion", "name":"Mucha gente",          "desc":"Consigue 50 personajes distintos.",                 "icon":"gacha", "metric":"inv_unique", "goal":50,  "reward":{"bp":600, "estrella":4}},
+  {"id":"invc_150", "cat":"invocacion", "name":"Gran elenco",          "desc":"Consigue 150 personajes distintos.",                "icon":"gacha", "metric":"inv_unique", "goal":150, "reward":{"bp":1500, "estrella":8, "title":"Gran elenco"}},
+  {"id":"invc_400", "cat":"invocacion", "name":"Todo un reparto",      "desc":"Consigue 400 personajes distintos.",                "icon":"gacha", "metric":"inv_unique", "goal":400, "reward":{"bp":4000, "estrella_t":8, "title":"Gran invocador", "frame":"arcoiris"}},
+  {"id":"invr_e1",  "cat":"invocacion", "name":"¡Un Épico!",           "desc":"Consigue tu primer personaje Épico.",               "icon":"gacha", "metric":"inv_tier", "tier":"E", "goal":1,  "reward":{"bp":300, "estrella":2}},
+  {"id":"invr_e10", "cat":"invocacion", "name":"Cazador de Épicos",    "desc":"Consigue 10 personajes Épicos distintos.",          "icon":"gacha", "metric":"inv_tier", "tier":"E", "goal":10, "reward":{"bp":1000, "estrella":5}},
+  {"id":"invr_l1",  "cat":"invocacion", "name":"¡Un Legendario!",      "desc":"Consigue tu primer personaje Legendario.",          "icon":"gacha", "metric":"inv_tier", "tier":"L", "goal":1,  "reward":{"bp":800, "estrella_t":2}},
+  {"id":"invr_l5",  "cat":"invocacion", "name":"Cazador de leyendas",  "desc":"Consigue 5 personajes Legendarios distintos.",      "icon":"gacha", "metric":"inv_tier", "tier":"L", "goal":5,  "reward":{"bp":2000, "estrella_t":4, "title":"Cazador de leyendas"}},
+  {"id":"invr_l15", "cat":"invocacion", "name":"Panteón completo",     "desc":"Consigue 15 personajes Legendarios distintos.",     "icon":"gacha", "metric":"inv_tier", "tier":"L", "goal":15, "reward":{"bp":5000, "estrella_t":10, "title":"Señor del panteón"}},
+  {"id":"invm_1",   "cat":"invocacion", "name":"Versión Masters",      "desc":"Consigue tu primera versión Masters.",              "icon":"gacha", "metric":"inv_masters", "goal":1,  "reward":{"bp":500, "estrella_t":2}},
+  {"id":"invm_10",  "cat":"invocacion", "name":"Colección Masters",    "desc":"Consigue 10 versiones Masters distintas.",          "icon":"gacha", "metric":"inv_masters", "goal":10, "reward":{"bp":1500, "estrella_t":4}},
+  {"id":"invm_50",  "cat":"invocacion", "name":"Gran colección Masters","desc":"Consigue 50 versiones Masters distintas.",         "icon":"gacha", "metric":"inv_masters", "goal":50, "reward":{"bp":4000, "estrella_t":10, "title":"Maestro de los Masters"}},
+
   // ---------- COLECCIÓN ----------
   {"id":"coleccion_10",    "cat":"coleccion","name":"Primeras capturas",   "desc":"Consigue 10 Pokémon diferentes.",                             "icon":"dex",    "metric":"pokemon_owned", "goal":10,  "reward":{"bp":100,  "tickets":0}},
   {"id":"coleccion_25",    "cat":"coleccion","name":"Coleccionista novato","desc":"Consigue 25 Pokémon diferentes.",                             "icon":"dex",    "metric":"pokemon_owned", "goal":25,  "reward":{"bp":200,  "tickets":1}},
@@ -103,7 +148,7 @@ const ACHIEVEMENT_DATA = [
   {"id":"sec_mewtwo_sh", "cat":"secreto", "secret":true, "name":"Clon esmeralda",         "hint":"Un clon creado en un laboratorio, pero de otro color.",  "desc":"Consigue a Mewtwo shiny.",                              "icon":"gacha", "metric":"shiny_dex", "dex":[150], "goal":1, "reward":{"bp":1500, "tickets":8, "title":"Clon esmeralda", "frame":"mewtwo"}},
   {"id":"sec_campo_250", "cat":"secreto", "secret":true, "name":"Incansable",              "hint":"Entrenar, entrenar y entrenar un poco más.",             "desc":"Vence a 250 entrenadores en el Campo de Entrenamiento.", "icon":"campo", "metric":"campo_wins", "goal":250, "reward":{"bp":2500, "tickets":15, "title":"Incansable", "frame":"campo"}},
 ];
-const ACH_CATS = {historia:'Historia', campo:'Campo de Entrenamiento', coleccion:'Colección', entrenadores:'Entrenadores', secreto:'Secretos'};
+const ACH_CATS = {historia:'Historia', campo:'Campo de Entrenamiento', torre:'Torre Batalla', ranked:'Clasificatoria', invocacion:'Invocación', coleccion:'Colección', secreto:'Secretos'};
 
 // ---- Métricas: cada una devuelve el número actual que se compara con "goal" ----
 const ACH_PROG = (kind, region) => FLOORS.filter(F => F.kind === kind && (!region || F.region === region) && F.idx < progAny(F.region)).length;   // combates de la Historia ya superados
@@ -117,6 +162,16 @@ const ACH_METRICS = {
   shiny_owned:   () => new Set(save.shiny).size,
   owns:          d => (d.dex || []).filter(x => save.box.includes(x)).length,                           // cuántos de esos Pokémon (nº de Pokédex en "dex") tienes
   shiny_dex:     d => (d.dex || []).filter(x => save.shiny.includes(x)).length,                         // cuántos de esos tienes en versión shiny
+  inv_pulls:     () => invSave().n,                                                                       // tiradas de la Invocación (cada carta cuenta como una)
+  inv_unique:    () => Object.keys(invSave().own).length,                                                  // personajes distintos
+  inv_tier:      d => Object.keys(invSave().own).filter(f => INV_BY[f] && INV_BY[f].t === d.tier).length,  // personajes distintos de un rango (C, R, E o L)
+  inv_masters:   () => Object.keys(invSave().own).filter(f => INV_BY[f] && invHas(INV_BY[f], 'ma')).length, // versiones Masters distintas
+  tower_best:    () => save.tower.best,                                                                    // mejor piso de la Torre Batalla
+  tower_total:   () => save.tower.total,                                                                   // pisos superados en total (repetidos incluidos)
+  tower_runs:    () => save.tower.runs,                                                                    // subidas empezadas
+  tower_king:    () => save.stats.rey || 0,                                                                // tronos de la Torre conseguidos
+  ranked_w:      () => save.ranked ? save.ranked.w : 0,                                                    // victorias en la Clasificatoria
+  ranked_best:   () => save.ranked ? save.ranked.best : 0,                                                 // mejores puntos de Clasificatoria
   dex_region:    d => ownedIn(d.region)                                                                // Pokémon que tienes de esa región (sin contar los que aún no tienen sprite)
 };
 
@@ -132,11 +187,8 @@ ACHIEVEMENT_DATA.forEach(registerAchievement);
 REGIONS_DEX.filter(r => regionSize(r.a, r.b) > 0).forEach(r => registerAchievement({id:'dex_' + r.n.toLowerCase(), cat:'coleccion', name:'Pokédex de ' + r.n,
   desc:`Consigue todos los Pokémon de ${r.n}. Te dan su Amuleto Arcoíris: más shiny en el Gachapon de ${r.n}.`, icon:'dex', metric:'dex_region', region:r.n, goal:regionSize(r.a, r.b),
   reward:{bp:1500, tickets:10, charm:r.n, title:'Pokédex de ' + r.n}}));
-// Un logro por cada personaje de TRAINERS (vspanel.js): consigue esos Pokémon EN SHINY y reclama el logro para desbloquear al personaje (se elige en Perfil › Personaje)
-const dexNames = list => { const n = list.map(d => { try{ return mon(d).name; }catch(e){ return '#' + d; } }); return n.length > 1 ? n.slice(0, -1).join(', ') + ' y ' + n[n.length - 1] : n[0]; };
-TRAINERS.forEach(t => registerAchievement({id:'tr_' + t.id, cat:'entrenadores', name:t.name, desc:`Consigue en versión shiny a ${dexNames(t.dex)}. Desbloquea al personaje ${t.name}.`, icon:'dex',
-  metric:'shiny_dex', dex:t.dex, goal:t.dex.length, reward:{trainer:t.id}}));
-const trainerUnlocked = id => ACHIEVEMENTS.some(a => a.reward && a.reward.trainer === id && achGet(a.id).claimed);
+// (Antes había un logro por personaje: «consigue estos 3 Pokémon shiny». Ya no existen: los personajes ahora salen de la Invocación. Quien ya los había conseguido los conserva.)
+const trainerUnlocked = id => { const a = save.ach['tr_' + id]; return !!(a && (a.done || a.date)); };      // personajes antiguos: solo los que ya habías completado
 const achDef = id => ACHIEVEMENTS.find(a => a.id === id);
 function achGet(id){                                // estado de un logro (no modifica nada). Las partidas antiguas ya tenían "date" = cobrado
   const s = save.ach[id], d = achDef(id), claimed = !!(s && s.date);
@@ -217,7 +269,7 @@ setTimeout(() => achSync(), 900);                                               
 const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8', Alola:'#ffa23a'};   // color de cada región
 const ACH_REG_NAME = {'Unova / Teselia':'Teselia'};                                          // cómo se escribe el grupo en pantalla
 const ACH_GROUP = {primer_gimnasio:'Primeros pasos', mega_aro:'Unova / Teselia'};            // logros que van a un grupo concreto (si no, se agrupan por región o por métrica)
-const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['coleccion', 'Colección'], ['entrenadores', 'Entrenadores'], ['secreto', 'Secretos']];
+const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['torre', 'Torre'], ['ranked', 'Clasificatoria'], ['invocacion', 'Invocación'], ['coleccion', 'Colección'], ['secreto', 'Secretos']];
 let achTab = 'all', achHideDone = false; const achJust = new Set();                           // pestaña actual · ocultar los ya reclamados · logros recién reclamados (animación)
 
 // ---- Marcos de avatar y títulos de perfil: son recompensas especiales de algunos logros (reward.frame / reward.title) y se eligen en Perfil ----
@@ -257,6 +309,11 @@ function achStyle(a){                                                           
     case 'shiny_owned':   return {shape:'spark',  glyph:'star',   col:'#ffe26a'};
     case 'shiny_dex':     return {shape:'spark',  glyph:'star',   col:'#ffe26a'};
     case 'owns':          return {shape:'circle', glyph:'ball',   col:'#b07bff'};
+    case 'inv_pulls': case 'inv_unique': case 'inv_tier': case 'inv_masters': return {shape:'spark', glyph:a.metric === 'inv_pulls' ? 'bolt' : 'star', col:a.tier === 'L' ? '#ff7ad9' : a.tier === 'E' ? '#ffcc33' : a.metric === 'inv_masters' ? '#7af0ff' : '#b36bff'};
+    case 'tower_best': case 'tower_total': case 'tower_runs': return {shape:'shield', glyph:'tower', col:'#ff9a3a'};
+    case 'tower_king':    return {shape:'star',   glyph:'crown',  col:'#ffd84a'};
+    case 'ranked_w':      return {shape:'circle', glyph:'bolt',   col:'#7af0ff'};
+    case 'ranked_best':   return {shape:'star',   glyph:'trophy', col:'#7af0ff'};
   }
   return {shape:'circle', glyph:'trophy', col};
 }
@@ -325,7 +382,9 @@ function achGroupOf(a){
   if(ACH_GROUP[a.id]) return ACH_GROUP[a.id];
   if(a.cat === 'historia') return a.region || 'Maestro de Ligas';
   if(a.cat === 'campo') return a.metric === 'campo_tier' ? 'Dificultades' : 'Victorias';
-  if(a.cat === 'entrenadores') return a.reward && TRAINERS.some(t => t.masters && t.id === a.reward.trainer) ? 'Versiones Masters' : 'Personajes';
+  if(a.cat === 'torre') return a.metric === 'tower_best' ? 'Pisos' : a.metric === 'tower_king' ? 'Reyes' : 'Subidas';
+  if(a.cat === 'ranked') return a.metric === 'ranked_best' ? 'Rangos' : 'Victorias';
+  if(a.cat === 'invocacion') return a.metric === 'inv_pulls' ? 'Tiradas' : a.metric === 'inv_unique' ? 'Colección de personajes' : a.metric === 'inv_masters' ? 'Versiones Masters' : 'Rarezas';
   if(a.cat === 'coleccion') return a.metric === 'shiny_owned' ? 'Shiny' : a.metric === 'dex_region' ? 'Pokédex' : 'Pokémon';
   return ACH_CATS[a.cat] || a.cat;
 }

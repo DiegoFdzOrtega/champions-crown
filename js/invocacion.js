@@ -101,7 +101,7 @@ function invPull(bn, n){
   if(held(bn.cur) < n){ toast(`Te faltan ${n - held(bn.cur)} ${bn.cur === 'estrella' ? 'Estrellas azules' : 'Estrellas rosas'}. Se ganan en el Alto Mando, el Campeón y los logros.`); return; }
   save.items[bn.cur] = held(bn.cur) - n; if(save.items[bn.cur] <= 0) delete save.items[bn.cur];
   const res = []; for(let i = 0; i < n; i++) res.push(invRoll(bn));
-  persist(); refreshHud(); invAnim(res);
+  persist(); refreshHud(); if(typeof achSync === 'function') achSync(); invAnim(res);
 }
 
 // ---- Pantalla ----

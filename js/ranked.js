@@ -251,7 +251,7 @@ function rkResult(iWon){
   r.hitos = r.hitos || {};
   RK_HITOS.forEach(h => { if(r.w >= h.n && !r.hitos[h.n]){ r.hitos[h.n] = 1; save.bp += h.bp || 0; save.tickets += h.tk || 0; save.ticketsL += h.tl || 0;
     if(typeof toast === 'function') setTimeout(() => toast(`¡Hito de Temporada! Has ganado ${h.n} combates: +${h.t}`), 2500); } });
-  persist(); rkPush();
+  persist(); rkPush(); if(typeof achSync === 'function') achSync();
   const after = rkTier(r.pts), up = RK_TIERS.indexOf(after) > RK_TIERS.indexOf(before), down = RK_TIERS.indexOf(after) < RK_TIERS.indexOf(before);
   return {d, pts: r.pts, tier: after, up, down, text: `${d >= 0 ? '+' : '−'}${Math.abs(d)} PC · ${after.n} ${r.pts} PC` + (up ? ` · ¡Has subido a ${after.n}!` : down ? ` · Has bajado a ${after.n}` : '')};
 }

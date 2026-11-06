@@ -153,6 +153,7 @@ async function twClaim(f){                                                      
   try{
     const {data, error} = await cloud.sb.rpc('tower_claim', {p_floor:f, p_card:fpCard(), p_mons:team.map(d => [d, useShiny(d) ? 1 : 0])});
     if(error) return; TW_K.at = 0;
+    if(data === 'king' || data === 'pending'){ save.stats.rey = (save.stats.rey || 0) + 1; persist(); if(typeof achSync === 'function') achSync(); }          // logros: tronos conseguidos
     if(data === 'king') toast(`¡Eres el Rey del piso ${f}! Los demás jugadores lucharán contra tu equipo.`);
     else if(data === 'pending') toast(`Has vencido al Rey del piso ${f}: el trono será tuyo cuando empiece la próxima hora.`);
   }catch(e){}
