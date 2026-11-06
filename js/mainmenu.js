@@ -48,7 +48,7 @@ function mmHero(){
   }
   if(towerOpen()){
     const best = (save.tower && save.tower.best) || 0;
-    return `<div class="m2-hero tw"><img class="por ico" src="${mmIcon('tower', '#ff9a3a')}" alt="">
+    return `<div class="m2-hero tw"><img class="por tw-art" src="${MM_TOWER}" alt="">
       <div class="m2-hi"><span class="k">Continuar · Torre Batalla</span><h2>${best ? 'Supera el piso ' + best : '¡La Torre te espera!'}</h2>
         <p>Has vencido a todas las Ligas. Sube piso a piso: los rivales son cada vez más fuertes y cada piso da premios.</p>
         <div class="row"><button class="m2-go" data-mm="go" data-k="tower">¡SUBIR!</button><small>Récord: piso ${best}</small></div></div></div>`;
@@ -56,9 +56,14 @@ function mmHero(){
   return `<div class="m2-hero"><div class="m2-hi"><span class="k">Historia</span><h2>¡Elige una región!</h2><p>Vence a los líderes, al Alto Mando y al Campeón.</p>
     <div class="row"><button class="m2-go" data-mm="go" data-k="story">JUGAR</button></div></div></div>`;
 }
+// Ilustraciones grandes de los cuadros del menú (carpeta iconos/). La de la Torre ya está; las demás se ponen solas al añadir el archivo (iconos/mm_equipo.webp...): si no existe, el cuadro queda como siempre.
+const MM_TOWER = 'iconos/torre.webp';
+const MM_ART = {};                                                                           // (ilustraciones grandes a la derecha de un cuadro: ahora ninguna)
+const MM_COL = {team:'iconos/mm_equipo.webp', dex:'iconos/mm_pokedex.webp', gacha:'iconos/mm_gachapon.webp', inv:'iconos/mm_invocacion.webp', shop:'iconos/mm_tienda.webp'};   // cuadros de Colección: la ilustración hace de icono
+const MM_HEAD = {story:'iconos/ic_historia.webp', rank:'iconos/ic_rank.webp', campo:'iconos/ic_campo.webp', tower:MM_TOWER, ...MM_COL};     // icono pequeño ilustrado de los cuadros de Jugar (si falta el archivo, vale el de píxeles)
 function mmTile(k, c, name, sub, st, extra, cls){
-  const ic = mmIcon(k, c);
-  return `<button class="m2-t ${cls || ''}" style="--c:${c};--ic:url('${ic}')" data-mm="go" data-k="${k}"><span class="h"><img src="${ic}" alt=""><b>${name}</b></span>${sub ? `<small>${sub}</small>` : ''}${extra || ''}<span class="st">${st}</span></button>`;
+  const ic = mmIcon(k, c), hd = MM_HEAD[k] ? `<img class="hd${MM_COL[k] ? ' col' : ''}" src="${MM_HEAD[k]}" alt="" onerror="this.onerror=null;this.classList.remove('hd','col');this.src='${ic}'">` : `<img src="${ic}" alt="">`, art = MM_ART[k] ? `<img class="art" src="${MM_ART[k]}" alt="" onerror="this.parentNode.classList.remove('hasart');this.remove()">` : '';
+  return `<button class="m2-t ${art ? 'hasart ' : ''}${cls || ''}" style="--c:${c};--ic:url('${ic}')" data-mm="go" data-k="${k}"><span class="h">${hd}<b>${name}</b></span>${sub ? `<small>${sub}</small>` : ''}${extra || ''}<span class="st">${st}</span>${art}</button>`;
 }
 function mmRender(){
   const m = $('main'); if(!m) return;
