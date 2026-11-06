@@ -3571,3 +3571,158 @@ html.phone .tw-hits .tw-h .tw-chips{display:flex}
 .m2-col .m2-t{min-height:0;padding:6px 10px 8px;gap:3px}
 .m2-col .m2-mini{display:none}
 .m2-t .h img.hd.col{width:40px;height:40px;margin:-2px 0 -1px}
+
+/* ===== INVOCACIÓN v2: círculo mágico → carga → explosión → revelar (js/invocacion.js · invAnim) ===== */
+.ivov.shk{animation:ivShake .11s linear infinite}
+@keyframes ivShake{0%{translate:0 0}25%{translate:var(--amp) calc(var(--amp)*-.6)}50%{translate:calc(var(--amp)*-1) var(--amp)}75%{translate:calc(var(--amp)*-.6) calc(var(--amp)*-1)}100%{translate:0 0}}
+.ivgrd{position:absolute;left:50%;top:60%;width:min(96vh,860px);aspect-ratio:1;transform:translate(-50%,-50%) perspective(1100px) rotateX(68deg) scale(.2);opacity:0;pointer-events:none;transition:transform .9s cubic-bezier(.2,.9,.3,1.1),opacity .6s}
+.ivov.p1 .ivgrd{transform:translate(-50%,-50%) perspective(1100px) rotateX(68deg) scale(1);opacity:1}
+.ivov.boom .ivgrd,.ivov.go .ivgrd{opacity:0;transform:translate(-50%,-50%) perspective(1100px) rotateX(68deg) scale(1.6);transition:transform .6s ease-in,opacity .45s}
+.ivcirc{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-width:1.3;overflow:visible}
+.ivcirc.base{stroke:#8fb8ff;filter:drop-shadow(0 0 4px #5aa8ff)}.ivcirc.base .st{fill:#8fb8ff;fill-opacity:.12}
+.ivcirc.tint{stroke:var(--c);opacity:0;filter:drop-shadow(0 0 7px var(--c))}.ivcirc.tint .st{fill:var(--c);fill-opacity:.22}
+.ivcirc .r3{fill:#fff;fill-opacity:0}.ivcirc .r0{stroke-width:2.2}
+.ivov.charge .ivcirc .g1{animation:ivSpinUp var(--ch) cubic-bezier(.45,0,1,1) forwards}
+.ivov.charge .ivcirc .g2{animation:ivSpinUp var(--ch) cubic-bezier(.45,0,1,1) forwards reverse}
+@keyframes ivSpinUp{from{transform:rotate(0)}to{transform:rotate(2200deg)}}
+.ivov.charge .ivcirc.tint{animation:ivTint var(--ch) ease-in forwards}
+@keyframes ivTint{0%{opacity:0}35%{opacity:0}100%{opacity:1}}
+.ivov.charge .ivcirc.tint .r3,.ivov.charge .ivcirc.base .r3{animation:ivCore var(--ch) ease-in forwards}
+@keyframes ivCore{to{fill-opacity:.95}}
+.ivov.tL.charge .ivcirc.tint{animation:ivTint var(--ch) ease-in forwards,ivHue 1.2s linear infinite}
+@keyframes ivHue{to{filter:hue-rotate(360deg) drop-shadow(0 0 7px #ff7ad9)}}
+.ivbeam{position:absolute;left:50%;bottom:40%;width:min(26vh,240px);height:78vh;transform:translateX(-50%) scaleY(0);transform-origin:50% 100%;opacity:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--c) 55%,transparent) 55%,#fff);-webkit-mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent);mask:linear-gradient(90deg,transparent,#000 35%,#000 65%,transparent)}
+.ivov.charge .ivbeam{animation:ivBeam var(--ch) ease-in forwards}
+@keyframes ivBeam{0%{opacity:0;transform:translateX(-50%) scaleY(.05)}100%{opacity:1;transform:translateX(-50%) scaleY(1)}}
+.ivov.boom .ivbeam{animation:ivBeamOut .5s ease-out forwards}
+@keyframes ivBeamOut{from{opacity:1;transform:translateX(-50%) scaleY(1)}to{opacity:0;transform:translateX(-50%) scaleY(1.15) scaleX(5)}}
+.ivpart{position:absolute;inset:0;pointer-events:none}
+.ivpart i{position:absolute;left:50%;top:60%;width:var(--s);height:var(--s);border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--c);opacity:0;animation:ivPt 1.1s ease-in infinite;animation-delay:var(--d)}
+@keyframes ivPt{0%{transform:translate(var(--x),var(--y));opacity:0}20%{opacity:1}100%{transform:translate(0,-3vh) scale(.3);opacity:0}}
+.ivshock i{position:absolute;left:50%;top:60%;width:140vmax;height:140vmax;margin:-70vmax 0 0 -70vmax;border-radius:50%;pointer-events:none;opacity:0;transform:scale(0);
+  background:radial-gradient(circle,transparent 40%,var(--c) 46%,#fff9 48%,transparent 54%)}
+.ivov.boom .ivshock i{animation:ivShk .9s ease-out forwards}.ivov.boom .ivshock i+i{animation-delay:.14s}
+@keyframes ivShk{0%{opacity:1;transform:scale(0)}100%{opacity:0;transform:scale(1)}}
+.ivov.hit .ivflash{animation:none}.ivov.boom .ivflash{animation:ivFl 1s ease-out forwards}
+.ivov.pulse .ivsky{animation:ivPulse .6s ease-out}
+@keyframes ivPulse{0%{filter:brightness(2.6)}100%{filter:brightness(1)}}
+/* una tirada: el personaje sale de una silueta */
+.ivcard{animation:ivUp .6s ease-out both}
+@keyframes ivUp{from{opacity:0;transform:translateY(30px)}}
+.ivcard>img{filter:brightness(1) drop-shadow(0 0 3px #fff) drop-shadow(0 0 22px var(--c));transition:filter .55s ease,transform .7s cubic-bezier(.2,1.6,.4,1)}
+.ivcard>img.sil{filter:brightness(0) drop-shadow(0 0 3px #fff0) drop-shadow(0 0 22px var(--c));transform:translateY(40px) scale(.72)}
+.ivinfo i s,.ivfc i s{text-decoration:none}
+.ivinfo i s{display:inline-block;animation:ivStar .4s cubic-bezier(.2,1.8,.4,1) both;animation-delay:calc(.6s + var(--k)*.12s)}
+@keyframes ivStar{from{opacity:0;transform:scale(0) rotate(-90deg)}}
+.ivinfo b{animation:ivUp .5s .75s both}.ivinfo small,.ivinfo .ivt,.ivinfo em{animation:ivUp .5s .9s both}
+.ivrays{position:absolute;left:-300px;top:50%;width:900px;height:900px;margin-top:-450px;opacity:0;pointer-events:none;transition:opacity .9s;animation:ivSp2 20s linear infinite;
+  background:repeating-conic-gradient(color-mix(in srgb,var(--c) 75%,transparent) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 4%,transparent 60%);mask:radial-gradient(circle,#000 4%,transparent 60%)}
+@keyframes ivSp2{to{transform:rotate(360deg)}}
+.ivcard.tL .ivrays{background:repeating-conic-gradient(#ff7ad9 0 6deg,transparent 6deg 12deg,#7af0ff 12deg 18deg,transparent 18deg 24deg,#ffe680 24deg 30deg,transparent 30deg 36deg)}
+.ivcard.tC .ivrays{display:none}
+.ivov.shine .ivcard.tR .ivrays{opacity:.3}.ivov.shine .ivcard.tE .ivrays,.ivov.shine .ivcard.tL .ivrays{opacity:.6}
+html.phone .ivrays{left:-360px}
+/* tirada x10: cartas boca abajo que se giran */
+.ivgt{position:absolute;top:5%;margin:0;font-size:11px;color:#c3d0ee;animation:ivTw 1s ease-in-out infinite alternate}
+.ivgrid{display:grid;grid-template-columns:repeat(5,minmax(0,clamp(96px,13vw,160px)));gap:clamp(8px,1.4vw,18px);padding:0 16px;perspective:1200px}
+.ivfc{margin:0;padding:0;border:0;background:none;aspect-ratio:3/4;cursor:pointer;animation:ivDeal .5s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--k)*70ms)}
+@keyframes ivDeal{from{opacity:0;transform:translateY(-60px) scale(.6) rotate(-8deg)}}
+.ivfc .in{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.3,.5,1)}
+.ivfc.flip .in{transform:rotateY(180deg)}
+.ivfc .bk,.ivfc .fr{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ivfc .bk{background:radial-gradient(circle at 50% 50%,#2a3f8a,#0d1330 70%);border:2px solid #6f8fe6;box-shadow:0 0 14px #5aa8ff44}
+.ivfc .bk i{display:grid;place-items:center;width:46%;aspect-ratio:1;border-radius:50%;border:3px solid #8fb8ff;box-shadow:0 0 14px #8fb8ff88,inset 0 0 12px #8fb8ff66;color:#8fb8ff;font-style:normal;font-size:clamp(16px,2.2vw,30px)}
+.ivfc .bk i::after{content:'✦'}
+.ivfc.tE .bk,.ivfc.tL .bk{border-color:var(--c);box-shadow:0 0 20px var(--c);animation:ivBk 1s ease-in-out infinite alternate}
+.ivfc.tL .bk{animation:ivBk 1s ease-in-out infinite alternate,ivHueBk 2s linear infinite}
+@keyframes ivBk{to{box-shadow:0 0 34px 6px var(--c);transform:scale(1.03)}}
+@keyframes ivHueBk{to{filter:hue-rotate(360deg)}}
+.ivfc .fr{transform:rotateY(180deg);background:linear-gradient(180deg,color-mix(in srgb,var(--c) 38%,#0a1226),#0a1226);border:2px solid var(--c);box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent)}
+.ivfc .fr img{width:78%;height:56%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 10px var(--c))}
+.ivfc .fr i{font-style:normal;font-size:clamp(8px,1vw,13px);color:var(--c);letter-spacing:-1px}.ivfc .fr b{font-weight:normal;font-size:clamp(8px,1vw,12px);text-align:center;padding:0 4px}
+.ivfc .fr em{font-style:normal;font-size:clamp(7px,.8vw,10px);color:#ffe680}.ivfc .fr em.new{color:#4ccf6a}
+.ivfc.burst .fr{animation:ivBurst .9s ease-out}
+@keyframes ivBurst{0%{box-shadow:0 0 0 0 var(--c)}30%{box-shadow:0 0 50px 22px var(--c)}100%{box-shadow:0 0 16px color-mix(in srgb,var(--c) 55%,transparent)}}
+html.phone .ivgrid{grid-template-columns:repeat(5,minmax(0,92px));gap:6px}
+html.phone .ivgt{top:3%}
+
+/* Invocación: banner a la izquierda, probabilidades y reglas a la derecha */
+.iv-cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.iv-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+.iv-side{padding:14px 16px;border-radius:16px;background:#0a1226cc;border:2px solid #2d4a7c;font-size:9px}
+.iv-side h3{margin:0 0 6px;font-size:10px;color:#ffe680;font-weight:normal}.iv-side h3:not(:first-child){margin-top:12px}
+.iv-side .ptbl{font-size:9px}.iv-side .rules{font-size:8px;line-height:1.9;padding-left:1.1em}
+.iv-side .iv-cred{margin-top:10px;font-size:7px}
+html.phone .iv-cols{grid-template-columns:minmax(0,1fr) 230px;gap:10px}
+html.phone .iv-side{padding:10px 12px}
+html.phone .iv-side .ptbl{font-size:8px}html.phone .iv-side .rules{font-size:7px;line-height:1.7}
+.iv-side .ptbl td,.iv-side .ptbl th{white-space:nowrap}
+
+/* ===== INVOCACIÓN · TEMPLO (rayo del cielo que cae en la fuente) ===== */
+.tpov{background:#02030a}
+.tp-s{position:absolute;left:50%;top:50%;width:max(100vw,calc(100vh * 1.794));aspect-ratio:2000/1115;transform:translate(-50%,-50%);overflow:visible;pointer-events:none}
+.tp-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tp-out{opacity:0;transition:opacity 1.1s ease}
+.tpov.p1 .tp-out{opacity:1}
+.tp-out .tp-bg{transform-origin:50% 28%;filter:brightness(.55)}
+.tpov.charge .tp-out .tp-bg{animation:tpZoom var(--ch) ease-in forwards}
+@keyframes tpZoom{from{transform:scale(1);filter:brightness(.7)}to{transform:scale(1.16);filter:brightness(1.1) saturate(1.2)}}
+.tp-in{opacity:0}
+.tpov.boom .tp-out{opacity:0;transition:opacity .15s}
+.tpov.boom .tp-in{opacity:1}
+.tp-hole{position:absolute;left:50%;top:25.4%;width:16%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;mix-blend-mode:screen;
+  background:radial-gradient(circle,#fff 0,var(--c) 38%,transparent 70%)}
+.tpov.charge .tp-hole{animation:tpHole var(--ch) ease-in forwards}
+@keyframes tpHole{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}60%{opacity:.7}100%{opacity:1;transform:translate(-50%,-50%) scale(2.4)}}
+.tp-swirl{position:absolute;left:50%;top:25.4%;width:78%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);opacity:0;mix-blend-mode:screen;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 55%,transparent) 0 8deg,transparent 8deg 24deg);
+  -webkit-mask:radial-gradient(circle,transparent 9%,#000 16%,transparent 58%);mask:radial-gradient(circle,transparent 9%,#000 16%,transparent 58%)}
+.tpov.charge .tp-swirl{animation:tpSw var(--ch) cubic-bezier(.4,0,1,1) forwards}
+@keyframes tpSw{from{opacity:0;transform:translate(-50%,-50%) rotate(0)}30%{opacity:.35}to{opacity:.8;transform:translate(-50%,-50%) rotate(540deg)}}
+.tpov.tL.charge .tp-swirl{animation:tpSw var(--ch) cubic-bezier(.4,0,1,1) forwards,ivHue 1.2s linear infinite}
+.tp-out .ivpart i{top:25.4%}
+.tp-beam{position:absolute;left:50%;transform-origin:50% 0;transform:translateX(-50%) scaleY(0);opacity:0;height:56%;width:auto;filter:drop-shadow(0 0 14px var(--c)) drop-shadow(0 0 40px var(--c))}
+.tp-in .tp-beam{top:0;height:83%}
+.tpov.boom .tp-in .tp-beam{animation:tpDrop2 .45s cubic-bezier(.3,0,.6,1) forwards,tpFade 1s .9s forwards}
+@keyframes tpDrop2{0%{opacity:1;transform:translateX(-50%) scaleY(.05)}100%{opacity:1;transform:translateX(-50%) scaleY(1)}}
+@keyframes tpFade{to{opacity:0}}
+.tp-in .tp-bg{filter:brightness(.6)}
+.tpov.boom .tp-in .tp-bg{animation:tpLight 1.3s ease-out .35s both}
+@keyframes tpLight{from{filter:brightness(.6)}to{filter:brightness(.95)}}
+.tpov.go .tp-in .tp-bg{filter:brightness(.4) blur(1.5px);animation:none;transition:filter .8s}
+.tpov.pulse .tp-in .tp-bg{animation:tpPulse .6s ease-out}
+@keyframes tpPulse{0%{filter:brightness(1.5)}100%{filter:brightness(.4) blur(1.5px)}}
+.tpov .ivsky{background:#02030a;animation:none}
+.tpov.shk .tp-out .tp-bg{translate:var(--amp) 0}
+
+/* templo v2: la luz entra por el tejado y enciende las ventanas; el rayo real cae dentro, sobre el agua */
+.tp-cone{position:absolute;left:50%;top:25.4%;width:30%;height:19%;transform:translateX(-50%);opacity:0;mix-blend-mode:screen;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);
+  background:linear-gradient(180deg,#fff,color-mix(in srgb,var(--c) 70%,transparent) 55%,transparent)}
+.tpov.charge .tp-cone{animation:tpCone calc(var(--ch) * .45) ease-in calc(var(--ch) * .55) forwards}
+@keyframes tpCone{from{opacity:0}to{opacity:.8}}
+.tp-wins i{position:absolute;left:var(--x);top:43.4%;width:2.9%;height:7.8%;transform:translate(-50%,-50%);opacity:0;border-radius:45% 45% 4% 4% / 60% 60% 4% 4%;
+  background:linear-gradient(180deg,#fff,var(--c));box-shadow:0 0 26px 10px var(--c),0 0 70px 24px color-mix(in srgb,var(--c) 60%,transparent)}
+.tp-wins i::after{content:'';position:absolute;left:50%;top:70%;width:700%;height:900%;transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--c) 60%,transparent),transparent 68%);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)}
+.tpov.charge .tp-wins i{animation:tpWin calc(var(--ch) * .3) ease-in calc(var(--ch) * .7) forwards}
+.tp-wins i:nth-child(1),.tp-wins i:nth-child(5){animation-delay:calc(var(--ch) * .78)!important}.tp-wins i:nth-child(2),.tp-wins i:nth-child(4){animation-delay:calc(var(--ch) * .74)!important}
+@keyframes tpWin{from{opacity:0}to{opacity:1}}
+/* resplandor SOLO sobre el agua de la fuente (elipse del agua ≈ x 31–69 %, y 78–90 %) */
+.tp-wglow{position:absolute;left:50%;top:84.2%;width:37%;aspect-ratio:6.1;transform:translate(-50%,-50%) scale(.3);opacity:0;border-radius:50%;mix-blend-mode:screen;
+  background:radial-gradient(ellipse,#fff 0,var(--c) 32%,color-mix(in srgb,var(--c) 40%,transparent) 62%,transparent 74%)}
+.tpov.boom .tp-wglow{animation:tpGlow 1.2s ease-out .3s forwards}
+@keyframes tpGlow{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:.8;transform:translate(-50%,-50%) scale(1)}}
+.tpov.go .tp-wglow{animation:tpGlowP 2.2s ease-in-out infinite alternate;opacity:.8;transform:translate(-50%,-50%) scale(1)}
+@keyframes tpGlowP{to{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+.tp-rip i{position:absolute;left:50%;top:84.2%;width:12%;aspect-ratio:6.1;border-radius:50%;border:3px solid #fff;box-shadow:0 0 16px var(--c),inset 0 0 14px var(--c);opacity:0;transform:translate(-50%,-50%) scale(.2)}
+.tpov.boom .tp-rip i{animation:tpRip 1.6s ease-out .35s infinite}.tp-rip i:nth-child(2){animation-delay:.9s!important}.tp-rip i:nth-child(3){animation-delay:1.45s!important}
+@keyframes tpRip{0%{opacity:.9;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(3)}}
+.tp-in .ivshock i{top:84.2%}
+.tp-in .tp-beam{height:84.2%}
+/* móvil: textos de las cartas ×10 dentro de la carta */
+.ivfc .fr{overflow:hidden}.ivfc .fr b{max-width:100%;overflow:hidden;line-height:1.25}
+html.phone .ivfc .fr{gap:2px;padding:4px 2px}
+html.phone .ivfc .fr img{height:50%}
+html.phone .ivfc .fr b{font-size:5.5px;overflow-wrap:anywhere}
+html.phone .ivfc .fr i{font-size:6px}html.phone .ivfc .fr em{font-size:5px}
