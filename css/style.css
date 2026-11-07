@@ -4064,3 +4064,6 @@ html.phone .scan::after,html.phone .scan::before{display:none}                  
 html.phone #guiaM{font-size:14px}
 html.phone #guiaM .box{max-height:96%}
 html.phone #guiaM .gnav button{min-height:2.8em}
+
+/* ===== MANDO v20261389: marco del botón elegido con el mando en los menús ===== */
+.gp-f{outline:3px solid #ffd54a!important;outline-offset:3px!important;box-shadow:0 0 14px rgba(255,213,74,.7)!important;z-index:2;position:relative}

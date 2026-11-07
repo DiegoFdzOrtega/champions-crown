@@ -31,6 +31,13 @@ const GUIA_SECCIONES = [
       <li><b>Botones</b> a la derecha: tocas un ataque y se lanza solo hacia el rival. Si <b>mantienes y arrastras</b>, apuntas tú.</li>
       <li>Toca los <b>cuadritos del equipo</b> de arriba para cambiar de Pokémon.</li>
     </ul>
+    <p class="gh">Con mando 🎮</p>
+    <ul>
+      <li>Conéctalo y pulsa cualquier botón. <b>Stick izquierdo</b>: moverte · <b>Stick derecho</b>: apuntar (si no lo tocas, apunta solo al rival).</li>
+      <li><b>A</b> o <b>RT</b>: golpe · <b>X</b>: disparo · <b>B</b> o <b>LT</b>: carrera · <b>Y</b>: ataque fuerte · <b>LB</b>: mejora · <b>RB</b>: megaevolución.</li>
+      <li><b>Cruceta ← ↓ →</b>: cambiar al Pokémon 1 · 2 · 3 · <b>Start</b>: pausa.</li>
+      <li>En los menús: <b>cruceta</b> para moverte, <b>A</b> para pulsar y <b>B</b> para volver.</li>
+    </ul>
     <p class="gn">Los <b>tipos</b> importan: un ataque de Agua hace más daño a un Pokémon de Fuego. En <b>Equipo</b> ves las debilidades y resistencias de tu equipo.</p>`],
   ['modos', '3 · Modos de juego', `
     <ul>
