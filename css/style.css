@@ -3887,8 +3887,8 @@ html.phone .m2-hero img.tw-art{height:96px;max-width:90px}
 .sa-vend img{height:clamp(11rem,36vh,27rem);width:auto;max-width:100%;object-fit:contain;filter:drop-shadow(0 .5rem .3rem rgba(0,0,0,.55))}
 .sa-vend img.hop{animation:saHop .45s ease-out}
 @keyframes saHop{0%{transform:translateY(0)}35%{transform:translateY(-1.2rem)}70%{transform:translateY(.2rem)}100%{transform:translateY(0)}}
-html.phone .sa-vend{display:none}
-@media(max-width:1100px){.sa-vend{display:none}}
+
+@media(max-width:1100px) and (pointer:fine){.sa-vend{display:none}}
 
 /* ===== v20261369: el vendedor pasa a la columna derecha, debajo del panel de compra ===== */
 .sa-right{position:sticky;top:1rem;display:flex;flex-direction:column;gap:.8rem;min-width:0;align-self:start}
@@ -4012,5 +4012,25 @@ html.phone .rf-go{padding:1.3rem 3.6rem;font-size:2rem;min-height:48px}
 html.phone .rcard{cursor:pointer}
 html.phone #btnBack2,html.phone .ui [id^=btnBack]{min-width:96px;min-height:46px;font-size:15px}
 /* Tienda */
-html.phone .sa-vend{display:none}
+
 html.phone #shop .sa-tab,html.phone #shop [class*=cat] button{min-height:44px}
+/* móvil: vendedor visible en la tienda → el panel de compra se compacta para que quepan los dos (v20261385) */
+html.phone .sa-right{position:static;display:flex;flex-direction:column;gap:.5rem;height:calc(100vh - 9.5rem);max-height:470px}
+html.phone .sa-right .sa-det{flex:1 1 auto;min-height:0;overflow:auto;padding:.7rem}
+html.phone .sa-det .sa-big{height:5.2rem;min-height:0}
+html.phone .sa-det .sa-big *{max-height:100%}
+html.phone .sa-det .sa-og{display:none}
+html.phone .sa-det h2{font-size:1rem;margin-bottom:.4rem}
+html.phone .sa-vend{flex:none;display:flex;gap:.4rem}
+html.phone .sa-vend .sa-say{min-height:0;font-size:.56rem;padding:.35rem .5rem}
+html.phone .sa-stage{height:10rem;padding-top:.8rem}
+html.phone .sa-stage img{height:13rem;margin-left:-2rem}
+html.phone .sa-counter{height:3.6rem}
+html.phone .sa-cn-front:after{top:.5rem;bottom:.5rem}
+html.phone .sa-reg{bottom:2.6rem}html.phone .sa-coins{bottom:2.9rem}
+html.phone .sa-det .sa-big{height:3.2rem}
+html.phone .sa-stage{height:7.6rem;padding-top:.4rem}
+html.phone .sa-stage img{height:10rem}
+html.phone .sa-counter{height:3rem}
+html.phone .sa-reg{bottom:2rem;width:3rem;height:2rem}html.phone .sa-coins{bottom:2.3rem}
+html.phone .sa-det .qty{margin-bottom:.3rem}
