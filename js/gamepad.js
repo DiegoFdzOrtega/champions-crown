@@ -19,6 +19,35 @@ const GP = {
   rep: {}, focus: null, seen: false
 };
 const GP_DEAD = .28;
+// ---- Botones del mando configurables (Ajustes › Controles › Mando). Guardado: save.padCtl = {accion: [botón1, botón2]} ----
+const GP_ACTIONS = [
+  {id:'melee',  n:'Golpe',          def:[0, 7]},
+  {id:'shot',   n:'Disparo',        def:[2, null]},
+  {id:'dash',   n:'Carrera',        def:[1, 6]},
+  {id:'strong', n:'Ataque fuerte',  def:[3, null]},
+  {id:'buff',   n:'Mejora',         def:[4, null]},
+  {id:'mega',   n:'Megaevolución',  def:[5, null]},
+  {id:'sw1',    n:'Pokémon 1',      def:[14, null]},
+  {id:'sw2',    n:'Pokémon 2',      def:[13, null]},
+  {id:'sw3',    n:'Pokémon 3',      def:[15, null]},
+  {id:'pause',  n:'Pausa',          def:[9, null]}
+];
+const GP_NAMES = ['A','B','X','Y','LB','RB','LT','RT','SELECT','START','L3','R3','CRUZ ↑','CRUZ ↓','CRUZ ←','CRUZ →'];
+const gpOkBtn = v => Number.isInteger(v) && v >= 0 && v <= 15;
+function gpBinds(id){
+  const a = GP_ACTIONS.find(x => x.id === id), c = save.padCtl && save.padCtl[id], b = Array.isArray(c) ? c : a.def;
+  return [gpOkBtn(b[0]) ? b[0] : null, gpOkBtn(b[1]) ? b[1] : null];
+}
+function gpSetBind(id, slot, btn){                       // si otra acción ya usaba ese botón, se intercambian
+  const cur = gpBinds(id).slice(), old = cur[slot];
+  if(btn !== null) for(const a of GP_ACTIONS){
+    const b = gpBinds(a.id).slice(); let ch = false;
+    b.forEach((c, k) => { if(c === btn && !(a.id === id && k === slot)){ b[k] = old; ch = true; } });
+    if(ch){ (save.padCtl = save.padCtl || {})[a.id] = b; if(a.id === id) cur.splice(0, 2, ...b); }
+  }
+  cur[slot] = btn; (save.padCtl = save.padCtl || {})[id] = cur; persist();
+}
+const gpHeldId = (id, b) => gpBinds(id).some(i => i !== null && b(i));
 const gpPad = () => { const l = navigator.getGamepads ? navigator.getGamepads() : []; for(const p of l) if(p && p.connected) return p; return null; };
 const gpBtn = (p, i) => !!(p.buttons[i] && (p.buttons[i].pressed || p.buttons[i].value > .5));
 const gpInCombat = () => !!g && !g.over && !g.paused && !(typeof pvp !== 'undefined' && pvp && pvp.menu);
@@ -80,21 +109,27 @@ function gpTick(){
   requestAnimationFrame(gpTick);
   const p = gpPad(); if(!p){ if(GP.on) GP.on = false; GP.held = {}; return; }
   const now = performance.now(), b = i => gpBtn(p, i), pr = i => b(i) && !GP.prev[i];
+  if(GP.cap){                                            // esperando un botón para asignarlo (Ajustes › Controles)
+    for(let i = 0; i < 16; i++) if(pr(i)){ const f = GP.cap; GP.cap = null; f(i); }
+    GP.prev = p.buttons.map((x, i) => b(i)); return;
+  }
   const inC = gpInCombat(), [ax, ay] = gpAxis(p, !inC), rx = p.axes[2] || 0, ry = p.axes[3] || 0;
   const act = p.buttons.some((x, i) => b(i) && !GP.prev[i]) || Math.hypot(ax, ay) > .5 || Math.hypot(rx, ry) > .5;
-  if(act && !GP.on){ GP.on = true; if(!GP.seen){ GP.seen = true; if(typeof toast === 'function') toast('Mando activado 🎮'); } }
+  let justOn = false;
+  if(act && !GP.on){ GP.on = true; justOn = true; if(!GP.seen){ GP.seen = true; if(typeof toast === 'function') toast('Mando activado 🎮'); } }
   if(!GP.on){ GP.prev = p.buttons.map((x, i) => b(i)); return; }
+  if(justOn){ GP.prev = p.buttons.map((x, i) => b(i)); if(!inC) gpMove(0, 0); return; }      // el primer botón solo «despierta» el mando (y enseña el marco), no pulsa nada
 
   if(inC){
     if(GP.focus){ GP.focus.classList.remove('gp-f'); GP.focus = null; }
     GP.held = {
       left: ax < -.38, right: ax > .38, up: ay < -.38, down: ay > .38,
-      melee: b(0) || b(7), shot: b(2), dash: b(1) || b(6), strong: b(3), buff: b(4)
+      melee: gpHeldId('melee', b), shot: gpHeldId('shot', b), dash: gpHeldId('dash', b), strong: gpHeldId('strong', b), buff: gpHeldId('buff', b)
     };
     GP.aim = Math.hypot(rx, ry) > .4 ? Math.atan2(ry, rx) : null;
-    if(pr(5)) megaPlayer();
-    if(pr(14)) switchMon(0); if(pr(13)) switchMon(1); if(pr(15)) switchMon(2);
-    if(pr(9)) pauseBattle(true);
+    if(gpHeldId('mega', pr)) megaPlayer();
+    if(gpHeldId('sw1', pr)) switchMon(0); if(gpHeldId('sw2', pr)) switchMon(1); if(gpHeldId('sw3', pr)) switchMon(2);
+    if(gpHeldId('pause', pr)) pauseBattle(true);
   }else{
     GP.held = {}; GP.aim = null;
     const dx = ax > .5 ? 1 : ax < -.5 ? -1 : 0, dy = ay > .5 ? 1 : ay < -.5 ? -1 : 0, d = Math.abs(dx) > 0 ? [dx, 0] : [0, dy];
@@ -129,3 +164,34 @@ addEventListener('mousemove', e => { if(Math.abs(e.movementX || 0) + Math.abs(e.
 addEventListener('mousedown', gpOff, true);
 addEventListener('keydown', e => { if(!e.isTrusted) return; gpOff(); }, true);
 addEventListener('gamepadconnected', () => { if(typeof toast === 'function') toast('Mando conectado: pulsa un botón 🎮'); });
+
+// ---- Ajustes › Controles: filas del mando dentro de la misma tabla ----
+{
+  const h0 = ctlSettingsHtml;
+  ctlSettingsHtml = () => h0().replace(/<\/div>(\s*)<div class="cbtns">/, '<span class="ctlHd" style="grid-column:1/-1;margin-top:.5rem"><b>🎮 Mando</b> · pulsa un botón de la lista y después el botón del mando que quieras (el stick izquierdo mueve, el derecho apunta; en menús: cruceta, A y B)</span>' +
+    GP_ACTIONS.map(a => `<span class="ctlN">${a.n}</span>` + [0, 1].map(s => `<button class="ctlB ctlP" data-p="${a.id}" data-s="${s}"></button>`).join('')).join('') + '</div>$1<div class="cbtns">');
+  const p0 = ctlPaint;
+  ctlPaint = () => { p0(); document.querySelectorAll('#ctlGrid .ctlP').forEach(b => { const c = gpBinds(b.dataset.p)[+b.dataset.s]; b.textContent = c === null ? '—' : GP_NAMES[c]; b.classList.toggle('empty', c === null); b.classList.remove('cap'); }); };
+  const r0 = ctlReset;
+  ctlReset = () => { r0(); save.padCtl = {}; persist(); };
+  const b0 = ctlSettingsBind;
+  ctlSettingsBind = () => {
+    b0(); const grid = document.getElementById('ctlGrid'); if(!grid) return;
+    grid.addEventListener('click', e => {
+      const b = e.target.closest('.ctlP'); if(!b) return;
+      if(ctlCapOff) ctlCapOff();
+      const id = b.dataset.p, slot = +b.dataset.s;
+      b.classList.add('cap'); b.textContent = 'Pulsa...';
+      const off = () => { GP.cap = null; removeEventListener('keydown', onKey, true); ctlCapOff = null; ctlPaint(); };
+      const onKey = ev => {
+        if(ev.code !== 'Escape' && ev.code !== 'Backspace' && ev.code !== 'Delete') return;
+        ev.preventDefault(); ev.stopImmediatePropagation();
+        if(ev.code === 'Escape') return off();
+        off(); gpSetBind(id, slot, null); ctlPaint();
+      };
+      GP.cap = i => { off(); gpSetBind(id, slot, i); ctlPaint(); };
+      ctlCapOff = off; addEventListener('keydown', onKey, true);
+      if(!gpPad() && typeof toast === 'function') toast('No detecto el mando: conéctalo y pulsa un botón.');
+    });
+  };
+}

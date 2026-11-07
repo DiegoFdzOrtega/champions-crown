@@ -78,13 +78,13 @@ function ctlSettingsHtml(){
 }
 let ctlCapOff = null;                                        // función que cancela la captura en curso
 function ctlPaint(){
-  document.querySelectorAll('#ctlGrid .ctlB').forEach(b => { const c = ctlBinds(b.dataset.a)[+b.dataset.s]; b.textContent = ctlLabel(c); b.classList.toggle('empty', !c); b.classList.remove('cap'); });
+  document.querySelectorAll('#ctlGrid .ctlB:not(.ctlP)').forEach(b => { const c = ctlBinds(b.dataset.a)[+b.dataset.s]; b.textContent = ctlLabel(c); b.classList.toggle('empty', !c); b.classList.remove('cap'); });
 }
 function ctlSettingsBind(){
   const grid = document.getElementById('ctlGrid'); if(!grid) return;
   ctlPaint();
   grid.onclick = e => {
-    const b = e.target.closest('.ctlB'); if(!b) return;
+    const b = e.target.closest('.ctlB'); if(!b || b.classList.contains('ctlP')) return;      // (los botones del mando .ctlP van en js/gamepad.js)
     if(ctlCapOff) ctlCapOff();
     const id = b.dataset.a, slot = +b.dataset.s;
     b.classList.add('cap'); b.textContent = 'Pulsa...';
