@@ -159,7 +159,8 @@ function draw(){
   if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
   ctx.setTransform(VIEW.sx, 0, 0, VIEW.sy, VIEW.ox, VIEW.oy);
   ctx.clearRect(0,0,W,H);
-  if(!g){ menuBg(performance.now()/1000); return; }
+  if(!g){ if(['dexv','teamv','torrev'].some(v => !$(v).classList.contains('hide'))) return;   // pantallas que tapan todo el lienzo: no gastar batería en dibujar el fondo del menú
+    menuBg(performance.now()/1000); return; }
   const WW = W;                                    // ancho del mundo (en el Campo de pruebas es mayor que la pantalla)
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
   if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo

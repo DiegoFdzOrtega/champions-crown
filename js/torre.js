@@ -465,11 +465,12 @@ function twRenderTower(){
 const TW_FLYERS = [18, 142, 334, 398, 628, 277, 149, 6, 823, 663, 130, 249, 250, 144, 145, 146];   // Pidgeot, Aerodactyl, Altaria, Staraptor, Braviary, Swellow, Dragonite, Charizard, Corviknight, Talonflame, Gyarados, Lugia, Ho-Oh, Articuno, Zapdos, Moltres
 const TW_FLY_SLOTS = [{dur:30, gap:10, off:3, y:.2, dir:1}, {dur:36, gap:22, off:30, y:.34, dir:-1}, {dur:28, gap:30, off:45, y:.12, dir:1}];   // dur = segundos cruzando · gap = pausa entre uno y otro
 const TW_TOWER_X = [.404, .602];                                                          // franja de la imagen que ocupa la torre (fracciones del ancho)
-let twFxRaf = 0, twStars = null;
+let twFxRaf = 0, twStars = null, twFxLast = 0;
 function twFxLoop(){
   const cv = $('twFx'), root = $('twRoot'), scr = $('torrev');
   if(!cv || !root || !scr || scr.classList.contains('hide')){ twFxRaf = 0; return; }
   twFxRaf = requestAnimationFrame(twFxLoop);
+  if(LOWFX){ const nw = performance.now(); if(nw - twFxLast < 32) return; twFxLast = nw; }   // móvil: el cielo va a 30 fps (la mitad de trabajo)
   const W = root.offsetWidth, H = root.offsetHeight; if(!W || !H) return;
   if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
   const c = cv.getContext('2d'), B = TW_BG, s = Math.max(W / B.w, H / B.h), ox = (W - B.w * s) / 2, oy = H - B.h * s, t = performance.now() / 1000, night = root.classList.contains('night');

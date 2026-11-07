@@ -4034,3 +4034,33 @@ html.phone .sa-stage img{height:10rem}
 html.phone .sa-counter{height:3rem}
 html.phone .sa-reg{bottom:2rem;width:3rem;height:2rem}html.phone .sa-coins{bottom:2.3rem}
 html.phone .sa-det .qty{margin-bottom:.3rem}
+
+/* ===== MÓVIL: rendimiento y manejo táctil (v20261387) ===== */
+html.phone,html.phone body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html.phone .ui,html.phone .ui *{touch-action:manipulation}                         /* sin retraso de 300 ms ni zoom con doble toque */
+html.phone .ui button,html.phone .ui .tw-btn,html.phone .ui .rcard,html.phone .ui [onclick]{-webkit-user-select:none;user-select:none}
+html.phone *,html.phone *::before,html.phone *::after{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}   /* el desenfoque de fondo es lo que más pesa en móviles */
+html.phone .rk-glass,html.phone .tslot,html.phone .tc-b,html.phone .tc-c,html.phone .tc-rank,html.phone .tmhd #tmTotal,html.phone #teamv .tmtab,html.phone #teamv.lista .tmx,html.phone .rk-panel,html.phone .v-gd{filter:none!important}
+html.phone .scan::after,html.phone .scan::before{display:none}                     /* líneas de "pantalla antigua" (capa extra a pantalla completa) */
+@media (prefers-reduced-motion:reduce){html.phone *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* ===== GUÍA DEL JUGADOR (v20261388): js/guia.js ===== */
+#guiaM{position:fixed;inset:0;z-index:400;font-size:15px;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}
+#guiaM .box{width:min(52em,94%);max-height:92%;scroll-behavior:smooth}
+#guiaM h2{font:900 1.7em "Arial Black","Segoe UI Black",sans-serif}
+#guiaM .gl{text-align:center;margin:0 0 .8em;color:#c7d1ee;font-weight:600}
+#guiaM .gnav{display:flex;flex-wrap:wrap;gap:.4em;justify-content:center;margin:0 0 .6em}
+#guiaM .gnav button{margin:0;padding:.4em .8em;font:700 .85em "Segoe UI",system-ui,sans-serif;background:#0a1028;color:#cfe0ff;border:1px solid #3a4a7c;border-radius:2em;cursor:pointer;min-height:2.4em}
+#guiaM .gnav button:hover{border-color:#ffd45a;color:#fff}
+#guiaM section{padding-top:.2em}
+#guiaM h3{font-size:1.2em;border-top:1px solid #ffffff22;padding-top:.8em}
+#guiaM p{margin:.4em 0;line-height:1.5;color:#dfe6fb;font-weight:500}
+#guiaM p b,#guiaM li b{color:#fff}
+#guiaM .gh{margin:.9em 0 .2em;color:#8fd0ff;font-weight:800;text-transform:uppercase;font-size:.85em;letter-spacing:.06em}
+#guiaM ol{margin:.2em 0;padding-left:1.4em;display:flex;flex-direction:column;gap:.4em;color:#dfe6fb;line-height:1.45;font-weight:500}
+#guiaM ul{font-weight:500}
+#guiaM .gn{margin:.8em 0 .2em;padding:.6em .8em;background:#ffd45a14;border-left:3px solid #ffd45a;border-radius:.3em;color:#f1e7c4}
+#guiaM .gok{display:block;margin:1.2em auto 0;padding:.7em 2.4em;font:900 1em "Segoe UI",system-ui,sans-serif;background:linear-gradient(#ffd54a,#f0a31c);color:#2a1a00;border:0;border-radius:.7em;cursor:pointer;min-height:2.8em}
+html.phone #guiaM{font-size:14px}
+html.phone #guiaM .box{max-height:96%}
+html.phone #guiaM .gnav button{min-height:2.8em}

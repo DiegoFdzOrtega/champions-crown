@@ -14,6 +14,7 @@ const MM_ICO = {
   friends: '<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c3 0 5 2 5 5"/>',
   bag: '<rect x="4" y="7" width="16" height="13" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M4 12h16"/>',
   account: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17c.5-2 2-3 3.5-3s3 1 3.5 3M15 10h3M15 14h3"/>',
+  guide: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17v.1"/>',
   set: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
 };
 const mmSvg = k => `<svg viewBox="0 0 24 24">${MM_ICO[k]}</svg>`;
@@ -74,7 +75,7 @@ function mmRender(){
   const ach = typeof achReadyCount === 'function' ? achReadyCount() : 0;
   const fr = typeof cloud !== 'undefined' && cloud.fr && cloud.fr.incoming ? cloud.fr.incoming.length : 0;
   const logged = typeof cloud !== 'undefined' && !!cloud.user;
-  const icons = [['profile', 'Perfil', 0], ['ach', 'Logros', ach], ['friends', 'Amigos', fr], ['bag', 'Mochila', 0], ['account', 'Cuenta', 0], ['set', 'Ajustes', 0]]
+  const icons = [['profile', 'Perfil', 0], ['ach', 'Logros', ach], ['friends', 'Amigos', fr], ['bag', 'Mochila', 0], ['account', 'Cuenta', 0], ['guide', 'Guía', save.guideSeen ? 0 : '!'], ['set', 'Ajustes', 0]]
     .map(([k, n, b]) => `<button data-mm="go" data-k="${k}" title="${n}" aria-label="${n}">${mmSvg(k)}${b ? `<i>${b}</i>` : ''}<em>${n}</em></button>`).join('');
   const dex = boxCount(), lockT = !towerOpen(), need = towerNeed();
   const nx = mmNext();
@@ -131,7 +132,7 @@ if(MM_NEW){
   document.addEventListener('click', e => {
     const b = e.target.closest('#mm2 [data-mm]'); if(!b) return;
     const a = b.dataset.mm;
-    if(a === 'go') enter(b.dataset.k);
+    if(a === 'go'){ if(b.dataset.k === 'guide') openGuia(); else enter(b.dataset.k); }
     else if(a === 'fight' || a === 'liga'){
       save.region = b.dataset.r; if(typeof liga !== 'undefined') liga.sel = null;
       if(a === 'fight' && team.length === 3) floorFight(+b.dataset.gi); else goStory();

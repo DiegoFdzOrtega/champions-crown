@@ -247,3 +247,12 @@ function touchDraw(){
   css.textContent = 'html.phone [draggable="true"],body.touch [draggable="true"]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}';
   document.head.appendChild(css);
 })();
+
+/* ---- móvil: que la pantalla no se apague a mitad de un combate (Wake Lock, si el navegador lo permite) ---- */
+(function(){
+  if(!('wakeLock' in navigator)) return;
+  let lock = null;
+  const get = async () => { try{ if(!lock && document.visibilityState === 'visible'){ lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); } }catch(e){ lock = null; } };
+  addEventListener('touchstart', () => { if(document.documentElement.classList.contains('phone')) get(); }, {passive: true});
+  document.addEventListener('visibilitychange', () => { if(document.documentElement.classList.contains('phone')) get(); });
+})();
