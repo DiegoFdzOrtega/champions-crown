@@ -47,7 +47,12 @@ function invFeatured(th){                                                 // los
 }
 // Banner MASTERS: las versiones Masters SOLO salen aquí. Cada día hay 3 disponibles (van rotando por todas: INV_MA_ROT) y salen al sacar un Legendario.
 const INV_MA_ROT = (() => { const L = INV_LIST.filter(x => invHas(x, 'ma')), R = invSeeded(20261105); return L.map(x => [x, R()]).sort((a, b) => a[1] - b[1]).map(p => p[0]); })();
-const invMaWeek = () => { const n = INV_MA_ROT.length, w = ((invDay() % Math.ceil(n / 3)) + Math.ceil(n / 3)) % Math.ceil(n / 3); return [0, 1, 2].map(i => INV_MA_ROT[(w * 3 + i) % n]); };
+// Mujeres del banner Masters (por el nombre base del archivo: «cynthia-masters3» -> «cynthia»). El resto cuenta como hombre.
+const INV_MA_FEM = new Set('acerola bea beauty bianca caitlin candice carmine clair cynthia dawn diantha elesa erika gardenia gloria hilda iono irida iris jasmine juliana korrina kris lacey lana leaf lillie lisia liza lusamine lyra mallow marley marnie may mina misty nemona nessa phoebe poppy punkgirl rika rosa roxanne roxie sabrina selene serena shauna shauntal skyla sonia tina tricia trinnia trista viola whitney zinnia'.split(' '));
+const INV_MA_W = INV_MA_ROT.filter(x => INV_MA_FEM.has(x.f.split('-')[0])), INV_MA_M = INV_MA_ROT.filter(x => !INV_MA_FEM.has(x.f.split('-')[0]));
+// Cada día: 2 hombres y 1 mujer (siempre hay de los dos). Cada lista rota por separado, así que todos acaban saliendo.
+const invMaWeek = () => { const d = invDay(), m = INV_MA_M.length, w = INV_MA_W.length, pm = ((d * 2) % m + m) % m, pw = ((d % w) + w) % w;
+  return [INV_MA_M[pm], INV_MA_W[pw], INV_MA_M[(pm + 1) % m]]; };
 const INV_BANNERS = () => { const th = invTheme(); return [
   {id:'thm', cur:'estrella_t', n:th.n, d:th.d, tag:th.tag, c1:th.c1, c2:th.c2, feat:invFeatured(th)},
   {id:'ma', cur:'estrella_t', n:'Pokémon Masters', d:'Las versiones Masters solo salen en este banner, y cada día hay 3 distintas.', tag:null, ma:true, c1:'#7af0ff', c2:'#08304a', feat:invMaWeek()},

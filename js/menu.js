@@ -114,7 +114,7 @@ function toastNext(){
 }
 // Abre el panel genérico con un título y un contenido
 function panel(html){
-  dexThumbs.length = 0; $('panelBody').classList.remove('wide'); $('panelBody').innerHTML = BACK + html; $('btnBack3').onclick = goMain; show('panel'); refreshAvatars();
+  dexThumbs.length = 0; $('panelBody').classList.remove('wide', 'shopv'); $('panelBody').innerHTML = BACK + html; $('btnBack3').onclick = goMain; show('panel'); refreshAvatars();
 }
 function card(m, extra){                           // tarjeta de Pokémon con miniatura
   const d = document.createElement('div'); d.className = 'card';
@@ -132,29 +132,72 @@ function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
   storyToggle($('rMode'), buildRegions);                                                            // botón Fácil / Difícil, cada una con su avance (js/dificultad.js)
   $('rTower').textContent = !towerOpen() ? 'Torre Batalla: se abre al ser Campeón de Kanto.' : 'Torre Batalla: ¡abierta! Pulsa «Torre Batalla» en el menú principal.';
+  // Medallas de una región: la medalla real de cada líder (lideres/<Región>/Medallas/), los retratos del Alto Mando y del Campeón.
+  // Lo que aún no has vencido sale apagado (silueta); lo siguiente por superar parpadea. Si falta una imagen, sale un círculo del color del tipo.
+  const medals = (n, nL, rec, cur) => {
+    const fl = floorsOf(n), dir = encodeURIComponent((typeof REGION_DIR !== 'undefined' && REGION_DIR[n]) || n), R0 = save.region;
+    const nextIdx = cur ? rec : -1;
+    const stc = f => (f.idx < rec ? ' on' : f.idx === nextIdx ? ' nx' : '');
+    let lead = '', elite = '', champ = '';
+    fl.forEach(f => {
+      if(f.kind === 'lider'){
+        const md = (typeof LIGA_INFO !== 'undefined' && (LIGA_INFO[f.id] || {}).medal) || '';
+        lead += md ? `<img class="mimg${stc(f)}" data-src="lideres/${dir}/Medallas/Medalla_${encodeURIComponent(md)}.webp" data-c="${tagColor(f)}" alt="" title="${esc(f.leader)}">`
+                   : `<span class="mimg mc${stc(f)}" style="--c:${tagColor(f)}"></span>`;
+      } else {
+        save.region = n; const paths = leaderPaths(f.id); save.region = R0;                 // leaderPaths usa la región activa: se cambia un instante
+        const im = `<img class="mpor${stc(f)}${f.kind === 'campeon' ? ' ch' : ''}" data-p='${JSON.stringify(paths)}' alt="" title="${esc(f.leader)}">`;
+        if(f.kind === 'alto') elite += im; else champ += im;
+      }
+    });
+    return `<div class="mrow">${lead}</div><div class="mrow mr2"><div class="mel">${elite}</div>${champ ? `<div class="mch"><b>♛</b>${champ}</div>` : ''}</div>`;
+  };
+  const hydrate = root => {
+    root.querySelectorAll('img.mimg').forEach(im => { im.onerror = () => { im.onerror = null; const s = document.createElement('span'); s.className = im.className.replace('mimg', 'mimg mc'); s.style.setProperty('--c', im.dataset.c); im.replaceWith(s); }; im.src = im.dataset.src; });
+    root.querySelectorAll('img.mpor').forEach(im => { const L = JSON.parse(im.dataset.p); let k = 0; im.onerror = () => { if(++k < L.length) im.src = L[k]; else im.style.visibility = 'hidden'; }; im.src = L[0]; });
+  };
+  const items = [];
   REGIONS.forEach((n,i)=>{
-    const playable = floorsOf(n).length > 0, prev = REGIONS[i-1];                 // jugable = ya tiene combates en FLOORS (Kanto y Johto)
+    const total = floorsOf(n).length, playable = total > 0, prev = REGIONS[i-1];       // jugable = ya tiene combates en FLOORS
     const open = playable && (i === 0 || champOf(prev) || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
     const nL = floorsOf(n).filter(F => F.kind === 'lider').length || 8;                              // nº de líderes de la región (8 en casi todas; Teselia tiene 10)
-    const rec = PREVIEW[n] ? 99 : progOf(n), done = open ? Math.min(nL, rec) : 0, elite = open && rec >= nL;
-    const d = document.createElement('div'); d.className = 'rcard' + (open ? ' open' : ' lock');
+    const rec = PREVIEW[n] ? 99 : progOf(n), done = open ? Math.min(nL, rec) : 0, elite = open ? Math.max(0, Math.min(4, rec - nL)) : 0;
+    const champ = open && champOf(n), st = champ ? 'done' : open ? 'now' : 'lock';
+    const pct = open && total ? Math.round(Math.min(rec, total) / total * 100) : 0;
+    items.push({n, i, total, playable, prev, open, nL, rec, done, elite, champ, st, pct});
+    const d = document.createElement('div'); d.className = 'rcard ' + st + (open ? ' open' : ' lock');
     d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
-    let pips = ''; for(let k=0;k<nL;k++) pips += `<i class="${k < done ? 'on' : ''}"></i>`;
-    d.innerHTML = `<small>${i+1}</small><h3>${n}</h3><div class="pips${nL > 8 ? ' many' : ''}">${pips}</div>` +
-      `<div class="elite${elite ? ' ready' : ''}">ALTO MANDO · ${elite ? 'LISTO' : 'BLOQUEADO'}</div>` +
-      (open ? `<p>${done}/${nL} líderes${rec > nL ? ' · Liga ' + Math.min(5, rec - nL) + '/5' : ''}${champOf(n) ? ' · 🏆 Campeón' : ''}</p>` : `<p class="lk">${playable ? 'Vence la Liga de ' + prev : 'Próximamente'}</p>`);
+    const badge = champ ? '★ COMPLETADA' : open ? 'EN CURSO' : playable ? 'BLOQUEADA' : 'PRÓXIMAMENTE';
+    d.title = open ? `${done}/${nL} líderes · Liga ${Math.max(0, Math.min(5, rec - nL))}/5${champ ? ' · Campeón' : ''}` : (playable ? 'Vence la Liga de ' + prev : 'Próximamente');
+    d.innerHTML = `<small>${i+1}</small><span class="rbadge ${st}">${badge}</span>` +
+      (open ? '' : '<span class="rlock">🔒</span>') +
+      `<div class="rinfo"><h3>${n}</h3><div class="rbar"><i style="width:${pct}%"></i></div></div>`;
+    hydrate(d);
     if(open){
       d.tabIndex = 0;
       const go = ()=>{ save.region = n; persist(); goStory(); };          // la región elegida es la del Gachapon
-      d.onclick = e => {
-        if(e.target.closest('.elite') && elite){ toast('Alto Mando de ' + n + ': ¡adelante!'); go(); }
-        else if(e.target.closest('.elite')) toast('Vence a los ' + nL + ' líderes para desafiar al Alto Mando.');
-        else go();
-      };
+      d.onclick = go;
       d.onkeydown = e => { if(e.code === 'Enter') go(); };
     }
     grid.appendChild(d);
   });
+  // ---- resumen de arriba: regiones superadas y combates ----
+  const won = items.filter(x => x.champ).length, played = items.filter(x => x.open), totalAll = items.reduce((a, x) => a + x.total, 0);
+  const recAll = items.reduce((a, x) => a + (x.open ? Math.min(x.rec, x.total) : 0), 0), pAll = totalAll ? Math.round(recAll / totalAll * 100) : 0;
+  $('rSum').innerHTML = `<div class="rs-big"><b>${won}</b> / ${REGIONS.length} regiones</div><div class="rs-bar"><i style="width:${pAll}%"></i></div><span>${recAll} de ${totalAll} combates</span>`;
+  // ---- tarjeta destacada: «Continúa aquí» (la primera región abierta sin completar; si están todas, la última) ----
+  const cur = played.find(x => !x.champ) || played[played.length - 1], F = $('rFeat'); F.innerHTML = '';
+  if(cur){
+    const all = !!cur.champ, fls = floorsOf(cur.n), nextF = all ? null : fls.find(f => f.idx >= cur.rec);
+    const nx = all ? 'Has superado todas las Ligas disponibles. ¡Puedes repasarlas cuando quieras!' : nextF ? `Siguiente: <b>${esc(nextF.leader)}</b>${nextF.kind === 'lider' ? ' · Líder ' + esc(nextF.tag) : nextF.kind === 'alto' ? ' · Alto Mando' : ' · Campeón'}${nextF.place ? ' · ' + esc(nextF.place) : ''}` : '';
+    const d = document.createElement('div'); d.className = 'rfeat'; d.tabIndex = 0;
+    d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[cur.n] || cur.n}.webp")`);
+    d.innerHTML = `<div class="rf-in"><div><span class="rf-tag">${all ? 'TODO AL DÍA' : 'CONTINÚA AQUÍ'}</span><h2>${cur.n}</h2><p>${nx}</p></div>` +
+      `<div><div class="mdls${cur.nL > 8 ? ' many' : ''}">${medals(cur.n, cur.nL, cur.rec, !all)}</div><button class="rf-go" type="button">${all ? '↻ Repasar' : '▶ Continuar'}</button></div></div>`;
+    const go = ()=>{ save.region = cur.n; persist(); goStory(); };
+    d.onclick = go; d.onkeydown = e => { if(e.code === 'Enter') go(); };
+    hydrate(d); F.appendChild(d);
+  }
 }
 
 // ---- HISTORIA: líderes de la región ----
