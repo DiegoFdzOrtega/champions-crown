@@ -3997,3 +3997,20 @@ html.phone .sa-vend{display:none}
 .rcard h3{font-size:max(1.6rem,6.2cqw)}
 .rinfo{gap:2.2cqw;bottom:3.6cqw}
 .rcard::after{background:linear-gradient(180deg,rgba(5,10,28,.1) 0%,rgba(5,10,28,0) 45%,rgba(5,10,28,.88) 100%)}
+
+/* ===== MÓVIL v20261384: botones más grandes y pantallas nuevas adaptadas =====
+   En el móvil todo se dibuja a 560 px de alto y se reduce (≈0,7), así que lo "pequeño" se queda diminuto al dedo. */
+html.phone .ui button,html.phone .ui select,html.phone .ui .tw-btn,html.phone .ui .sm-b{min-height:44px}
+html.phone .ui button{padding-top:.5em;padding-bottom:.5em}
+html.phone .ui input:not([type=range]):not([type=checkbox]):not([type=radio]){min-height:42px}
+html.phone .tw-arr{width:54px;height:44px}
+html.phone .tw-btn{min-width:56px;padding:.6em 1.1em;font-size:13px}
+/* Historia */
+html.phone .rfeat .mdls{display:none}
+html.phone .rf-in{padding:1.6rem 2rem;gap:1rem}
+html.phone .rf-go{padding:1.3rem 3.6rem;font-size:2rem;min-height:48px}
+html.phone .rcard{cursor:pointer}
+html.phone #btnBack2,html.phone .ui [id^=btnBack]{min-width:96px;min-height:46px;font-size:15px}
+/* Tienda */
+html.phone .sa-vend{display:none}
+html.phone #shop .sa-tab,html.phone #shop [class*=cat] button{min-height:44px}
