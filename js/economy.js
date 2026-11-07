@@ -10,17 +10,20 @@ const free = id => held(id) - used(id);                                        /
 function buyMany(id, n){                                           // compra n unidades de golpe (tope: lo que puedes pagar). Devuelve cuántas compró
   const it = SHOP.find(s => s.id === id); n = Math.floor(+n);
   if(!it || !(n >= 1)) return 0;
-  let k = Math.min(n, Math.floor(save.bp / it.p));
+  const pr = shopPrice(it), cur = it.cat === 'canje' ? it.cur : 'bp';                // precio (con oferta) y moneda: BP, o chapas en el Canje
+  const have = cur === 'bp' ? save.bp : held(cur);
+  let k = Math.min(n, Math.floor(have / pr));
   if(k < 1) return 0;
-  save.bp -= it.p * k;
-  if(id === 'ticket_n') save.tickets += k;
+  if(cur === 'bp') save.bp -= pr * k; else save.items[cur] = held(cur) - pr * k;
+  if(it.cat === 'canje'){ const g = it.give, q = (it.gn || 1) * k; if(g === 'tickets') save.tickets += q; else if(g === 'ticketsL') save.ticketsL += q; else if(g === 'bp') save.bp += q; else save.items[g] = held(g) + q; }
+  else if(id === 'ticket_n') save.tickets += k;
   else if(id === 'ticket_l') save.ticketsL += k;
   else save.items[id] = held(id) + k;
   persist(); return k;
 }
 function maxBuy(id){                                               // cuántas unidades puedes comprar ahora mismo (por dinero)
   const it = SHOP.find(s => s.id === id); if(!it) return 0;
-  return Math.floor(save.bp / it.p);
+  return Math.floor((it.cat === 'canje' ? held(it.cur) : save.bp) / shopPrice(it));
 }
 function buy(id){ return buyMany(id, 1) === 1; }
 

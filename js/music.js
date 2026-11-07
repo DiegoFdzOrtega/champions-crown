@@ -399,6 +399,18 @@ const Music = (() => {
     return T;
   })();
   Object.assign(SFX, invSfx);
+  // ---- SONIDOS DE LA TIENDA (js/shop.js): moneda, caja registradora, oferta, canje, error y un toque suave al elegir ----
+  const shopSfx = (() => {
+    const T = {}, bell = (f, at, d, v) => [{f, at, d, w:'sine', v}, {f:f * 2, at, d:d * .7, w:'sine', v:v * .35}, {f:f * 3.01, at, d:d * .4, w:'triangle', v:v * .12}];
+    const coin = (at, v) => [{f:1319, at, d:.07, w:'square', v:v * .35}, ...bell(1976, at + .05, .5, v), ...bell(2637, at + .05, .35, v * .5)];        // «tin» de moneda
+    T.shop_buy = [{n:1, ft:'bandpass', f:3000, q:2, at:0, d:.05, v:.2}, ...coin(0, .24), ...coin(.09, .2), ...bell(1047, .2, .6, .22), ...bell(1568, .28, .8, .24)];   // ¡cha-ching!
+    T.shop_deal = [...T.shop_buy, ...[0, 1, 2, 3, 4, 5].flatMap(i => bell(2093 * Math.pow(1.122, i), .38 + i * .06, .35, .12)), {n:1, ft:'highpass', f:6500, at:.38, d:.5, v:.09}];   // + destellos de oferta
+    T.shop_canje = [{f:140, to:60, x:1, at:0, d:.16, w:'sine', v:.5}, {n:1, ft:'bandpass', f:1800, q:1.5, at:0, d:.06, v:.25}, ...bell(784, .14, .6, .24), ...bell(1175, .22, .7, .24), ...bell(1568, .3, .9, .22)];   // sello + campanitas
+    T.shop_fail = [{f:196, at:0, d:.14, w:'square', v:.14}, {f:147, at:.12, d:.22, w:'square', v:.14}];
+    T.shop_pick = [{f:1175, at:0, d:.04, w:'sine', v:.1}, {f:1568, at:.03, d:.05, w:'sine', v:.08}];
+    return T;
+  })();
+  Object.assign(SFX, shopSfx);
   const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
   function sfx(name, k){                                                           // k (opcional, 0-1): lo bajito que suena (los ataques del rival de la Historia suenan más suaves)
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;

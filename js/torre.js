@@ -90,12 +90,90 @@ function torreSets(){
   [...Object.values(TEAMS), ...CAMPO.map(T => T.team)].forEach(t => (t || []).forEach(s => { if(s && s.dex && mon(s.dex) && !seen.has(s.dex)){ seen.add(s.dex); out.push(s); } }));
   return TORRE_SETS = out;
 }
+// Los Pokémon de CADA PERSONAJE en los juegos y el anime (número de Pokédex). El orden importa: los primeros son los más famosos y salen los primeros
+// (los pisos 1-14 usan los 3 primeros; después, 4). Si el personaje no está aquí, se le reparten Pokémon por tipos como antes (TORRE_FIRMA / TORRE_AFIN).
+// La clave es el nombre del archivo del personaje, sin variante (ash-alola → ash). Para añadir o cambiar uno basta con escribir su línea.
+const TORRE_CANON = {
+  ash:[25, 6, 658, 448],                      // Pikachu, Charizard, Greninja, Lucario
+  alain:[6, 376, 461],                        // Charizard, Metagross, Weavile
+  anabel:[65, 196, 244, 245],                 // Alakazam, Espeon, Entei, Suicune
+  archer:[229, 169, 198, 110],                // Houndoom, Crobat, Murkrow, Weezing
+  archie:[319, 262, 169, 89],                 // Sharpedo, Mightyena, Crobat, Muk
+  ariana:[24, 45, 198, 169],                  // Arbok, Vileplume, Murkrow, Crobat
+  arven:[942, 966],                           // Mabosstiff, Revavroom
+  barry:[398, 214, 143, 392],                 // Staraptor, Heracross, Snorlax, Infernape
+  bede:[858, 303, 282],                       // Hatterene, Mawile, Gardevoir
+  bianca:[518, 500, 549],                     // Musharna, Emboar, Lilligant
+  brandon:[377, 378, 379],                    // Regirock, Regice, Registeel
+  brendan:[254, 277, 330],                    // Sceptile, Swellow, Flygon
+  calem:[658, 663, 282],                      // Greninja, Talonflame, Gardevoir
+  cheren:[508, 521, 505],                     // Stoutland, Unfezant, Watchog
+  colress:[462, 601, 606, 376],               // Magnezone, Klinklang, Beheeyem, Metagross
+  courtney:[323, 262, 324],                   // Camerupt, Mightyena, Torkoal
+  cyrus:[430, 169, 461, 130],                 // Honchkrow, Crobat, Weavile, Gyarados
+  dawn:[395, 468, 428, 417],                  // Empoleon, Togekiss, Lopunny, Pachirisu
+  emmet:[530, 462],                           // Excadrill, Magnezone
+  ethan:[157, 468, 181],                      // Typhlosion, Togekiss, Ampharos
+  eusine:[245, 97, 94],                       // Suicune, Hypno, Gengar
+  faba:[97, 65, 779],                         // Hypno, Alakazam, Bruxish
+  ghetsis:[635, 625, 563],                    // Hydreigon, Bisharp, Cofagrigus
+  giacomo:[675, 435, 862],                    // Pangoro, Skuntank, Obstagoon
+  giovanni:[112, 34, 31, 53],                 // Rhydon, Nidoking, Nidoqueen, Persian
+  gladion:[773, 448, 169, 571],               // Silvally, Lucario, Crobat, Zoroark
+  gloria:[888, 812, 815],                     // Zacian, Rillaboom, Cinderace
+  greta:[257, 297, 308],                      // Blaziken, Hariyama, Medicham
+  green:[9, 18, 65, 59],                      // Blastoise, Pidgeot, Alakazam, Arcanine
+  guzma:[768, 284, 168],                      // Golisopod, Masquerain, Ariados
+  hau:[26, 715, 727],                         // Raichu, Noivern, Incineroar
+  hilbert:[500, 503, 497],                    // Emboar, Samurott, Serperior
+  hilda:[497, 503, 500],                      // Serperior, Samurott, Emboar
+  hop:[832, 823, 143, 888],                   // Dubwool, Corviknight, Snorlax, Zacian
+  hugh:[500, 581],                            // Emboar, Swanna
+  irida:[471, 134, 470, 196],                 // Glaceon, Vaporeon, Leafeon, Espeon
+  jupiter:[435, 432, 437],                    // Skuntank, Purugly, Bronzong
+  kieran:[62, 635, 1017],                     // Poliwrath, Hydreigon, Ogerpon
+  leaf:[3, 18, 65, 131],                      // Venusaur, Pidgeot, Alakazam, Lapras
+  lillie:[38, 35, 730],                       // Ninetales de Alola, Clefairy, Primarina
+  lucas:[389, 398, 405],                      // Torterra, Staraptor, Luxray
+  lucy:[336, 127, 350],                       // Seviper, Pinsir, Milotic
+  lusamine:[36, 350, 760, 429],               // Clefable, Milotic, Bewear, Mismagius
+  lyra:[184, 154, 468],                       // Azumarill, Meganium, Togekiss
+  lysandre:[668, 620, 430, 130],              // Pyroar, Mienshao, Honchkrow, Gyarados
+  marnie:[861, 877, 510, 454],                // Grimmsnarl, Morpeko, Liepard, Toxicroak
+  mars:[432, 42],                             // Purugly, Golbat
+  matt:[319, 262, 169],                       // Sharpedo, Mightyena, Crobat
+  maxie:[323, 262, 169, 110],                 // Camerupt, Mightyena, Crobat, Weezing
+  may:[257, 267, 301],                        // Blaziken, Beautifly, Delcatty
+  mustard:[892, 620],                         // Urshifu, Mienshao
+  n:[571, 643, 601, 567],                     // Zoroark, Reshiram, Klinklang, Archeops
+  nemona:[923, 745, 706],                     // Pawmot, Lycanroc, Goodra
+  oak:[59, 128, 103],                         // Arcanine, Tauros, Exeggutor
+  penny:[700, 196, 197, 134],                 // Sylveon, Espeon, Umbreon, Vaporeon
+  petrel:[110, 198, 89],                      // Weezing, Murkrow, Muk
+  plumeria:[758, 748, 169],                   // Salazzle, Toxapex, Crobat
+  proton:[169, 110, 89],                      // Crobat, Weezing, Muk
+  rose:[879, 589, 598, 462],                  // Copperajah, Escavalier, Ferrothorn, Magnezone
+  serena:[655, 700, 675, 702],                // Delphox, Sylveon, Pangoro, Dedenne
+  shauna:[711],                               // Gourgeist
+  shelly:[319, 340],                          // Sharpedo, Whiscash
+  silver:[160, 461, 94, 65],                  // Feraligatr, Weavile, Gengar, Alakazam
+  tabitha:[323, 262, 169],                    // Camerupt, Mightyena, Crobat
+  victor:[889, 812, 815],                     // Zamazenta, Rillaboom, Cinderace
+  volo:[442, 407, 468, 487],                  // Spiritomb, Roserade, Togekiss, Giratina
+  wally:[475, 334, 301, 315],                 // Gallade, Altaria, Delcatty, Roselia
+  xerosic:[169, 687],                         // Crobat, Malamar
+  yellow:[25],                                // Pikachu
+  zinnia:[373, 334, 445]                      // Salamence, Altaria, Garchomp
+};
 function torreEquipo(x, n, seed){                                                        // n Pokémon distintos, con los tipos que le pegan a ese personaje (seed: el mismo equipo aunque recargues)
   const base = x.f.split('-')[0], af = TORRE_FIRMA[base] || (TORRE_AFIN.find(([re]) => re.test(x.f)) || [null, null])[1] || (invHas(x, 'vi') ? ['siniestro', 'veneno'] : null), all = torreSets();
   const R = invSeeded(seed || 1), mix = l => l.map(s => [s, R()]).sort((a, b) => a[1] - b[1]).map(p => p[0]);
+  const own = (TORRE_CANON[base] || []).filter(d => { try{ return !!mon(d); }catch(e){ return false; } }).map(d => all.find(q => q.dex === d) || d).slice(0, n);   // sus Pokémon de verdad (con su preparación si ya la tenemos)
+  if(own.length >= n) return own;
   const fit = af ? mix(all.filter(s => mon(s.dex).types.some(t => af.includes(t)))) : [];
-  const out = fit.slice(0, Math.max(n - 1, Math.min(n, fit.length)));                  // casi todo de su tipo y alguno de otro, para que no sea tan previsible
-  for(const s of mix(all)){ if(out.length >= n) break; if(!out.includes(s)) out.push(s); }
+  const out = own.slice();
+  fit.forEach(q => { if(out.length < Math.max(n - 1, Math.min(n, fit.length)) && !out.some(o => (o.dex || o) === q.dex)) out.push(q); });                  // casi todo de su tipo y alguno de otro, para que no sea tan previsible
+  for(const s of mix(all)){ if(out.length >= n) break; if(!out.some(o => (o.dex || o) === s.dex)) out.push(s); }
   return out;
 }
 // ---- La subida: los 50 rivales, decididos al empezar ----
@@ -281,6 +359,7 @@ function openTorre(){
   const meds = TORRE_HITOS.map(h => { const got = !!tw.ms[h.f], pc = Math.round(Math.min(1, tw.best / h.f) * 100);
     return `<div class="v-med${got ? ' got' : ''}"><div class="hd"><b>Piso ${h.f}${h.f === TORRE_MAX ? ' · Cima' : ''}</b><em>${got ? '✓ Conseguido' : Math.min(tw.best, h.f) + ' / ' + h.f}</em></div>${tiles(h)}<i class="hp"><s style="width:${pc}%"></s></i></div>`; }).join('');
   el.innerHTML = `<div class="tw2 v2 ${twNight() ? 'night' : 'day'}" id="twRoot">
+    <canvas class="tw-fx" id="twFx"></canvas>
     <div class="tw-glass" id="twGlass"></div>
     <div class="tw-nav" id="twNav"></div>
     <header class="tw-top"><button class="tw-btn" data-tw="back">☰ Menú</button><button class="tw-btn v-gbtn" data-tw="guide">? Guía</button>
@@ -380,11 +459,53 @@ function twRenderTower(){
     <button class="tw-arr" data-tw="dn" ${pg <= 0 ? 'disabled' : ''} aria-label="Pisos de abajo">${TW_ICO.dn}</button>`;
 }
 // Coloca el fondo (cubre la pantalla; si sobra alto, se recorta el CIELO y no la entrada) y pone los pisos encima del cristal
+// ---- VIDA EN EL CIELO DE LA TORRE ----
+// Una capa (canvas #twFx) entre la ilustración y los paneles: nubes que pasan, estrellas que brillan (de noche) y Pokémon voladores que cruzan
+// el cielo POR DETRÁS de la torre (se recortan donde está la torre). Se dibuja en coordenadas de la imagen, igual que twFit, y para cuando sales de la pantalla.
+const TW_FLYERS = [18, 142, 334, 398, 628, 277, 149, 6, 823, 663, 130, 249, 250, 144, 145, 146];   // Pidgeot, Aerodactyl, Altaria, Staraptor, Braviary, Swellow, Dragonite, Charizard, Corviknight, Talonflame, Gyarados, Lugia, Ho-Oh, Articuno, Zapdos, Moltres
+const TW_FLY_SLOTS = [{dur:30, gap:10, off:3, y:.2, dir:1}, {dur:36, gap:22, off:30, y:.34, dir:-1}, {dur:28, gap:30, off:45, y:.12, dir:1}];   // dur = segundos cruzando · gap = pausa entre uno y otro
+const TW_TOWER_X = [.404, .602];                                                          // franja de la imagen que ocupa la torre (fracciones del ancho)
+let twFxRaf = 0, twStars = null;
+function twFxLoop(){
+  const cv = $('twFx'), root = $('twRoot'), scr = $('torrev');
+  if(!cv || !root || !scr || scr.classList.contains('hide')){ twFxRaf = 0; return; }
+  twFxRaf = requestAnimationFrame(twFxLoop);
+  const W = root.offsetWidth, H = root.offsetHeight; if(!W || !H) return;
+  if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+  const c = cv.getContext('2d'), B = TW_BG, s = Math.max(W / B.w, H / B.h), ox = (W - B.w * s) / 2, oy = H - B.h * s, t = performance.now() / 1000, night = root.classList.contains('night');
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H);
+  c.setTransform(s, 0, 0, s, ox, oy);
+  c.beginPath(); c.rect(0, 0, B.w, B.h); c.rect(B.w * TW_TOWER_X[0], 0, B.w * (TW_TOWER_X[1] - TW_TOWER_X[0]), 760); c.clip('evenodd');       // todo MENOS la torre
+  const SKY = 560;                                                                        // el cielo llega hasta aquí (después empiezan los edificios)
+  if(night){                                                                              // estrellas que brillan
+    if(!twStars){ let a = 12345; const r = () => (a = (a * 16807) % 2147483647) / 2147483647; twStars = Array.from({length:70}, () => [r() * B.w, r() * (SKY - 230) + 230, r() * 6.28, .6 + r() * 1.4]); }
+    c.fillStyle = '#fff';
+    twStars.forEach(([x, y, ph, sp]) => { if(Math.hypot(x - 1940, y - 250) < 200) return; c.globalAlpha = Math.max(0, Math.sin(t * sp + ph)) * .85; c.fillRect(x - 3, y - 3, 6, 6); });
+    const q = (t * .12) % 1;                                                              // estrella fugaz
+    if(q < .1){ const k = q / .1, fx = 2300 - k * 520 + Math.floor(t * .12) % 3 * 90, fy = 260 + k * 190; const g = c.createLinearGradient(fx, fy, fx + 160, fy - 70);
+      g.addColorStop(0, `rgba(255,255,255,${1 - k})`); g.addColorStop(1, 'rgba(255,255,255,0)'); c.globalAlpha = 1; c.strokeStyle = g; c.lineWidth = 6; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + 160, fy - 70); c.stroke(); }
+  }
+  c.globalAlpha = 1;
+  for(let i = 0; i < 7; i++){                                                             // nubes suaves que pasan
+    const w = 380 + (i * 97 % 260), sp = 26 + (i * 13 % 22), x = ((t * sp + i * (B.w + 900) / 7) % (B.w + 900)) - 450, y = 300 + (i * 131 % 300);
+    c.fillStyle = night ? 'rgba(170,150,255,.07)' : 'rgba(255,255,255,.55)';
+    for(let k = 0; k < 6; k++){ const r = w * (.10 + .05 * ((k * 5 + i) % 4)), cx = x + (k - 2.5) * w * .18, cy = y - ((k % 3) ? r * .45 : 0); c.beginPath(); c.ellipse(cx, cy, r * 1.25, r * .8, 0, 0, 7); c.fill(); }
+  }
+  const sc = 2.1 / s;                                                                     // los voladores pasan por detrás de la torre
+  TW_FLY_SLOTS.forEach((f, i) => {
+    const cyc = f.dur + f.gap, n = Math.floor((t + f.off) / cyc), q = ((t + f.off) % cyc) / f.dur; if(q > 1) return;
+    const dex = TW_FLYERS[(n * 5 + i * 7) % TW_FLYERS.length], x = f.dir > 0 ? -150 + q * (B.w + 300) : B.w + 150 - q * (B.w + 300), y = 250 + f.y * 900 + Math.sin(t * 1.5 + i * 2 + n) * 14;
+    if('filter' in c) c.filter = night ? 'brightness(.22) saturate(.6)' : 'brightness(.42) saturate(.5)';
+    c.globalAlpha = night ? .9 : .75; drawFrame(c, dex, 'Walk', t, f.dir > 0 ? 2 : 6, x, y, sc, 0, false);
+  });
+  c.filter = 'none'; c.globalAlpha = 1;
+}
 function twFit(){
   const root = $('twRoot'); if(!root || !root.offsetWidth) return;
   const W = root.offsetWidth, H = root.offsetHeight, B = TW_BG, s = Math.max(W / B.w, H / B.h), iw = B.w * s, ih = B.h * s, ox = (W - iw) / 2, oy = H - ih;   // pegado abajo
   root.style.setProperty('--bgs', `${Math.ceil(iw)}px ${Math.ceil(ih)}px`); root.style.setProperty('--bgp', `${Math.round(ox)}px ${Math.round(oy)}px`);
   const G = B.glass, gx = ox + G.x * iw, gy = Math.max(oy + G.y * ih, root.querySelector('.tw-banner').getBoundingClientRect().bottom - root.getBoundingClientRect().top + 6), gw = G.w * iw, gh = oy + (G.y + G.h) * ih - gy;
   Object.assign($('twGlass').style, {left: gx + 'px', top: gy + 'px', width: gw + 'px', height: gh + 'px'});
+  if(!twFxRaf) twFxRaf = requestAnimationFrame(twFxLoop);                                 // (arranca la vida del cielo)
   const nav = $('twNav'); nav.style.left = (gx + gw + Math.max(8, gw * .08)) + 'px'; nav.style.top = gy + 'px'; nav.style.height = gh + 'px';
 }
