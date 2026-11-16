@@ -59,6 +59,7 @@ begin
   if p_floor not in (10,20,30,40,50) then return 'bad'; end if;
   if jsonb_typeof(p_mons) <> 'array' or jsonb_array_length(p_mons) not between 1 and 3 then return 'bad'; end if;
   if p_card is not null and pg_column_size(p_card) > 6000 then return 'bad'; end if;
+  if pg_column_size(p_mons) > 600 then return 'bad'; end if;
   select username into nm from profiles where id = uid;
   if nm is null then return 'noname'; end if;
   perform tower_rotate();

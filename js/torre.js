@@ -462,7 +462,7 @@ function twRenderTower(){
 // ---- VIDA EN EL CIELO DE LA TORRE ----
 // Una capa (canvas #twFx) entre la ilustración y los paneles: nubes que pasan, estrellas que brillan (de noche) y Pokémon voladores que cruzan
 // el cielo POR DETRÁS de la torre (se recortan donde está la torre). Se dibuja en coordenadas de la imagen, igual que twFit, y para cuando sales de la pantalla.
-const TW_FLYERS = [18, 142, 334, 398, 628, 277, 149, 6, 823, 663, 130, 249, 250, 144, 145, 146];   // Pidgeot, Aerodactyl, Altaria, Staraptor, Braviary, Swellow, Dragonite, Charizard, Corviknight, Talonflame, Gyarados, Lugia, Ho-Oh, Articuno, Zapdos, Moltres
+const TW_FLYERS = [142, 334, 277, 249, 250, 144, 145, 146, 169, 384, 468, 227];   // SOLO los que al moverse van volando: Aerodactyl, Altaria, Swellow, Lugia, Ho-Oh, Articuno, Zapdos, Moltres, Crobat, Rayquaza, Togekiss, Skarmory. (Fuera los que su animación es andando: Pidgeot, Staraptor, Braviary, Dragonite, Charizard, Corviknight, Talonflame, Gyarados)
 const TW_FLY_SLOTS = [{dur:30, gap:10, off:3, y:.2, dir:1}, {dur:36, gap:22, off:30, y:.34, dir:-1}, {dur:28, gap:30, off:45, y:.12, dir:1}];   // dur = segundos cruzando · gap = pausa entre uno y otro
 const TW_TOWER_X = [.404, .602];                                                          // franja de la imagen que ocupa la torre (fracciones del ancho)
 let twFxRaf = 0, twStars = null, twFxLast = 0;

@@ -1,0 +1,320 @@
+"use strict";
+/* =====================================================================
+   5) DIBUJO: arena, Pokémon y HUD retro oscuro
+   ===================================================================== */
+function text(t, x, y, size, col, align){
+  ctx.font = `${size}px ${FONT}`; ctx.fillStyle = col || '#fff';
+  ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillText(t, x, y);
+}
+function textO(t, x, y, size, col, align){                // texto con contorno oscuro: se lee sobre cualquier fondo (avisos flotantes, subtítulo)
+  ctx.font = `${size}px ${FONT}`; ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(3, size / 3); ctx.strokeStyle = 'rgba(8,10,20,.92)'; ctx.strokeText(t, x, y);
+  text(t, x, y, size, col, align);
+}
+let HUD_SCALE = .74;      /* js/touch.js lo sube a .92 en pantallas táctiles */                                   // tamaño del HUD en combate (1 = como antes; más pequeño = molesta menos)
+function hudAt(ax, ay, fn){ ctx.save(); ctx.translate(ax, ay); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-ax, -ay); fn(); ctx.restore(); }   // dibuja fn() reducido desde la esquina (ax, ay)
+function bar(x, y, w, h, v, max, col){
+  ctx.fillStyle = '#05070c'; ctx.fillRect(x, y, w, h);
+  ctx.fillStyle = col; ctx.fillRect(x+1, y+1, Math.max(0, (w-2) * v/max), h-2);
+  ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1; ctx.strokeRect(x+.5, y+.5, w-1, h-1);
+}
+// Caja oscura semitransparente con borde fino iluminado
+function hudBox(x, y, w, h, col){
+  ctx.fillStyle = 'rgba(16,20,30,.9)'; ctx.fillRect(x, y, w, h);
+  ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = 10;
+  ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.strokeRect(x+.5, y+.5, w-1, h-1); ctx.restore();
+  ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1; ctx.strokeRect(x+4.5, y+4.5, w-9, h-9);
+}
+// Sombra suave bajo cada Pokémon
+function shadow(x, y, rx){
+  ctx.save(); ctx.translate(x, y); ctx.scale(1, .3);
+  const gr = ctx.createRadialGradient(0,0,0,0,0,rx);
+  gr.addColorStop(0, 'rgba(0,0,0,.6)'); gr.addColorStop(.6, 'rgba(0,0,0,.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0,0,rx,0,7); ctx.fill(); ctx.restore();
+}
+
+// Fondo antiguo (lava): solo se usa si un rival no tiene arena propia en arenas.js
+function arenaFallback(){
+  ctx.fillStyle = '#3b2c2a'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 1;
+  for(let x=0; x<W; x+=48){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0; y<H; y+=48){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  const gr = ctx.createRadialGradient(W/2, H/2, H*.3, W/2, H/2, Math.hypot(W,H)/2);   // lava en los bordes
+  gr.addColorStop(0, 'rgba(255,90,20,0)'); gr.addColorStop(.65, 'rgba(255,90,20,.2)'); gr.addColorStop(1, 'rgba(255,130,30,.65)');
+  ctx.fillStyle = gr; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(W/2, 70); ctx.lineTo(W/2, H-90); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2+10, 140, 0, 7); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2, H/2+10, 40, 0, 7); ctx.stroke();
+}
+
+// Fondo del combate: cada líder / Alto Mando / Campeón tiene el suyo (ver arenas.js)
+function arena(){ drawArena(g && g.o ? (g.o.arena || g.o.leader) : '', g ? g.t : 0); }
+
+// Aviso del ataque fuerte: mientras se carga (f.wind, combat.js) se pinta en el suelo el carril por donde va a salir. Se va llenando; cuando el rival de la IA deja de apuntar, el borde se pone blanco.
+function windDraw(){
+  for(const f of [g.p[g.pi], g.e[g.ei]]){
+    const w = f.wind; if(!w || f.dead || f.ghost) continue;
+    const k = clamp(1 - w.t / w.T, 0, 1), col = TC[w.type] || '#ffffff', len = 640, hw = 24, fijo = feelFoe(f) && w.t <= w.T * FEEL.windLock;
+    ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(w.ang);
+    const gr = ctx.createLinearGradient(0, 0, len, 0); gr.addColorStop(0, col); gr.addColorStop(1, col + '00');
+    ctx.fillStyle = gr; ctx.globalAlpha = .14 + .16 * k; ctx.fillRect(18, -hw, len, hw * 2);                 // el carril entero
+    ctx.globalAlpha = .3 + .3 * k; ctx.fillRect(18, -hw, len * k, hw * 2);                                    // la parte que se va llenando
+    ctx.globalAlpha = .55 + .45 * k; ctx.strokeStyle = fijo ? '#ffffff' : col; ctx.lineWidth = fijo ? 3 : 2; if(!fijo) ctx.setLineDash([12, 9]);
+    ctx.beginPath(); ctx.moveTo(18, -hw); ctx.lineTo(len * .8, -hw); ctx.moveTo(18, hw); ctx.lineTo(len * .8, hw); ctx.stroke();
+    ctx.restore();
+  }
+}
+// Forma del golpe cuerpo a cuerpo (f.swing, combat.js): una línea (estocada), un arco (barrido) o un anillo (giro) que dura un instante
+function swingDraw(){
+  for(const f of [g.p[g.pi], g.e[g.ei]]){
+    const s = f.swing; if(!s || f.ghost) continue;
+    const a = (g.t - s.t0) / .22; if(a < 0 || a >= 1) continue;
+    const K = s.k, R = K.reach + 16, grow = Math.min(1, a * 2.4);
+    ctx.save(); ctx.translate(f.x, f.y - 6); ctx.globalAlpha = .8 * (1 - a); ctx.strokeStyle = TC[s.type] || '#ffffff'; ctx.lineCap = 'round'; ctx.lineWidth = 11 * (1 - a) + 3;
+    ctx.beginPath();
+    if(K.lunge){ ctx.rotate(s.ang); ctx.moveTo(24, 0); ctx.lineTo(24 + (R - 24) * grow, 0); }
+    else if(K.arc >= Math.PI) ctx.arc(0, 0, R * (.45 + .45 * grow), 0, 6.3);
+    else ctx.arc(0, 0, R * .8, s.ang - K.arc, s.ang - K.arc + K.arc * 2 * grow);
+    ctx.stroke(); ctx.restore();
+  }
+}
+// Pilar de piedra (PIL, combat.js): su base está a la altura de los pies de los Pokémon
+function pilDraw(p){
+  const r = p.r, y = p.y + 22, h = r * 2.3, e = r * .38;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.34)'; ctx.beginPath(); ctx.ellipse(p.x + 7, y + 5, r * 1.2, e * 1.15, 0, 0, 6.3); ctx.fill();          // sombra
+  const gr = ctx.createLinearGradient(p.x - r, 0, p.x + r, 0); gr.addColorStop(0, '#565d6d'); gr.addColorStop(.42, '#bcc2cf'); gr.addColorStop(1, '#3f4553');
+  ctx.fillStyle = gr; ctx.strokeStyle = '#242934'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(p.x - r, y - h); ctx.lineTo(p.x - r, y); ctx.ellipse(p.x, y, r, e, 0, Math.PI, 0, true); ctx.lineTo(p.x + r, y - h); ctx.closePath(); ctx.fill(); ctx.stroke();   // fuste
+  ctx.strokeStyle = 'rgba(36,41,52,.45)'; [.28, .62].forEach(k => { ctx.beginPath(); ctx.ellipse(p.x, y - h * k, r, e, 0, 0, Math.PI); ctx.stroke(); });                                        // juntas de la piedra
+  ctx.fillStyle = '#d9dde6'; ctx.strokeStyle = '#242934'; ctx.beginPath(); ctx.ellipse(p.x, y - h, r, e, 0, 0, 6.3); ctx.fill(); ctx.stroke();                                                  // tapa
+  ctx.restore();
+}
+function drawF(f, col){
+  if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
+  const I = idleInfo(f.m.dex);
+  const hid = f.hide > 0, lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
+  if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
+  const inv = f.inv > 0 && !f.dead; if(inv){ ctx.save(); ctx.globalAlpha = .5; }                                               // esquivando con la carrera: se ve translúcido
+  const okSpr = hid || drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny);
+  if(inv) ctx.restore();
+  if(!hid && !okSpr && sheet(f.m.dex, 'Idle', false).bad){      // sin sprite (de verdad, no solo cargando): círculo
+    ctx.fillStyle = TC[f.m.types[0]]; ctx.beginPath(); ctx.arc(f.x + lg.x, f.y + lg.y, 30, 0, 7); ctx.fill();
+    text(f.m.name[0], f.x + lg.x, f.y+8 + lg.y, 20, '#10141e', 'center');
+  }
+  if(f.buff > 0 && !hid) fxAura(f, I);                                         // aura de la mejora activa (5 s)
+  if(!hid && !f.dead && hasStatus(f)) fxStatusAura(f, I);                      // aura del estado (paralizado, veneno, quemadura, sueño, confusión)
+  if(!f.dead) bar(f.x-30, f.y + I.top*ESCALA - 14, 60, 7, f.hp, f.max, col);
+  if(!f.dead && hasStatus(f)) statusChips(f, f.x-30, f.y + I.top*ESCALA - 26, 28, 10, 6);   // etiquetas PAR · TOX · QUE · DRM · CNF
+}
+
+// Cuadritos del equipo (debajo de tu tarjeta): posición en el mundo del juego. La usan hud() para dibujarlos y ui.js para saber si hiciste clic en uno.
+const ICON_K = 1.3;                                       // tamaño de TUS cuadritos del equipo (1 = pequeños como antes; más = más grandes, y se separan solos)
+const HUD_H = 90, ICON_DY = 98;                           // alto de la tarjeta de Pokémon y dónde empiezan los cuadritos del equipo (debajo de ella)
+function hudIconRect(i){ const k = HUD_SCALE; return {x:(10 + i*52*ICON_K) * k, y:(10 + ICON_DY) * k, w:46 * ICON_K * k, h:46 * ICON_K * k}; }
+function hudIconAt(mx, my){                      // nº del cuadrito que hay en (mx, my), o -1
+  if(!g || g.over) return -1;
+  for(let i = 0; i < myList().length; i++){ const r = hudIconRect(i); if(mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i; }
+  return -1;
+}
+// EQUIPO RIVAL OCULTO (Clasificatoria y Campo de pruebas): los cuadritos del rival enseñan «?» hasta que ese Pokémon sale al campo.
+// Se apunta FUERA del estado del combate (WeakSet), así no cambia la huella del combate online (js/pvp.js).
+const FOE_SEEN = new WeakSet();
+function foeHidden(){ return !!(g && ((g.pvp && typeof pvp !== 'undefined' && pvp && pvp.match && pvp.match.ranked) || (g.o && g.o.pruebas))); }
+function hud(x, y, list, idx, col){
+  const f = list[idx], w = 340, r = f.hp / f.max, side = list === g.p ? 'p' : 'e', t = performance.now() / 1000;
+  const hid = list !== myList() && foeHidden(); if(list !== myList()) FOE_SEEN.add(f);       // el que está en el campo ya se ha visto
+  hudBox(x, y, w, HUD_H, f.m.isMega ? hue(t * 140, .85) : col);                                           // megaevolucionado: borde arcoíris
+  ctx.fillStyle = '#0a0d15'; ctx.fillRect(x+8, y+10, 56, 56);                // retrato
+  ctx.strokeStyle = f.m.isMega ? hue(t * 140 + 90, .9) : col; ctx.lineWidth = 1; ctx.strokeRect(x+8.5, y+10.5, 55, 55);
+  drawFrame(ctx, f.m.dex, 'Idle', 0, 0, x+36, y+38, 2, 50, f.shiny);
+  if(hasStatus(f)) statusChips(f, x+8, y+55, 27, 11, 6);                    // estado en el retrato
+  text(f.m.name.toUpperCase(), x+74, y+24, f.m.name.length > 9 ? 8 : 10);                 // nombres largos (Mega-Charizard X...) un poco más pequeños para no tapar los tipos
+  f.m.types.forEach((t,j)=>{
+    const tx = x + w - 8 - 64*(f.m.types.length - j);
+    ctx.fillStyle = TC[t]; ctx.fillRect(tx, y+12, 60, 12);
+    text(t.toUpperCase(), tx+30, y+21, 6, '#10141e', 'center');
+  });
+  const bx = x + 92, bw = 236;                                               // barras con su etiqueta (PS = vida · EN = energía)
+  text('PS', x+74, y+42, 7, '#c9d6f5'); text('EN', x+74, y+54, 6, '#7fa8d8');
+  bar(bx, y+32, bw, 12, f.hp, f.max, r > .5 ? '#4ccf6a' : r > .2 ? '#e8c33a' : '#e8493a');
+  [.5, .2].forEach(m => { ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.fillRect(Math.round(bx + 1 + (bw - 2) * m), y+33, 1, 10); });     // marcas del 50 % y del 20 % (donde la barra cambia de color)
+  bar(bx, y+48, bw, 5, f.en, 100, '#4fb3ff');
+  text(`${Math.ceil(f.hp)}/${Math.ceil(f.max)}`, x+328, y+68, 8, '#fff', 'right');
+  {                                                                                                        // objeto (1ª línea) y habilidad (2ª línea): ya no se pisan ni desaparece la habilidad
+    let tx = x+74;
+    const im = f.item && itemImg(f.item);
+    if(im && im.ok){ ctx.imageSmoothingEnabled = false; ctx.drawImage(im, tx, y+56, 16, 16); tx += 19; }
+    if(f.item) text(ITEMS[f.item].n.toUpperCase(), tx, y+68, 6, '#c9d6f5');
+    if(f.ab){ const ab = f.ab.toUpperCase(); ctx.font = `6px ${FONT}`; const aw = ctx.measureText(ab).width;
+      ctx.fillStyle = 'rgba(155,226,155,.14)'; ctx.fillRect(x+74, y+73, aw + 12, 11); ctx.strokeStyle = 'rgba(155,226,155,.45)'; ctx.lineWidth = 1; ctx.strokeRect(x+74.5, y+73.5, aw + 11, 10);
+      text(ab, x+80, y+81, 6, '#9be29b'); }
+  }
+  list.forEach((u,i)=>{                                                      // mini-iconos del equipo
+    const K = list === myList() ? ICON_K : 1, px = x + i*52*K, py = y + ICON_DY;
+    ctx.save(); ctx.translate(px, py); ctx.scale(K, K); ctx.translate(-px, -py);          // tus cuadritos se dibujan más grandes
+    ctx.fillStyle = 'rgba(16,20,30,.9)'; ctx.fillRect(px, py, 46, 46);
+    ctx.strokeStyle = i === idx ? '#ffcc33' : 'rgba(255,255,255,.25)'; ctx.lineWidth = i === idx ? 2 : 1; ctx.strokeRect(px+.5, py+.5, 45, 45);
+    if(hid && !FOE_SEEN.has(u)){                                               // aún no ha salido: Poké Ball gris con «?»
+      ctx.fillStyle = '#2a3148'; ctx.beginPath(); ctx.arc(px+23, py+21, 13, 0, 7); ctx.fill();
+      ctx.fillStyle = '#1a2033'; ctx.beginPath(); ctx.arc(px+23, py+21, 13, 0, Math.PI); ctx.fill();
+      ctx.fillStyle = '#10131f'; ctx.fillRect(px+10, py+20, 26, 2); ctx.beginPath(); ctx.arc(px+23, py+21, 4, 0, 7); ctx.fill();
+      text('?', px+23, py+42, 9, '#8a94b0', 'center');
+      ctx.restore(); return;
+    }
+    ctx.globalAlpha = u.dead ? .35 : 1;
+    drawFrame(ctx, u.m.dex, 'Idle', 0, 0, px+23, py+20, 1, 34, u.shiny);
+    bar(px+4, py+37, 38, 5, u.hp, u.max, '#4ccf6a'); ctx.globalAlpha = 1;
+    if(u.dead){ ctx.save(); ctx.strokeStyle = 'rgba(232,73,58,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(px+13, py+10); ctx.lineTo(px+33, py+30); ctx.moveTo(px+33, py+10); ctx.lineTo(px+13, py+30); ctx.stroke(); ctx.restore(); }   // ✖ = debilitado
+    { const ready = u.megaKey && !u.megaDone && !u.dead, done = u.m.isMega, blocked = ready && megaUsed(side);                    // «M» de megaevolución: arcoíris = lista · rosa = ya megaevolucionó · gris = otra mega ya usada
+      if(ready || done){ const mx = px + 31, my = py + 3; ctx.fillStyle = done ? '#ff6ad8' : blocked ? '#3a4258' : hue(t * 200 + i * 60, .95); ctx.fillRect(mx, my, 13, 12); text('M', mx + 2, my + 10, 8, blocked ? '#7a86a6' : '#10141e'); } }
+    if(list === myList()){                                                        // solo tus cuadritos: se pueden pulsar para cambiar de Pokémon
+      const can = !u.dead && i !== idx, wait = can && myCd() > 0, hov = hudIconAt(mouse.x, mouse.y) === i;
+      if(wait){                                                              // en espera: se oscurece y muestra los segundos que faltan
+        ctx.fillStyle = 'rgba(5,7,12,.62)'; ctx.fillRect(px+1, py+1, 44, 44);
+        ctx.fillStyle = '#ffcc33'; ctx.fillRect(px+1, py+43, 44 * Math.min(1, myCd() / SWITCH_CD), 2);          // barrita que se vacía
+        text(String(Math.ceil(myCd())), px+23, py+30, 16, '#ffcc33', 'center');
+      }
+      if(hov && can){ ctx.strokeStyle = wait ? '#ff9a3a' : '#7dffa0'; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, 44, 44); }
+      text(ctlShort('sw' + (i + 1)).slice(0, 3), px+6, py+11, 7, can ? '#c9d6f5' : 'rgba(201,214,245,.4)');          // la tecla que hace lo mismo (1 · 2 · 3)
+    }
+    ctx.restore();
+  });
+  if(list === myList()){                                                          // mensajes bajo los cuadritos
+    const hv = hudIconAt(mouse.x, mouse.y), ty = y + ICON_DY + 46 * ICON_K + 12;
+    if(g.swNote > 0) text(`ESPERA ${Math.ceil(myCd())} s PARA CAMBIAR`, x, ty, 7, '#ff9a3a');
+    else if(hv >= 0 && hv !== idx && !list[hv].dead) text(myCd() > 0 ? `ESPERA ${Math.ceil(myCd())} s` : `CAMBIAR A ${list[hv].m.name.toUpperCase()}`, x, ty, 7, '#7dffa0');
+    else if(g.clock < (typeof TOUCH !== 'undefined' && TOUCH.on ? 4 : 8) && g.count <= 0 && !g.over) text(typeof TOUCH !== 'undefined' && TOUCH.on ? 'TOCA UN CUADRO PARA CAMBIAR' : `CLIC EN UN CUADRO O TECLAS ${ctlShort('sw1')} · ${ctlShort('sw2')} · ${ctlShort('sw3')} PARA CAMBIAR`, x, ty, 6, 'rgba(201,214,245,.75)');
+  }
+}
+
+// Dónde cae el mundo (W × H) dentro del lienzo. Normal: lo llena entero. Combate online: arena fija PVP_W × H, centrada y sin deformar (barras oscuras a los lados si la ventana es más ancha)
+const VIEW = {sx: 1, sy: 1, ox: 0, oy: 0};
+function viewCalc(){
+  if(LOCKW){ const vw = typeof prOn === 'function' && prOn() ? PR.SW : W, s = Math.min(cv.width / vw, cv.height / H); VIEW.sx = VIEW.sy = s; VIEW.ox = (cv.width - vw * s) / 2; VIEW.oy = (cv.height - H * s) / 2; }   // Campo de pruebas (js/pruebas.js): la pantalla mide PR.SW aunque el mundo sea más ancho
+  else{ VIEW.sx = cv.width / W; VIEW.sy = cv.height / H; VIEW.ox = VIEW.oy = 0; }
+}
+function draw(){
+  const PRV = typeof prOn === 'function' && prOn(), want = PRV ? PR.W : g && g.pvp ? PVP_W : 0;      // PRV = Campo de pruebas: vista de estadio (js/pruebas.js)
+  if(want !== LOCKW){ LOCKW = want; resize(); }                        // al entrar o salir de un combate online
+  viewCalc();
+  if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
+  ctx.setTransform(VIEW.sx, 0, 0, VIEW.sy, VIEW.ox, VIEW.oy);
+  ctx.clearRect(0,0,W,H);
+  if(!g){ if(['dexv','teamv','torrev'].some(v => !$(v).classList.contains('hide'))) return;   // pantallas que tapan todo el lienzo: no gastar batería en dibujar el fondo del menú
+    menuBg(performance.now()/1000); return; }
+  const WW = W;                                    // ancho del mundo (en el Campo de pruebas es mayor que la pantalla)
+  ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
+  if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
+  else arena();
+  fxhdGround();                                    // marcas en el suelo de los ataques (js/fxhd3.js)
+  const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
+
+  windDraw();                                      // carril del ataque fuerte que se está cargando
+  swingDraw();                                     // forma del golpe cuerpo a cuerpo
+  [[P, gm ? '#ff5a5a' : '#4ccf6a'], [E, gm ? '#4ccf6a' : '#ff5a5a']].map(([f, c]) => ({y:f.y, d:() => drawF(f, c)}))
+    .concat(pilList().map(p => ({y:p.y, d:() => pilDraw(p)}))).sort((a, b) => a.y - b.y).forEach(o => o.d());      // Pokémon y pilares, de atrás hacia delante
+  g.shots.forEach(s=>{
+    if(fxShot(s)) return;                          // proyectil con sprite; si no, el círculo de siempre
+    ctx.save(); ctx.fillStyle = TC[s.type]; ctx.shadowColor = TC[s.type]; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); ctx.restore();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.stroke();
+  });
+  fxhdBegin();                                     // efectos HD (js/fxhd.js): guarda el cuadro antes de los efectos
+  fxDraw();                                        // impactos, golpes, polvo y partículas
+  fxhdDraw(); fxhdEnd();                           // efectos HD: luces, golpes, carga y brillo (bloom)
+  swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
+  megaDraw();                                      // animación de megaevolución (js/mega.js)
+  if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
+  ctx.restore();
+  if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
+  if(!M.dead && !(typeof TOUCH !== 'undefined' && TOUCH.on)){             // cruz de puntería (con los dedos no se enseña)
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
+    ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
+  }
+  if(PRV) g.pops.forEach(p => { const [sx, sy] = prW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, sy, p.s || 9, p.c || '#ffe066', 'center'); });   // números del daño: a su sitio en la pantalla
+  else g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
+
+  if(PRV) prTopBegin();                            // Campo de pruebas: los paneles de arriba van a la escala del estadio (js/pruebas.js)
+  hudAt(0, 0, () => hud(10, 10, myList(), myIdx(), '#4a8cff'));
+  hudAt(W, 0, () => hud(W-350, 10, oppList(), oppIdx(), '#ff4a5a'));
+  abDrawHud();                                                               // clima activo (js/abilities.js)
+
+  // Panel central: piso y temporizador
+  const s = g.clock | 0;
+  hudAt(W/2, 0, () => {
+  hudBox(W/2-110, 8, 220, 52, '#4a8cff');
+  text(g.pvp ? (g.o.estadio ? 'CLASIFICATORIA' : 'ONLINE') : g.o.pruebas ? 'PRUEBAS' : g.o.torre ? 'TORRE · PISO ' + g.o.floor : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');
+  text(`${(s/60|0)}:${String(s%60).padStart(2,'0')}`, W/2, 49, 10, '#fff', 'center');
+  { ctx.font = `8px ${FONT}`; const sw = ctx.measureText(g.o.sub).width + 16; ctx.fillStyle = 'rgba(8,10,20,.62)'; ctx.fillRect(W/2 - sw/2, 64, sw, 16); }       // fondo tras el subtítulo para que se lea
+  textO(g.o.sub, W/2, 76, 8, '#c9d6f5', 'center');
+  const L = leaderImg(g.o.leader, g.o.portrait);                                             // retrato del líder
+  if(L && L.ok){                                                                             // en un marco, a la izquierda del panel (antes iba debajo y se mezclaba con el subtítulo y el aviso del clima)
+    const fx0 = W/2 - 110 - 8 - 52, k = Math.min(44 / L.width, 44 / L.height), w = L.width * k, h = L.height * k;
+    hudBox(fx0, 8, 52, 52, '#4a8cff');
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(L, fx0 + 26 - w/2, 34 - h/2, w, h);
+  }
+  });
+  if(PRV) prTopEnd();
+  if(!(typeof TOUCH !== 'undefined' && TOUCH.on)) text(g.pvp ? 'ESC · MENÚ' : 'ESC · PAUSA', W - 14, H - 12, 6, '#6d7899', 'right');   // con los dedos está el botón II
+  if(g.count > 0) text(String(Math.ceil(g.count)), W/2, H/2+22, 64, '#ffcc33', 'center');
+
+  if(!(typeof TOUCH !== 'undefined' && TOUCH.on)){   // con pantalla táctil, la barra de ataques la sustituyen los botones (js/touch.js)
+  // Barra de ataques, centrada abajo
+  ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
+  if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás
+  const bw = 104, gap = 8, tw = 5*bw + 4*gap + 24, x0 = (W - tw)/2, y0 = H - 82;
+  // Barra de energía grande, siempre visible, con las marcas de Q (20) y E (40) y el tiempo que falta
+  { const ey = y0 - 38, bx = x0 + 78, bwid = tw - 78 - 12, bh = 10, by = ey + 16;
+    hudBox(x0, ey, tw, 34, '#4fb3ff');
+    text('ENERGÍA', x0 + 12, by + 8, 7, '#4fb3ff');
+    bar(bx, by, bwid, bh, M.en, 100, '#4fb3ff');
+    [3, 4].forEach(i => { const k = ctlKey(i).slice(0, 4);
+      const need = Math.round(enCost(M, i)), mx = bx + 1 + (bwid - 2) * need / 100, ready = M.en >= need, col = i === 3 ? '#b07bff' : '#ffcc33';
+      ctx.fillStyle = col; ctx.fillRect(Math.round(mx) - 1, by - 3, 2, bh + 6);
+      const wait = Math.max(0, (need - M.en) / EN_REGEN);
+      text(`${k} ${need}` + (ready ? ' ✔' : ` · ${wait.toFixed(1)}s`), mx, by - 5, 6, ready ? '#9be29b' : col, 'center');
+    });
+    text(String(Math.floor(M.en)), bx + bwid - 4, by + 8, 7, '#fff', 'right'); }
+  hudBox(x0, y0, tw, 72, '#4a8cff');
+  MV.forEach((m,i)=>{
+    const x = x0 + 12 + i*(bw+gap), y = y0 + 10, h = 52, cost = Math.round(enCost(M, i));      // cost: energía real (Presión del rival)
+    const enWait = Math.max(0, (cost - M.en) / EN_REGEN), cdWait = Math.max(0, M.cd[i]), wait = Math.max(enWait, cdWait);   // segundos hasta poder usarlo
+    const ok = wait <= 0;
+    const col = i === 0 ? '#9aa6b8' : i === 3 ? '#b07bff' : TC[mtype(M, i)];
+    ctx.fillStyle = '#161c2c'; ctx.fillRect(x, y, bw, h);
+    ctx.strokeStyle = ok ? col : '#2c3550'; ctx.lineWidth = 2; ctx.strokeRect(x+1, y+1, bw-2, h-2);
+    const kl = ctlKey(i).slice(0, 7);                                                          // tecla de ese ataque (configurable: Ajustes › Controles)
+    ctx.fillStyle = ok ? col : '#2c3550'; ctx.fillRect(x+4, y+4, kl.length*6 + 6, 10);      // tecla
+    text(kl, x+7, y+12, 6, '#10141e');
+    const nm = mvName(M, i).toUpperCase();
+    text(nm, x+bw/2, y+32, nm.length > 10 ? 7 : 8, ok ? '#fff' : '#6d7899', 'center');
+    if(ok && (i === 1 || i === 2)) text((i === 1 ? meleeKind(M) : shotKind(M)).n.toUpperCase(), x+bw/2, y+43, 6, col, 'center');      // forma del ataque (combat.js)
+    if(m.en) text('EN ' + cost, x+bw-5, y+14, 6, M.en >= cost ? '#4fb3ff' : '#e8493a', 'right');
+    if(m.en){ const fr = Math.min(1, M.en / cost); ctx.fillStyle = '#05070c'; ctx.fillRect(x+4, y+h-6, bw-8, 3);          // mini barra de energía de ese ataque
+      ctx.fillStyle = fr >= 1 ? '#9be29b' : '#4fb3ff'; ctx.fillRect(x+4, y+h-6, (bw-8)*fr, 3); }
+    if(!ok){
+      const total = Math.max(m.cd, cost / EN_REGEN, .01);
+      ctx.fillStyle = 'rgba(5,7,12,.72)'; ctx.fillRect(x+2, y+2, bw-4, (h-4) * Math.min(1, wait/total));
+      text(wait.toFixed(1) + 's', x+bw/2, y+47, 8, cdWait >= enWait ? '#fff' : '#4fb3ff', 'center');       // blanco = enfriamiento · azul = falta energía
+    }
+  });
+  ctx.restore();
+  if(PRV){ ctx.save(); ctx.globalAlpha = PR.barA || 1; megaHud(); ctx.restore(); } else
+  megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
+  }
+  megaTop();                                       // destello y cartel de la megaevolución, encima de todo
+  if(g.pvp) pvpDraw();                             // combate online: avisos de conexión (js/pvp.js)
+  if(typeof touchDraw === 'function') touchDraw();  // joystick y botones táctiles (js/touch.js)
+  if(PRV){ prFront(); W = WW; }                    // Campo de pruebas: cartel de megaevolución y línea de abajo; se repone el ancho del mundo
+}
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(.05, (now-last)/1000); last = now;
+  if(g && g.pvp) pvpFrame(dt);                     // combate online: pasos fijos sincronizados con el rival (js/pvp.js)
+  else if(fxhd.stop > 0 && g && !g.over){ fxhd.stop -= dt; }     // congelado del golpe (js/fxhd.js): el combate se queda quieto un instante
+  else update(dt);
+  draw(); requestAnimationFrame(loop);
+}

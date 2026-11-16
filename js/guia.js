@@ -19,11 +19,29 @@ const GUIA_SECCIONES = [
     <p>Los combates son <b>en tiempo real</b> (no por turnos): tú mueves a tu Pokémon por la arena y lanzas ataques.</p>
     <p class="gh">En ordenador</p>
     <ul>
-      <li><b>W A S D</b> o las <b>flechas</b>: moverte · <b>Espacio</b>: carrera rápida.</li>
+      <li><b>W A S D</b> o las <b>flechas</b>: moverte · <b>Espacio</b>: carrera rápida. Durante un instante <b>no te pueden dar</b>: úsala para <b>esquivar</b> (si esquivas un ataque recuperas energía y tu siguiente ataque, si lo lanzas enseguida, <b>pega más</b>: verás un aro azul a tus pies).</li>
+      <li>Al <b>debilitar</b> a un Pokémon rival con un ataque recuperas <b>energía</b>.</li>
       <li><b>Clic izquierdo</b>: golpe · <b>Clic derecho</b>: disparo (apuntas con el ratón).</li>
-      <li><b>Q</b>: mejora · <b>E</b>: ataque fuerte · <b>R</b>: megaevolución (si tu Pokémon lleva la megapiedra).</li>
+      <li><b>Q</b>: mejora · <b>E</b>: ataque fuerte (tarda un momento en salir: se ve una <b>línea en el suelo</b>, también la del rival; al salir <b>aparta</b> al rival si lo tienes encima, y si le da lo lanza lejos) · <b>R</b>: megaevolución (si tu Pokémon lleva la megapiedra).</li>
       <li><b>1 · 2 · 3</b>: cambiar de Pokémon · <b>Esc</b>: pausa.</li>
       <li>Puedes cambiar las teclas en <b>Ajustes › Controles</b>.</li>
+    </ul>
+    <p class="gh">Cada tipo ataca a su manera</p>
+    <ul>
+      <li><b>Golpe</b>: <b>Barrido</b> (ancho, fácil de acertar) · <b>Estocada</b> (largo y estrecho: te lanzas hacia delante) · <b>Giro</b> (golpea todo alrededor y empuja más).</li>
+      <li><b>Disparo</b>: <b>Directo</b> · <b>Ráfaga</b> (tres en abanico) · <b>Veloz</b> (muy rápido) · <b>Pesado</b> (lento, grande y fuerte).</li>
+      <li>Depende del <b>tipo</b> del ataque. En ordenador, la forma sale debajo del nombre de cada ataque en la barra de abajo.</li>
+    </ul>
+    <p class="gh">Más trucos</p>
+    <ul>
+      <li><b>Golpe cargado</b>: mantén pulsado el golpe (verás un aro a tus pies) y suéltalo: pega más y lanza lejos al rival. Si lo estampas contra un <b>pilar</b>, daño extra.</li>
+      <li><b>Terreno</b>: el ataque fuerte deja una <b>franja</b> en el suelo por donde pasa, según su tipo: <b>Brasas</b> (queman), <b>Tóxico</b>, <b>Hielo</b> (resbala), <b>Charco</b> (frena), <b>Campo</b> eléctrico (quita energía) o <b>Hierba</b> (te cura). Las de borde blanco te perjudican: sal de ellas. Un tipo eficaz borra la zona del otro (el Agua apaga las Brasas).</li>
+      <li>Al <b>cambiar</b>, el Pokémon que entra <b>empuja</b> al rival si lo tiene cerca. Y ojo con los pilares: si te cae uno encima, duele.</li>
+    </ul>
+    <p class="gh">Pilares y choques</p>
+    <ul>
+      <li>En Historia y en el Campo de Entrenamiento <b>caen pilares</b> del cielo de vez en cuando (verás su sombra antes). <b>Paran los disparos</b>: ponte detrás para cubrirte. Se <b>rompen a golpes</b>, y el ataque fuerte los revienta de una vez.</li>
+      <li>Si tu disparo y el del rival <b>chocan</b>, gana el más fuerte: cuentan el <b>tamaño</b> del ataque y el <b>tipo</b> (Agua vence a Fuego). El que gana sigue adelante y el otro se deshace; si van parejos, se anulan. Un <b>golpe</b> cuerpo a cuerpo también puede <b>cortar</b> un disparo si le gana por tipo.</li>
     </ul>
     <p class="gh">En móvil</p>
     <ul>
@@ -83,7 +101,7 @@ const GUIA_SECCIONES = [
   ['consejos', '8 · Consejos rápidos', `
     <ul>
       <li>Crea una <b>cuenta</b> (menú › Cuenta) para guardar tu partida en internet y jugar desde otro dispositivo.</li>
-      <li>Si un combate se te atraga, mejora a tu equipo en el <b>Campo de Entrenamiento</b> y vuelve.</li>
+      <li>Si un combate se te atraganta, mejora a tu equipo en el <b>Campo de Entrenamiento</b> y vuelve.</li>
       <li>No repitas Pokémon del mismo tipo débil: combina tipos para cubrir debilidades.</li>
       <li>Mira las <b>Notas del parche</b> (abajo en el menú) para ver las novedades.</li>
     </ul>`]

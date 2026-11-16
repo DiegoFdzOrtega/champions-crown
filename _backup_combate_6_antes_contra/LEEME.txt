@@ -1,0 +1,4 @@
+COPIA DE SEGURIDAD 6 · 16-11-2026
+Estado del combate ANTES de añadir: energía al debilitar a un rival, contraataque tras esquivar y cámara lenta en el remate final.
+Archivos guardados: index.html · js/combat.js · js/render.js · js/pvp.js · js/guia.js
+PARA DAR MARCHA ATRÁS: copia estos archivos encima de los del juego (mismas carpetas) y recarga con Ctrl+F5.

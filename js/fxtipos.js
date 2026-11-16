@@ -381,21 +381,48 @@ function hgLanzaHit(e, a){
   for(let i = 0; i < 6; i++){ const t = a - .3 - i * .05; if(t < 0 || t > .8) continue; const u = t / .8, px = cx + (HH(i, 70) - .5) * b.hw * 1.5 + Math.sin(t * 5 + i) * 6, py = top - 6 - 60 * u, r = 8 + 12 * u; ctx.save(); ctx.globalAlpha = (1 - u) * .85; ctx.beginPath(); ctx.arc(px, py, r + 2, 0, 6.283); ctx.fillStyle = '#2a2a2a'; ctx.fill(); ctx.beginPath(); ctx.arc(px, py, r, 0, 6.283); ctx.fillStyle = '#7d7d7d'; ctx.fill(); ctx.beginPath(); ctx.arc(px - r * .25, py - r * .25, r * .5, 0, 6.283); ctx.fillStyle = '#b5b5b5'; ctx.fill(); ctx.restore(); }   // humo
   ctx.save(); for(let i = 0; i < 16; i++){ const t = a - .15 - HH(i, 80) * .3; if(t < 0 || t > .9) continue; ctx.globalAlpha = 1 - t / .9; ctx.fillStyle = i % 3 ? '#4a4a4a' : '#9a9a9a'; const sz = 2 + HH(i, 81) * 3; ctx.fillRect(cx + (HH(i, 82) - .5) * b.hw * 2 + Math.sin(t * 6 + i) * 8 - sz / 2, top + hh * .4 - t * 55 - sz / 2, sz, sz); } ctx.restore();                  // ceniza
 }
-// Hidropulso: esfera de agua con ondas que salen de ella
+// Hidropulso (como en los juegos de DS): un ANILLO de agua que sale pequeño y va creciendo mientras viaja, con burbujas dentro y una estela de burbujas que suben;
+// al impactar, el anillo se abre alrededor del rival, se vuelve grueso y oscuro y se deshace entre burbujas, con un tinte de «fondo marino».
+function hgBubble(x, y, r, A){                                       // burbuja verde azulada con borde oscuro y un brillo arriba a la izquierda
+  if(r < .8 || A <= 0) return;
+  ctx.save(); ctx.globalAlpha = A;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fillStyle = 'rgba(64,184,204,.62)'; ctx.fill(); ctx.lineWidth = Math.max(1.2, r * .28); ctx.strokeStyle = '#14607a'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x, y, r * .6, Math.PI * 1.05, Math.PI * 1.6); ctx.lineWidth = Math.max(1, r * .24); ctx.strokeStyle = '#e8fbff'; ctx.stroke();
+  ctx.restore();
+}
 function hgHidropulsoFlight(s, a, an){
-  ctx.save(); const t = g.t, r = 16 + Math.sin(t * 12) * 1.2;
-  for(let i = 0; i < 3; i++){ const v = (t * 1.8 + i / 3) % 1, rr = r + 4 + v * 26; ctx.save(); ctx.translate(s.x, s.y); ctx.globalAlpha = 1 - v; ctx.beginPath(); ctx.arc(0, 0, rr, 0, 6.283); ctx.strokeStyle = TP.agua[0]; ctx.lineWidth = 8; ctx.stroke(); ctx.strokeStyle = TP.agua[3]; ctx.lineWidth = 4; ctx.stroke(); ctx.restore(); }
-  tpLayers([[s.x, s.y, r]], TP.agua);
-  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(s.x - r * .35, s.y - r * .4, r * .22, r * .14, -.6, 0, 6.283); ctx.fill();     // reflejo
-  for(let i = 0; i < 4; i++){ const ph = t * 4 + i * 1.57, bx = s.x + Math.cos(ph) * (r + 10), by = s.y + Math.sin(ph) * (r + 10); tpLayers([[bx, by, 3.2]], TP.agua); }          // burbujitas orbitando
+  const t = g.t, grow = clamp01(a / .4), R = 10 + 17 * grow + Math.sin(t * 13), ca = Math.cos(an), sa = Math.sin(an), far = a * Math.hypot(s.vx || 0, s.vy || 0);
+  ctx.save();
+  for(let i = 0; i < 10; i++){                                       // estela: burbujas que se quedan atrás y suben
+    const u = (t * 1.5 + HH(i, 3)) % 1, back = 12 + u * 96; if(back > far + 10) continue;
+    const side = (HH(i, 5) - .5) * (30 + 26 * u);
+    hgBubble(s.x - ca * back - sa * side, s.y - sa * back + ca * side - u * 20, (2.6 + HH(i, 7) * 4.2) * (1 - u * .35), (1 - u) * .95);
+  }
+  ctx.globalAlpha = .28; ctx.fillStyle = '#2f7fd6'; ctx.beginPath(); ctx.arc(s.x, s.y, R, 0, 6.283); ctx.fill();          // agua dentro del anillo
+  ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(s.x, s.y, R, 0, 6.283);
+  ctx.lineWidth = 8; ctx.strokeStyle = '#0d3f6e'; ctx.stroke(); ctx.lineWidth = 5; ctx.strokeStyle = '#7fd4f5'; ctx.stroke(); ctx.lineWidth = 1.6; ctx.strokeStyle = '#eafcff'; ctx.stroke();   // anillo: borde oscuro, cuerpo claro, filo blanco
+  ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(2, R - 5), Math.PI * 1.05, Math.PI * 1.55); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.stroke();                          // brillo
+  for(let i = 0; i < 4; i++){ const ph = t * 3.2 + i * 1.571, rr = R * (.36 + .12 * Math.sin(t * 5 + i)); hgBubble(s.x + Math.cos(ph) * rr, s.y + Math.sin(ph) * rr, 2.4 + (i % 2) * 1.4 + grow * 1.6, .95); }   // burbujas dentro
   ctx.restore();
 }
 function hgHidropulsoHit(e, a){
   const k = e.k || 1, x = e.x, y = e.y - 6; if(!e.hdDec){ e.hdDec = 1; hdDecal(e.x, e.y, 'agua', k); }
-  for(let i = 0; i < 3; i++){ const v = clamp01((a - i * .1) / .5); if(v > 0 && v < 1){ const o = 1 - Math.pow(1 - v, 2); tpEllipse(x, y, (14 + 62 * o) * k, (12 + 50 * o) * k, 1 - v, 5, TP.agua); } }
-  const u = clamp01(a / .22), life = a < .3 ? 1 : Math.max(0, 1 - (a - .3) / .25);
-  if(life > 0) tpLayers([[x, y, 24 * (.5 + .5 * u) * life * k]], TP.agua);
-  tpDrops(x, y, a, 14, 200 * k, .7, 420, TP.agua, 5.5);
+  ctx.save();
+  const tint = a < .12 ? a / .12 : Math.max(0, 1 - (a - .12) / .5);                                                       // fondo marino: se oscurece en azul alrededor
+  if(tint > 0){ const gr = ctx.createRadialGradient(x, y, 8, x, y, 125 * k); gr.addColorStop(0, 'rgba(10,30,90,.45)'); gr.addColorStop(1, 'rgba(10,30,90,0)'); ctx.globalAlpha = tint; ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(x, y, 125 * k, 0, 6.283); ctx.fill(); }
+  for(let i = 0; i < 2; i++){                                                                                             // el anillo se abre: claro al principio, grueso y oscuro al crecer
+    const v = clamp01((a - i * .16) / .55); if(v <= 0 || v >= 1) continue;
+    const o = 1 - Math.pow(1 - v, 2), R = (26 + 80 * o) * k, lw = (6 + 12 * o) * k, al = (1 - v) * (i ? .7 : 1);
+    ctx.beginPath(); ctx.arc(x, y, R, 0, 6.283);
+    ctx.globalAlpha = al; ctx.lineWidth = lw + 4; ctx.strokeStyle = '#06222e'; ctx.stroke(); ctx.lineWidth = lw; ctx.strokeStyle = '#1c6f8c'; ctx.stroke();
+    ctx.globalAlpha = al * Math.max(0, 1 - v * 2.4); ctx.strokeStyle = '#7fd4f5'; ctx.stroke(); ctx.lineWidth = Math.max(1.5, lw * .25); ctx.strokeStyle = '#eafcff'; ctx.stroke();
+  }
+  for(let i = 0; i < 16; i++){                                                                                            // burbujas que salen y suben
+    const u = (a - HH(i, 11) * .18) / .7; if(u <= 0 || u >= 1) continue;
+    const an = HH(i, 13) * 6.283, d = (18 + HH(i, 17) * 72) * k * (1 - Math.pow(1 - u, 2));
+    hgBubble(x + Math.cos(an) * d, y + Math.sin(an) * d * .8 - u * 34 * k, (3 + HH(i, 19) * 5) * k * (1 - u * .3), 1 - u);
+  }
+  ctx.restore();
 }
 
 /* ======================= VENDAVAL (botón E): remolino que levanta al rival ======================= */

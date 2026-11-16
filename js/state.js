@@ -49,7 +49,10 @@ try{
     if(s.volMusic === undefined && s.volMenu === undefined && s.volBattle === undefined){ save.volMenu = save.volBattle = okv(s.vol) ? s.vol : save.volMenu; save.vol = 100; }
     else{ save.vol = okv(s.vol) ? s.vol : 100; const old = okv(s.volMusic) ? s.volMusic : 70; save.volMenu = okv(s.volMenu) ? s.volMenu : old; save.volBattle = okv(s.volBattle) ? s.volBattle : old; }
     save.volSfx = s.volSfx ?? save.volSfx;
-    save.controls = s.controls && typeof s.controls === 'object' && !Array.isArray(s.controls) ? s.controls : {};         // controles personalizados (js/controls.js); vacío = los de serie save.patchSeen = typeof s.patchSeen === 'string' ? s.patchSeen : '';
+    save.controls = s.controls && typeof s.controls === 'object' && !Array.isArray(s.controls) ? s.controls : {};         // controles personalizados (js/controls.js); vacío = los de serie
+    save.patchSeen = typeof s.patchSeen === 'string' ? s.patchSeen : '';                                              // últimas notas del parche vistas (js/patchnotes.js)
+    save.padCtl = s.padCtl && typeof s.padCtl === 'object' && !Array.isArray(s.padCtl) ? s.padCtl : {};               // botones del mando personalizados (js/gamepad.js); cada valor se valida al usarlo (gpBinds)
+    save.guideSeen = !!s.guideSeen;                                                                                   // ¿ya se ha visto la guía? (js/guia.js)
     save.shinyOff = Array.isArray(s.shinyOff) ? s.shinyOff : [];                    // shinys que tienes pero eliges NO usar (por defecto se usan)
     save.avatar = typeof s.avatar === 'string' ? s.avatar : '';
     save.title = typeof s.title === 'string' ? s.title : ''; save.frame = typeof s.frame === 'string' ? s.frame : '';      // título (id del logro) y marco de avatar elegidos (Perfil); se comprueban al usarlos (js/achievements.js)
@@ -71,7 +74,8 @@ try{
     if(save.easy.record >= floorsOf('Kanto').length) save.easy.champ.Kanto = 1;
     save.champ = obj(s.champ); save.prog = obj(s.prog); save.campoWins = obj(s.campoWins); save.stats = obj(s.stats);
     { const t0 = obj(s.tower), nn = v => Math.max(0, Math.min(1e6, Math.floor(+v) || 0)); save.tower = {best:nn(t0.best), total:nn(t0.total), runs:nn(t0.runs), ms:obj(t0.ms), rot:nn(t0.rot), seen:nn(t0.seen), run:(t0.run && typeof t0.run === 'object') ? {f:Math.min(49, nn(t0.run.f)), r:nn(t0.run.r)} : null}; }   // run = la subida a medias (js/torre.js)
-    { const r0 = obj(s.ranked), ni = v => Math.max(-1e6, Math.min(1e6, Math.floor(+v) || 0)); save.ranked = {pts:Math.max(0, ni(r0.pts)), w:Math.max(0, ni(r0.w)), l:Math.max(0, ni(r0.l)), streak:ni(r0.streak), best:Math.max(0, ni(r0.best)), hitos:obj(r0.hitos)}; }      // Clasificatoria (js/ranked.js)      // Torre Batalla (js/torre.js): récord de piso, pisos totales, subidas y premios únicos ya cobrados if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
+    { const r0 = obj(s.ranked), ni = v => Math.max(-1e6, Math.min(1e6, Math.floor(+v) || 0)); save.ranked = {pts:Math.max(0, ni(r0.pts)), w:Math.max(0, ni(r0.w)), l:Math.max(0, ni(r0.l)), streak:ni(r0.streak), best:Math.max(0, ni(r0.best)), hitos:obj(r0.hitos)}; }      // Clasificatoria (js/ranked.js)      // Torre Batalla (js/torre.js): récord de piso, pisos totales, subidas y premios únicos ya cobrados
+    if(save.record >= floorsOf('Kanto').length) save.champ.Kanto = 1;   // prog = combates superados en las demás regiones (Johto...)
          // quien ya venció a Azul tiene el trofeo de Kanto
     save.profileFav = Array.isArray(s.profileFav) ? s.profileFav : []; save.profileSh = Array.isArray(s.profileSh) ? s.profileSh : []; save.ach = (s.ach && typeof s.ach === 'object') ? s.ach : {};   save.welcome = s.welcome === undefined ? 1 : s.welcome; save.login = (s.login && typeof s.login === 'object') ? {streak:+s.login.streak || 0, last:String(s.login.last || '')} : {streak:0, last:''}; save.firstWin = String(s.firstWin || '');   // profileSh = 1 en cada favorito que enseñas en su versión shiny
   }

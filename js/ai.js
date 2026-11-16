@@ -40,19 +40,20 @@ const aiSmart = () => !!(AI_TUNE.on && g.o.boss && AI_TUNE.agg[g.o.boss]);
 function enemyBasic(E, P, dt){
   if(aiAway(P)) return aiRetreat(E, P, dt);                    // estás cambiando de Pokémon o te has debilitado: se aparta y no ataca
   const sk = g.o.skill, ang = Math.atan2(P.y-E.y, P.x-E.x), dist = Math.hypot(P.x-E.x, P.y-E.y);
+  if(E.wind && E.wind.t > E.wind.T * FEEL.windLock) E.wind.ang = ang;                // cargando el ataque fuerte: te sigue con la línea hasta el último tramo y ahí la deja fija (FEEL, combat.js)
   const want = dist > 240 ? 1 : dist < 140 ? -1 : 0, side = Math.sin(g.t*1.2 + g.ei*2);
   move(E, Math.cos(ang)*want + Math.cos(ang+1.57)*side, Math.sin(ang)*want + Math.sin(ang+1.57)*side, dt, .5 + .4*sk);
   E.dir = dirOf(ang);
-  const err = (1-sk)*.6*(Math.random()-.5), r = Math.random;
+  const err = (1-sk)*.6*(Math.random()-.5), r = Math.random, los = !pilBlocks(E.x, E.y, P.x, P.y, 14);      // los = no hay un pilar en medio (combat.js): si lo hay, no malgasta disparos
   if(!aiNoAtk(P)){                             // tras el cambio espera un momento (AI_SWAP.grace) antes de atacar
     if(dist < 120 && r() < dt*6) use(E,1,ang,false);
-    else if(r() < dt*(1+3*sk)) use(E,2,ang+err,false);
-    if(r() < dt*.5*sk) use(E,4,ang+err,false);
+    else if(los && r() < dt*(1+3*sk)) use(E,2,ang+err,false);
+    if(los && r() < dt*.5*sk) use(E,4,ang+err,false);
     if(r() < dt*.25*sk) use(E,3,ang,false);
     if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
   }
 }
-const aiReach = T => MELEE.reach + rad(T);                          // alcance real del golpe cuerpo a cuerpo (igual que en melee(), combat.js)
+const aiReach = (T, E) => (E ? meleeKind(E).reach : MELEE.reach) + rad(T);                          // alcance real del golpe cuerpo a cuerpo (igual que en melee(), combat.js)
 
 function aiStyle(E){
   if(E.style) return E.style;
@@ -81,13 +82,14 @@ function aiThreat(E){
 
 function enemyAI(E, P, dt){
   const sk = g.o.skill, r = Math.random, st = aiStyle(E);
-  const dx = P.x - E.x, dy = P.y - E.y, dist = Math.hypot(dx, dy), ang = Math.atan2(dy, dx), reach = aiReach(P);
+  const dx = P.x - E.x, dy = P.y - E.y, dist = Math.hypot(dx, dy), ang = Math.atan2(dy, dx), reach = aiReach(P, E);
   // velocidad del jugador (suavizada), para apuntar a donde va a estar
   const pv = E.pv || (E.pv = {x:P.x, y:P.y, vx:0, vy:0, who:g.pi});
   if(dt > 0 && pv.who === g.pi){ pv.vx += (clamp((P.x - pv.x)/dt, -450, 450) - pv.vx) * .2; pv.vy += (clamp((P.y - pv.y)/dt, -450, 450) - pv.vy) * .2; } else { pv.vx = pv.vy = 0; pv.who = g.pi; }
   pv.x = P.x; pv.y = P.y;
   const aimAt = spd => { const lead = dist / spd * (.55 + .4*sk); return Math.atan2(P.y + pv.vy*lead - E.y, P.x + pv.vx*lead - E.x) + (1 - sk) * .5 * (r() - .5); };
 
+  if(E.wind && E.wind.t > E.wind.T * FEEL.windLock){ const w = E.wind, ld = dist / 380 * (.55 + .4*sk); if(w.err === undefined) w.err = (1 - sk) * .5 * (r() - .5); w.ang = Math.atan2(P.y + pv.vy*ld - E.y, P.x + pv.vx*ld - E.x) + w.err; }                                // cargando el ataque fuerte: te sigue con la línea hasta el último tramo y ahí la deja fija (FEEL, combat.js): ese es el momento de esquivar
   if(aiAway(P)) return aiRetreat(E, P, dt);                  // estás cambiando de Pokémon o te has debilitado: se aparta y no ataca
 
   // ---- Movimiento: cada estilo mantiene su distancia y da vueltas alrededor (cambia de sentido de vez en cuando) ----
@@ -100,8 +102,12 @@ function enemyAI(E, P, dt){
     const px = Math.cos(ang + 1.57), py = Math.sin(ang + 1.57);
     E.orb = (px*(W/2 - E.x) + py*(H/2 - E.y)) >= 0 ? 1 : -1; want = 0; mag = 1;
   }
+  const los = !pilBlocks(E.x, E.y, P.x, P.y, 14);                                           // ¿te ve? (no hay un pilar en medio, combat.js)
+  if(!los && want <= 0){ want = .7; mag = 1; }                                               // te has cubierto tras un pilar: lo rodea para volver a tenerte a tiro
   const th = aiThreat(E);
+  const tq = terrHostile(E);                                                                 // ¿está pisando brasas, hielo, un charco... tuyos? (TERR, combat.js)
   if(th !== null && r() < sk) move(E, Math.cos(th), Math.sin(th), dt, .5 + .4*sk);        // esquiva andando…
+  else if(tq) move(E, E.x - tq.x || 1, E.y + 20 - tq.y || 1, dt, .9);                          // …sale de la zona que le perjudica
   else move(E, Math.cos(ang)*want + Math.cos(ang + 1.57)*E.orb*mag, Math.sin(ang)*want + Math.sin(ang + 1.57)*E.orb*mag, dt, .5 + .4*sk);
   E.dir = dirOf(ang);
 
@@ -113,7 +119,7 @@ function enemyAI(E, P, dt){
   if(st !== 'melee' && dist < reach*.9 && can(0) && r() < rate(1.5)) return use(E, 0, ang + Math.PI + E.orb*.9, false);     // tirador con el rival encima: huye con la carrera
   if(st === 'melee' && dist > reach*2 && can(0) && r() < rate(1.2)) return use(E, 0, ang, false);                              // pegador lejos: se lanza con la carrera
   if(!(E.buff > 0) && can(3) && dist < 450 && (st === 'melee' || E.en >= 55) && r() < rate(.9)) return use(E, 3, ang, false);   // mejora (Q): al entrar en combate
-  if(can(4) && dist > 130 && dist < 560 && (st !== 'melee' || dist > reach*1.5) && r() < rate(1.1)) return use(E, 4, aimAt(380), false);   // ataque fuerte (E)
+  if(los && can(4) && dist > 130 && dist < 560 && (st !== 'melee' || dist > reach*1.5) && r() < rate(1.1)) return use(E, 4, aimAt(380), false);   // ataque fuerte (E)
   const needE = E.cd[4] < 1.5 ? 40 : 0;                                                    // guarda energía para el E si está a punto de poder usarlo
-  if(can(2) && dist > reach*(st === 'melee' ? 2.2 : 1.15) && dist < 620 && E.en >= enCost(E, 2) + (st === 'melee' ? 36 : needE) && r() < rate(2.2)) use(E, 2, aimAt(520), false);   // disparo
+  if(los && can(2) && dist > reach*(st === 'melee' ? 2.2 : 1.15) && dist < 620 && E.en >= enCost(E, 2) + (st === 'melee' ? 36 : needE) && r() < rate(2.2)) use(E, 2, aimAt(shotKind(E).speed), false);   // disparo
 }

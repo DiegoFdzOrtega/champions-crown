@@ -1,0 +1,10 @@
+COPIA DE SEGURIDAD 2 · 15-11-2026
+Estado del combate CON retroceso, esquiva y aviso del ataque fuerte, pero ANTES de añadir las formas de ataque por tipo
+(Barrido / Estocada / Giro en el golpe · Directo / Ráfaga / Veloz / Rebote / Pesado en el disparo).
+
+Archivos guardados (tal y como estaban):
+  index.html
+  js/combat.js   js/ai.js   js/pvp.js   js/render.js   js/guia.js
+
+PARA DAR MARCHA ATRÁS SOLO DE LAS FORMAS: copia estos archivos encima de los del juego (mismas carpetas) y recarga con Ctrl+F5.
+Para volver al combate de antes de todo, usa la carpeta _backup_combate_2026-11-15.

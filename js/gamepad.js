@@ -16,7 +16,7 @@ const GP = {
   prev: [],             // botones del fotograma anterior (para detectar «acaba de pulsarse»)
   held: {},             // acciones de combate mantenidas ahora mismo
   aim: null,            // ángulo del stick derecho (null = apunta solo)
-  rep: {}, focus: null, seen: false
+  rep: {}, focus: null, seen: false, cap: null, capEl: null
 };
 const GP_DEAD = .28;
 // ---- Botones del mando configurables (Ajustes › Controles › Mando). Guardado: save.padCtl = {accion: [botón1, botón2]} ----
@@ -102,6 +102,12 @@ function gpClick(){
   if(el.tagName === 'SELECT' || (el.tagName === 'INPUT' && /^(text|search|number|email|password|url|tel)$/i.test(el.type))){ el.focus(); return; }
   el.click();
 }
+function gpScroller(){                                    // la zona con scroll donde está el botón marcado (o la del centro de la pantalla)
+  for(let el = GP.focus || document.elementFromPoint(innerWidth / 2, innerHeight / 2); el && el !== document.documentElement; el = el.parentElement){
+    if(el.scrollHeight > el.clientHeight + 2 && /auto|scroll/.test(getComputedStyle(el).overflowY)) return el;
+  }
+  return document.scrollingElement;
+}
 function gpEsc(){ (document.activeElement || document.body).dispatchEvent(new KeyboardEvent('keydown', {code: 'Escape', key: 'Escape', bubbles: true})); }
 
 // ---- Un fotograma del mando ----
@@ -110,7 +116,8 @@ function gpTick(){
   const p = gpPad(); if(!p){ if(GP.on) GP.on = false; GP.held = {}; return; }
   const now = performance.now(), b = i => gpBtn(p, i), pr = i => b(i) && !GP.prev[i];
   if(GP.cap){                                            // esperando un botón para asignarlo (Ajustes › Controles)
-    for(let i = 0; i < 16; i++) if(pr(i)){ const f = GP.cap; GP.cap = null; f(i); }
+    if(!GP.capEl || !GP.capEl.isConnected || GP.capEl.closest('.hide')){ if(ctlCapOff) ctlCapOff(); else GP.cap = null; }      // se salió de Ajustes sin elegir botón: se cancela
+    else for(let i = 0; i < 16; i++) if(pr(i)){ const f = GP.cap; GP.cap = null; f(i); break; }
     GP.prev = p.buttons.map((x, i) => b(i)); return;
   }
   const inC = gpInCombat(), [ax, ay] = gpAxis(p, !inC), rx = p.axes[2] || 0, ry = p.axes[3] || 0;
@@ -138,11 +145,12 @@ function gpTick(){
       if(r.k !== k){ r.k = k; r.t = now + 380; gpMove(d[0], d[1]); }
       else if(now >= r.t){ r.t = now + 130; gpMove(d[0], d[1]); }
     }else GP.rep = {};
+    const pz = !!g && !g.over && g.paused;
     if(pr(0)) gpClick();
     if(pr(1)) gpEsc();
-    if(pr(9)){ if(g && !g.over && g.paused) pauseBattle(false); else gpEsc(); }
+    if(pz && (pr(9) || gpHeldId('pause', pr))) pauseBattle(false); else if(pr(9)) gpEsc();      // en pausa, también la quita el botón que hayas puesto para «Pausa»
     if(g && g.paused && !GP.focus) gpMove(0, 1);
-    if(Math.abs(ry) > .4){ const sc = (GP.focus && GP.focus.closest('[style*="overflow"], .scroll')) || document.scrollingElement; if(sc) sc.scrollTop += ry * 14; }
+    if(Math.abs(ry) > .4){ const sc = gpScroller(); if(sc) sc.scrollTop += ry * 14; }
   }
   GP.prev = p.buttons.map((x, i) => b(i));
 }
@@ -182,7 +190,8 @@ addEventListener('gamepadconnected', () => { if(typeof toast === 'function') toa
       if(ctlCapOff) ctlCapOff();
       const id = b.dataset.p, slot = +b.dataset.s;
       b.classList.add('cap'); b.textContent = 'Pulsa...';
-      const off = () => { GP.cap = null; removeEventListener('keydown', onKey, true); ctlCapOff = null; ctlPaint(); };
+      const off = () => { GP.cap = null; GP.capEl = null; removeEventListener('keydown', onKey, true); removeEventListener('mousedown', onMouse, true); ctlCapOff = null; ctlPaint(); };
+      const onMouse = ev => { if(!(ev.target instanceof Element) || ev.target.closest('.ctlP') !== b) off(); };      // un clic en cualquier otro sitio cancela la captura
       const onKey = ev => {
         if(ev.code !== 'Escape' && ev.code !== 'Backspace' && ev.code !== 'Delete') return;
         ev.preventDefault(); ev.stopImmediatePropagation();
@@ -190,7 +199,7 @@ addEventListener('gamepadconnected', () => { if(typeof toast === 'function') toa
         off(); gpSetBind(id, slot, null); ctlPaint();
       };
       GP.cap = i => { off(); gpSetBind(id, slot, i); ctlPaint(); };
-      ctlCapOff = off; addEventListener('keydown', onKey, true);
+      GP.capEl = b; ctlCapOff = off; addEventListener('keydown', onKey, true); addEventListener('mousedown', onMouse, true);
       if(!gpPad() && typeof toast === 'function') toast('No detecto el mando: conéctalo y pulsa un botón.');
     });
   };

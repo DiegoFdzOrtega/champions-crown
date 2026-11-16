@@ -27,21 +27,24 @@ function pauseBattle(on){
     for(const k in keys) keys[k] = false; mouse.l = mouse.r = false; $('pBtns').classList.remove('hide'); $('pAsk').classList.add('hide'); $('pGo').focus();   // sueltas teclas y ratón para que no se quede nada pulsado
     const o = g.o, alive = a => a.filter(f => !f.dead).length, s = g.clock | 0;
     $('pzSub').textContent = (o.title ? o.title + ' · ' : 'Piso ' + o.floor + ' · ') + (o.sub || '');
+    $('pRe').style.display = o.torre ? 'none' : '';                       // en la Torre no se puede reiniciar el combate: cada piso se juega una sola vez por subida
     $('pzStats').innerHTML = `<span>Tiempo<b>${(s / 60) | 0}:${String(s % 60).padStart(2, '0')}</b></span><span>Tu equipo<b>${alive(g.p)}/${g.p.length}</b></span><span>Rival<b>${alive(g.e)}/${g.e.length}</b></span>`;
   }
 }
 function exitBattle(){                                           // sale del combate sin recompensa y vuelve a la pantalla de donde venías
-  const campo = g && g.o.campo, torre = g && g.o.torre, prb = g && g.o.pruebas; g = null; $('pause').classList.add('hide'); Music.duck(false);
+  const campo = g && g.o.campo, torre = g && g.o.torre, prb = g && g.o.pruebas;
+  if(torre && typeof torreAcabar === 'function'){ if(!g.o.boss) save.tower.seen = (save.tower.seen || 0) + 1; torreAcabar(); }   // Torre: salir a medias cuenta como caer (si no, se podría repetir el piso sin fin)
+  g = null; $('pause').classList.add('hide'); Music.duck(false);
   if(prb) goMain(); else if(torre) openTorre(); else if(campo) openCampo(); else goStory();
 }
 function restartBattle(){                                        // empieza el mismo combate desde cero (misma vida, energía y rival), sin recompensa de por medio
-  const o = g.o; $('pause').classList.add('hide'); Music.duck(false); startBattle(o, true);
+  const o = g.o; if(o.torre) return; $('pause').classList.add('hide'); Music.duck(false); startBattle(o, true);
 }
 { const el = id => document.getElementById(id);                   // ($ todavía no existe: ui.js se carga después)
   const ask = (txt, yes, act) => { el('pBtns').classList.add('hide'); el('pAsk').classList.remove('hide'); el('pAskT').textContent = txt; el('pYes').textContent = yes; pzAct = act; el('pNo').focus(); };
   el('pGo').onclick = () => pauseBattle(false);
   el('pNo').onclick = () => { pzAct = null; el('pAsk').classList.add('hide'); el('pBtns').classList.remove('hide'); el('pGo').focus(); };   // «No»: vuelves al menú de pausa
-  el('pOut').onclick = () => ask('¿Salir del combate? No ganarás ninguna recompensa.', 'Sí, salir', exitBattle);
+  el('pOut').onclick = () => ask(g && g.o.torre ? '¿Salir del combate? Tu subida a la Torre terminará aquí, como si hubieras caído.' : '¿Salir del combate? No ganarás ninguna recompensa.', 'Sí, salir', exitBattle);
   el('pRe').onclick = () => ask('¿Reiniciar el combate? Empezarás desde cero: tus Pokémon y el rival recuperan toda la vida.', 'Sí, reiniciar', restartBattle);
   el('pYes').onclick = () => { if(pzAct) pzAct(); };
   el('pMus').onclick = () => { Music.toggleMute(); el('pMus').textContent = save.mute ? 'Sonido: no (M)' : 'Sonido: sí (M)'; }; }

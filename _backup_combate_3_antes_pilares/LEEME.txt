@@ -1,0 +1,9 @@
+COPIA DE SEGURIDAD 3 · 15-11-2026
+Estado del combate CON retroceso, esquiva, carga del ataque fuerte y formas de ataque (sin rebote), pero ANTES de añadir los PILARES.
+
+Archivos guardados (tal y como estaban):
+  index.html
+  js/combat.js   js/ai.js   js/render.js   js/guia.js
+
+PARA QUITAR SOLO LOS PILARES sin restaurar nada: en js/combat.js pon  PIL.on  a  false.
+PARA DAR MARCHA ATRÁS: copia estos archivos encima de los del juego (mismas carpetas) y recarga con Ctrl+F5.
