@@ -42,6 +42,7 @@ function koBonus(A, T){                                              // A ha deb
   if(!A.dead) g.pops.push({x:A.x, y:A.y-140, txt:'+ENERGÍA', t:1.1, c:'#ffe04a', s:11});
   if(!g.pvp && (g.p.includes(T) ? g.p : g.e).every(f => f.dead)){ g.slowT = FEEL.slowT; g.zoomAt = {x:T.x, y:T.y}; }      // era el último: remate a cámara lenta y con la cámara acercándose
 }
+const BIG_SPEED = {'Rayo Solar': 820, 'Hidrobomba': 820, 'Hiperrayo': 820};                                // [AJUSTE] ataques fuertes que van más deprisa que los demás (380): el Rayo Solar es un rayo, cruza la arena en un momento
 function windFire(f){                                                // el ataque fuerte sale al acabar la carga
   const w = f.wind; f.wind = null; f.dir = dirOf(w.ang);
   const B = foe(w.mine), bd = Math.hypot(B.x - f.x, B.y - f.y);                  // onda al soltarlo: si el rival está encima, lo aparta (para quitártelo cuando viene cuerpo a cuerpo)
@@ -49,7 +50,7 @@ function windFire(f){                                                // el ataqu
   const wp = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : 0;                       // cuánto has cargado (0..1)
   if(!w.hold && !B.dead && !B.ghost && !(B.inv > 0) && bd < FEEL.blastR){ const a = bd < .01 ? w.ang : Math.atan2(B.y - f.y, B.x - f.x); B.kx = clamp((B.kx || 0) + Math.cos(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.ky = clamp((B.ky || 0) + Math.sin(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.kbHit = true; setAct(B, 'Hurt', .3); }
   Sfx.play('strong', w.vk);
-  const s4 = shot(f, w.ang, w.dmg * (1 + (FEEL.windK - 1) * wp), 380, 22, w.type, w.mine); s4.kbP = wp; fxShotStart(f, s4, w.nm, true);
+  const s4 = shot(f, w.ang, w.dmg * (1 + (FEEL.windK - 1) * wp), BIG_SPEED[w.nm] || 380, 22, w.type, w.mine); s4.kbP = wp; fxShotStart(f, s4, w.nm, true);
   if(w.nm === 'Surf') f.ride = {s:s4, a:w.ang, t:1.4}; else if(w.nm === 'Envite Ígneo' || w.nm === 'Pájaro Osado') f.ride = {s:s4, a:w.ang, t:1.2};   // Surf: el Pokémon se monta en la ola y viaja con ella
 }
 // ---- PILARES: de vez en cuando cae una columna del cielo. Para los disparos (los tuyos y los del rival), no se atraviesa andando y se ROMPE a golpes ----
@@ -152,7 +153,7 @@ function terrHostile(f){ for(const q of g.terr || []){ const d = TERR[q.type]; i
 function terrAge(dt){ if(g.terr && g.terr.length){ for(const q of g.terr) q.t += dt; g.terr = g.terr.filter(q => q.t < q.T); } }
 function terrTick(f, dt){                                            // efecto de las franjas sobre un Pokémon, cada fotograma
   let slow = 1, slip = 0; if(f.tst > 0) f.tst -= dt;
-  if(!f.dead && !f.ghost) for(const q of g.terr || []){
+  if(!f.dead && !f.ghost && !f.jump) for(const q of g.terr || []){
     if(!terrOn(f, q)) continue; const d = TERR[q.type];
     if(terrFoe(f, q)){
       if(d.dps && f.hp > 1) f.hp = Math.max(1, f.hp - f.max * d.dps * eff(q.type, f.m.types) * dt);
@@ -227,8 +228,61 @@ function clashHold(s, dt){                                           // un dispa
     else{ s.dmg *= CLASH.keep; Sfx.play('hit_super', .6); }
   }
 }
+// ---- GOLPE GIRATORIO (Torbellino): en vez de un golpe, el Pokémon gira un rato sobre sí mismo lanzando agua alrededor. Puede moverse mientras gira ----
+// Golpea varias veces a lo que tenga dentro de su radio; el último golpe empuja. El dibujo (cuatro brazos de agua en espiral) está en js/fxnuevos.js.
+const SPIN = {T: 1.1, n: 6, R: 104, dmg: .27, kb: .22, kbEnd: 1.3, chgR: 1.2, rot: 14};      // [AJUSTE] segundos que dura · golpes que da · radio · daño de cada golpe (1 = un golpe normal; 0,27 × 6 = 1,6 si entran todos) · empujón de cada golpe / del último · radio extra si va cargado · velocidad a la que gira el Pokémon
+const SPIN_MOVE = {'Torbellino': 1};                                 // ataques cuerpo a cuerpo que son un giro
+function spinStart(f, dmg, type, mine, nm){
+  f.spin = {t: 0, T: SPIN.T, k: 0, n: SPIN.n, gap: (SPIN.T - .15) / SPIN.n, next: .12, dmg: dmg * SPIN.dmg, type, mine, nm, R: SPIN.R * (f.chg ? SPIN.chgR : 1)};
+  f.cd[1] = Math.max(f.cd[1], SPIN.T + .25); setAct(f, 'Attack', SPIN.T);
+}
+function spinTick(f, dt){
+  const s = f.spin; if(!s) return;
+  if(f.dead || f.ghost || cant(f)){ f.spin = null; return; }
+  s.t += dt; f.dir = dirOf(s.t * SPIN.rot);                          // gira de verdad: va pasando por sus 8 direcciones
+  while(s.t >= s.next && s.k < s.n){
+    s.k++; s.next += s.gap; const T = foe(s.mine), last = s.k === s.n;
+    if(!T.dead && !T.ghost && Math.hypot(T.x - f.x, T.y - f.y) <= s.R + rad(T)){ f.kbK = last ? SPIN.kbEnd : SPIN.kb; hit(T, s.dmg, s.type, f, true, false, s.nm); f.kbK = 1; }
+    if(last) for(const p of pilList()) if(Math.hypot(p.x - f.x, p.y - f.y) <= s.R + p.r) pilDamage(p, 1);      // al acabar también pica los pilares que pille
+  }
+  if(s.t >= s.T) f.spin = null;
+}
+// ---- SALTO (Golpe Cuerpo, Vuelo): salta fuera de la pantalla, eliges dónde caer moviéndote y aterriza golpeando en círculo ----
+// Mientras está en el aire no se le puede golpear, no puede atacar ni cambiar, y pasa por encima de pilares y franjas. El rival ve la diana en el suelo y tiene que apartarse.
+const JUMP = {up: .25, air: .75, down: .22, R: 92, dmg: 1.8, kb: 1.7, spd: 1.25, cd: 4};      // [AJUSTE] segundos subiendo / en el aire / cayendo · radio del golpe al caer · daño (1 = un golpe normal) · empujón · velocidad a la que te mueves en el aire · espera hasta el siguiente salto
+const JUMP_MOVE = {'Golpe Cuerpo': {}, 'Vuelo': {air: 1, R: 76, dmg: 1.55, spd: 1.6}};        // [AJUSTE] ataques cuerpo a cuerpo que son un salto, y lo que cada uno cambia de JUMP (Vuelo: más tiempo arriba y más rápido, cae en menos sitio)
+function jumpStart(f, dmg, type, mine, nm){
+  const K = Object.assign({}, JUMP, JUMP_MOVE[nm]);
+  f.jump = {t: 0, K, T: K.up + K.air + K.down, dmg: dmg * K.dmg, type, mine, nm, R: K.R};
+  f.cd[1] = Math.max(f.cd[1], K.cd); f.inv = Math.max(f.inv || 0, .1); f.invUsed = true; f.burst = null; f.kx = f.ky = 0; setAct(f, 'Attack', K.up);
+}
+function jumpTick(f, dt){
+  const j = f.jump; if(!j) return;
+  if(f.dead || f.ghost){ f.jump = null; return; }
+  j.t += dt;
+  if(j.t < j.T){ f.inv = Math.max(f.inv, .05); f.invUsed = true; return; }       // en el aire: intocable (y sin el premio de esquivar con la carrera)
+  f.jump = null; f.inv = 0; setAct(f, 'Attack', .3);                              // aterriza
+  const T = foe(j.mine);
+  if(typeof fxAdd === 'function') fxAdd('impact', '_salto', {x: f.x, y: f.y + 22, dur: 1.5, R: j.R, type: j.type});
+  fx.shake = Math.max(fx.shake, 9); Sfx.play('hit', 1);
+  if(!T.dead && !T.ghost && Math.hypot(T.x - f.x, T.y - f.y) <= j.R + rad(T)){ f.kbK = j.K.kb; hit(T, j.dmg, j.type, f, true, false, j.nm); f.kbK = 1; }
+  for(const p of pilList()) if(Math.hypot(p.x - f.x, p.y - f.y) <= j.R + p.r) pilDamage(p, 1);
+}
+function burstTick(f, dt){                                           // ristra de proyectiles en marcha (SHOT_KINDS.chorro): suelta uno cada K.gap segundos, hacia donde apuntes en ese momento
+  const b = f.burst; if(!b) return;
+  if(f.dead || f.ghost || cant(f)){ f.burst = null; return; }
+  b.t -= dt;
+  while(b.t <= 0 && b.i < b.n){
+    const K = b.K, j = b.i++, s = shot(f, b.ang + Math.sin(j * 2.4) * K.spread, b.dmg, K.speed * (1 + Math.sin(j * 1.7) * K.vary), K.r, b.type, b.mine);
+    s.pw = K.pw; s.pd = K.pd; s.kbS = K.kb; s.sd = j; if(K.range) s.life = s.L = K.range / (K.speed * (1 + Math.sin(j * 1.7) * K.vary));      // alcance limitado: se apaga al llegar
+    if(K.jet){ s.mvn = b.nm; s.jet = 1; } else fxShotStart(f, s, b.nm, false);                        // chorro: sin destello ni rayo por cada llama, solo su dibujo
+    b.t += K.gap;
+  }
+  if(b.i >= b.n) f.burst = null;
+}
 function feelTick(f, dt){                                            // cada fotograma, para los dos Pokémon en combate
   if(f.inv > 0) f.inv -= dt;
+  burstTick(f, dt); spinTick(f, dt); jumpTick(f, dt);
   if(f.ctr > 0) f.ctr -= dt;
   if(f.wind){
     if(f.dead || f.ghost) f.wind = null;
@@ -277,7 +331,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
   }
   T.hp -= dealt;
   if(dealt > 0 && A && A !== T){                                                                       // retroceso: el golpe empuja al que lo recibe (FEEL)
-    const ka = Math.atan2(T.y - A.y, T.x - A.x), kM = A.kbCh ? FEEL.chgMax : big ? FEEL.bigMax : FEEL.kbMax, kp = A.kbCh ? FEEL.chgPush + (FEEL.chgPushMax - FEEL.chgPush) * (A.chgP || 0) : ((big ? FEEL.kbBig + (FEEL.kbBigMax - FEEL.kbBig) * (A.kbP || 0) : close ? FEEL.kbMelee * (A.kbK || 1) : FEEL.kbShot) * (mult >= 2 ? 1.25 : 1) * (crit ? 1.2 : 1));
+    const ka = Math.atan2(T.y - A.y, T.x - A.x), kM = A.kbCh ? FEEL.chgMax : big ? FEEL.bigMax : FEEL.kbMax, kp = A.kbCh ? FEEL.chgPush + (FEEL.chgPushMax - FEEL.chgPush) * (A.chgP || 0) : ((big ? FEEL.kbBig + (FEEL.kbBigMax - FEEL.kbBig) * (A.kbP || 0) : close ? FEEL.kbMelee * (A.kbK || 1) : FEEL.kbShot * (A.kbS || 1)) * (mult >= 2 ? 1.25 : 1) * (crit ? 1.2 : 1));
     T.kx = clamp((T.kx || 0) + Math.cos(ka)*kp, -kM, kM); T.ky = clamp((T.ky || 0) + Math.sin(ka)*kp, -kM, kM); T.kbHit = true;
     if(!g.pvp && typeof fxhd !== 'undefined') fxhd.stop = Math.max(fxhd.stop, crit ? .07 : close ? .03 : 0);   // congelado del golpe también en críticos y cuerpo a cuerpo (js/fxhd.js; no en online)
   }
@@ -315,8 +369,11 @@ const SHOT_KINDS = {
   directo: {n:'Directo', speed:520, r:9,  dmg:1},                                  // el de siempre
   rafaga:  {n:'Ráfaga',  speed:540, r:7,  dmg:.4,  n3:3, spread:.17, pw:.5, pd:.5},              // [AJUSTE] tres pequeños en abanico: de cerca entran los tres (1,2 en total), de lejos uno
   veloz:   {n:'Veloz',   speed:780, r:6,  dmg:.95},                                // [AJUSTE] muy rápido y fino: casi no da tiempo a esquivarlo
-  pesado:  {n:'Pesado',  speed:330, r:15, dmg:1.3, pw:1.5, pd:2}                                 // [AJUSTE] lento, grande y fuerte
+  pesado:  {n:'Pesado',  speed:330, r:15, dmg:1.3, pw:1.5, pd:2},                                // [AJUSTE] lento, grande y fuerte
+  chorro:  {n:'Chorro',  speed:430, r:7,  dmg:.15, burst:9, gap:.065, spread:.07, vary:.12, pw:.35, pd:.34, kb:.16},      // [AJUSTE] una RISTRA: burst proyectiles seguidos, uno cada gap segundos (1,35 de daño si entran todos) · spread = cuánto se abren · vary = cuánto cambia la velocidad de uno a otro · kb = empujón de cada uno
+  llama:   {n:'Llama',   speed:480, r:8,  dmg:.1,  burst:16, gap:.055, spread:.09, vary:.1, pw:.3, pd:.25, kb:.1, range:250, jet:1}      // [AJUSTE] CHORRO SOSTENIDO (Lanzallamas): 16 llamas seguidas durante 0,9 s que salen de donde estés y hacia donde apuntes en cada momento (1,6 de daño si entran todas) · range = hasta dónde llega (px) · jet = se dibuja como chorro (js/fxnuevos.js)
 };
+const SHOT_MOVE = {'Rayo Burbuja':'chorro', 'Lanzallamas':'llama'};                                           // ataques con una forma propia, sea cual sea su tipo
 const MELEE_BY = {lucha:'estocada', bicho:'estocada', volador:'estocada', veneno:'estocada', acero:'estocada', hielo:'estocada', electrico:'estocada',
                   agua:'giro', fuego:'giro', psiquico:'giro', hada:'giro', fantasma:'giro', dragon:'giro'};                       // los demás (normal, planta, tierra, roca, siniestro): barrido
 const SHOT_BY = {electrico:'rafaga', bicho:'rafaga', planta:'rafaga', veneno:'rafaga', volador:'rafaga',
@@ -324,6 +381,7 @@ const SHOT_BY = {electrico:'rafaga', bicho:'rafaga', planta:'rafaga', veneno:'ra
                  fuego:'pesado', fantasma:'pesado', siniestro:'pesado', lucha:'pesado', dragon:'pesado'};       // los demás (agua, roca, normal, tierra): directo
 const meleeKind = f => MELEE_KINDS[MELEE_BY[mtype(f, 1)] || 'barrido'];
 function shotKind(f){
+  if(SHOT_MOVE[mvName(f, 2)]) return SHOT_KINDS[SHOT_MOVE[mvName(f, 2)]];
   if(typeof FXR !== 'undefined' && FXR.stream && FXR.stream[mvName(f, 2)]) return SHOT_KINDS.veloz;      // los ataques que se dibujan como un chorro o un rayo continuo siempre son veloces (en abanico se verían mal)
   return SHOT_KINDS[SHOT_BY[mtype(f, 2)] || 'directo'];
 }
@@ -360,7 +418,7 @@ function mtype(f, i){
 
 function use(f, i, ang, mine){
   const m = MV[i], cost = enCost(f, i);                                         // enCost: Presión del rival
-  if(f.dead || f.wind || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
+  if(f.dead || f.wind || f.jump || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
   if(i > 0 && f.truant > 0) return;                                             // Indolente: espera tras su último ataque
   f.cd[i] = m.cd; f.en -= cost; f.dir = dirOf(ang);
   if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede), confuso o enamorado: se pierde el ataque
@@ -375,12 +433,16 @@ function use(f, i, ang, mine){
   const vk = g.pvp || mine ? 1 : .6;                                            // volumen del sonido al lanzar: el del rival de la Historia, más suave
   Sfx.play(i === 0 ? 'dash' : i === 1 ? 'swing' : i === 2 ? 'shot' : i === 4 ? 'buff' : sm ? 'status' : 'buff', vk);      // (el sonido de cada ataque; el del golpe lo pone hit())
   if(i === 0){ f.dash = .25; f.da = ang; f.inv = feelFoe(f) ? FEEL.invFoe : FEEL.inv; f.invUsed = false; }      // la carrera esquiva: un instante sin recibir golpes
-  if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
-  if(i === 2){ setAct(f,'Shoot',.4); const K = shotKind(f), n = K.n3 || 1;        // disparo: según su forma (SHOT_KINDS)
+  if(i === 1 && JUMP_MOVE[nm]) jumpStart(f, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm);      // salto (Golpe Cuerpo, Vuelo): ver JUMP
+  else if(i === 1 && SPIN_MOVE[nm]) spinStart(f, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm);      // golpe giratorio (Torbellino): ver SPIN
+  else if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
+  if(i === 2 && shotKind(f).burst){ const K = shotKind(f); setAct(f, 'Shoot', K.burst * K.gap + .15); f.burst = {K, n:K.burst, i:0, t:0, ang, dmg:m.dmg*d*K.dmg, type:t, mine, nm}; }      // ristra (Rayo Burbuja): los proyectiles van saliendo en burstTick()
+  else if(i === 2){ setAct(f,'Shoot',.4); const K = shotKind(f), n = K.n3 || 1;        // disparo: según su forma (SHOT_KINDS)
     for(let j = 0; j < n; j++){ const s = shot(f, ang + (j - (n - 1) / 2) * (K.spread || 0), m.dmg*d*K.dmg, K.speed, K.r, t, mine); if(K.pw) s.pw = K.pw; if(K.pd) s.pd = K.pd; fxShotStart(f, s, nm, false); } }
   if(sm){ setAct(f,'Shoot',.4); const s = shot(f, ang, 0, STX.speed * (f.ab === 'Bromista' ? ABX.bromista : 1), STX.r, t, mine); s.status = nm; s.pd = 0; fxShotStart(f, s, nm, false); }   // ataque de estado: proyectil sin daño
   else if(i === 3){ setAct(f,'Charge',.6);  fxBuff(f, nm, t);                  qApply(f, nm); }      // mejora: cada ataque hace lo suyo (js/qmoves.js)
-  if(i === 4){ const wt = feelFoe(f) ? FEEL.windFoe : FEEL.wind; setAct(f,'Charge', wt + .25); f.wind = {t:wt, T:wt, ang, dmg:m.dmg*d, type:t, mine, nm, vk, hold:!feelFoe(f), c:0}; }   // ataque fuerte: se carga un momento (se ve la línea en el suelo) y sale en windFire()
+  if(i === 4){ if(typeof nvBigStart === 'function') nvBigStart(f, nm, t);      // cartel del ataque (js/fxnuevos.js)
+    const wt = feelFoe(f) ? FEEL.windFoe : FEEL.wind; setAct(f,'Charge', wt + .25); f.wind = {t:wt, T:wt, ang, dmg:m.dmg*d, type:t, mine, nm, vk, hold:!feelFoe(f), c:0}; }   // ataque fuerte: se carga un momento (se ve la línea en el suelo) y sale en windFire()
 }
 
 function move(f, dx, dy, dt, k){
@@ -395,7 +457,7 @@ function move(f, dx, dy, dt, k){
   }
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
-  else if(l){ if(f.wind) k *= FEEL.windSlow; if(f.tslow) k *= f.tslow; vx = dx/l*sp*k; vy = dy/l*sp*k; }
+  else if(l){ if(f.wind) k *= FEEL.windSlow; if(f.jump) k *= f.jump.K.spd; else if(f.tslow) k *= f.tslow; vx = dx/l*sp*k; vy = dy/l*sp*k; }
   f.mv = l > 0 || f.dash > 0;
   f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110); if(prOn()) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
 }
@@ -419,7 +481,7 @@ function update(dt){
     const dx = (ctlHeld('right')?1:0) - (ctlHeld('left')?1:0);            // teclas configurables (Ajustes › Controles, js/controls.js)
     const dy = (ctlHeld('down')?1:0) - (ctlHeld('up')?1:0);
     const mw = typeof mouseWorld === 'function' ? mouseWorld() : mouse, aim = Math.atan2(mw.y-P.y, mw.x-P.x);   // mouseWorld: en el Campo de pruebas el ratón va en la pantalla y el campo está reducido (js/pruebas.js)
-    move(P, dx, dy, dt, 1); P.dir = dirOf(aim); if(P.wind) P.wind.ang = aim;      // mientras cargas el ataque fuerte sigues apuntando
+    move(P, dx, dy, dt, 1); P.dir = dirOf(aim); if(P.burst) P.burst.ang = aim; if(P.wind) P.wind.ang = aim;      // mientras cargas el ataque fuerte sigues apuntando
     meleeInput(P, ctlHeld('melee'), aim, true, dt);          // golpe normal al pulsar; cargado si lo mantienes
     if(ctlHeld('shot')) use(P,2,aim,true);
     if(ctlHeld('dash')) use(P,0, (dx||dy) ? Math.atan2(dy,dx) : aim, true);
@@ -436,7 +498,7 @@ function update(dt){
     f.en = Math.min(100, f.en + EN_REGEN*dt); f.buff -= dt; f.dash -= dt; f.at += dt; f.lock -= dt;
     if(!f.dead && f.lock <= 0){ const w = f.mv ? 'Walk' : 'Idle'; if(f.act !== w){ f.act = w; f.at = 0; } }
     feelTick(f, dt);                             // esquiva, carga del ataque fuerte y retroceso (FEEL)
-    if(!f.dead && !f.ghost) pilPush(f);          // pilares: no se atraviesan
+    if(!f.dead && !f.ghost && !f.jump) pilPush(f);          // pilares: no se atraviesan
     terrTick(f, dt);                             // terreno: brasas, hielo, charco...
     statusTick(f, dt);                           // estados (js/status.js)
     abTick(f, dt);                               // habilidades (js/abilities.js): clima, Mudar, Impulso...
@@ -456,7 +518,7 @@ function update(dt){
     const T = foe(s.mine);
     if(s.life > 0 && !s.dg && !T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r * abShotK(s, T)){
       if(T.inv > 0){ s.dg = true; dodgeOk(T); }                                  // esquivado con la carrera: el disparo pasa de largo y ya no puede darle
-      else{ if(s.status) statusShotHit(T, s); else{ if(s.o) s.o.kbP = s.kbP || 0; hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); if(s.o) s.o.kbP = 0; } s.life = 0; }
+      else{ if(s.status) statusShotHit(T, s); else{ if(s.o){ s.o.kbP = s.kbP || 0; s.o.kbS = s.kbS || 1; } hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); if(s.o){ s.o.kbP = 0; s.o.kbS = 1; } } s.life = 0; }
     }
     if(s.x<0 || s.x>W || s.y<0 || s.y>H) s.life = 0;
   }
@@ -478,7 +540,7 @@ function switchMon(i){                            // cambio VOLUNTARIO (teclas 1
   if(!g || g.over || g.paused || g.count > 0) return;
   if(g.pvp){ if(i !== undefined) pvpEvent('sw', i); return; }       // combate online: el cambio se manda como pulsación y lo hacen los dos a la vez (js/pvp.js)
   if(i === undefined){ for(let k=1;k<=3;k++){ const j=(g.pi+k)%3; if(!g.p[j].dead){ i=j; break; } } }
-  if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead) return;
+  if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead || g.p[g.pi].jump) return;      // (en pleno salto no se puede cambiar)
   if(swapBusy()) return;                          // ya hay un cambio en marcha: no se empieza otro hasta que acabe la animación
   const trap = abTrapped(g.p[g.pi], g.e[g.ei]);   // Sombra Trampa · Trampa Arena · Imán del rival
   if(trap){ const P = g.p[g.pi]; g.pops.push({x:P.x, y:P.y - 150, txt:'¡' + trap.toUpperCase() + ': no puedes cambiar!', t:1.4, c:'#ff9a3a', s:10}); return; }

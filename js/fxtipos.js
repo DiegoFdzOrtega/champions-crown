@@ -148,29 +148,39 @@ function tpLatigoCepa(e, a){
     ctx.restore(); });
   tpMeleeBurstGrass(e, a, .13);
 }
-// Rayo Solar: 1) la luz del sol baja del cielo y se junta en el Pokémon (0,45 s), 2) sale un rayo ancho dorado con centro blanco
+// Rayo Solar (como en Poké Arena 2D): 1) una bola de luz se enciende en el Pokémon entre destellos, 2) sale un rayo ANCHO: centro blanco, capa amarilla y un borde
+// verde y dentado que tiembla, con una bola brillante en la boca. Al acabarse no se apaga: se va afinando. La carga larga (mientras mantienes la E) y el cartel están en js/fxnuevos.js.
 const TP_SOL = ['#9a6a00', '#ffc81a', '#fff27a', '#ffffff'];
+const TP_SOLG = ['#2f7a1c', '#9bdc3c', '#ffe83a', '#fffbd0', '#ffffff'];                // borde verde oscuro · verde claro · amarillo · crema · blanco
 function tpSpark4(x, y, r, A){ ctx.save(); ctx.globalAlpha = A; ctx.beginPath(); for(let i = 0; i < 8; i++){ const a = i * Math.PI / 4, rr = i % 2 ? r * .3 : r; ctx[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = TP_SOL[0]; ctx.lineWidth = 1.6; ctx.stroke(); ctx.restore(); }
 function tpSolOrb(x, y, r, A){ ctx.save(); ctx.globalAlpha = A; [[r + 3, TP_SOL[0]], [r, TP_SOL[1]], [r * .66, TP_SOL[2]], [r * .34, TP_SOL[3]]].forEach(([rr, c]) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, rr, 0, 6.283); ctx.fill(); }); ctx.restore(); }
-function tpSolarCharge(x, y, u, A){
-  const t = g.t, ease = 1 - Math.pow(1 - u, 2); ctx.save(); ctx.globalCompositeOperation = 'source-over';
-  for(let i = 0; i < 4; i++){ const sx = x + (i - 1.5) * 70, w0 = 15 - u * 6; ctx.globalAlpha = A * (.2 + .25 * u); ctx.fillStyle = '#fff6a8'; ctx.beginPath(); ctx.moveTo(sx - w0, -10); ctx.lineTo(sx + w0, -10); ctx.lineTo(x + 7, y); ctx.lineTo(x - 7, y); ctx.closePath(); ctx.fill(); }   // rayos de luz del cielo
-  for(let i = 0; i < 12; i++){ const th = i * .5236 + u * 4, rad = (110 * (1 - ease)) * (.55 + .45 * HH(i, 1)) + 6; tpSolOrb(x + Math.cos(th) * rad, y + Math.sin(th) * rad * .8 - 6, 4.5, A * Math.min(1, u * 4)); }   // motas de luz que entran
-  tpSolOrb(x, y - 4, 7 + 20 * ease, A);
-  for(let i = 0; i < 8; i++){ const an = i * .785 + t * 3, r0 = 12 + 20 * ease; ctx.globalAlpha = A * ease; ctx.strokeStyle = TP_SOL[0]; ctx.lineWidth = 6; ctx.lineCap = 'butt'; ctx.beginPath(); ctx.moveTo(x + Math.cos(an) * r0, y - 4 + Math.sin(an) * r0); ctx.lineTo(x + Math.cos(an) * (r0 + 14), y - 4 + Math.sin(an) * (r0 + 14)); ctx.stroke(); ctx.strokeStyle = TP_SOL[2]; ctx.lineWidth = 2.6; ctx.stroke(); }
+function tpSolarCharge(x, y, u, A){                                                      // bola de luz que crece, con un halo y destellos de 4 puntas girando alrededor
+  const t = g.t, ease = 1 - Math.pow(1 - u, 2), R = 8 + 15 * ease; ctx.save(); ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = A * .35; ctx.fillStyle = '#fff6a8'; ctx.beginPath(); ctx.arc(x, y - 4, R + 12 + Math.sin(t * 20) * 2, 0, 6.283); ctx.fill();
+  ctx.globalAlpha = A * .8; ctx.strokeStyle = '#fffbd0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y - 4, R + 18 - 8 * ((t * 2.2) % 1), 0, 6.283); ctx.stroke();
+  for(let i = 0; i < 8; i++){ const th = i * .785 + u * 5, rad = (70 * (1 - ease)) * (.5 + .5 * HH(i, 1)) + R; tpSolOrb(x + Math.cos(th) * rad, y - 4 + Math.sin(th) * rad * .8, 3.2, A * Math.min(1, u * 4) * (1 - ease * .6)); }   // motas de luz que entran
+  tpSolOrb(x, y - 4, R, A);
+  for(let i = 0; i < 5; i++){ const an = i * 1.257 + t * 2.4, rr = R + 12 + 5 * Math.sin(t * 7 + i); tpSpark4(x + Math.cos(an) * rr, y - 4 + Math.sin(an) * rr * .85, 5 + 2 * Math.sin(t * 11 + i * 2), A * (.6 + .4 * Math.sin(t * 9 + i))); }
   ctx.restore();
 }
 function tpRayoSolar(e){
-  const CH = .45, t = e.t || 0, G = sg(e, 400), A = G.al;
+  const CH = .12, t = e.t || 0, G = sg(e, 2400), A = G.al;
   if(t < CH){ tpSolarCharge(e.ox, e.oy, t / CH, 1); return; }
-  if(G.len < 8) return; const gw = clamp01((t - CH) / .12), w = (26 + Math.sin(g.t * 18) * 2.5) * gw, dx = Math.cos(G.an), dy = Math.sin(G.an), px = -dy, py = dx, N = 16;
-  const half = u => (w / 2) * (u < .14 ? .5 + .5 * u / .14 : 1);
-  ctx.save(); ctx.globalCompositeOperation = 'source-over';
-  const poly = (sc, pad) => { ctx.beginPath(); for(let i = 0; i <= N; i++){ const u = i / N, h = half(u) * sc + pad; ctx[i ? 'lineTo' : 'moveTo'](G.x0 + dx * G.len * u + px * h, G.y0 + dy * G.len * u + py * h); }
-    ctx.arc(G.x1, G.y1, half(1) * sc + pad, G.an - Math.PI / 2, G.an + Math.PI / 2); for(let i = N; i >= 0; i--){ const u = i / N, h = half(u) * sc + pad; ctx.lineTo(G.x0 + dx * G.len * u - px * h, G.y0 + dy * G.len * u - py * h); } ctx.closePath(); };
-  ctx.globalAlpha = A; [[1, 3, TP_SOL[0]], [1, 0, TP_SOL[1]], [.66, 0, TP_SOL[2]], [.32, 0, TP_SOL[3]]].forEach(([sc, pad, c]) => { ctx.fillStyle = c; poly(sc, pad); ctx.fill(); });
-  for(let i = 0; i < 9; i++){ const u = hdFract(i * .113 + g.t * 1.5), off = ((HH(i, 3) - .5)) * w * .9; tpSpark4(G.x0 + dx * G.len * u + px * off, G.y0 + dy * G.len * u + py * off, 4 + HH(i, 4) * 3, A); }     // destellos
-  tpSolOrb(G.x0, G.y0, 14 * gw, A);                                                                                                     // la boca del rayo
+  if(G.len < 8) return;
+  const gw = clamp01((t - CH) / .1), w = (34 + Math.sin(g.t * 18) * 2.5) * gw * (.25 + .75 * A), dx = Math.cos(G.an), dy = Math.sin(G.an), px = -dy, py = dx, N = Math.max(8, Math.ceil(G.len / 20)), fr = Math.floor(g.t * 16);
+  const half = u => (w / 2) * (u < .06 ? .55 + .45 * u / .06 : 1);
+  ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.lineJoin = 'miter';
+  const poly = (sc, pad, jag, sd) => { ctx.beginPath();                                    // una capa del rayo; jag = cuánto se le dentan los bordes (cambia 16 veces por segundo)
+    for(let i = 0; i <= N; i++){ const u = i / N, h = half(u) * sc + pad + (HH(i * 3 + fr * 7, sd) - .5) * jag; ctx[i ? 'lineTo' : 'moveTo'](G.x0 + dx * G.len * u + px * h, G.y0 + dy * G.len * u + py * h); }
+    ctx.arc(G.x1, G.y1, Math.max(1, half(1) * sc + pad), G.an - Math.PI / 2, G.an + Math.PI / 2);
+    for(let i = N; i >= 0; i--){ const u = i / N, h = half(u) * sc + pad + (HH(i * 3 + fr * 7, sd + 9) - .5) * jag; ctx.lineTo(G.x0 + dx * G.len * u - px * h, G.y0 + dy * G.len * u - py * h); }
+    ctx.closePath(); };
+  ctx.globalAlpha = Math.min(1, A * 1.6);
+  [[1, 6, 13, 1, TP_SOLG[0]], [1, 3, 11, 1, TP_SOLG[1]], [.82, 0, 6, 2, TP_SOLG[2]], [.58, 0, 3, 3, TP_SOLG[3]], [.32, 0, 0, 4, TP_SOLG[4]]].forEach(([sc, pad, jag, sd, c]) => { ctx.fillStyle = c; poly(sc, pad, jag * gw, sd); ctx.fill(); });
+  for(let i = 0; i < 10; i++){ const u = hdFract(i * .113 + g.t * 1.7), off = (i % 2 ? 1 : -1) * (w * .5 + 4 + HH(i, 3) * 10), x = G.x0 + dx * G.len * u + px * off, y = G.y0 + dy * G.len * u + py * off;     // chispas y hojitas que saltan de los bordes
+    if(i % 3) tpSpark4(x, y, 3.5 + HH(i, 4) * 3, A); else { ctx.globalAlpha = A; ctx.fillStyle = i % 2 ? TP_SOLG[1] : TP_SOLG[0]; ctx.fillRect(x - 2.5, y - 2.5, 5, 5); } }
+  ctx.globalAlpha = A * .4; ctx.fillStyle = '#fff6a8'; ctx.beginPath(); ctx.arc(G.x0, G.y0, 30 * gw, 0, 6.283); ctx.fill();      // halo de la boca
+  tpSolOrb(G.x0, G.y0, 19 * gw * (.5 + .5 * A), Math.min(1, A * 1.6));                                                          // la bola de la boca del rayo
   ctx.restore();
 }
 function tpRayoSolarHit(e, a){

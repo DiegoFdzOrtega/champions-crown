@@ -89,7 +89,7 @@ const CUSTOM = {
   149:{mv:['Garra Dragón','Pulso Dragón','Danza Dragón','Cometa Draco'], mt:['dragon','dragon','dragon']},
   59:{mv:['Colmillo Ígneo','Lanzallamas','Agilidad','Envite Ígneo']},
   6:{mv:['Garra Dragón','Lanzallamas','Danza Espada','Llamarada'], mt:['dragon','fuego','fuego']},
-  9:{mv:['Cabezazo','Hidropulso','Refugio','Hidrobomba']},
+  9:{mv:['Torbellino','Hidropulso','Refugio','Hidrobomba']},
   143:{mv:['Golpe Cuerpo','Doble Filo','Amnesia','Hiperrayo']}
 };
 Object.entries(CUSTOM).forEach(([d,o]) => Object.assign(DEX[d-1], o));

@@ -45,7 +45,7 @@ MOVES_ES = {
  'Carantoña':'play-rough','Viento Feérico':'fairy-wind','Voz Cautivadora':'disarming-voice','Campo Neblinoso':'misty-terrain','Fuerza Lunar':'moonblast',
  'Cabezazo':'headbutt','Golpe Cuerpo':'body-slam','Doble Filo':'double-edge','Amnesia':'amnesia','Danza Espada':'swords-dance','Agilidad':'agility','Refugio':'withdraw',
  'Onda Trueno':'thunder-wave','Tóxico':'toxic','Fuego Fatuo':'will-o-wisp','Somnífero':'sleep-powder','Brecha Negra':'dark-void','Rayo Confuso':'confuse-ray',
- 'Hipnosis':'hypnosis',
+ 'Hipnosis':'hypnosis','Burbuja':'bubble','Torbellino':'whirlpool','Vuelo':'fly','Rayo Burbuja':'bubble-beam','Drenadoras':'leech-seed',
  'Puño Fuego':'fire-punch','Puño Hielo':'ice-punch','Puño Trueno':'thunder-punch','Puño Bala':'bullet-punch','Puño Sombra':'shadow-punch',
  'Shuriken de Agua':'water-shuriken',
 }

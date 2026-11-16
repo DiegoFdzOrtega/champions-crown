@@ -100,17 +100,29 @@ function aguaFx(len, w, a, t){                                   // agua de píx
     ctx.globalAlpha = a * .22 * Math.sin(p * Math.PI); ctx.fillStyle = '#ffffff'; for(let k = 0; k < 6; k++) ctx.fillRect(Math.round((x + k * 6) / 2) * 2, -w + 6 + k * 14 - 8, 4, 12);
   }
 }
+// ASPECTO de las franjas: se dibujan translúcidas (se ve el suelo del estadio por debajo) y con el borde más suave que el centro, y NUNCA fuera del campo.
+const SUELO_LOOK = {capas: [.3, .3, .26], paso: .2, fx: .6, borde: .6};      // [AJUSTE] opacidad de cada capa (la 1ª es la franja entera; cada una siguiente es más estrecha y se suma: borde ≈ 30 %, centro ≈ 64 %) · cuánto se estrecha cada capa (parte del ancho) · opacidad de ondas, gotas y llamas · del borde discontinuo de las que te perjudican
+function terrCap(len, r){ ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(len, -r); ctx.arc(len, 0, r, -Math.PI / 2, Math.PI / 2); ctx.lineTo(0, r); ctx.arc(0, 0, r, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); }      // la forma de la franja (recta con las puntas redondas)
+function terrClip(){                                             // recorta el dibujo al suelo del campo: lo que se sale (pared del fondo, gradas) no se pinta
+  ctx.beginPath();
+  if(typeof prOn === 'function' && prOn()){ const c = PR.cam, F = PR.floor, X = x => (x - c.ox) / c.s, Y = y => (y - c.oy) / c.s; ctx.moveTo(X(F.lt), Y(F.yt)); ctx.lineTo(X(F.rt), Y(F.yt)); ctx.lineTo(X(F.rb), Y(F.yb)); ctx.lineTo(X(F.lb), Y(F.yb)); ctx.closePath(); }      // estadio (Torre Batalla, Campo de pruebas, Clasificatoria): el campo en perspectiva, por sus líneas
+  else ctx.rect(14, 146, W - 28, H - 70 - 146);                    // resto de arenas: la zona por la que se mueven los Pokémon (con un pequeño margen)
+  ctx.clip();
+}
 function terrDraw(){
+  if(!g.terr || !g.terr.length) return;
+  ctx.save(); terrClip();
   for(const q of g.terr || []){
     const dx = q.x1 - q.x0, dy = q.y1 - q.y0, len = Math.hypot(dx, dy); if(len < 6) continue;
     const a = clamp(Math.min(q.t / .25, (q.T - q.t) / .8), 0, 1), col = TC[q.type] || '#ffffff', w = q.w, bad = !TERR[q.type].heal && q.mine === (g.me === 'e'), t = g.t, ux = dx / len, uy = dy / len;
     ctx.save(); ctx.translate(q.x0, q.y0); ctx.rotate(Math.atan2(dy, dx));
-    ctx.beginPath(); ctx.moveTo(0, -w); ctx.lineTo(len, -w); ctx.arc(len, 0, w, -Math.PI / 2, Math.PI / 2); ctx.lineTo(0, w); ctx.arc(0, 0, w, Math.PI / 2, Math.PI * 1.5); ctx.closePath();
-    const spr = SUELO.ok && suelo(q, len, w, a);                                  // con sprite: se dibuja la imagen; sin él, el dibujo de siempre
+    let spr = false;
+    if(SUELO.ok) SUELO_LOOK.capas.forEach((al, k) => { ctx.save(); if(k){ terrCap(len, w * (1 - SUELO_LOOK.paso * k)); ctx.clip(); } spr = suelo(q, len, w, a * al) || spr; ctx.restore(); });      // por capas: entera y floja, y encima el centro (cada vez más estrecho) → borde difuminado
+    terrCap(len, w);                                  // con sprite: se dibuja la imagen; sin él, el dibujo de siempre
     if(!spr){ ctx.globalAlpha = .32 * a; ctx.fillStyle = col; ctx.fill(); }
-    if(spr && q.type === 'fuego') fuegoFx(len, w, a, t);
-    else if(spr && q.type === 'agua') aguaFx(len, w, a, t);                                   // agua: ondas y gotas dibujadas                                           // fuego: llamas dibujadas en vez de las del sprite
-    if(!spr || bad){ ctx.globalAlpha = .85 * a; ctx.lineWidth = bad ? 3 : 2; ctx.strokeStyle = bad ? '#ffffff' : col; if(bad) ctx.setLineDash([11, 8]); ctx.stroke(); ctx.setLineDash([]); }      // las que te perjudican llevan borde blanco discontinuo
+    if(spr && q.type === 'fuego') fuegoFx(len, w, a * SUELO_LOOK.fx, t);
+    else if(spr && q.type === 'agua') aguaFx(len, w, a * SUELO_LOOK.fx, t);                                   // agua: ondas y gotas dibujadas                                           // fuego: llamas dibujadas en vez de las del sprite
+    if(!spr || bad){ ctx.globalAlpha = (spr ? SUELO_LOOK.borde : .85) * a; ctx.lineWidth = bad ? 3 : 2; ctx.strokeStyle = bad ? '#ffffff' : col; if(bad) ctx.setLineDash([11, 8]); ctx.stroke(); ctx.setLineDash([]); }      // las que te perjudican llevan borde blanco discontinuo
     ctx.restore();
     if(SUELO.ok) continue;
     ctx.save();
@@ -126,6 +138,7 @@ function terrDraw(){
     }
     ctx.restore();
   }
+  ctx.restore();
 }
 // EFECTO DE CARGA (clic mantenido y ataque fuerte): bolita con aro amarillo → brillo con chispas → torbellino blanco → estallido de estrella. k = 0..1 de lo cargado; ok = ya cuenta
 function chgFxDraw(f, k, ok){
@@ -153,8 +166,11 @@ function chgFxDraw(f, k, ok){
 function windDraw(){
   for(const f of [g.p[g.pi], g.e[g.ei]]){
     if(f.ctr > 0 && !f.dead && !f.ghost){ ctx.save(); ctx.globalAlpha = .55 + .4 * Math.sin(g.t * 22); ctx.strokeStyle = '#7fe3ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y + 22, 34, 13, 0, 0, 6.3); ctx.stroke(); ctx.restore(); }      // contraataque listo: aro azul a sus pies
+    if(f.jump && !f.dead && !f.ghost && typeof nvJumpDraw === 'function') nvJumpDraw(f);      // salto (Golpe Cuerpo, Vuelo): la diana donde va a caer (js/fxnuevos.js)
+    if(f.spin && !f.dead && !f.ghost && typeof nvSpinDraw === 'function') nvSpinDraw(f);      // Torbellino: los brazos de agua (js/fxnuevos.js)
     if(f.mc > .12 && !f.dead && !f.ghost) chgFxDraw(f, clamp(f.mc / FEEL.chgT, 0, 1), f.mc >= FEEL.chgMin);      // golpe cargándose (mantienes el clic)
     const w = f.wind; if(!w || f.dead || f.ghost) continue;
+    if(typeof nvWindFx === 'function') nvWindFx(f, w);                              // carga propia de algunos ataques fuertes (la bola de luz del Rayo Solar: js/fxnuevos.js)
     const k = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : clamp(1 - w.t / w.T, 0, 1), col = TC[w.type] || '#ffffff', len = 640, hw = 24, fijo = feelFoe(f) && w.t <= w.T * FEEL.windLock;
     chgFxDraw(f, k, w.hold ? w.c >= FEEL.wind : k > .3);                                                                                  // ataque fuerte cargándose: mismo efecto que el golpe cargado
     ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(w.ang);
@@ -275,10 +291,10 @@ function pilFxDraw(f){                                               // restos d
 function drawF(f, col){
   if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
   const I = idleInfo(f.m.dex);
-  const hid = f.hide > 0, lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
+  const hid = f.hide > 0, lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0) + (f.jump && typeof nvJumpLift === 'function' ? nvJumpLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
-  const inv = f.inv > 0 && !f.dead; if(inv){ ctx.save(); ctx.globalAlpha = .5; }                                               // esquivando con la carrera: se ve translúcido
-  const okSpr = hid || drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny);
+  const inv = f.inv > 0 && !f.dead && !f.jump; if(inv){ ctx.save(); ctx.globalAlpha = .5; }                                               // esquivando con la carrera: se ve translúcido
+  const okSpr = hid || (f.spin && !f.dead && typeof nvShellDraw === 'function' && nvShellDraw(f, lg)) || drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny);      // Torbellino de Squirtle y familia: el caparazón en vez del sprite (js/fxnuevos.js)
   if(inv) ctx.restore();
   if(!hid && !okSpr && sheet(f.m.dex, 'Idle', false).bad){      // sin sprite (de verdad, no solo cargando): círculo
     ctx.fillStyle = TC[f.m.types[0]]; ctx.beginPath(); ctx.arc(f.x + lg.x, f.y + lg.y, 30, 0, 7); ctx.fill();
@@ -413,6 +429,7 @@ function draw(){
   if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
   if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
+  if(typeof nvBannerDraw === 'function') nvBannerDraw();          // cartel grande de algunos ataques fuertes («¡Rayo Solar!») y la pantalla que se oscurece un instante (js/fxnuevos.js)
   if(!M.dead && !(typeof TOUCH !== 'undefined' && TOUCH.on)){             // cruz de puntería (con los dedos no se enseña)
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();

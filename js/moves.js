@@ -35,8 +35,10 @@ const MOVESET = {
 const EXTRA_MOVES = {
   'Cabezazo':['normal',1], 'Golpe Cuerpo':['normal',1], 'Doble Filo':['normal',2], 'Amnesia':['psiquico',3], 'Danza Espada':['normal',3],
   'Agilidad':['psiquico',3], 'Refugio':['agua',3], 'Surf':['agua',4],
+  'Burbuja':['agua',2], 'Rayo Burbuja':['agua',2], 'Torbellino':['agua',1], 'Vuelo':['volador',1],                 // nuevos (16-11-2026): dibujos en js/fxnuevos.js
   // Ataques de estado (hueco 3): no los tiene nadie de serie, solo se aprenden con MT (ver js/status.js)
-  'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3]
+  'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3],
+  'Drenadoras':['planta',3]                                         // nuevo (16-11-2026): estado «drenado» (js/status.js), dibujos en js/fxnuevos.js
 };
 // Nombre -> {t: tipo, s: hueco}
 const MOVES = {};
@@ -50,7 +52,10 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
 // los PUÑOS (js/fxpunch.js), el Shuriken de Agua (js/fxshuriken.js) y el Vendaval. El resto de Pokémon de ese tipo se queda con su ataque de siempre.
 const PUNCHES = new Set(['Vendaval', 'Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
 // Ataque propio de un Pokémon concreto: {nº Pokédex: {hueco: ataque}}. Greninja (siniestro) lleva el Shuriken de Agua, que es de agua.
-const SIGNATURE = {658: {2:'Shuriken de Agua'}};
+const SIGNATURE = {658: {2:'Shuriken de Agua'},
+  1: {3:'Drenadoras'}, 2: {3:'Drenadoras'},                         // Bulbasaur e Ivysaur traen Drenadoras de serie (en vez de Desarrollo)
+  16: {1:'Vuelo'}, 17: {1:'Vuelo'}, 18: {1:'Vuelo'},                 // Pidgey, Pidgeotto y Pidgeot traen Vuelo (en vez de Ataque Ala)
+  7: {1:'Torbellino', 2:'Burbuja'}, 8: {1:'Torbellino', 2:'Rayo Burbuja'}, 60: {2:'Burbuja'}, 61: {2:'Rayo Burbuja'}, 116: {2:'Burbuja'}, 117: {2:'Rayo Burbuja'}};      // Squirtle / Wartortle, Poliwag / Poliwhirl y Horsea / Seadra traen Burbuja y Rayo Burbuja
 const learnHas = (n, dex) => {                      // ¿está el número de Pokédex en la lista de LEARN[n]? (LEARN_SET se crea después, en training.js)
   const txt = (typeof LEARN !== 'undefined' && LEARN[n]) || '';
   return txt.split(',').some(r => { if(!r) return false; const [a, b] = r.split('-').map(Number); return dex >= a && dex <= (b || a); });

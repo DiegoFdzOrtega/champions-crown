@@ -20,7 +20,7 @@
    REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
    porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '15';                                   // (15: el golpe cargado empuja mucho más · 14: el terreno es una franja recta · 13: el ataque fuerte empuja más y suelta una onda al salir · 12: terreno por tipo en forma de rastro, golpe cargado y entrada con impacto · 11: energía al debilitar y contraataque tras esquivar · 10: chocan todos los disparos y el golpe corta disparos · 9: choque de disparos, CLASH en combat.js · 8: formas de ataque por tipo, MELEE_KINDS y SHOT_KINDS en combat.js, sin rebotes · 7: retroceso, esquiva con la carrera y carga del ataque fuerte, FEEL en combat.js · 6: golpe cuerpo a cuerpo con más alcance y ángulo, MELEE en combat.js · 5: la Clasificatoria se juega en el Estadio: campo de 1250 de ancho con límites en perspectiva, js/pruebas.js · 2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
+const PVP_VER = '22';                                   // (22: Golpe Cuerpo y Vuelo son un salto · 21: Lanzallamas es un chorro sostenido · 20: Torbellino · 19: Hidrobomba e Hiperrayo van más deprisa · 18: el Rayo Solar va más deprisa · 17: el Rayo Burbuja es una ristra de burbujas · 16: Drenadoras, Burbuja y Rayo Burbuja · 15: el golpe cargado empuja mucho más · 14: el terreno es una franja recta · 13: el ataque fuerte empuja más y suelta una onda al salir · 12: terreno por tipo en forma de rastro, golpe cargado y entrada con impacto · 11: energía al debilitar y contraataque tras esquivar · 10: chocan todos los disparos y el golpe corta disparos · 9: choque de disparos, CLASH en combat.js · 8: formas de ataque por tipo, MELEE_KINDS y SHOT_KINDS en combat.js, sin rebotes · 7: retroceso, esquiva con la carrera y carga del ataque fuerte, FEEL en combat.js · 6: golpe cuerpo a cuerpo con más alcance y ángulo, MELEE en combat.js · 5: la Clasificatoria se juega en el Estadio: campo de 1250 de ancho con límites en perspectiva, js/pruebas.js · 2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
 const PVP_DELAY = 3, PVP_DMIN = 2, PVP_DMAX = 18, PVP_CALM = 10;     // retraso al empezar (3 pasos = 50 ms), mínimo (2 = 33 ms) y máximo; segundos yendo bien antes de bajarlo un paso                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
@@ -253,7 +253,7 @@ function pvpControl(f, side, dt){
   if(i.mg) pvpMega(side);
   if(f.dead || f.ghost) return;
   const aim = Math.atan2(i.my - f.y, i.mx - f.x);
-  move(f, i.dx, i.dy, dt, 1); f.dir = dirOf(aim); if(f.wind) f.wind.ang = aim;
+  move(f, i.dx, i.dy, dt, 1); f.dir = dirOf(aim); if(f.burst) f.burst.ang = aim; if(f.wind) f.wind.ang = aim;
   meleeInput(f, !!i.l, aim, mine, dt);
   if(i.r) use(f, 2, aim, mine);
   if(i.sp) use(f, 0, (i.dx || i.dy) ? Math.atan2(i.dy, i.dx) : aim, mine);
@@ -262,7 +262,7 @@ function pvpControl(f, side, dt){
 }
 function pvpSwitch(side, i){                              // lo mismo que switchMon (combat.js) pero para cualquiera de los dos bandos
   const L = side === 'p' ? g.p : g.e, cur = side === 'p' ? g.pi : g.ei, F = side === 'p' ? g.e[g.ei] : g.p[g.pi], cd = side === 'p' ? g.swCd : g.swCdE;
-  if(g.over || g.count > 0 || !L[i] || L[i].dead || i === cur || L[cur].dead || swapBusy(side)) return;
+  if(g.over || g.count > 0 || !L[i] || L[i].dead || i === cur || L[cur].dead || L[cur].jump || swapBusy(side)) return;
   const trap = abTrapped(L[cur], F);
   if(trap){ g.pops.push({x: L[cur].x, y: L[cur].y - 150, txt: '¡' + trap.toUpperCase() + ': no puedes cambiar!', t: 1.4, c: '#ff9a3a', s: 10}); return; }
   if(cd > 0){ if(side === g.me) g.swNote = 1.6; return; }

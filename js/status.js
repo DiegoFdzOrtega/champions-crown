@@ -1,7 +1,7 @@
 "use strict";
 /* =====================================================================
    15) ESTADOS: paralizado, envenenado, quemado, dormido y confuso
-   Se aplican con 7 ataques del hueco 3 (Q): Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso e Hipnosis.
+   Se aplican con 8 ataques del hueco 3 (Q): Onda Trueno, Tóxico, Fuego Fatuo, Somnífero, Brecha Negra, Rayo Confuso, Hipnosis y Drenadoras (drenado: js/fxnuevos.js).
    Cada uno lanza un proyectil SIN daño (se puede esquivar). Si impacta, el rival recibe el estado.
    Todos los números están en STX: cámbialos aquí para equilibrar el juego.
    Los dibujos de cada ataque están en js/fxstatus.js.
@@ -12,6 +12,7 @@ const STX = {
   psn: {dur: 6, base: .003},                          // envenenado grave: pierde (base × (segundos + 1)) de la vida máxima por segundo → sube cada segundo (~6 % en total)
   brn: {dur: 8, tick: 0, melee: .5},                  // quemado: su golpe cuerpo a cuerpo hace la mitad. Daño por segundo: ver «tick» justo debajo (se calcula para que sea el MISMO daño total que el veneno)
   slp: {dur: 2, imm: 5},                              // dormido: no se mueve ni ataca · imm = segundos que no se puede volver a dormir al despertar
+  lch: {dur: 8, tick: .0125, heal: 1},                // drenado (Drenadoras): pierde el 1,25 % de la vida máxima por segundo (10 % en total) y se lo da a quien se las lanzó (heal = cuánto de eso recupera: 1 = todo)
   cnf: {dur: 4, self: .33, hit: .5}                   // confuso: el 33 % de los ataques se los hace a sí mismo (con la mitad de fuerza que su golpe normal)
 };
 // La quemadura hace el mismo daño TOTAL que el veneno grave (≈ 6 % de la vida máxima), repartido a ritmo constante durante sus segundos.
@@ -24,6 +25,7 @@ const STATUS_MOVES = {
   'Fuego Fatuo':  {k: 'brn', desc: 'Lanza llamas fantasmales que queman al rival.'},
   'Somnífero':    {k: 'slp', immune: ['planta'], desc: 'Lanza un polvo que duerme al rival.'},
   'Brecha Negra': {k: 'slp', dur: 2.5, desc: 'Lanza una esfera oscura que duerme al rival. Solo la usa Darkrai.'},
+  'Drenadoras':   {k: 'lch', immune: ['planta'], desc: 'Lanza unas semillas que se enredan en el rival: le quitan vida poco a poco y te la dan a ti. No afecta a los de tipo Planta.'},
   'Rayo Confuso': {k: 'cnf', desc: 'Lanza una luz extraña que confunde al rival.'},
   'Hipnosis':     {k: 'slp', acc: .7, desc: 'Un péndulo y ondas hipnóticas duermen al rival. A veces falla (como en los juegos, donde tiene un 60 % de precisión).'}
 };
@@ -33,14 +35,15 @@ const STATUS_INFO = {
   brn: {n: 'Quemado',     txt: '¡Quemado!',     ab: 'QUE', c: '#ff7a1a'},
   slp: {n: 'Dormido',     txt: '¡Dormido!',     ab: 'DRM', c: '#8fb0ff'},
   cnf: {n: 'Confuso',     txt: '¡Confuso!',     ab: 'CNF', c: '#ff5fb0'},
+  lch: {n: 'Drenado',     txt: '¡Drenadoras!',  ab: 'DRE', c: '#7ed957'},              // va aparte, como la confusión: se puede tener además de otro estado
   lov: {n: 'Enamorado',   txt: '¡Enamorado!',   ab: 'AMO', c: '#ff7ab8'}              // solo lo pone la habilidad Gran Encanto (abilities.js)
 };
-const STATUS_IMMUNE = {par: ['electrico'], psn: ['veneno', 'acero'], brn: ['fuego'], slp: [], cnf: [], lov: []};   // tipos que no pueden tener ese estado
+const STATUS_IMMUNE = {par: ['electrico'], psn: ['veneno', 'acero'], brn: ['fuego'], slp: [], cnf: [], lov: [], lch: ['planta']};   // tipos que no pueden tener ese estado
 
 const cant = f => f.stun > 0 || !!(f.st && f.st.k === 'slp');        // no puede moverse ni atacar (amedrentado o dormido)
-const hasStatus = f => !!(f.st || f.cnf > 0 || f.lov > 0);
+const hasStatus = f => !!(f.st || f.cnf > 0 || f.lov > 0 || f.lch > 0);
 const popAt = (T, txt, c) => g.pops.push({x: T.x, y: T.y - 150, txt, t: 1.1, c: c || '#fff', s: 11});
-function clearStatus(f){ f.st = null; f.cnf = 0; f.lov = 0; }
+function clearStatus(f){ f.st = null; f.cnf = 0; f.lov = 0; f.lch = 0; f.lchBy = null; }
 
 // Daño directo del estado (veneno, quemadura, confusión): puede debilitar
 function stDamage(f, amt, kind){
@@ -60,6 +63,9 @@ function statusInflict(T, k, dur, src){                                         
   if(k === 'cnf'){
     if(T.cnf > 0){ popAt(T, 'Ya está confuso', '#c8c8d4'); return false; }
     T.cnf = dur;
+  } else if(k === 'lch'){
+    if(T.lch > 0){ popAt(T, 'Ya está drenado', '#c8c8d4'); return false; }
+    T.lch = dur; T.lchBy = src || null;
   } else if(k === 'lov'){
     if(T.lov > 0){ popAt(T, 'Ya está enamorado', '#c8c8d4'); return false; }
     T.lov = dur;
@@ -111,6 +117,12 @@ function statusTick(f, dt){
   if(f.slpImm > 0) f.slpImm -= dt;
   if(f.cnf > 0) f.cnf -= dt;
   if(f.lov > 0) f.lov -= dt;
+  if(f.lch > 0){                                                                  // drenado: pierde vida y se la da a quien le lanzó las Drenadoras (si sigue en combate)
+    f.lch -= dt; const amt = Math.min(f.hp, f.max * STX.lch.tick * dt), src = f.lchBy, hp0 = f.hp;
+    stDamage(f, amt);
+    if(src && !src.dead && f.hp < hp0 && (src === g.p[g.pi] || src === g.e[g.ei])) src.hp = Math.min(src.max, src.hp + (hp0 - f.hp) * STX.lch.heal);
+    if(f.dead) return;
+  }
   const s = f.st; if(!s) return;
   s.t -= dt; s.el += dt;
   if(s.k === 'psn') stDamage(f, f.max * STX.psn.base * (1 + Math.floor(s.el)) * dt);

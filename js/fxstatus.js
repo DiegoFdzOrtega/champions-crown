@@ -195,6 +195,7 @@ function fxStatusAura(f, I){
   if(f.cnf > 0){
     for(let i = 0; i < 3; i++){ const a1 = t * 5 + i * 2.09, x = hx + Math.cos(a1) * 22, y = top - 8 + Math.sin(a1) * 6; ctx.globalAlpha = 1; Spark(x, y, 2, RAINBOW[i]); D(x, y, 1, '#ffffff'); }
   }
+  if(f.lch > 0 && typeof nvLeechAura === 'function'){ ctx.globalAlpha = 1; nvLeechAura(f, hx, foot, bw); }      // drenado (Drenadoras, js/fxnuevos.js)
   if(f.lov > 0){
     for(let i = 0; i < 3; i++){ const u = (t * .8 + i * .33) % 1; ctx.globalAlpha = 1 - u; Spark(hx + (HH(i, 7) - .5) * bw * 1.6, top - 4 - u * 26, 2, '#ff7ab8'); D(hx + (HH(i, 7) - .5) * bw * 1.6, top - 4 - u * 26, 1, '#ffffff'); }
   }
@@ -203,7 +204,7 @@ function fxStatusAura(f, I){
 
 // Etiquetas pequeñas con el estado (PAR · TOX · QUE · DRM · CNF)
 function statusChips(f, x, y, w, h, size){
-  const list = []; if(f.st) list.push(f.st.k); if(f.cnf > 0) list.push('cnf'); if(f.lov > 0) list.push('lov');
+  const list = []; if(f.st) list.push(f.st.k); if(f.cnf > 0) list.push('cnf'); if(f.lov > 0) list.push('lov'); if(f.lch > 0) list.push('lch');
   list.forEach((k, i) => {
     const inf = STATUS_INFO[k], cx = x + i * (w + 3);
     ctx.fillStyle = 'rgba(8,10,16,.88)'; ctx.fillRect(cx, y, w, h);
