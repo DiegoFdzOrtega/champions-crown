@@ -4,7 +4,7 @@
    Se carga DESPUÉS de johto.js y ANTES de campo.js (que comprueba todos los equipos al final). No toca nada de Kanto ni de Johto.
 
    VERSIÓN DE REFERENCIA: Pokémon ESMERALDA (así el octavo líder es Galano/Juan y el Campeón es Plubio/Wallace). Fuentes: pokemondb.net/emerald,
-   Bulbapedia y Serebii (Match Call de Esmeralda). Sprites: lideres/Hoenn/<Nombre>.png (Máximo y Leti no se usan: Máximo es el Campeón de Rubí/Zafiro
+   Bulbapedia y Serebii (Match Call de Esmeralda). Sprites: assets/lideres/Hoenn/<Nombre>.png (Máximo y Leti no se usan: Máximo es el Campeón de Rubí/Zafiro
    y Leti ya va dentro del retrato de Vito_y_Leti).
 
    CÓMO ESTÁ HECHO (igual que Kanto y Johto, ver teams.js):
@@ -135,7 +135,7 @@ Object.assign(TEAMS, {
 
 // ---------------------------------------------------------------------
 // Los 13 combates de Hoenn, en orden: 8 líderes, 4 del Alto Mando y el Campeón.
-// id = nombre del retrato (lideres/Hoenn/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenashoenn.js)
+// id = nombre del retrato (assets/lideres/Hoenn/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenashoenn.js)
 // ---------------------------------------------------------------------
 const HF = (id, leader, tag, kind, lvl, dn, place) =>
   ({id, leader, tag, kind, lvl, diff: kind === 'lider' ? 'dificil' : 'muy_dificil', teams: TEAMS[id], region: 'Hoenn', idx: 0, dn, place});

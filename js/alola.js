@@ -6,7 +6,7 @@
    VERSIÓN DE REFERENCIA: Pokémon Sol y Luna. Los equipos son los de la lista que dio Diego (noviembre 2026).
    Orden de la región: Ilima (Normal) · Lana (Agua) · Kiawe (Fuego) · Mallow (Planta) · Sophocles (Eléctrico) · Acerola (Fantasma) · Mina (Hada).
    Alto Mando: Hala (Lucha) · Olivia (Roca) · Acerola (Fantasma) · Kahili (Volador). Campeón: Profesor Kukui.
-   Retratos: lideres/Alola/<id>.png (ilima, lana, kiawe, mallow, sophocles, acerola, mina, hala, olivia, kahili, kukui). Acerola está dos veces (líder y Alto Mando):
+   Retratos: assets/lideres/Alola/<id>.png (ilima, lana, kiawe, mallow, sophocles, acerola, mina, hala, olivia, kahili, kukui). Acerola está dos veces (líder y Alto Mando):
    el Alto Mando usa el id 'acerola_am' y el mismo retrato (LEADER_FILE en data.js). Hapu y Nanu también tienen retrato en la carpeta, pero no están en esta lista.
 
    CÓMO ESTÁ HECHO (igual que kalos.js, ver teams.js):
@@ -19,7 +19,7 @@
 
    DIFICULTAD: lvl = nivel del rival · dn = índice de dificultad (DIFF en data.js). Alola: líderes lvl 157-163 (dn 9-15), Alto Mando lvl 165-168 (dn 18-20) y Kukui lvl 175 (dn 23).
    RECOMPENSA: REWARD_REGION['Alola'] (teams.js): 5 Chapas Doradas + 5 Plateadas + 10 tiradas de Gachapon por cada victoria.
-   MÚSICA: pistas lider_alola / alto_alola / campeon_kukui en music.js (leen musica/Alola/: Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres, Victoria Campeon).
+   MÚSICA: pistas lider_alola / alto_alola / campeon_kukui en music.js (leen assets/musica/Alola/: Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres, Victoria Campeon).
    ===================================================================== */
 Object.assign(TEAMS, {
   // ---------------- LÍDERES ----------------
@@ -125,7 +125,7 @@ Object.assign(TEAMS, {
 
 // ---------------------------------------------------------------------
 // Los 12 combates de Alola, en orden: 7 líderes, 4 del Alto Mando y el Campeón.
-// id = nombre del retrato (lideres/Alola/<id>.png, ver LEADER_FILE en data.js) y de la arena (arenasalola.js, cuando se hagan los estadios)
+// id = nombre del retrato (assets/lideres/Alola/<id>.png, ver LEADER_FILE en data.js) y de la arena (arenasalola.js, cuando se hagan los estadios)
 // ---------------------------------------------------------------------
 const ALOLA = 'Alola';
 const AF = (id, leader, tag, kind, lvl, dn, place, extra) =>

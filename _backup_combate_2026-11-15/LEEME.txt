@@ -1,9 +1,0 @@
-COPIA DE SEGURIDAD · 15-11-2026
-Estado del combate ANTES de añadir: retroceso al recibir golpes, esquiva con la carrera y aviso del ataque fuerte.
-
-Archivos guardados (tal y como estaban):
-  index.html
-  js/combat.js   js/ai.js   js/pvp.js   js/render.js   js/guia.js
-
-PARA DAR MARCHA ATRÁS: copia estos archivos encima de los del juego (mismas carpetas) y recarga con Ctrl+F5.
-Cuando ya no la necesites, puedes borrar esta carpeta entera.

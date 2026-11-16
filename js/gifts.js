@@ -66,7 +66,7 @@ function giftShow(t, notes){
   const o = document.createElement('div'); o.id = 'giftOv'; o.className = 'dlOv';
   const row = (id, txt) => `<div class="gf-row"><canvas id="${id}"></canvas><b>${txt}</b></div>`;
   const rows = (t.bp ? row('gfCoin', `+${giftFmt(t.bp)} <small>Puntos de Batalla</small>`) : '') + (t.tickets ? row('gfTk', `+${giftFmt(t.tickets)} <small>Tickets de Gachapon</small>`) : '') + (t.ticketsL ? row('gfTkL', `+${giftFmt(t.ticketsL)} <small>Tickets legendarios</small>`) : '')
-    + (t.estrella ? `<div class="gf-row"><img src="iconos/estrella.webp" alt=""><b>+${giftFmt(t.estrella)} <small>Estrellas de Invocación</small></b></div>` : '') + (t.estrellaT ? `<div class="gf-row"><img src="iconos/estrella_t.webp" alt=""><b>+${giftFmt(t.estrellaT)} <small>Estrellas temáticas</small></b></div>` : '');
+    + (t.estrella ? `<div class="gf-row"><img src="assets/iconos/estrella.webp" alt=""><b>+${giftFmt(t.estrella)} <small>Estrellas de Invocación</small></b></div>` : '') + (t.estrellaT ? `<div class="gf-row"><img src="assets/iconos/estrella_t.webp" alt=""><b>+${giftFmt(t.estrellaT)} <small>Estrellas temáticas</small></b></div>` : '');
   o.innerHTML = `<div class="dlBox gfBox"><canvas id="gfIcon" class="gf-icon"></canvas><h2>¡Has recibido un regalo!</h2>
     ${notes.length ? `<p class="gf-note">${notes.map(n => cloudEsc(n)).join(' · ')}</p>` : ''}<div class="gf-rows">${rows}</div>
     <button class="main" id="giftOk">Aceptar</button></div>`;

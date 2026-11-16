@@ -5,7 +5,7 @@
    No toca la Clasificatoria ni el resto de modos: todo lo de aquí solo se activa con g.o.pruebas.
 
    CÓMO FUNCIONA
-   - Fondo: la imagen fondos/estadio_pruebas.webp (2764 × 1536), que llena toda la ventana (ver prRef).
+   - Fondo: la imagen assets/fondos/estadio_pruebas.webp (2764 × 1536), que llena toda la ventana (ver prRef).
    - El campo de juego: el mundo del combate mide PR.W × H (más ancho que la pantalla) y se dibuja reducido con una
      "cámara" (PR.cam) para que caiga justo encima del suelo del estadio: así se ve como en la imagen, con los Pokémon
      pequeños abajo y la grada, los focos y las pantallas arriba.
@@ -32,7 +32,7 @@ const PR_ADS = [                                            // patrocinadores de
   {n: ['BALL', 'CORP.'], bg: '#c8302a', fg: '#ffffff', ic: 'ball'},
   {n: ['LIGA', 'CROWN'], bg: '#2a6fd0', fg: '#ffffff', ic: 'star'}
 ];
-const PR_BG = {ranked: 'fondos/estadio_pruebas.webp', pruebas: 'fondos/estadio_torre.webp'};   // fondo de cada modo (las dos imágenes tienen el MISMO encuadre: campo y pantallas en el mismo sitio)
+const PR_BG = {ranked: 'assets/fondos/estadio_pruebas.webp', pruebas: 'assets/fondos/estadio_torre.webp'};   // fondo de cada modo (las dos imágenes tienen el MISMO encuadre: campo y pantallas en el mismo sitio)
 function prImg(src){
   src = src || (g && g.o && (g.o.pruebas || g.o.estTorre) ? PR_BG.pruebas : PR_BG.ranked);
   const c = PR.imgs || (PR.imgs = {});
@@ -72,11 +72,11 @@ function openPruebas(){
   const pool = CAMPO.filter(T => T.id !== prLast), T = pool[(Math.random() * pool.length) | 0]; prLast = T.id;
   prImg(PR_BG.pruebas);
   const S = campoStats(T), o = {
-    pruebas: true, prId: T.id, floor: 0, n: -1, leader: '', arena: '', portrait: 'entrenadores/' + T.file,
+    pruebas: true, prId: T.id, floor: 0, n: -1, leader: '', arena: '', portrait: 'assets/entrenadores/' + T.file,
     title: 'CAMPO DE PRUEBAS', sub: `${trainerName()} VS ${T.name}`.toUpperCase().slice(0, 34), rival: T.name,
     enemies: T.team, hm: S.hm, dm: S.dm, skill: S.skill, spdm: S.spdm, lvl: S.lvl
   };
-  vsIntro({name: T.name, path: 'entrenadores/' + T.file, enemies: T.team, hideFoe: true, label: 'CAMPO DE PRUEBAS · EQUIPO RIVAL OCULTO', music: o, go: () => prGo(o)});
+  vsIntro({name: T.name, path: 'assets/entrenadores/' + T.file, enemies: T.team, hideFoe: true, label: 'CAMPO DE PRUEBAS · EQUIPO RIVAL OCULTO', music: o, go: () => prGo(o)});
 }
 function prGo(o){
   LOCKW = PR.W; resize();                                   // el mundo de este modo mide PR.W (startBattle coloca a los Pokémon con W)
@@ -182,7 +182,7 @@ function prPic(src, half){                                    // carga la imagen
   P.im.src = src;
   return P;
 }
-function prSkinPic(g){ if(typeof invSkin === 'function' && invSkin(g)) return prPic(invUrl(g.slice(2))); return g === 'f' ? prPic(VS_SKIN_URL, 'r') : prPic('avatares/' + (VS_SKINS[g] || VS_SKINS.m)); }   // personaje de un jugador (el mismo de la pantalla VS)
+function prSkinPic(g){ if(typeof invSkin === 'function' && invSkin(g)) return prPic(invUrl(g.slice(2))); return g === 'f' ? prPic(VS_SKIN_URL, 'r') : prPic('assets/avatares/' + (VS_SKINS[g] || VS_SKINS.m)); }   // personaje de un jugador (el mismo de la pantalla VS)
 function prMePic(){ return prSkinPic(typeof skinOf === 'function' ? skinOf() : 'm'); }
 function prFoePic(){                                           // el rival: otro jugador (Clasificatoria: su personaje) o un entrenador del Campo (su imagen)
   if(g.pvp){ const sk = g.o.foeSkin; return prSkinPic(sk === 'f' || (typeof vsKnown === 'function' && vsKnown(sk)) ? sk : 'm'); }

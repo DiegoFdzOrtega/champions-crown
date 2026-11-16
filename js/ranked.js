@@ -2,7 +2,7 @@
 /* =====================================================================
    25) CLASIFICATORIA (combates online con puntos y rangos)
    QUÉ HAY:
-   - 7 RANGOS (RK_TIERS) según tus Puntos de Clasificación (PC): Bronce, Plata, Oro, Platino, Diamante, Maestro y Challenger. Emblemas en rangos/<id>.webp.
+   - 7 RANGOS (RK_TIERS) según tus Puntos de Clasificación (PC): Bronce, Plata, Oro, Platino, Diamante, Maestro y Challenger. Emblemas en assets/rangos/<id>.webp.
    - Ganar = +RK_WIN PC · perder (o abandonar) = −RK_LOSS PC (nunca por debajo de 0). Un combate cancelado por desconexión no cuenta.
      Se guarda en save.ranked = {pts, w, l, streak, best} (la partida normal, así también va a la nube) y, si la base de datos lo permite,
      en la tabla profiles (rank_pts, rank_w, rank_l) para la tabla de los mejores (SQL en el README, sección «Clasificatoria»).
@@ -10,7 +10,7 @@
      quién llegó antes y se emparejan de dos en dos (1º con 2º, 3º con 4º...). El primero de cada pareja (host) manda «found» al otro; este contesta «ok»
      y los dos salen de la cola y empiezan el combate online de siempre (js/pvp.js) con match.ranked = true. Si el otro no contesta en 6 s, se vuelve a intentar.
      Solo se emparejan jugadores con la misma versión del combate (PVP_VER).
-   - Pantalla #rankv sobre la ilustración fondos/clasificatoria.webp (sala de combate con 3 pedestales y una consola): tus Pokémon van sobre los pedestales
+   - Pantalla #rankv sobre la ilustración assets/fondos/clasificatoria.webp (sala de combate con 3 pedestales y una consola): tus Pokémon van sobre los pedestales
      y el botón BUSCAR CONTRINCANTE sobre la consola (rkFit los coloca según dónde quede la imagen, RK_BG). Izquierda: tu rango y estadísticas.
      Derecha: escalera de rangos y tabla de los mejores. Abajo: Hitos de Temporada (RK_HITOS: premios al ganar 5, 10 y 20 combates).
      Al buscar sale el radar y al encontrar rival el cartel VS, en un panel de cristal en el centro.
@@ -30,12 +30,12 @@ const RK_TIPS = ['Gana combates para subir de rango: +30 PC por victoria y −15
 const rk = {phase:'idle', ch:null, t0:0, tick:0, n:0, offer:null, match:null, cd:0, tip:0, top:null, topErr:'', topAt:0};
 const rkTier = p => RK_TIERS.reduce((a, t) => p >= t.min ? t : a, RK_TIERS[0]);
 const rkNext = p => RK_TIERS.find(t => t.min > p) || null;
-const rkImg = t => `rangos/${t.id}.webp`;
+const rkImg = t => `assets/rangos/${t.id}.webp`;
 const rkData = () => { const r = save.ranked || (save.ranked = {pts:0, w:0, l:0, streak:0, best:0, hitos:{}}); return r; };
 const rkMMSS = ms => { const s = Math.floor(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 const rkEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 
-// ---- Fondo de la sala (fondos/clasificatoria.webp) y sitios de la imagen donde se colocan las cosas (fracciones del ancho y del alto de la imagen) ----
+// ---- Fondo de la sala (assets/fondos/clasificatoria.webp) y sitios de la imagen donde se colocan las cosas (fracciones del ancho y del alto de la imagen) ----
 const RK_BG = {w:3200, h:1519, ped:[[.395, .5], [.505, .479], [.615, .5]], pedW:.107, ring:[.51, .589], con:[.5075, .714, .415, .079], hit:[.5, .9]};
 const RK_HITOS = [{n:5, bp:1000, t:'1000 BP'}, {n:10, tk:10, t:'10 tickets'}, {n:20, tl:3, t:'3 tickets legendarios'}];     // Hitos de Temporada: premios al ganar 5, 10 y 20 combates (una vez)
 const RK_ICON = {                                                                                                              // iconitos (SVG) de las estadísticas

@@ -5,7 +5,7 @@
 
    VERSIÓN DE REFERENCIA: Pokémon X e Y. Gimnasios en orden: Novarte (Violeta), Relieve (Lino), Yantra (Corelia), Tiriópolis (Amaro), Luminalia (Lem),
    Romantis (Valeria), Anistar (Ástrid) y Fractal (Édel). Alto Mando: Malva, Narciso, Tileo (Acero) y Dracena (Dragón). Campeona: Dianta.
-   Los nombres son los españoles de WikiDex. Los ids con los que se llaman los retratos son los de la carpeta lideres/kalos/ (LEADER_FILE en data.js):
+   Los nombres son los españoles de WikiDex. Los ids con los que se llaman los retratos son los de la carpeta assets/lideres/kalos/ (LEADER_FILE en data.js):
    Violeta=viola · Lino=grant · Corelia=korrina · Amaro=ramos · Lem=clemont · Valeria=valerie · Ástrid=olympia · Édel=wulfric ·
    Malva=malva · Narciso=siebold · Tileo=wikstrom · Dracena (id agata)=dracena.png · Dianta=diantha.
    Fuentes: WikiDex («Liga Pokémon (Kalos)»: equipos oficiales de la Liga con niveles) y Bulbapedia / Serebii (equipos de los líderes de X e Y y del Torneo).
@@ -138,7 +138,7 @@ Object.assign(TEAMS, {
 
 // ---------------------------------------------------------------------
 // Los 13 combates de Kalos, en orden: 8 líderes, 4 del Alto Mando y la Campeona.
-// id = nombre del retrato (lideres/kalos/<id>.png, ver LEADER_FILE en data.js) y de la arena (arenaskalos.js)
+// id = nombre del retrato (assets/lideres/kalos/<id>.png, ver LEADER_FILE en data.js) y de la arena (arenaskalos.js)
 // ---------------------------------------------------------------------
 const KALOS = 'Kalos';
 const KF = (id, leader, tag, kind, lvl, dn, place, extra) =>

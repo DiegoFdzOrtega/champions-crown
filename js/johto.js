@@ -116,7 +116,7 @@ TEAMS.j_koga = TEAMS.koga.map(s => ({...s}));
 TEAMS.j_bruno = TEAMS.bruno.map(s => ({...s}));
 
 // ---------------------------------------------------------------------
-// Los 13 combates de Johto, en orden: 8 líderes, 4 del Alto Mando y el Campeón. id = nombre del retrato (lideres/Johto/<Id>.png) y de la arena (arenasjohto.js)
+// Los 13 combates de Johto, en orden: 8 líderes, 4 del Alto Mando y el Campeón. id = nombre del retrato (assets/lideres/Johto/<Id>.png) y de la arena (arenasjohto.js)
 // ---------------------------------------------------------------------
 const JF = (id, leader, tag, kind, lvl, dn, place) =>
   ({id, leader, tag, kind, lvl, diff: kind === 'lider' ? 'dificil' : 'muy_dificil', teams: TEAMS[id], region: 'Johto', idx: 0, dn, place});

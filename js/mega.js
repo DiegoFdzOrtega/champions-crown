@@ -10,12 +10,12 @@
      (o hacer clic en el aviso). Una sola por combate para todo tu equipo. El tiempo se para durante la animación (estilo X/Y: hélice de luz, destello
      y símbolo mega). La mega cambia: sprite, tipos, habilidad, ataque (el mayor entre Atq y Atq. Esp.) y velocidad. La vida no cambia.
    - RIVALES: el campo `mega:'lucario'` de una plantilla (kalos.js) hace que ese Pokémon megaevolucione solo, MEGA_FOE_DELAY segundos después de salir.
-   SPRITES: pokemon_mega/<nº>-mega/ (mismas hojas que pokemon/). sheet() de sprites.js entiende dex = '448-mega' (texto) y los busca ahí.
-   CÓMO AÑADIR UNA MEGA: 1) su carpeta en pokemon_mega/  2) su piedra en objetos/megapiedras/  3) una línea en MEGA. La Tienda y el equipo la cogen solos.
+   SPRITES: assets/pokemon_mega/<nº>-mega/ (mismas hojas que assets/pokemon/). sheet() de sprites.js entiende dex = '448-mega' (texto) y los busca ahí.
+   CÓMO AÑADIR UNA MEGA: 1) su carpeta en assets/pokemon_mega/  2) su piedra en assets/objetos/megapiedras/  3) una línea en MEGA. La Tienda y el equipo la cogen solos.
    ===================================================================== */
 
-const MEGA_DIR = 'objetos/megapiedras/';               // sprites del Mega-Aro y de las Piedras Activadoras (32x32)
-const MEGA_SPR = 'pokemon_mega';                       // carpeta de los sprites de las formas mega (la usa sprites.js)
+const MEGA_DIR = 'assets/objetos/megapiedras/';               // sprites del Mega-Aro y de las Piedras Activadoras (32x32)
+const MEGA_SPR = 'assets/pokemon_mega';                       // carpeta de los sprites de las formas mega (la usa sprites.js)
 const MEGA_PRICE = 3000;                               // BP que cuesta cada megapiedra
 const MEGA_FOE_DELAY = 4;                              // los rivales megaevolucionan 4 s después de salir al campo
 
@@ -32,8 +32,8 @@ function giveKey(id){                                   // entrega un objeto cla
 }
 
 // ---- Tabla de megaevoluciones ----
-// clave = el valor de `mega` en las plantillas (kalos.js) · dex = Pokémon base · folder = carpeta en pokemon_mega/ · form = nombre de la forma
-// stone / img = nombre y archivo (objetos/megapiedras/) de su piedra · types = tipos de la forma mega · ab = su habilidad (las que hace el juego están en abilities.js)
+// clave = el valor de `mega` en las plantillas (kalos.js) · dex = Pokémon base · folder = carpeta en assets/pokemon_mega/ · form = nombre de la forma
+// stone / img = nombre y archivo (assets/objetos/megapiedras/) de su piedra · types = tipos de la forma mega · ab = su habilidad (las que hace el juego están en abilities.js)
 // base = [PS, Atq, Def, Atq.Esp, Def.Esp, Vel] de la forma mega (comprobadas con Bulbapedia). Todas las habilidades de esta tabla están hechas en abilities.js. En combate cuentan: Atq/Atq.Esp (el mayor) y Vel; los PS no cambian y la defensa solo va por tipos.
 const MG = (dex, folder, form, stone, img, types, ab, base) => ({dex, folder, form, stone, img, types, ab, base});
 const MEGA = {

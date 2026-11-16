@@ -18,9 +18,10 @@ if(LOWFX){
 
 // El lienzo usa la resolución real de la pantalla. El juego se dibuja en un mundo de alto 540
 // y ancho variable, así que llena toda la ventana sin deformarse.
+let PERF_DPR = 2.5;                              // resolución máxima del lienzo en PC: js/perfauto.js la baja si el combate va a tirones
 function resize(){
   const vs = window.visualViewport ? Math.min(1, visualViewport.scale || 1) : 1;                  // móvil: la página se dibuja reducida (index.html) → no hace falta tanta resolución
-  const dpr = Math.min(LOWFX ? 1.5 : 2.5, (window.devicePixelRatio || 1) * vs), cw = window.innerWidth, ch = window.innerHeight;   // (máximo 2,5: en móviles con pantallas muy densas iría lento)
+  const dpr = Math.min(LOWFX ? 1.5 : PERF_DPR, (window.devicePixelRatio || 1) * vs), cw = window.innerWidth, ch = window.innerHeight;   // (máximo 2,5: en móviles con pantallas muy densas iría lento)
   W = LOCKW || Math.max(500, Math.round(cw * H / ch));          // en un combate online W es fijo (LOCKW): si no, cada jugador tendría una arena distinta y se descuadraría
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
 }
@@ -33,7 +34,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 const save = {record:0, bp:0, tickets:0, ticketsL:0, ticketsS:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', cardBg:'', cardFrame:'rank', welcome:0, login:{streak:0, last:''}, firstWin:'',
-              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, tower:{best:0, total:0, runs:0, ms:{}}, ranked:{pts:0, w:0, l:0, streak:0, best:0, hitos:{}}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, title:'', frame:'', pubProfile:true, storyMode:'facil', easy:{record:0, prog:{}, champ:{}}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
+              iv:{}, ev:{}, abil:{}, mv:{}, mvHist:{}, mtV:2, ivBase:{}, evCap:{}, capUsed:{}, trainV:2, champ:{}, prog:{}, mute:false, campoWins:{}, tower:{best:0, total:0, runs:0, ms:{}}, ranked:{pts:0, w:0, l:0, streak:0, best:0, hitos:{}}, stats:{}, volMenu:70, volBattle:70, volSfx:80, controls:{}, title:'', frame:'', pubProfile:true, storyMode:'facil', easy:{record:0, prog:{}, champ:{}}, patchSeen:''};   // champ = Ligas superadas {Región:1} (trofeos y Torre Batalla)   // iv/ev/abil/mv: entrenamiento (ver training.js)   // avatar = archivo de assets/avatares/ que usas ('' = el clásico)   // profileFav = 3 favoritos del perfil · ach = logros
 try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){

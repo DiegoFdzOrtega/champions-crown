@@ -367,8 +367,8 @@ function achChips(r, hidden){
   if(hidden){ chip('ky', 'Recompensa: ???'); return w; }
   if(r.bp) chip('bp', `${r.bp} BP`, 'coin', '#ffcc33');
   if(r.tickets) chip('tk', `${r.tickets} ticket${r.tickets > 1 ? 's' : ''}`, 'ticket', '#ff8ad8');
-  if(r.estrella) chip('tk', `${r.estrella} Estrella${r.estrella > 1 ? 's' : ''}`, null, null, 'iconos/estrella.webp');
-  if(r.estrella_t) chip('tk', `${r.estrella_t} Estrella${r.estrella_t > 1 ? 's' : ''} rosa${r.estrella_t > 1 ? 's' : ''}`, null, null, 'iconos/estrella_t.webp');
+  if(r.estrella) chip('tk', `${r.estrella} Estrella${r.estrella > 1 ? 's' : ''}`, null, null, 'assets/iconos/estrella.webp');
+  if(r.estrella_t) chip('tk', `${r.estrella_t} Estrella${r.estrella_t > 1 ? 's' : ''} rosa${r.estrella_t > 1 ? 's' : ''}`, null, null, 'assets/iconos/estrella_t.webp');
   if(r.title) chip('ti', `Título: ${r.title}`);
   if(r.frame && ACH_FRAMES[r.frame]) chip('fr', `Marco ${ACH_FRAMES[r.frame].n}`, null, null, null, ACH_FRAMES[r.frame].c);
   if(r.trainer) chip('ti', `Personaje: ${(TRAINERS.find(t => t.id === r.trainer) || {}).name || r.trainer}`);

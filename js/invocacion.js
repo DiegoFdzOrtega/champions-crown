@@ -1,16 +1,16 @@
 "use strict";
 /* =====================================================================
    INVOCACIÓN: tiradas de ENTRENADORES (como los deseos de Genshin Impact)
-   - Datos: js/invdata.js (INV_DATA). Imágenes: carpeta «Sprites entrenadores/», sprites de Pokémon Showdown y sus artistas.
+   - Datos: js/invdata.js (INV_DATA). Imágenes: carpeta «assets/sprites_entrenadores/», sprites de Pokémon Showdown y sus artistas.
    - Rangos: Común · Raro · Épico · Legendario. Repetidos = BP (INV_TIER.dup).
-   - Banners: «Estándar» (Estrella azul, iconos/estrella.webp) y uno TEMÁTICO que cambia CADA DÍA (a medianoche, hora de España) (Estrella rosa, iconos/estrella_t.webp).
+   - Banners: «Estándar» (Estrella azul, assets/iconos/estrella.webp) y uno TEMÁTICO que cambia CADA DÍA (a medianoche, hora de España) (Estrella rosa, assets/iconos/estrella_t.webp).
      En el temático, al salir un Épico o Legendario hay un 50 % de que sea uno de los 3 destacados.
    - Garantías: un Épico o mejor cada 10 tiradas como mucho, y un Legendario a las 80 (desde la 66 la probabilidad sube).
    - Lo que sacas se usa como PERSONAJE en la tarjeta de entrenador y en el panel VS (Perfil › Entrenador, o «Usar» en la colección).
      Se guarda como save.gender = 'i:<archivo>' (vspanel.js lo entiende).
    - Las Estrellas se ganan en el Alto Mando y el Campeón (teams.js · REWARD_BOSS) y en los logros (achievements.js). Se guardan en save.items.estrella / estrella_t.
    ===================================================================== */
-const INV_DIR = 'Sprites entrenadores/';
+const INV_DIR = 'assets/sprites_entrenadores/';
 const INV_TIER = {
   C: {n:'Común',      st:3, c:'#5aa8ff', dup:15,  p:.625},
   R: {n:'Raro',       st:4, c:'#b36bff', dup:40,  p:.28},
@@ -116,11 +116,11 @@ function openInv(){
   const B = INV_BANNERS(), bn = B.find(b => b.id === invSel) || B[0], s = invSave(), P = s.pity[bn.id];
   const left = INV_DAY - ((Date.now() - INV_EPOCH) % INV_DAY), lh = Math.floor(left / 3600000), lm = Math.floor(left % 3600000 / 60000);
   const cuando = lh ? `${lh} h ${lm} min` : `${lm} min`;                // lo que falta para el cambio de medianoche
-  const star = (k, n) => `<span class="ivc"><img src="iconos/${k === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><b>${n}</b></span>`;
+  const star = (k, n) => `<span class="ivc"><img src="assets/iconos/${k === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><b>${n}</b></span>`;
   const feat = bn.feat.map((x, i) => { const tt = bn.ma ? 'L' : x.t; return `<figure class="ivf ivf${i}" style="--c:${INV_TIER[tt].c}"><img src="${invUrl(x.f)}" alt=""><figcaption><b>${esc(x.n)}</b>${x.v ? `<small>${esc(x.v)}</small>` : ''}<i>${'★'.repeat(INV_TIER[tt].st)}</i></figcaption></figure>`; }).join('');
   panel(`<div class="iv">
     <div class="iv-top"><h1>Invocación</h1><div class="iv-cur">${star('estrella', held('estrella'))}${star('estrella_t', held('estrella_t'))}<button class="iv-colb" id="ivCol">Colección · ${invCount()} / ${INV_LIST.length}</button></div></div>
-    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Hoy' : b.id === 'ma' ? '3 cada día' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
+    <div class="iv-tabs">${B.map(b => `<button data-b="${b.id}" class="${b.id === bn.id ? 'on' : ''}" style="--c:${b.c1}"><img src="assets/iconos/${b.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""><span>${b.id === 'thm' ? 'Hoy' : b.id === 'ma' ? '3 cada día' : 'Permanente'}<b>${esc(b.n)}</b></span></button>`).join('')}</div>
     <div class="iv-cols"><div class="iv-main">
     <div class="iv-ban" style="--c1:${bn.c1};--c2:${bn.c2}">
       <div class="iv-bt"><span class="k">${bn.id === 'thm' ? `Banner del día · cambia en ${cuando}` : bn.id === 'ma' ? `Rotación diaria · cambian en ${cuando}` : 'Banner permanente'}</span><h2>${esc(bn.n)}</h2><p>${esc(bn.d)}</p>
@@ -129,8 +129,8 @@ function openInv(){
       <div class="iv-feat">${feat}</div>
     </div>
     <div class="iv-go">
-      <button class="iv-pull" data-n="1"><span>Invocar ×1</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×1</em></button>
-      <button class="iv-pull x10" data-n="10"><span>Invocar ×10</span><em><img src="iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×10</em></button>
+      <button class="iv-pull" data-n="1"><span>Invocar ×1</span><em><img src="assets/iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×1</em></button>
+      <button class="iv-pull x10" data-n="10"><span>Invocar ×10</span><em><img src="assets/iconos/${bn.cur === 'estrella' ? 'estrella' : 'estrella_t'}.webp" alt=""> ×10</em></button>
     </div>
     </div>
     <aside class="iv-side">
@@ -228,7 +228,7 @@ const INV_ANIM = 'templo';
 let invScenesOk = null;
 function invScenes(){
   if(invScenesOk) return invScenesOk;
-  const load = n => new Promise(ok => { const im = new Image(); im.onload = () => ok(true); im.onerror = () => ok(false); im.src = 'iconos/' + n + '.webp'; });
+  const load = n => new Promise(ok => { const im = new Image(); im.onload = () => ok(true); im.onerror = () => ok(false); im.src = 'assets/iconos/' + n + '.webp'; });
   const wait = new Promise(ok => setTimeout(() => ok(false), 8000));
   invScenesOk = Promise.race([Promise.all(['inv_templo', 'inv_sala', 'inv_rayo'].map(load)).then(a => a.every(Boolean)), wait]).then(ok => { if(!ok) invScenesOk = null; return ok; });
   return invScenesOk;
@@ -315,10 +315,10 @@ function invAnimTemplo(res){
   const o = document.createElement('div'); o.id = 'invOv'; o.className = 'ivov t' + best; o.style.setProperty('--c', col); o.style.setProperty('--ch', CH + 'ms');
   o.style.setProperty('--amp', {C:1, R:2, E:3.5, L:5}[best] + 'px');
   o.classList.add('tpov');
-  ['inv_templo', 'inv_sala', 'inv_rayo'].forEach(n => { new Image().src = 'iconos/' + n + '.webp'; });
+  ['inv_templo', 'inv_sala', 'inv_rayo'].forEach(n => { new Image().src = 'assets/iconos/' + n + '.webp'; });
   o.innerHTML = `<div class="ivsky"></div>
-    <div class="tp-s tp-out"><img class="tp-bg" src="iconos/inv_templo.webp" alt=""><div class="tp-swirl"></div><div class="tp-hole"></div><div class="ivpart"></div><div class="tp-cone"></div><div class="tp-wins"><i style="--x:43.9%"></i><i style="--x:47.1%"></i><i style="--x:50.4%"></i><i style="--x:53.7%"></i><i style="--x:57%"></i></div></div>
-    <div class="tp-s tp-in"><img class="tp-bg" src="iconos/inv_sala.webp" alt=""><div class="tp-wglow"></div><div class="tp-rip"><i></i><i></i><i></i></div><img class="tp-beam" src="iconos/inv_rayo.webp" alt=""><div class="ivshock"><i></i><i></i></div></div>
+    <div class="tp-s tp-out"><img class="tp-bg" src="assets/iconos/inv_templo.webp" alt=""><div class="tp-swirl"></div><div class="tp-hole"></div><div class="ivpart"></div><div class="tp-cone"></div><div class="tp-wins"><i style="--x:43.9%"></i><i style="--x:47.1%"></i><i style="--x:50.4%"></i><i style="--x:53.7%"></i><i style="--x:57%"></i></div></div>
+    <div class="tp-s tp-in"><img class="tp-bg" src="assets/iconos/inv_sala.webp" alt=""><div class="tp-wglow"></div><div class="tp-rip"><i></i><i></i><i></i></div><img class="tp-beam" src="assets/iconos/inv_rayo.webp" alt=""><div class="ivshock"><i></i><i></i></div></div>
     <div class="ivflash"></div><div class="ivstage"></div><button class="ivskip">Saltar »</button>`;
   document.body.appendChild(o);
   const sfx = (n, k) => { try{ if(typeof Sfx !== 'undefined') Sfx.play(n, k); }catch(e){} };

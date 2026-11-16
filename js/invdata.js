@@ -1,6 +1,6 @@
 "use strict";
 /* Datos de la INVOCACIÓN (js/invocacion.js): [archivo sin .png, rango C/R/E/L, temas, nombre, variante]
-   Sprites: carpeta "Sprites entrenadores/", de Pokémon Showdown (play.pokemonshowdown.com/sprites/trainers/) y sus artistas.
+   Sprites: carpeta "assets/sprites_entrenadores/", de Pokémon Showdown (play.pokemonshowdown.com/sprites/trainers/) y sus artistas.
    Temas: ch Campeones · am Alto Mando · vi Villanos · gy Líderes · he Héroes y rivales · pa Pasarela · re Retro · ma Masters · an Anime
    Fuera del juego (colaboraciones y bromas): miku-*, rose-zerosuit, unknown-flipped, unknownf-flipped.
    Fuera también: Pokémon Conquest, los sprites de dos personas (hinchas, gamberros, párvulos, Sordward y Shielbert, Yukito y Hideko...)

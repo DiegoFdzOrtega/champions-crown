@@ -26,7 +26,7 @@ const hdCanvas = (w, h) => { const c = document.createElement('canvas'); c.width
 const fxhdLive = () => fx.list.length > 0 || fx.parts.length > 0 || fxhd.hits.length > 0 || fxhd.charges.length > 0 || !!fxhd.flash;
 
 function fxhdBegin(){
-  hdBl.on = fxhd.on && !LOWFX && !!g && fxhdLive();                                   // en modo rendimiento (state.js) no hay bloom: los halos de fxhdDraw siguen
+  hdBl.on = fxhd.on && !LOWFX && !(typeof PERF !== 'undefined' && PERF.low) && !!g && fxhdLive();   // (PERF.low: el PC iba a tirones, js/perfauto.js)                                   // en modo rendimiento (state.js) no hay bloom: los halos de fxhdDraw siguen
   if(!hdBl.on) return;
   const w = cv.width >> 1, h = cv.height >> 1;
   if(!hdBl.A || hdBl.A.width !== w || hdBl.A.height !== h){ hdBl.A = hdCanvas(w, h); hdBl.H = hdCanvas(w, h); hdBl.S = hdCanvas(w >> 1, h >> 1); hdBl.S2 = hdCanvas(w >> 3, h >> 3); }

@@ -4,7 +4,7 @@
    ===================================================================== */
 const W = 960, H = 540;
 const ESCALA = 3;            // los sprites son pequeños: se dibujan 3 veces más grandes
-const CARPETA = 'pokemon';   // carpeta de sprites: pokemon/<número>/Walk.png ...
+const CARPETA = 'assets/pokemon';   // carpeta de sprites: assets/pokemon/<número>/Walk.png ...
 
 // Colores de los 18 tipos
 const TC = {normal:'#a8a878',fuego:'#f08030',agua:'#6890f0',planta:'#78c850',electrico:'#f8d030',

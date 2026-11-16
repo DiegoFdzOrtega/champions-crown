@@ -67,7 +67,7 @@ function renderProfile(){
         ${sec('av', 'Avatar', 'Los que tienen candado se desbloquean al conseguir ese Pokémon.', `<div class="av-grid" id="avGrid"></div><div class="pf-btns"><button id="avSave" class="main">Guardar avatar</button></div>`)}
         ${sec('tf', 'Título y marco', 'Son recompensas de los logros: se desbloquean al reclamarlos. El título sale bajo tu nombre y el marco rodea tu avatar. Se aplican al momento.', `<div class="pf-card"><label class="pf-lab">Título<select id="titSel"></select></label></div><div class="pf-card"><h3>Marco del avatar</h3><div class="frames" id="frameRow"></div></div>
           <div class="pf-card"><h3>Borde de la tarjeta</h3><p class="help">Elige si tu tarjeta lleva el marco de tu rango de la Clasificatoria o un borde a juego con el marco de tu avatar.</p>
-            <div class="pf-cf" id="cfRow"><button data-cf="rank" class="${save.cardFrame !== 'avatar' ? 'on' : ''}"><i class="cfp rk" style="background-image:url(fondos/marcos/${typeof rkTier === 'function' && save.ranked ? rkTier(save.ranked.pts).id : 'bronce'}.webp)"></i><span>Marco de rango</span></button><button data-cf="avatar" class="${save.cardFrame === 'avatar' ? 'on' : ''}"><i class="cfp av" style="--ac:${typeof achActiveFrame === 'function' && achActiveFrame() ? ACH_FRAMES[achActiveFrame()].c : '#3ea6ff'}"></i><span>A juego con el avatar</span></button></div></div>`)}
+            <div class="pf-cf" id="cfRow"><button data-cf="rank" class="${save.cardFrame !== 'avatar' ? 'on' : ''}"><i class="cfp rk" style="background-image:url(assets/fondos/marcos/${typeof rkTier === 'function' && save.ranked ? rkTier(save.ranked.pts).id : 'bronce'}.webp)"></i><span>Marco de rango</span></button><button data-cf="avatar" class="${save.cardFrame === 'avatar' ? 'on' : ''}"><i class="cfp av" style="--ac:${typeof achActiveFrame === 'function' && achActiveFrame() ? ACH_FRAMES[achActiveFrame()].c : '#3ea6ff'}"></i><span>A juego con el avatar</span></button></div></div>`)}
         ${sec('fav', 'Pokémon favoritos', 'Elige 3 Pokémon distintos. Si tienes su versión shiny, puedes enseñarla. Solo son para tu perfil: no cambian tu equipo.', `<div class="pf-slots" id="pfSlots"></div><p id="pfMsg" class="warn"></p><div class="pf-btns"><button id="pfSave" class="main">Guardar favoritos</button><button id="pfCancel">Cancelar cambios</button></div>`)}
         ${sec('priv', 'Privacidad', 'Tus amigos pueden abrir tu tarjeta desde Amigos. Nunca ven tu partida, ni tus BP ni tus tickets. Hace falta tener cuenta.', `<div class="pf-card"><label class="sw"><span class="swT"><b>Mostrar mi perfil a mis amigos</b><small>Si lo desactivas, nadie ve tu tarjeta.</small></span><input type="checkbox" id="pubChk"><i></i></label></div>`)}
       </div>
@@ -169,7 +169,7 @@ function renderTitleFrame(){
   const pv = $('pfAv'); if(pv) pv.className = (pv.className.replace(/\s*\bafr-\S+/g, '') + (curF ? ' afr-' + curF : '')).trim();
 }
 
-// ---- Selector de avatar: cuadrícula con las imágenes de avatares/ (los bloqueados salen apagados con candado) ----
+// ---- Selector de avatar: cuadrícula con las imágenes de assets/avatares/ (los bloqueados salen apagados con candado) ----
 function renderAvatarGrid(){
   const grid = $('avGrid'); if(!grid) return;
   const tiles = [{file:'', name:'Clásico', dex:0, src:defaultAvatar()}, ...avatarList().map(a => ({...a, src:avatarUrl(a.file)}))];

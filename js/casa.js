@@ -1,6 +1,6 @@
 "use strict";
 /* =====================================================================
-   18) LA CASA DEL EQUIPO POKÉMON: fondo de la pantalla de equipo (imagen fondos/casa.png + trofeos y favoritos dibujados encima)
+   18) LA CASA DEL EQUIPO POKÉMON: fondo de la pantalla de equipo (imagen assets/fondos/casa.png + trofeos y favoritos dibujados encima)
    - La imagen es solo el decorado: una casa vista desde arriba con 4 habitaciones. La vitrina del salón está VACÍA a propósito:
      el juego pone encima un trofeo por cada Liga superada (save.champ, igual que en room.js) y sus gemas de colores.
    - Los 3 Pokémon FAVORITOS del perfil (favSaved() y favShinySaved() de profile.js) viven en la casa, animados (reposo).
@@ -14,7 +14,7 @@
    ===================================================================== */
 const TEAM_HOUSE = false;     // ← DESACTIVADA por ahora: se usa la habitación antigua. Ponlo en true para volver a ver la casa
 
-const HOUSE = {W:750, H:750, src:'fondos/casa.png', img:null, ok:false, failed:false, cv:null, x:null, base:null, on:false, timer:0, t0:0, won:[], pets:[],
+const HOUSE = {W:750, H:750, src:'assets/fondos/casa.png', img:null, ok:false, failed:false, cv:null, x:null, base:null, on:false, timer:0, t0:0, won:[], pets:[],
   slots: Array.from({length:9}, (_, i) => ({x:238 + i * 34.75, y:118})),     // un cristal de la vitrina por Liga (mismo orden que ROOM_LEAGUES)
   pos: [[330, 330], [515, 590], [280, 555]],                                  // dónde está cada favorito (pies): salón, dormitorio y cocina
   fit: 84};                                                                   // tamaño máximo de un favorito en píxeles de la imagen

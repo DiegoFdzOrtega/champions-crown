@@ -265,7 +265,7 @@ function torreFight(f){
     o = {torre:true, estTorre:true, torreFloor:f, floor:f, n:-1, leader:'torre_' + P.id, arena:'campo', leaderName:P.name, rival:P.name, portrait:P.path, title:'TORRE BATALLA', sub:`PISO ${f} · ${P.name.toUpperCase()}`, enemies:team2, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl};
     vs = {name:P.name, path:P.path, enemies:team2, label:`TORRE · PISO ${f}`, music:o};
   }
-  vs.go = () => prGo(o);                                                                  // se juega en el ESTADIO de la Torre (js/pruebas.js · fondos/estadio_torre.webp)
+  vs.go = () => prGo(o);                                                                  // se juega en el ESTADIO de la Torre (js/pruebas.js · assets/fondos/estadio_torre.webp)
   vsIntro(vs);
 }
 
@@ -305,7 +305,7 @@ function torreEnd(won){                                                         
 const TORRE_RWN = {bp:() => 'BP', tickets:n => n === 1 ? 'tirada' : 'tiradas', ticketsL:n => n === 1 ? 'legendaria' : 'legendarias', chapa:n => n === 1 ? 'dorada' : 'doradas',
   chapaplata:n => n === 1 ? 'plateada' : 'plateadas', estrella:n => n === 1 ? 'estrella' : 'estrellas', estrella_t:n => n === 1 ? 'estrella rosa' : 'estrellas rosas'};   // (chapas doradas/plateadas, estrellas de Invocación)
 const torreRw = r => Object.entries(r).map(([id, n]) => `${n} ${TORRE_RWN[id] ? TORRE_RWN[id](n) : id}`).join(' · ');
-// Pantalla #torrev sobre la ilustración fondos/torre_dia.webp (de 8:00 a 19:59) o torre_noche.webp (de 20:00 a 7:59).
+// Pantalla #torrev sobre la ilustración assets/fondos/torre_dia.webp (de 8:00 a 19:59) o torre_noche.webp (de 20:00 a 7:59).
 // Los pisos van DENTRO del cristal de la torre (twFit los coloca encima de la imagen): se ven 10 y con las flechas se cambia de tramo.
 // Cada piso enseña a su rival: los vencidos en esta subida y el siguiente, a la vista; los demás, en silueta; los Campeones con corona.
 const TW_BG = {w:2880, h:1607, glass:{x:.436, y:.2195, w:.128, h:.5605}};               // dónde está el cristal de la torre en la imagen (en fracciones)
@@ -321,7 +321,7 @@ let twPage = -1;                                                                
 const twNext = () => save.tower.run ? Math.min(TORRE_MAX, save.tower.run.f + 1) : 1;     // el siguiente combate
 const twCurPage = () => twPage >= 0 ? twPage : Math.floor((twNext() - 1) / 10);
 // Iconos de las recompensas (los mismos de la pantalla de victoria)
-const TW_RWI = {bp:() => CUR_SRC.bp, tickets:() => CUR_SRC.ticket, ticketsL:() => CUR_SRC.ticket_l, chapa:() => imgOf('chapa'), chapaplata:() => imgOf('chapaplata'), estrella:() => 'iconos/estrella.webp', estrella_t:() => 'iconos/estrella_t.webp'};
+const TW_RWI = {bp:() => CUR_SRC.bp, tickets:() => CUR_SRC.ticket, ticketsL:() => CUR_SRC.ticket_l, chapa:() => imgOf('chapa'), chapaplata:() => imgOf('chapaplata'), estrella:() => 'assets/iconos/estrella.webp', estrella_t:() => 'assets/iconos/estrella_t.webp'};
 const TW_RWL = {bp:'Puntos de Batalla', tickets:'Tiradas de Gachapon', ticketsL:'Tiradas legendarias', chapa:'Chapas Doradas', chapaplata:'Chapas Plateadas', estrella:'Estrellas de Invocación', estrella_t:'Estrellas temáticas'};
 const twChips = (r, big) => Object.entries(r).filter(([k]) => k !== 'f').map(([id, n]) => `<span class="tw-rwc${big ? ' big' : ''} rw-${id}" title="${TW_RWL[id] || id}"><img src="${TW_RWI[id] ? TW_RWI[id]() : ''}" alt="" onerror="this.style.display='none'"><b>${n >= 1000 ? (n / 1000).toFixed(n % 1000 ? 1 : 0).replace('.', ',') + 'k' : n}</b></span>`).join('');
 const TW_SI = {

@@ -26,9 +26,9 @@ const shopLeft = () => { const n = new Date(), m = new Date(n.getFullYear(), n.g
 SHOP.push(
   {id:'cj_ticket',   n:'Ticket Gachapon',        cat:'canje', cur:'chapaplata', p:4,  give:'tickets',    gn:1,   d:'Cambia 4 Chapas Plateadas por 1 tirada del Gachapon.'},
   {id:'cj_bp',       n:'Saco de Puntos',         cat:'canje', cur:'chapaplata', p:2,  give:'bp',         gn:400, d:'Cambia 2 Chapas Plateadas por 400 Puntos de Batalla.', get icon(){ return CUR_SRC.bp; }},
-  {id:'cj_estrella', n:'Estrella de Invocación', cat:'canje', cur:'chapaplata', p:8,  give:'estrella',   gn:1,   d:'Cambia 8 Chapas Plateadas por 1 Estrella para la Invocación.', icon:'iconos/estrella.webp'},
+  {id:'cj_estrella', n:'Estrella de Invocación', cat:'canje', cur:'chapaplata', p:8,  give:'estrella',   gn:1,   d:'Cambia 8 Chapas Plateadas por 1 Estrella para la Invocación.', icon:'assets/iconos/estrella.webp'},
   {id:'cj_ticketl',  n:'Ticket Legendario',      cat:'canje', cur:'chapa',      p:6,  give:'ticketsL',   gn:1,   d:'Cambia 6 Chapas Doradas por un Ticket Gachapon Legendario.'},
-  {id:'cj_estrellat',n:'Estrella Rosa',          cat:'canje', cur:'chapa',      p:12, give:'estrella_t', gn:1,   d:'Cambia 12 Chapas Doradas por 1 Estrella Rosa (Masters).', icon:'iconos/estrella_t.webp'}
+  {id:'cj_estrellat',n:'Estrella Rosa',          cat:'canje', cur:'chapa',      p:12, give:'estrella_t', gn:1,   d:'Cambia 12 Chapas Doradas por 1 Estrella Rosa (Masters).', icon:'assets/iconos/estrella_t.webp'}
 );
 const CJ_NAME = {chapaplata:'Chapas Plateadas', chapa:'Chapas Doradas'};
 const SHOP_ICO = {oferta:'cintaelec', todo:'restos', ticket:'', ataque:'vidasfera', defensa:'chaleco', tipo:'gafasol', util:'cascabel', mejora:'chapa', mega:'mega_charizard_x', mt:'', canje:'chapaplata'};   // objeto que hace de icono de cada categoría
@@ -48,7 +48,7 @@ const shopNote = {
   _:'Cada Pokémon lleva un objeto. Puedes comprar varios del mismo.'};
 
 const shopSnd = n => { try{ if(typeof Sfx !== 'undefined') Sfx.play(n); }catch(e){} };     // suena un efecto (música.js · Sfx)
-// ---- EL VENDEDOR: cambia de pose y dice una frase según lo que hagas (imágenes iconos/vendedor_*.webp) ----
+// ---- EL VENDEDOR: cambia de pose y dice una frase según lo que hagas (imágenes assets/iconos/vendedor_*.webp) ----
 const SHOP_V = {hi:'vendedor_hola', ok:'vendedor_ok', joy:'vendedor_feliz', sorry:'vendedor_perdon', idle:'vendedor_reposo'};
 const SHOP_SAY = {
   hi:['¡Bienvenido! Mira lo que quieras.', '¡Hola! ¿Qué te pongo hoy?', '¡Pasa, pasa! Hoy hay ofertas.'],
@@ -59,7 +59,7 @@ const SHOP_SAY = {
 let shopVT = 0;
 const shopSay = (m, txt) => {
   const im = $('shVimg'), bx = $('shSay'); if(!im || !bx) return;
-  const L = SHOP_SAY[m]; im.src = 'iconos/' + SHOP_V[m] + '.webp?v=1'; bx.textContent = txt || L[Math.floor(Math.random() * L.length)];
+  const L = SHOP_SAY[m]; im.src = 'assets/iconos/' + SHOP_V[m] + '.webp?v=1'; bx.textContent = txt || L[Math.floor(Math.random() * L.length)];
   bx.classList.remove('pop'); void bx.offsetWidth; bx.classList.add('pop'); im.classList.remove('hop'); void im.offsetWidth; if(m === 'joy' || m === 'ok') im.classList.add('hop');
   clearTimeout(shopVT); if(m !== 'idle') shopVT = setTimeout(() => shopSay('idle'), 5000);
 };
@@ -96,7 +96,7 @@ function openShop(){
   $('shType').onchange = e => { shopSt.type = e.target.value; drawShop(); };
   $('shClr').onclick = () => { shopSt.q = ''; shopSt.slot = ''; shopSt.type = ''; $('shQ').value = ''; $('shSlot').value = ''; $('shType').value = ''; drawShop(); };
   $('shTabs').onclick = e => { const b = e.target.closest('[data-c]'); if(!b) return; shopSt.cat = b.dataset.c; drawShop(); };
-  Object.values(SHOP_V).forEach(n => { new Image().src = 'iconos/' + n + '.webp?v=1'; });       // se cargan ya, para que el cambio de pose no parpadee
+  Object.values(SHOP_V).forEach(n => { new Image().src = 'assets/iconos/' + n + '.webp?v=1'; });       // se cargan ya, para que el cambio de pose no parpadee
   drawShop(); shopSay('hi');
 }
 

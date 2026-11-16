@@ -167,13 +167,13 @@ const ICON_CAPSULE = gridIcon(['............', '............', '..oooooooo..', '
   {o:'#1a1a2e', r:'#e8493a', h:'#ffb3a8', w:'#f4f4f4', b:'#3ea6ff'});
 const mtIcon = color => gridIcon(discRows((r, dx, dy) => r > 6 ? '.' : r > 5.2 ? 'o' : r < 1.5 ? 'o' : r < 2.4 ? 'd' : r < 3.3 ? 'w' : (dx + dy < -3 && r < 5) ? 'h' : 'c'),
   {o:'#101a33', c:color, w:'#f4f4f4', d:'#34405f', h:'#ffffff99'});
-// Imágenes de tus carpetas: objetos/mts/<tipo en inglés>.png, objetos/mentas/<stat>.png y objetos/ivs/*.png.
+// Imágenes de tus carpetas: assets/objetos/mts/<tipo en inglés>.png, assets/objetos/mentas/<stat>.png y assets/objetos/ivs/*.png.
 // Si falta un archivo, se usa el icono dibujado en píxeles de arriba (trainFallback), así nunca sale un hueco vacío.
 const TYPE_EN = {normal:'normal', fuego:'fire', agua:'water', planta:'grass', electrico:'electric', hielo:'ice', lucha:'fighting', veneno:'poison', tierra:'ground',
   volador:'flying', psiquico:'psychic', bicho:'bug', roca:'rock', fantasma:'ghost', dragon:'dragon', siniestro:'dark', acero:'steel', hada:'fairy'};
 const MINT_FILE = {atk:'attack', def:'defense', spa:'special-attack', spd:'special-defense', spe:'speed'};    // la menta depende de la estadística que sube la naturaleza
-const mintImg = n => 'objetos/mentas/' + (MINT_FILE[n[1]] || 'neutral') + '.png';                             // n = una entrada de NATURES
-const IMG_CAPSULE = 'objetos/ivs/ability-capsule.png', IMG_CHAPA = 'objetos/ivs/chapa-dorada.png', IMG_PLATA = 'objetos/ivs/Chapa-plateada.png';       // (la Chapa Dorada aún no tiene imagen: usa el icono dibujado; si la creas con ese nombre, se usará sola)
+const mintImg = n => 'assets/objetos/mentas/' + (MINT_FILE[n[1]] || 'neutral') + '.png';                             // n = una entrada de NATURES
+const IMG_CAPSULE = 'assets/objetos/ivs/ability-capsule.png', IMG_CHAPA = 'assets/objetos/ivs/chapa-dorada.png', IMG_PLATA = 'assets/objetos/ivs/Chapa-plateada.png';       // (la Chapa Dorada aún no tiene imagen: usa el icono dibujado; si la creas con ese nombre, se usará sola)
 function trainFallback(src){                                                                                   // icono dibujado equivalente a una imagen que no se ha podido cargar
   src = decodeURI(String(src || '')); let m;
   if((m = src.match(/objetos\/mts\/([a-z]+)\.png/))){ const t = Object.keys(TYPE_EN).find(k => TYPE_EN[k] === m[1]); return mtIcon(TC[t] || '#aaa'); }
@@ -187,10 +187,10 @@ document.addEventListener('error', e => { const i = e.target; if(i && i.tagName 
 const CONS = {
   chapa:   {n:'Chapa Dorada',          icon:IMG_CHAPA, p:TRAIN.price.chapa,   d:`Sube un IV (valor individual) de un Pokémon en +${TRAIN.chapaIV}. Máximo ${TRAIN.ivMax} por stat. Se usa en Equipo Pokémon > Ver datos.`},
   chapaplata:{n:'Chapa Plateada',      icon:IMG_PLATA, p:TRAIN.price.plata,   d:`Suma +${TRAIN.chapaEV} EVs (puntos de esfuerzo) a un stat. Máximo ${TRAIN.evCap} por stat y ${TRAIN.evTotal} en total. Se usa en Equipo Pokémon > Ver datos.`},
-  menta:   {n:'Menta',                 icon:'objetos/mentas/neutral.png',    p:TRAIN.price.menta,   d:'Cambia la naturaleza de un Pokémon por la que elijas. Se usa en Equipo Pokémon > Ver datos.'},
+  menta:   {n:'Menta',                 icon:'assets/objetos/mentas/neutral.png',    p:TRAIN.price.menta,   d:'Cambia la naturaleza de un Pokémon por la que elijas. Se usa en Equipo Pokémon > Ver datos.'},
   capsula: {n:'Cápsula de Habilidad',  icon:IMG_CAPSULE, p:TRAIN.price.capsula, d:'Cambia la habilidad de un Pokémon por su otra habilidad. Se usa en Equipo Pokémon > Ver datos.'}
 };
-const trainIcon = id => CONS[id] ? CONS[id].icon : MT_ID[id] ? 'objetos/mts/' + TYPE_EN[MOVES[MT_ID[id]].t] + '.png' : '';
+const trainIcon = id => CONS[id] ? CONS[id].icon : MT_ID[id] ? 'assets/objetos/mts/' + TYPE_EN[MOVES[MT_ID[id]].t] + '.png' : '';
 const itemName = id => CONS[id] ? CONS[id].n : MT_ID[id] ? 'MT ' + MT_ID[id] : (ITEMS[id] ? ITEMS[id].n : id);
 Object.keys(CONS).forEach(id => SHOP.push({id, n:CONS[id].n, d:CONS[id].d, p:CONS[id].p, cat:'mejora', icon:CONS[id].icon}));
 

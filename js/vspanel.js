@@ -6,21 +6,21 @@
    - Abajo: "3 vs 6 · Región · tipo de combate".
    - Se cierra solo a los pocos segundos; clic / Enter / Espacio lo salta; Esc cancela y vuelves al menú.
 
-   TU PERSONAJE: la imagen  avatares/RED Y LEAF.png  trae a los dos (Red a la izquierda, Leaf a la derecha); se enseña una mitad u otra.
+   TU PERSONAJE: la imagen  assets/avatares/RED Y LEAF.png  trae a los dos (Red a la izquierda, Leaf a la derecha); se enseña una mitad u otra.
    Se elige en Perfil › Personaje (save.gender: 'm' = chico, 'f' = chica, 'r' = Red Masters, solo para la cuenta yumbax, o el id de un personaje de TRAINERS desbloqueado con su logro). Si falta la imagen se usa el avatar clásico.
    (No sale en la lista de avatares: loadAvatars la salta.)
 
    USO:  vsIntro({name, id, path, label, enemies, go})
-        name = nombre del rival · id = nombre de su retrato (lideres/...) · path = ruta fija del retrato (Campo)
+        name = nombre del rival · id = nombre de su retrato (assets/lideres/...) · path = ruta fija del retrato (Campo)
         label = texto de abajo · enemies = su equipo (nº de Pokédex u objetos {dex}) · go = función que empieza el combate
         skin = (combate online) el personaje del rival, que es otro jugador · sub = texto bajo su nombre · shinyOf(dex) = si su Pokémon es shiny · cancel = función para Esc (en vez de volver a la música del menú)
         music = el objeto del combate (el mismo que recibe startBattle): hace que la música del combate empiece a sonar ya en esta pantalla. Si cancelas con Esc, vuelve la música del menú.
    ===================================================================== */
-const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en avatares/ con los dos personajes: Red (chico, izquierda) y Leaf (chica, derecha)
-const VS_SKIN_URL = 'avatares/' + encodeURIComponent(VS_SKIN_FILE);
+const VS_SKIN_FILE = 'RED Y LEAF.png';                    // una sola imagen en assets/avatares/ con los dos personajes: Red (chico, izquierda) y Leaf (chica, derecha)
+const VS_SKIN_URL = 'assets/avatares/' + encodeURIComponent(VS_SKIN_FILE);
 // Personajes de una sola imagen (80x80, con margen transparente que se recorta al dibujarlos): 'm' = chico (Red de 3.ª gen.) · 'r' = Red Masters (EXCLUSIVO de la cuenta VS_MASTERS_USER)
 // La chica ('f') sigue siendo la mitad derecha de VS_SKIN_FILE.
-// PERSONAJES EXTRA que se desbloquean con logros (categoría «Entrenadores» de js/achievements.js): para añadir uno, pon su imagen (80x80) en avatares/ y una línea aquí.
+// PERSONAJES EXTRA que se desbloquean con logros (categoría «Entrenadores» de js/achievements.js): para añadir uno, pon su imagen (80x80) en assets/avatares/ y una línea aquí.
 //   id = código que se guarda (save.gender) · name = nombre · file = imagen · dex = Pokémon que hay que tener EN SHINY para desbloquearlo (3 en los normales, 6 en los «Masters»)
 // Cada uno crea solo su logro y su recompensa «personaje» (no hay que tocar nada más). Los de Red (chico, chica y Red Masters) no están aquí: el chico y la chica son gratis y Red Masters es de una sola cuenta.
 const TRAINERS = [
@@ -44,16 +44,16 @@ const skinAllowed = g => g !== 'r' || (typeof cloud !== 'undefined' && !!cloud.n
 const trainerOpen = id => typeof trainerUnlocked === 'function' && trainerUnlocked(id);          // ¿ya has reclamado el logro de ese personaje? (achievements.js)
 const skinOf = g => { g = g || save.gender; if(invSkin(g)) return invOwns(g.slice(2)) ? g : 'm'; return g === 'f' ? 'f' : (g === 'r' ? (skinAllowed('r') ? 'r' : 'm') : (vsKnown(g) && g !== 'm' && trainerOpen(g) ? g : 'm')); };      // el personaje que se usa de verdad (si no lo tienes, el chico)
 const VS_AUTO_MS = 4600, VS_MIN_MS = 700;                  // se cierra solo a los 4,6 s · no se puede saltar en los primeros 0,7 s (evita dobles clics)
-// Arte VS de los rivales (como el de la pantalla VS de los juegos): si existe lideres/<región>/VS_<Nombre>.webp (o .png / vs_<nombre>), se usa en vez del retrato pequeño.
+// Arte VS de los rivales (como el de la pantalla VS de los juegos): si existe assets/lideres/<región>/VS_<Nombre>.webp (o .png / vs_<nombre>), se usa en vez del retrato pequeño.
 // Solo se busca en las regiones de esta lista (así no se piden archivos que no existen).  Si no está, se usa el retrato de siempre.
 const VS_ART_REGIONS = [];                                 // DESACTIVADO: siempre se usan los retratos normales. Para volver a usar el arte VS de Kalos: ['kalos']
 function vsFoeImg(im, o){
   const fallback = () => { im.onerror = () => { im.style.visibility = 'hidden'; }; if(o.path) im.src = o.path; else loadLeaderInto(im, o.id, () => { im.style.visibility = 'hidden'; }); };
   const reg0 = (typeof save !== 'undefined' && save.region) || '', reg = (typeof REGION_DIR !== 'undefined' && REGION_DIR[reg0]) || reg0;
-  const dir = VS_ART_REGIONS.find(r => r === reg.toLowerCase());                          // (la carpeta es lideres/kalos, en minúsculas)
+  const dir = VS_ART_REGIONS.find(r => r === reg.toLowerCase());                          // (la carpeta es assets/lideres/kalos, en minúsculas)
   if(o.path || !dir){ fallback(); return; }
   const cap = n => n.charAt(0).toUpperCase() + n.slice(1), names = [o.id, ...((typeof LEADER_FILE !== 'undefined' && LEADER_FILE[o.id]) || [])], list = [];
-  names.forEach(n => ['VS_' + cap(n) + '.webp', 'VS_' + cap(n) + '.png', 'vs_' + n + '.png', 'vs_' + n + '.webp'].forEach(f => list.push(`lideres/${dir}/${f}`)));
+  names.forEach(n => ['VS_' + cap(n) + '.webp', 'VS_' + cap(n) + '.png', 'vs_' + n + '.png', 'vs_' + n + '.webp'].forEach(f => list.push(`assets/lideres/${dir}/${f}`)));
   let k = 0;
   im.onload = () => im.parentNode && im.parentNode.classList.add('art');                  // marco apaisado para el arte VS
   im.onerror = () => { if(++k < list.length) im.src = list[k]; else { im.onload = null; fallback(); } };
@@ -85,7 +85,7 @@ function setPlayerSkin(el, g, raw){                              // cambia 'el' 
     const probe = new Image(); probe.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; probe.src = VS_SKIN_URL;
     return;
   }
-  const url = invSkin(g) ? invUrl(g.slice(2)) : 'avatares/' + VS_SKINS[g]; sp.classList.add('one'); sp.style.backgroundImage = `url("${url}")`;
+  const url = invSkin(g) ? invUrl(g.slice(2)) : 'assets/avatares/' + VS_SKINS[g]; sp.classList.add('one'); sp.style.backgroundImage = `url("${url}")`;
   const probe = new Image(); probe.onload = () => vsTrim(sp, probe);
   probe.onerror = () => { sp.classList.remove('one'); sp.dataset.g = 'm'; sp.style.backgroundImage = `url("${VS_SKIN_URL}")`;       // sin la imagen nueva: la mitad izquierda de la antigua
     const old = new Image(); old.onerror = () => { sp.classList.add('fb'); sp.style.backgroundImage = `url(${defaultAvatar()})`; }; old.src = VS_SKIN_URL; };

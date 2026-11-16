@@ -3,9 +3,9 @@
    19) MÚSICA DINÁMICA: un tema para el menú y uno para cada tipo de combate (líderes, Alto Mando y Campeones de Kanto y Johto)
 
    CÓMO FUNCIONA (en sencillo)
-   - Pones tus archivos de audio en la carpeta  musica/  con el nombre de cada pista (ver MUSIC_TRACKS): musica/menu.mp3,
-     musica/lider_kanto.mp3, musica/lider_johto.mp3, musica/alto_kanto.mp3, musica/alto_johto.mp3, musica/campeon_azul.mp3,
-     musica/campeon_lance.mp3 y musica/campo.mp3. El juego los encuentra solo.
+   - Pones tus archivos de audio en la carpeta  assets/musica/  con el nombre de cada pista (ver MUSIC_TRACKS): assets/musica/menu.mp3,
+     assets/musica/lider_kanto.mp3, assets/musica/lider_johto.mp3, assets/musica/alto_kanto.mp3, assets/musica/alto_johto.mp3, assets/musica/campeon_azul.mp3,
+     assets/musica/campeon_lance.mp3 y assets/musica/campo.mp3. El juego los encuentra solo.
    - Si una pista NO tiene archivo, suena una música original "chiptune" que genera el propio juego (sin ficheros), así nunca hay silencio.
      Cuando añadas el archivo, empieza a usarse sin tocar nada más.
    - Los archivos no vienen incluidos: los temas oficiales de Pokémon son de Nintendo / Game Freak, así que tienes que poner tú los tuyos.
@@ -30,12 +30,12 @@
      Music.probe([ids])     promesa: para cada pista dice si usa 'archivo' o 'generada'
    ===================================================================== */
 
-const MUSIC_DIR = 'musica/';
+const MUSIC_DIR = 'assets/musica/';
 const MUSIC_EXT = ['ogg', 'mp3'];     // extensiones que se buscan, en orden. Añade 'wav' si usas ese formato: ['ogg', 'mp3', 'wav']
 
 // ---------------------------------------------------------------------
 // PISTAS. name = cómo se muestra · ref = qué tema oficial encaja (orientativo, para que sepas qué buscar)
-// file: nombre del archivo (sin extensión) si no quieres que se llame como la pista; así varias pistas pueden compartir el mismo archivo. Puede llevar carpeta: 'Kalos/Combate Lideres' = musica/Kalos/Combate Lideres.ogg (una carpeta por región)
+// file: nombre del archivo (sin extensión) si no quieres que se llame como la pista; así varias pistas pueden compartir el mismo archivo. Puede llevar carpeta: 'Kalos/Combate Lideres' = assets/musica/Kalos/Combate Lideres.ogg (una carpeta por región)
 // win: id de la pista de victoria que suena (una vez) al ganar · once:true = esa pista no se repite
 // loop: [inicio, fin] en segundos, si la pista tiene una intro que no debe repetirse (si no, repite entera)
 // synth = receta de la música generada cuando no hay archivo: bpm, tónica (nº MIDI), escala, acordes (grados), ritmo, sonido...
@@ -83,7 +83,7 @@ const MUSIC_TRACKS = {
   win_campeon_sinnoh:{name:'Victoria: Campeona de Sinnoh',              file:'Sinnoh/Victoria Campeona',             once:true, ref:'"Victory! Champion" de Sinnoh'},
   win_lider_teselia: {name:'Victoria: Líderes y Alto Mando de Teselia', file:'Unova/Victoria Lideres y Alto Mando',  once:true, ref:'"Victory! Gym Leader" de Teselia'},
   win_campeon_teselia:{name:'Victoria: Campeón de Teselia',             file:'Unova/Victoria Campeon',               once:true, ref:'"Victory! Champion" de Teselia'},
-  // Kalos: los archivos están en la carpeta musica/Kalos/ (una carpeta por región) con nombres que dicen para qué son. win = el tema de victoria que suena al ganar (once = suena una vez, sin repetir)
+  // Kalos: los archivos están en la carpeta assets/musica/Kalos/ (una carpeta por región) con nombres que dicen para qué son. win = el tema de victoria que suena al ganar (once = suena una vez, sin repetir)
   lider_kalos:  {name:'Líderes de Kalos', file:'Kalos/Combate Lideres', win:'win_lider_kalos',          ref:'"Battle! Gym Leader" de Kalos (X/Y)',
                  synth:{seed:26, bpm:158, root:62, scale:'major',    prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
   alto_kalos:   {name:'Alto Mando de Kalos', file:'Kalos/Combate Alto Mando', win:'win_lider_kalos',  ref:'"Battle! Elite Four" de Kalos (X/Y)',
@@ -92,7 +92,7 @@ const MUSIC_TRACKS = {
                  synth:{seed:46, bpm:178, root:59, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   win_lider_kalos:  {name:'Victoria: Líderes y Alto Mando de Kalos', file:'Kalos/Victoria Lideres',  once:true, ref:'"Victory! Gym Leader" de Kalos (X/Y)'},
   win_campeon_kalos:{name:'Victoria: Campeona de Kalos',            file:'Kalos/Victoria Campeona', once:true, ref:'"Victory! Champion" de Kalos (X/Y)'},
-  // Alola: carpeta musica/Alola/ con los mismos nombres que Kalos (Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres, Victoria Campeon). Si falta un archivo suena la música generada de abajo
+  // Alola: carpeta assets/musica/Alola/ con los mismos nombres que Kalos (Combate Lideres, Combate Alto Mando, Combate Campeon, Victoria Lideres, Victoria Campeon). Si falta un archivo suena la música generada de abajo
   lider_alola:  {name:'Líderes de Alola', file:'Alola/Combate Lideres', win:'win_lider_alola',          ref:'"Battle! Trainer / Kahuna" de Alola (Sol y Luna)',
                  synth:{seed:27, bpm:150, root:64, scale:'major',    prog:[0,3,4,5],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.8}},
   alto_alola:   {name:'Alto Mando de Alola', file:'Alola/Combate Alto Mando', win:'win_lider_alola',  ref:'"Battle! Elite Four" de Alola (Sol y Luna)',
@@ -109,7 +109,7 @@ const MUSIC_TRACKS = {
 
 // ---------------------------------------------------------------------
 // QUÉ PISTA SUENA CON CADA ENTRENADOR (id del combate -> pista). Para darle una pista propia a uno: crea una pista nueva
-// arriba (p. ej. 'brock') con su archivo musica/brock.mp3 y cambia aquí su línea a 'brock'.
+// arriba (p. ej. 'brock') con su archivo assets/musica/brock.mp3 y cambia aquí su línea a 'brock'.
 // ---------------------------------------------------------------------
 const MUSIC_BY_TRAINER = {
   // Kanto: 8 líderes, Alto Mando (4) y Campeón
@@ -279,7 +279,7 @@ const Music = (() => {
     return webaudioHandle({id, kind:'generada', stop(){ clearInterval(timer); g.disconnect(); }}, g);
   }
 
-  // ---- Carga: archivo de musica/ si existe; si no, música generada ----
+  // ---- Carga: archivo de assets/musica/ si existe; si no, música generada ----
   const probeElement = url => new Promise(res => { const a = new Audio(); const done = ok => { clearTimeout(tm); a.onerror = a.oncanplaythrough = null; res(ok); }; const tm = setTimeout(() => done(false), 4000);
     a.oncanplaythrough = () => done(true); a.onerror = () => done(false); a.preload = 'auto'; a.src = url; });
   function load(id){

@@ -1,3 +1,0 @@
-COPIA DE SEGURIDAD 5 · 16-11-2026
-js/fxtipos.js tal y como estaba ANTES de rehacer el dibujo de Hidropulso (anillo que crece + burbujas, como en los juegos de DS).
-PARA VOLVER AL HIDROPULSO ANTERIOR: copia js/fxtipos.js encima del del juego y recarga con Ctrl+F5.

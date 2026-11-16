@@ -47,7 +47,7 @@ const PATCHES = [
   ]},
   {v:'Pantalla VS y música de Alola', date:'1 nov 2026', sections:[
     {t:'Pantalla VS', i:['En la pantalla VS, tu lado ya solo muestra tu nombre de entrenador (se quitó el rótulo «Tu equipo»).']},
-    {t:'Música', i:['Alola ya tiene su música: «Battle! Gym Leader» para los 7 líderes, «Battle! Elite Four» para el Alto Mando y «The Battle at the Summit!» para Kukui, con sus temas de victoria al ganar (carpeta musica/Alola/).']}
+    {t:'Música', i:['Alola ya tiene su música: «Battle! Gym Leader» para los 7 líderes, «Battle! Elite Four» para el Alto Mando y «The Battle at the Summit!» para Kukui, con sus temas de victoria al ganar (carpeta assets/musica/Alola/).']}
   ]},
   {v:'Alola: la séptima Liga', date:'1 nov 2026', sections:[
     {t:'Historia', i:[

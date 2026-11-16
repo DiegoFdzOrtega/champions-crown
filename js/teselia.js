@@ -6,7 +6,7 @@
    VERSIÓN DE REFERENCIA: Pokémon NEGRO y BLANCO (y sus secuelas). Orden de los gimnasios: Gres (Zeo, Maíz y Millo), Esmalte (Aloe), Porcelana (Camus),
    Mayólica (Camila), Fayenza (Yakón), Loza (Gerania), Teja (Junco) y Caolín (Iris). Alto Mando: Anís, Aza, Lotto y Catleya. Campeón: Mirto.
    Fuentes: Pokémon Database (equipos de Negro/Blanco y Negro 2/Blanco 2), Bulbapedia (Torneo de Líderes de Teselia de Negro 2/Blanco 2: equipos de 6 con
-   objeto, habilidad y movimientos, para Millo, Maíz, Zeo, Aloe y Camus) y el anime. Retratos: lideres/Unova/<Nombre>.png.
+   objeto, habilidad y movimientos, para Millo, Maíz, Zeo, Aloe y Camus) y el anime. Retratos: assets/lideres/Unova/<Nombre>.png.
 
    CÓMO ESTÁ HECHO (igual que Kanto, Johto, Hoenn y Sinnoh, ver teams.js):
      P(nº de Pokédex, 'Naturaleza', 'Habilidad', 'objeto', {EVs}, ['golpe', 'disparo', 'mejora', 'ataque fuerte'])
@@ -156,7 +156,7 @@ Object.assign(TEAMS, {
 
 // ---------------------------------------------------------------------
 // Los 13 combates de Teselia, en orden: 8 líderes, 4 del Alto Mando y el Campeón.
-// id = nombre del retrato (lideres/Unova/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenasteselia.js)
+// id = nombre del retrato (assets/lideres/Unova/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenasteselia.js)
 // Gres: 'trio' = los tres hermanos, uno al azar. Caolín: 'arenas' = las dos versiones del gimnasio, una al azar.
 // ---------------------------------------------------------------------
 const TESELIA = 'Unova / Teselia';

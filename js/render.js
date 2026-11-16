@@ -54,8 +54,8 @@ function arena(){ drawArena(g && g.o ? (g.o.arena || g.o.leader) : '', g ? g.t :
 // Aviso del ataque fuerte: mientras se carga (f.wind, combat.js) se pinta en el suelo el carril por donde va a salir. Se va llenando; cuando el rival de la IA deja de apuntar, el borde se pone blanco.
 // Terreno (TERR, combat.js): FRANJAS rectas en el suelo, por donde pasó el ataque fuerte. Las que TE perjudican llevan borde blanco discontinuo; las tuyas, borde fino de su color.
 const SUELO = {ok:false, H:88, rows:[{"n": "fuego", "w": 422, "h": 77, "bt": 13}, {"n": "veneno", "w": 422, "h": 79, "bt": 14}, {"n": "hielo", "w": 422, "h": 75, "bt": 10}, {"n": "agua", "w": 423, "h": 88, "bt": 22}, {"n": "electrico", "w": 423, "h": 81, "bt": 15}, {"n": "planta", "w": 423, "h": 73, "bt": 8}]};
-{ const i = new Image(); i.onload = () => { SUELO.ok = true; }; i.src = 'objetos/suelo.png?v=3'; SUELO.img = i; }
-function suelo(q, len, w, a){                                   // dibuja la franja con su sprite (objetos/suelo.png): 2 tapas y el centro repetido en espejo para que no se note el corte
+{ const i = new Image(); i.onload = () => { SUELO.ok = true; }; i.src = 'assets/objetos/suelo.png?v=3'; SUELO.img = i; }
+function suelo(q, len, w, a){                                   // dibuja la franja con su sprite (assets/objetos/suelo.png): 2 tapas y el centro repetido en espejo para que no se note el corte
   const R = SUELO.rows[['fuego', 'veneno', 'hielo', 'agua', 'electrico', 'planta'].indexOf(q.type)]; if(!R) return false;
   const i = ['fuego', 'veneno', 'hielo', 'agua', 'electrico', 'planta'].indexOf(q.type), sy = i * SUELO.H, bh = R.h - R.bt, s = 2 * w / bh, cap = 36, capD = cap * s, L = len + 2 * w, midD = L - 2 * capD, top = -w - R.bt * s;
   ctx.globalAlpha = a; const im = SUELO.img;
@@ -110,7 +110,7 @@ function terrClip(){                                             // recorta el d
   ctx.clip();
 }
 // ---- ENTRENADORES EN EL CAMPO (de momento solo en la Historia de Kanto): tú a la izquierda y el líder a la derecha, fuera de las líneas del campo ----
-// Imagen: entrenadores_mini/kanto.png (una fila; cada entrenador ocupa 16x32 y mira a la IZQUIERDA). Créditos en entrenadores_mini/CREDITOS.txt
+// Imagen: assets/entrenadores_mini/kanto.png (una fila; cada entrenador ocupa 16x32 y mira a la IZQUIERDA). Créditos en assets/entrenadores_mini/CREDITOS.txt
 // CÁMARA LEJANA (FAR): en la Historia de Kanto el combate se ve desde más lejos: un campo grande en el centro, con sus líneas, y una zona de fuera ancha con decoración del tipo del gimnasio.
 //   pantalla = (mundo - centro) × z + centro   ·   el ratón se pasa al mundo con mouseWorld() (js/pruebas.js) y el táctil / mando con tW2S() (js/touch.js)
 //   Los límites por donde se mueven los Pokémon salen de aquí (bx0, bx1, by0, by1 en js/combat.js).
@@ -124,16 +124,16 @@ function farBarAlpha(){                                            // la barra d
   FAR.barA = (FAR.barA || 1) + ((behind ? .3 : 1) - (FAR.barA || 1)) * .15; return FAR.barA;
 }
 function farS2W(x, y){ return {x: (x - W / 2) / FAR.z + W / 2, y: (y - FAR.cy) / FAR.z + FAR.cy}; }
-// ESTADIOS CON IMAGEN PROPIA: el fondo entero es una imagen (fondos/estadios/) que ya trae pintadas las líneas del campo y la decoración de fuera.
+// ESTADIOS CON IMAGEN PROPIA: el fondo entero es una imagen (assets/fondos/estadios/) que ya trae pintadas las líneas del campo y la decoración de fuera.
 //   court = dónde está el rectángulo del campo DENTRO de la imagen, en píxeles: [izquierda, arriba, derecha, abajo] · w, h = tamaño de la imagen
 //   Para añadir otro: guarda la imagen y pon una línea con el id del líder (el de FLOORS, js/data.js). Si el campo está en otro sitio, mide su rectángulo.
 const EST = {
-  brock:    {src: 'fondos/estadios/brock.png',    w: 1024, h: 572, court: [74, 110, 973, 480]},
-  misty:    {src: 'fondos/estadios/misty.png',    w: 1024, h: 572, court: [75, 111, 972, 482]},
-  lt_surge: {src: 'fondos/estadios/surge.png',    w: 1024, h: 572, court: [75, 110, 973, 484]},
-  erika:    {src: 'fondos/estadios/erika.png',    w: 1024, h: 572, court: [76, 111, 971, 483]},
-  koga:     {src: 'fondos/estadios/koga.png',     w: 1024, h: 572, court: [75, 111, 972, 484]},
-  sabrina:  {src: 'fondos/estadios/sabrina.png',  w: 815,  h: 456, court: [59, 88, 773, 427]}       // recortada: la IA la hizo con el campo más pequeño
+  brock:    {src: 'assets/fondos/estadios/brock.png',    w: 1024, h: 572, court: [74, 110, 973, 480]},
+  misty:    {src: 'assets/fondos/estadios/misty.png',    w: 1024, h: 572, court: [75, 111, 972, 482]},
+  lt_surge: {src: 'assets/fondos/estadios/surge.png',    w: 1024, h: 572, court: [75, 110, 973, 484]},
+  erika:    {src: 'assets/fondos/estadios/erika.png',    w: 1024, h: 572, court: [76, 111, 971, 483]},
+  koga:     {src: 'assets/fondos/estadios/koga.png',     w: 1024, h: 572, court: [75, 111, 972, 484]},
+  sabrina:  {src: 'assets/fondos/estadios/sabrina.png',  w: 815,  h: 456, court: [59, 88, 773, 427]}       // recortada: la IA la hizo con el campo más pequeño
 };
 function estOf(){ const E = g && g.o && EST[g.o.leader]; if(!E) return null; if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=2'; } return E.ok ? E : null; }
 function estDraw(E){                                                // la imagen llena la pantalla; arriba se oscurece un poco para que se lea el marcador
@@ -145,7 +145,7 @@ function farBox(){                                                  // las líne
   const a = farS2W(s[0], s[1]), b = farS2W(s[2], s[3]); return {x0: a.x, y0: a.y, x1: b.x, y1: b.y};
 }
 // ---- ENTRENADORES EN EL CAMPO: tú a la izquierda y el líder a la derecha, justo por dentro de las líneas ----
-// Imagen: entrenadores_mini/todos.png (rejilla de 24 columnas; cada entrenador ocupa 32x32 y mira a la IZQUIERDA). Créditos en entrenadores_mini/CREDITOS.txt
+// Imagen: assets/entrenadores_mini/todos.png (rejilla de 24 columnas; cada entrenador ocupa 32x32 y mira a la IZQUIERDA). Créditos en assets/entrenadores_mini/CREDITOS.txt
 // Tu personaje es el del perfil (save.gender, js/vspanel.js): chico, chica, los de logros y los de la Invocación. Si no hay dibujo pequeño del tuyo, sale Red (o Leaf si elegiste la chica).
 const MINI = {ok: false, s: 2, x: 16, cols: 24,                     // [AJUSTE] tamaño en pantalla (x2) · a cuántos píxeles por DENTRO de la línea se ponen · columnas de la imagen
   names: ['red', 'leaf', 'blue', 'lucas', 'may', 'n', 'lance', 'brendan', 'ethan', 'aaron', 'acerola', 'acetrainer', 'acetrainerf', 'acetrainersnow', 'anabel', 'aquagrunt', 'aquagruntf', 'archer', 'archie', 'ariana', 'artist', 'barry', 'battlegirl', 'beauty', 'bede', 'bertha', 'birch', 'blackbelt', 'blaine', 'brandon', 'brawly', 'brock', 'bugcatcher', 'bugsy', 'byron', 'cameraman', 'camper', 'candice', 'charon', 'cheryl', 'chuck', 'clair', 'clay', 'clerk', 'colress', 'cook', 'cowgirl', 'crasherwake', 'cueball', 'cynthia', 'cyrus', 'daisy', 'dawn', 'dragontamer', 'drake', 'drayden', 'elesa', 'elm', 'erika', 'expert', 'expertf', 'falkner', 'fantina', 'fisherman', 'flannery', 'galacticgrunt', 'galacticgruntf', 'gamer', 'gardenia', 'gentleman', 'ghetsis', 'giovanni', 'glacia', 'greta', 'hexmaniac', 'hiker', 'iris', 'janine', 'jasmine', 'juan', 'jupiter', 'karen', 'kiawe', 'koga', 'korrina', 'lady', 'larry', 'lass', 'liza', 'ltsurge', 'lucian', 'lucy', 'magmagrunt', 'magmagruntf', 'marley', 'mars', 'maxie', 'maylene', 'mina', 'mira', 'misty', 'mom', 'morty', 'nessa', 'ninjaboy', 'noland', 'norman', 'nurse', 'oak', 'painter', 'palmer', 'parasollady', 'petrel', 'phoebe', 'picnicker', 'plasmagrunt', 'plasmagruntf', 'pokefan', 'pokefanf', 'pokekid', 'pokemaniac', 'proton', 'pryce', 'psychic', 'psychicf', 'rancher', 'reporter', 'richboy', 'roark', 'rocker', 'rocketgrunt', 'rocketgruntf', 'roughneck', 'rowan', 'roxanne', 'roxie', 'ruinmaniac', 'sabrina', 'sage', 'sailor', 'saturn', 'schoolkid', 'scientist', 'scott', 'shadowtriad', 'sidney', 'silver', 'skier', 'skierf', 'skyla', 'spenser', 'steven', 'supernerd', 'tate', 'tucker', 'veteran', 'volkner', 'waiter', 'waitress', 'wallace', 'wally', 'wattson', 'whitney', 'will', 'winona', 'worker', 'youngster', 'zinzolin']};      // orden en la imagen: es el nombre del personaje como en la Invocación (js/invdata.js), sin lo que va detrás del guion
@@ -154,7 +154,7 @@ function miniIdx(id){                                               // código d
   id = String(id || ''); if(id.startsWith('i:')) id = id.slice(2);
   id = MINI_ALIAS[id] || id; const k = id.split('-')[0]; return MINI.names.indexOf(MINI_ALIAS[k] || k);
 }
-{ const i = new Image(); i.onload = () => { MINI.ok = true; }; i.src = 'entrenadores_mini/todos.png?v=1'; MINI.img = i; }
+{ const i = new Image(); i.onload = () => { MINI.ok = true; }; i.src = 'assets/entrenadores_mini/todos.png?v=1'; MINI.img = i; }
 const miniOn = () => { const F = g && g.o && !g.pvp && g.o.floor && typeof FLOORS !== 'undefined' ? FLOORS[g.o.n] : null; return !!(F && F.id === g.o.leader && F.region === 'Kanto'); };      // ¿es un combate de la Historia de Kanto?
 function campoLineas(){                                             // la zona de fuera se oscurece un poco y el campo lleva sus líneas bien marcadas: borde oscuro, línea central y círculo
   const B = farBox(), cx = W / 2, cy = (B.y0 + B.y1) / 2, w = B.x1 - B.x0, big = 2000;
@@ -424,10 +424,10 @@ function pilDrawOld(p){
   ctx.restore();
 }
 
-// ---- PILARES CON DIBUJO: objetos/pilares.png (18 filas = 18 tipos, en el orden de PIL_THEMES; 7 columnas: entero · entero · agrietado · se inclina · cae y se parte · estalla · ruinas) ----
+// ---- PILARES CON DIBUJO: assets/objetos/pilares.png (18 filas = 18 tipos, en el orden de PIL_THEMES; 7 columnas: entero · entero · agrietado · se inclina · cae y se parte · estalla · ruinas) ----
 const PIL_IMG = {ok:false, xs:[0,61,124,188,286,382,497,572], ys:[0,62,121,182,239,295,352,408,465,521,577,632,688,744,799,854,910,966,1024],
   rows:['normal','roca','agua','electrico','planta','veneno','psiquico','fuego','tierra','hielo','lucha','fantasma','dragon','acero','volador','bicho','siniestro','hada']};
-{ const i = new Image(); i.onload = () => { PIL_IMG.ok = true; }; i.src = 'objetos/pilares.png?v=1'; PIL_IMG.img = i; }
+{ const i = new Image(); i.onload = () => { PIL_IMG.ok = true; }; i.src = 'assets/objetos/pilares.png?v=1'; PIL_IMG.img = i; }
 function pilFrame(th, c, x, base, flip, alpha, dy){                  // dibuja el cuadro c del pilar de ese tipo con la base en (x, base)
   const r = Math.max(0, PIL_IMG.rows.indexOf(th)), X = PIL_IMG.xs, Y = PIL_IMG.ys, S = PIL.r / 11;
   const sx = X[c] + 2, sw = X[c + 1] - X[c] - 3, sy = Y[r] + 2, sh = Y[r + 1] - Y[r] - 3, dw = sw * S, dh = sh * S;

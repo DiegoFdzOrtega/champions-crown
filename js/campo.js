@@ -3,11 +3,11 @@
    16b) CAMPO DE ENTRENAMIENTO: la zona para farmear Chapas Plateadas y Chapas Doradas
    Entrenadores normales (no líderes) con 3-4 Pokémon cada uno, repetibles todas las veces que quieras.
    Cada victoria da una recompensa FIJA: 1 ticket + BP y Chapas Plateadas y Doradas según la dificultad: Fácil 50 BP + 5+5, Media 100 BP + 10+10, Difícil 150 BP + 15+15 (REWARD.campo y REWARD_CAMPO en teams.js).
-   Se carga DESPUÉS de teams.js (usa P(), ITEMS, MOVES, enemyBoost...). Los sprites están en la carpeta entrenadores/ (80x80).
+   Se carga DESPUÉS de teams.js (usa P(), ITEMS, MOVES, enemyBoost...). Los sprites están en la carpeta assets/entrenadores/ (80x80).
 
    Cada entrenador es una entrada de CAMPO:
      {id, file, name, cls, theme, tier, arena, team:[P(...), ...]}
-       id     nombre interno (único)           file   archivo de entrenadores/
+       id     nombre interno (único)           file   archivo de assets/entrenadores/
        name   nombre en pantalla               cls    clase del entrenador (lo que se ve en su dibujo)
        theme  tema de su equipo (por qué lleva esos Pokémon)
        tier   1 = fácil · 2 = media · 3 = difícil (ver CAMPO_TIER: nivel y dificultad)
@@ -20,7 +20,7 @@
    DESBLOQUEO: la dificultad Media se abre al vencer a TODOS los entrenadores de Fácil, y la Difícil al vencer a todos los de Media
    (los entrenadores con opt:true no cuentan, porque pueden no tener imagen). Las victorias se guardan en save.campoWins {id:1}.
    Si prefieres que baste con vencer a UNO de cada dificultad, pon CAMPO_BASTA_UNO = true.
-   Para añadir un entrenador: copia una entrada, cambia sus datos y pon su imagen en entrenadores/.
+   Para añadir un entrenador: copia una entrada, cambia sus datos y pon su imagen en assets/entrenadores/.
    ===================================================================== */
 // Dificultad por nivel (tier): se calcula con la misma fórmula que la Historia (DIFF en data.js). lvl = nivel del rival, n = "posición" equivalente.
 //   tier 1 ≈ Brock-Misty · tier 2 ≈ Erika-Koga · tier 3 ≈ Sabrina-Blaine (pero con 3-4 Pokémon en vez de 6, para poder repetirlo muchas veces)
@@ -215,12 +215,12 @@ function campoFight(id){
   const T = campoById(id), S = campoStats(T);
   if(!campoOpen(T.tier)){ toast('Esta dificultad está bloqueada: supera antes la anterior.'); return; }
   const o = {
-    campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:T.arena === 'campo_prueba' ? 'campo_prueba' : 'campo',     /* PRUEBA: el Maestro Cafetero usa el campo nuevo */ portrait:'entrenadores/' + T.file,
+    campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:T.arena === 'campo_prueba' ? 'campo_prueba' : 'campo',     /* PRUEBA: el Maestro Cafetero usa el campo nuevo */ portrait:'assets/entrenadores/' + T.file,
     title:'CAMPO DE ENTRENAMIENTO', sub:`${T.name.toUpperCase()} · ${CAMPO_TIER[T.tier].nombre.toUpperCase()}`,
     enemies:T.team, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
   };
   if(!team.length){ startBattle(o); return; }
-  vsIntro({name:T.name, path:'entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS antes del combate
+  vsIntro({name:T.name, path:'assets/entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS antes del combate
 }
 function campoEnd(won){                                    // lo llama endBattle (modes.js) cuando el combate es del Campo de Entrenamiento
   g.over = true;
@@ -258,7 +258,7 @@ function openCampo(){
   }
   if(!campoSel || campoById(campoSel).tier !== campoTab){ const f = campoNeeded(campoTab).find(x => !save.campoWins[x.id]) || campoNeeded(campoTab)[0]; campoSel = f && f.id; }
   panel(`<div class="cp2">
-    <div class="cp2-top"><h1><img src="iconos/ic_campo.webp" alt="" onerror="this.remove()">Campo de Entrenamiento</h1>
+    <div class="cp2-top"><h1><img src="assets/iconos/ic_campo.webp" alt="" onerror="this.remove()">Campo de Entrenamiento</h1>
       <div class="stchips"><span class="stc"><i id="cpIcoS"></i><b id="cmpS"></b> Chapas Plateadas</span><span class="stc gold"><i id="cpIcoG"></i><b id="cmpG"></b> Chapas Doradas</span></div></div>
     <p class="cp2-sub">Combate todas las veces que quieras: perder no cuesta nada y cada victoria da siempre lo mismo. Las Chapas se gastan en Equipo Pokémon › Ver datos para subir IV y EV.</p>
     <div id="cpTabs" class="cp2-tabs"></div>
@@ -287,7 +287,7 @@ function renderCampo(){
     const won = !!save.campoWins[T.id], col = campoColor(T);
     const d = document.createElement('button'); d.className = 'cp2-t' + (won ? ' done' : '') + (campoSel === T.id ? ' sel' : '') + (first && first.id === T.id ? ' cur' : '') + (open ? '' : ' locked');
     d.dataset.id = T.id; d.style.setProperty('--tc', col);
-    d.innerHTML = `<span class="im"><img alt="" src="entrenadores/${T.file}"></span><b></b><span class="tg"></span>${won ? '<i class="md">✓</i>' : ''}${first && first.id === T.id ? '<i class="nx">SIGUIENTE</i>' : ''}`;
+    d.innerHTML = `<span class="im"><img alt="" src="assets/entrenadores/${T.file}"></span><b></b><span class="tg"></span>${won ? '<i class="md">✓</i>' : ''}${first && first.id === T.id ? '<i class="nx">SIGUIENTE</i>' : ''}`;
     d.querySelector('b').textContent = T.name; d.querySelector('.tg').textContent = T.cls;
     const im = d.querySelector('img');
     if(T.opt){ d.classList.add('hide'); im.onload = () => d.classList.remove('hide'); } else im.onerror = () => { im.style.visibility = 'hidden'; };
@@ -302,7 +302,7 @@ function renderCampoHero(){
   if(!T){ box.innerHTML = ''; return; }
   const open = campoOpen(T.tier), won = !!save.campoWins[T.id], col = campoColor(T);
   box.style.setProperty('--tc', col);
-  box.innerHTML = `<div class="hh"><span class="hi"><img alt="" src="entrenadores/${T.file}"></span><div class="ht"><h2></h2><span class="tb"></span><p class="th"></p></div></div>
+  box.innerHTML = `<div class="hh"><span class="hi"><img alt="" src="assets/entrenadores/${T.file}"></span><div class="ht"><h2></h2><span class="tb"></span><p class="th"></p></div></div>
     <div class="hmini" id="cpHM"></div>
     <div class="hrw"><span>Cada victoria:</span><span id="cpRw" class="lc-rw"></span></div>
     <p class="hst">${!open ? `🔒 Bloqueada: vence a los ${campoNeeded(T.tier - 1).length} entrenadores de ${CAMPO_TIER[T.tier - 1].nombre} (${campoDone(T.tier - 1)} de ${campoNeeded(T.tier - 1).length}).` : won ? '✓ Ya lo has vencido: puedes repetir cuando quieras.' : 'Aún no lo has vencido.'}</p>

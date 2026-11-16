@@ -2037,7 +2037,7 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 #teamv:not(.hubv) #tmHub{display:none}
 #tmHub{--bd:#2b3f73;--pn:rgba(12,20,44,.86);--gold:#ffcc33;position:relative;width:100%;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:.7em;padding:.7em 1em .8em;
   font:700 clamp(9px,1.38vh,15px)/1.35 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#e6ecfb;text-align:left;
-  background:linear-gradient(180deg,rgba(5,9,21,.25),rgba(5,9,21,0) 22%,rgba(5,9,21,0) 72%,rgba(5,9,21,.4)),url(../fondos/equipo.webp) var(--bgp,center 20%)/var(--bgs,cover) no-repeat,#070c1f}   /* fondo: fondos/equipo.webp · el emblema lo dibuja hbBgSvg() (js/teamhub.js) */
+  background:linear-gradient(180deg,rgba(5,9,21,.25),rgba(5,9,21,0) 22%,rgba(5,9,21,0) 72%,rgba(5,9,21,.4)),url(../assets/fondos/equipo.webp) var(--bgp,center 20%)/var(--bgs,cover) no-repeat,#070c1f}   /* fondo: assets/fondos/equipo.webp · el emblema lo dibuja hbBgSvg() (js/teamhub.js) */
 #tmHub>#hbBg{position:absolute;left:50%;top:12.5%;width:19vh;height:19vh;transform:translate(-50%,-50%);pointer-events:none;z-index:0;overflow:visible}
 #hbBg .emb circle,#hbBg .emb path{fill:none;stroke-width:6}
 #hbBg .g{stroke:#ffc23a}#hbBg .b{stroke:#3a9aff}#hbBg .b2{stroke:#3a9aff;stroke-opacity:.55;stroke-width:5}
@@ -2213,12 +2213,12 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 @media (max-width:1100px){.hb-body{grid-template-columns:minmax(12em,16em) minmax(0,1fr) minmax(14em,19em)}.hb-mon{width:11.5em}.hb-mon.big{width:14em}}
 
 /* =====================================================================
-   Clasificatoria (js/ranked.js). Todo va bajo #rankv / .rk. Fondo: fondos/clasificatoria.webp (lo coloca rkFit con --bgs y --bgp)
+   Clasificatoria (js/ranked.js). Todo va bajo #rankv / .rk. Fondo: assets/fondos/clasificatoria.webp (lo coloca rkFit con --bgs y --bgp)
    ===================================================================== */
 #rankv:not(.hide){display:flex}
 #rankv{font:700 clamp(9px,1.4vh,16px)/1.4 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#e6ecfb;text-align:left;overflow:hidden}
 .rk{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(15em,21em) minmax(0,1fr) minmax(16em,22em);grid-template-rows:auto minmax(0,1fr);gap:.8em 1em;padding:.8em 1.1em 1em;
-  background:linear-gradient(90deg,rgba(4,8,20,.55),rgba(4,8,20,0) 22%,rgba(4,8,20,0) 78%,rgba(4,8,20,.55)),url(../fondos/clasificatoria.webp) var(--bgp,center)/var(--bgs,cover) no-repeat,#070c1f}
+  background:linear-gradient(90deg,rgba(4,8,20,.55),rgba(4,8,20,0) 22%,rgba(4,8,20,0) 78%,rgba(4,8,20,.55)),url(../assets/fondos/clasificatoria.webp) var(--bgp,center)/var(--bgs,cover) no-repeat,#070c1f}
 .rk-bg{display:none}
 .rk h1,.rk h2,.rk h3{margin:0;font-family:"Press Start 2P","Courier New",monospace;font-weight:normal}
 .rk button{margin:0;font:inherit;cursor:pointer}
@@ -2533,7 +2533,7 @@ html.phone #hbClose::after{content:"";position:absolute;inset:-8px}
 .stg .cbtns{margin:0}
 html.phone .stg{zoom:1}
 
-/* ===== TARJETA DE ENTRENADOR NUEVA (fpViewNew en js/friendprofile.js): marco por rango (fondos/marcos/), fondo en toda la tarjeta ===== */
+/* ===== TARJETA DE ENTRENADOR NUEVA (fpViewNew en js/friendprofile.js): marco por rango (assets/fondos/marcos/), fondo en toda la tarjeta ===== */
 .tc-wrap{padding:22px 0 26px;overflow:visible}
 .tc{--gl:#3ea6ff;position:relative;width:900px;margin:0 auto;border-radius:6px;box-shadow:0 18px 50px #0009,0 0 50px color-mix(in srgb,var(--gl) 30%,transparent);font-size:12px;line-height:1.5}
 .tc::after{content:"";position:absolute;inset:-12px;border:92px solid transparent;border-image:var(--fimg) 220 stretch;z-index:6;pointer-events:none;filter:drop-shadow(0 4px 6px #0008)}
@@ -2600,13 +2600,13 @@ html.phone .stg{zoom:1}
 .tc-none{font-size:10px;color:#8fb3e8;margin:0}
 .tc-bgtag{position:absolute;right:44px;bottom:16px;font-size:8px;color:#ffffffaa;text-shadow:0 1px 3px #000}
 @media (prefers-reduced-motion:reduce){.tc-cup.on canvas,.tc-cup.on::before,.tc-cup s{animation:none!important}}
-.tc.rk-bronce{--fimg:url(../fondos/marcos/bronce.webp);--eimg:url(../fondos/marcos/bronce_emb.webp);--ew:183px;--eh:62px}
-.tc.rk-plata{--fimg:url(../fondos/marcos/plata.webp);--eimg:url(../fondos/marcos/plata_emb.webp);--ew:185px;--eh:62px}
-.tc.rk-oro{--fimg:url(../fondos/marcos/oro.webp);--eimg:url(../fondos/marcos/oro_emb.webp);--ew:185px;--eh:63px}
-.tc.rk-platino{--fimg:url(../fondos/marcos/platino.webp);--eimg:url(../fondos/marcos/platino_emb.webp);--ew:181px;--eh:60px}
-.tc.rk-diamante{--fimg:url(../fondos/marcos/diamante.webp);--eimg:url(../fondos/marcos/diamante_emb.webp);--ew:207px;--eh:59px}
-.tc.rk-maestro{--fimg:url(../fondos/marcos/maestro.webp);--eimg:url(../fondos/marcos/maestro_emb.webp);--ew:209px;--eh:60px}
-.tc.rk-challenger{--fimg:url(../fondos/marcos/challenger.webp);--eimg:url(../fondos/marcos/challenger_emb.webp);--ew:200px;--eh:60px}
+.tc.rk-bronce{--fimg:url(../assets/fondos/marcos/bronce.webp);--eimg:url(../assets/fondos/marcos/bronce_emb.webp);--ew:183px;--eh:62px}
+.tc.rk-plata{--fimg:url(../assets/fondos/marcos/plata.webp);--eimg:url(../assets/fondos/marcos/plata_emb.webp);--ew:185px;--eh:62px}
+.tc.rk-oro{--fimg:url(../assets/fondos/marcos/oro.webp);--eimg:url(../assets/fondos/marcos/oro_emb.webp);--ew:185px;--eh:63px}
+.tc.rk-platino{--fimg:url(../assets/fondos/marcos/platino.webp);--eimg:url(../assets/fondos/marcos/platino_emb.webp);--ew:181px;--eh:60px}
+.tc.rk-diamante{--fimg:url(../assets/fondos/marcos/diamante.webp);--eimg:url(../assets/fondos/marcos/diamante_emb.webp);--ew:207px;--eh:59px}
+.tc.rk-maestro{--fimg:url(../assets/fondos/marcos/maestro.webp);--eimg:url(../assets/fondos/marcos/maestro_emb.webp);--ew:209px;--eh:60px}
+.tc.rk-challenger{--fimg:url(../assets/fondos/marcos/challenger.webp);--eimg:url(../assets/fondos/marcos/challenger_emb.webp);--ew:200px;--eh:60px}
 .tc-top,.tc-rank small,.tc-b small,.tc-sub{letter-spacing:.04em}
 .tc-b.tw svg{width:34px;height:34px;right:10px;bottom:10px;opacity:.25}
 .tc-f.shiny::before{content:"✦ Shiny"}
@@ -2670,7 +2670,7 @@ html.phone .stg{zoom:1}
 .pf-cf button:hover{border-color:#3e64b0;color:#fff}
 .pf-cf button.on{border-color:#ffcc33;color:#ffcc33;background:linear-gradient(90deg,#ffcc3318,#0e1730)}
 .cfp{display:block;width:3.4rem;height:2.4rem;border-radius:.3rem;flex:none}
-.cfp.rk{background:url(../fondos/marcos/diamante.webp) center/100% 100% no-repeat,#0a1226}
+.cfp.rk{background:url(../assets/fondos/marcos/diamante.webp) center/100% 100% no-repeat,#0a1226}
 .cfp.av{border:4px solid var(--ac);background:#0a1226;box-shadow:0 0 .6rem color-mix(in srgb,var(--ac) 50%,transparent)}
 .stgPerf{cursor:default}
 .stg .seg{display:inline-flex;flex:none;background:#0a1226;border:2px solid #2d4a7c;border-radius:.6rem;padding:.15rem;gap:.15rem}
@@ -3071,7 +3071,7 @@ html.phone .stg{zoom:1}
 #mm2 .m2-daily,#mm2 .m2-daily *{color:#2a1a00;opacity:1}
 #mm2 .m2-daily{font-size:10px}
 @media (max-height:760px){.m2-foot{display:none}.m2-hero .m2-link{display:none}}
-/* iconos nuevos de BP y tickets (iconos/, menu.js · bitmap): son imágenes suaves, no pixel art escalado */
+/* iconos nuevos de BP y tickets (assets/iconos/, menu.js · bitmap): son imágenes suaves, no pixel art escalado */
 canvas.curimg{image-rendering:auto!important;object-fit:contain}
 .gcimg{width:1.3em;height:1.3em;vertical-align:middle;margin-right:.15em}
 #mm2 .m2-cur img{image-rendering:auto;width:28px;height:28px}
@@ -3257,15 +3257,15 @@ html.phone .m2-left{overflow:visible}
 
 /* =====================================================================
    TORRE BATALLA (js/torre.js · openTorre). Todo va bajo #torrev / .tw2.
-   Fondo: fondos/torre_dia.webp (8:00-19:59) o torre_noche.webp (20:00-7:59), colocado por twFit (--bgs / --bgp).
+   Fondo: assets/fondos/torre_dia.webp (8:00-19:59) o torre_noche.webp (20:00-7:59), colocado por twFit (--bgs / --bgp).
    Los pisos (.tw-glass) van encima del cristal de la torre; a su derecha las flechas y la barra de zonas (.tw-nav).
    ===================================================================== */
 #torrev:not(.hide){display:flex}
 #torrev{font:700 clamp(9px,1.4vh,16px)/1.35 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#eef2ff;text-align:left;overflow:hidden}
 .tw2{--gold:#d8b25a;--navy:rgba(13,20,46,.9);position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(16em,22em) minmax(0,1fr) minmax(16em,22em);
   grid-template-rows:auto minmax(0,1fr);gap:.7em 1.2em;padding:.7em 1.1em 1em;background:#0b1030 var(--bgp,center)/var(--bgs,cover) no-repeat}
-.tw2.day{background-image:url(../fondos/torre_dia.webp?v=2);background-color:#5fb4f0}
-.tw2.night{background-image:url(../fondos/torre_noche.webp?v=2)}
+.tw2.day{background-image:url(../assets/fondos/torre_dia.webp?v=2);background-color:#5fb4f0}
+.tw2.night{background-image:url(../assets/fondos/torre_noche.webp?v=2)}
 .tw2 h1,.tw2 h3{margin:0;font-weight:900}
 .tw2 button{margin:0;font:inherit;cursor:pointer}
 .tw2 svg{width:1.2em;height:1.2em;flex:none}

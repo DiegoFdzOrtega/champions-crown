@@ -4,14 +4,14 @@
       así que el tamaño se detecta solo al cargar cada hoja.
    ===================================================================== */
 const sheets = {};
-function sheet(dex, a, shiny){                    // shiny = usa la carpeta pokemon/<nº>/s/
+function sheet(dex, a, shiny){                    // shiny = usa la carpeta assets/pokemon/<nº>/s/
   const sd = shiny ? 's/' : '';
   const k = dex + '/' + sd + a;
   if(!sheets[k]){
     const im = new Image(); im.ok = false; im.bad = false;
     im.onload = ()=>{ im.info = analyze(im, a); im.ok = true; };
     im.onerror = ()=>{ im.bad = true; };
-    im.src = `${typeof dex === 'string' ? MEGA_SPR : CARPETA}/${dex}/${sd}${a}.png`;      // dex en texto ('448-mega') = forma mega, carpeta pokemon_mega/ (mega.js)
+    im.src = `${typeof dex === 'string' ? MEGA_SPR : CARPETA}/${dex}/${sd}${a}.png`;      // dex en texto ('448-mega') = forma mega, carpeta assets/pokemon_mega/ (mega.js)
     sheets[k] = im;
   }
   return sheets[k];
@@ -105,7 +105,7 @@ function drawFrame(c, dex, anim, t, dir, x, y, sc, fit, shiny){
     return true;
   }
   if(!im.bad) return false;                        // la hoja todavía está cargando: espera
-  const st = single(dex);                          // plan B: imagen suelta pokemon/<número>.png
+  const st = single(dex);                          // plan B: imagen suelta assets/pokemon/<número>.png
   if(st.ok){
     const h = (fit ? Math.min(fit, ANIMS[anim].h*sc) : ANIMS[anim].h*sc), w = st.width/st.height*h;
     c.drawImage(st, Math.round(x - w/2), Math.round(y - h/2), Math.round(w), Math.round(h));
@@ -117,7 +117,7 @@ function drawFrame(c, dex, anim, t, dir, x, y, sc, fit, shiny){
 // Retratos de los líderes, Alto Mando y Campeón: se prueba cada ruta de LEADER_PATHS hasta que una cargue
 const leaders = {};
 function leaderPaths(id){
-  const reg0 = (typeof save !== 'undefined' && save.region) || 'Kanto', reg = (typeof REGION_DIR !== 'undefined' && REGION_DIR[reg0]) || reg0;   // carpeta de la región (lideres/Unova para Teselia)
+  const reg0 = (typeof save !== 'undefined' && save.region) || 'Kanto', reg = (typeof REGION_DIR !== 'undefined' && REGION_DIR[reg0]) || reg0;   // carpeta de la región (assets/lideres/Unova para Teselia)
   const cap = n => n.charAt(0).toUpperCase() + n.slice(1);                             // azul -> Azul
   const cap2 = n => n.split('_').map(cap).join('_');                                   // lt_surge -> Lt_Surge
   const names = [id, ...((typeof LEADER_FILE !== 'undefined' && LEADER_FILE[id]) || [])];   // nombres de archivo posibles (LEADER_FILE en data.js)
@@ -136,7 +136,7 @@ function leaderImg(id, path){                       // path (opcional): ruta fij
   return leaders[id];
 }
 
-// Imágenes de los objetos (carpeta objetos/): se cargan una vez. Devuelve null si el objeto no existe; mira .ok antes de dibujar.
+// Imágenes de los objetos (carpeta assets/objetos/): se cargan una vez. Devuelve null si el objeto no existe; mira .ok antes de dibujar.
 const itemImgs = {};
 function itemImg(id){
   if(!ITEMS[id]) return null;

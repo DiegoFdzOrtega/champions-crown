@@ -7,7 +7,7 @@ const PVP_W = 960;            // ancho FIJO de la arena en un combate online (lo
 let LOCKW = 0;                // si no es 0, W vale siempre esto (lo pone draw() mientras haya un combate online) y la imagen se centra con barras a los lados
 const H = 540;                // alto lógico fijo
 const ESCALA = 2;             // los sprites se dibujan 2 veces más grandes
-const CARPETA = 'pokemon';    // sprites: pokemon/<número de Pokédex>/Walk.png ...
+const CARPETA = 'assets/pokemon';    // sprites: assets/pokemon/<número de Pokédex>/Walk.png ...
 const FONT = '"Press Start 2P","Courier New",monospace';
 
 // Colores de los 18 tipos
@@ -72,7 +72,7 @@ REGIONS_DEX.forEach(r => POKE_RAW[r.n].split('\n').forEach(line => {
 const DEX_TOTAL = DEX.length;
 
 /* Pokémon SIN sprites (de momento): no salen en el Gachapon, la Pokédex, el equipo ni el perfil. Siguen existiendo en los datos y, si ya los tenías,
-   se quedan guardados en tu partida (no se pierde nada). Para volver a ponerlos: mete su carpeta pokemon/<nº>/ y borra su número de esta lista. */
+   se quedan guardados en tu partida (no se pierde nada). Para volver a ponerlos: mete su carpeta assets/pokemon/<nº>/ y borra su número de esta lista. */
 const NO_SPRITE = new Set([
   514, 516, 520, 522, 523, 538, 558, 564, 565, 591, 592, 593, 616, 626, 668, 732,         // Teselia y Kalos
   735, 756, 765, 837, 838, 839, 866, 870, 878, 893,         // Alola y Galar
@@ -199,24 +199,24 @@ function floorStats(n){
 
 // Dónde buscar los retratos de líderes, Alto Mando y Campeón. Se prueba cada ruta en orden; {id} es el 'id' de arriba
 // (p. ej. lorelei). Añade aquí la ruta de tu carpeta de sprites si es otra.
-const LEADER_PATHS = ['lideres/{Region}/{Id2}.png', 'lideres/{Region}/{Id}.png', 'lideres/{Region}/{id}.png', 'lideres/{id}.png',
+const LEADER_PATHS = ['assets/lideres/{Region}/{Id2}.png', 'assets/lideres/{Region}/{Id}.png', 'assets/lideres/{Region}/{id}.png', 'assets/lideres/{id}.png',
                       'sprites/kanto/{Id}.png', 'sprites/kanto/{id}.png', 'Torre Batalla/sprites/kanto/{Id}.png',
-                      'lideres/Kanto/{Id2}.png'];            // último recurso: el retrato de Kanto (sirve para Koga, Bruno y Lance, que también están en Johto)
+                      'assets/lideres/Kanto/{Id2}.png'];            // último recurso: el retrato de Kanto (sirve para Koga, Bruno y Lance, que también están en Johto)
 // Nombre de archivo del retrato cuando no coincide con el id (Koga, Bruno y Lance de Johto tienen id propio para no chocar con los de Kanto).
-// Se prueban todos los nombres de la lista: lideres/Johto/Pegaso.png, lideres/Johto/Morti.png (o Moti.png)...
+// Se prueban todos los nombres de la lista: assets/lideres/Johto/Pegaso.png, assets/lideres/Johto/Morti.png (o Moti.png)...
 const LEADER_FILE = {j_koga:['koga'], j_bruno:['bruno'], j_lance:['lance'], morti:['morti', 'moti'], anton:['anton', 'antón'], anibal:['anibal', 'aníbal'], debora:['debora', 'débora'],
-                     // Hoenn: los archivos llevan tilde y el de Vito y Leti es un solo retrato (lideres/Hoenn/Vito_y_Leti.png)
+                     // Hoenn: los archivos llevan tilde y el de Vito y Leti es un solo retrato (assets/lideres/Hoenn/Vito_y_Leti.png)
                      fatima:['fátima'], nivea:['nívea'], dracon:['dracón'], vitoleti:['Vito_y_Leti'],
-                     // Sinnoh: los de Acerón y Alecrán llevan tilde (lideres/Sinnoh/Acerón.png, lideres/Sinnoh/Alecrán.png)
+                     // Sinnoh: los de Acerón y Alecrán llevan tilde (assets/lideres/Sinnoh/Acerón.png, assets/lideres/Sinnoh/Alecrán.png)
                      aceron:['acerón'], alecran:['alecrán'],
-                     // Teselia: Anís, Maíz y Yakón llevan tilde (lideres/Unova/Anís.png, Maíz.png, Yakón.png)
+                     // Teselia: Anís, Maíz y Yakón llevan tilde (assets/lideres/Unova/Anís.png, Maíz.png, Yakón.png)
                      anis:['anís'], maiz:['maíz'], yakon:['yakón'], millo:['cilan'], iris:['lirio'],
-                     // Kalos: los archivos están en minúsculas con el nombre inglés (lideres/kalos/viola.png...) · Ástrid y Édel llevan tilde en el juego pero no en el archivo
+                     // Kalos: los archivos están en minúsculas con el nombre inglés (assets/lideres/kalos/viola.png...) · Ástrid y Édel llevan tilde en el juego pero no en el archivo
                      violeta:['viola'], lino:['grant'], corelia:['korrina'], amaro:['ramos'], lem:['clemont'], valeria:['valerie'], astrid:['olympia'], edel:['wulfric'],
                      narciso:['siebold'], tileo:['wikstrom'], agata:['agata', 'dracena', 'drasna'], dianta:['diantha'],
-                     // Alola: lideres/Alola/<nombre>.png en minúsculas · Acerola del Alto Mando (acerola_am) usa el mismo retrato que la líder
+                     // Alola: assets/lideres/Alola/<nombre>.png en minúsculas · Acerola del Alto Mando (acerola_am) usa el mismo retrato que la líder
                      acerola_am:['acerola']};
-// Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es lideres/Unova)
+// Carpeta de retratos de cada región cuando no se llama igual que ella (la región se llama 'Unova / Teselia' pero la carpeta es assets/lideres/Unova)
 const REGION_DIR = {'Unova / Teselia':'Unova', Kalos:'kalos'};
 
 // Gachapon: cada región tiene su banner. Los Pokémon que salen son los de su rango de Pokédex.
@@ -226,16 +226,16 @@ const GACHA_RATES = {legendary:.01, epic:.04, rare:.15, uncommon:.30, common:.50
 const SHINY_RATE = .01;
 // AMULETO ARCOÍRIS: al completar la Pokédex de una región (logro «Pokédex de ...») te dan el Amuleto Arcoíris de esa región. Mientras lo tengas, las tiradas del
 // Gachapon de ESA región sacan shiny con CHARM_RATE en vez de SHINY_RATE (3 % en vez de 1 %: el triple, como en los juegos). Se guarda en save.charms {Región:true}.
-const CHARM_RATE = .03, CHARM_IMG = 'objetos/amuleto/Amuleto_Iris.png';
+const CHARM_RATE = .03, CHARM_IMG = 'assets/objetos/amuleto/Amuleto_Iris.png';
 const PITY_MAX = 70;          // tiradas sin legendaria: a la nº 70 sale una sí o sí
 const DUP_BP = {common:5, uncommon:10, rare:25, epic:60, legendary:150};   // monedas (PB) por un repetido
 
 // ---------------------------------------------------------------------------------------------
 // OBJETOS DE COMBATE (se compran en la TIENDA y se equipan en EQUIPO POKÉMON; 1 por Pokémon)
-//   n: nombre oficial en español · img: archivo de la carpeta objetos/ · cat: pestaña de la tienda
+//   n: nombre oficial en español · img: archivo de la carpeta assets/objetos/ · cat: pestaña de la tienda
 //   p: precio en Puntos de Batalla · d: lo que hace en ESTE juego · og: lo que hace en los juegos de Pokémon
 //   type: (solo objetos de tipo) tipo de ataque que potencian
-// Para añadir uno nuevo: copia una línea, ponle un id nuevo, su imagen en objetos/ y programa su efecto en combat.js
+// Para añadir uno nuevo: copia una línea, ponle un id nuevo, su imagen en assets/objetos/ y programa su efecto en combat.js
 // (los números de cada efecto están en IFX, justo debajo).
 // ---------------------------------------------------------------------------------------------
 const ITEM_CATS = {ataque:'Ataque', defensa:'Defensa', tipo:'Tipos', util:'Utilidad'};
@@ -263,7 +263,7 @@ const ITEMS = {
 };
 // Números de los efectos (los usa combat.js). Cámbialos aquí para equilibrar.
 const IFX = {tipo:1.2, cinta:1.4, gafaselec:1.4, gafasesp:1.15, cinturon:1.2, rocaProb:.10, rocaStun:.6, periscopio:.07, restos:.004};    // restos = fracción de la vida máxima que se recupera cada segundo (.004 = 0,4%)
-const imgOf = id => ITEMS[id] ? 'objetos/' + ITEMS[id].img : (typeof trainIcon === 'function' ? trainIcon(id) : '');   // consumibles y MTs: iconos de training.js                // ruta de la imagen de un objeto
+const imgOf = id => ITEMS[id] ? 'assets/objetos/' + ITEMS[id].img : (typeof trainIcon === 'function' ? trainIcon(id) : '');   // consumibles y MTs: iconos de training.js                // ruta de la imagen de un objeto
 
 const SHOP = [
   {id:'ticket_n', n:'Ticket Gachapon Normal',    d:'1 tirada en el Gachapon de la región que elijas.', p:50,  cat:'ticket'},

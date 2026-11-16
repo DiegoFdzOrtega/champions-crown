@@ -1,14 +1,14 @@
 "use strict";
 /* =====================================================================
    12) AVATARES Y BARRA DE USUARIO
-   - Los avatares son imágenes de la carpeta  avatares/  (una imagen = un avatar).
+   - Los avatares son imágenes de la carpeta  assets/avatares/  (una imagen = un avatar).
    - El avatar activo se guarda en save.avatar (nombre de archivo; '' = el avatar clásico en pixel art).
    - Un avatar con nombre de Pokémon (Gengar.png) se desbloquea al conseguir ese Pokémon. Un archivo con otro nombre está desbloqueado siempre.
    - userBar(): avatar + nombre + migas de pan  Perfil › Logros › Amigos › Mochila  (cabecera del menú y arriba de esas 3 pantallas).
-   CÓMO AÑADIR UN AVATAR NUEVO: copia la imagen a avatares/. Si abres el juego desde un servidor con listado de carpetas
+   CÓMO AÑADIR UN AVATAR NUEVO: copia la imagen a assets/avatares/. Si abres el juego desde un servidor con listado de carpetas
    (p. ej. Live Server o python -m http.server) aparece sola; si no, añade su nombre a AVATAR_FILES.
    ===================================================================== */
-const AVATAR_DIR = 'avatares/';
+const AVATAR_DIR = 'assets/avatares/';
 const AVATAR_FILES = ['Aerodactyl.png', 'Arcanine.png', 'Blastoise.png', 'Charizard.png', 'Dragonite.png', 'Garchomp.png', 'Gengar.png', 'Gyarados.png', 'Mew.png', 'Mewtwo.png', 'Pikachu.png', 'Venasaur.png'];   // lista de respaldo
 const AVATAR_EXT = /\.(png|webp|jpe?g|gif)$/i;
 const AVATAR_ALIAS = {venasaur: 'venusaur'};                 // nombres de archivo con otra ortografía que el Pokémon
@@ -46,7 +46,7 @@ function refreshUserTitle(){
   document.querySelectorAll('.ubar .uwho').forEach(w => { let e = w.querySelector('.utitle'); if(!t){ if(e) e.remove(); return; } if(!e){ e = document.createElement('small'); e.className = 'utitle'; w.appendChild(e); } e.textContent = t; });
 }
 
-// Intenta leer la carpeta avatares/ (solo funciona si el servidor muestra el listado) y suma lo que encuentre
+// Intenta leer la carpeta assets/avatares/ (solo funciona si el servidor muestra el listado) y suma lo que encuentre
 async function loadAvatars(){
   try{
     const r = await fetch(AVATAR_DIR, {cache: 'no-store'}); if(!r.ok) return;

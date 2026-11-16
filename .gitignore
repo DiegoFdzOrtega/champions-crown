@@ -12,10 +12,13 @@ desktop.ini
 *~
 
 # Vídeos y material de promoción (no forman parte del juego)
-trailer/
+material/trailer/
 
-# Música original sin comprimir (pesa mucho): solo se sube la de musica/<Región>/ ya optimizada
-musica/Musica2/
+# Música original sin comprimir (pesa mucho): solo se sube la de assets/musica/<Región>/ ya optimizada
+assets/musica/Musica2/
 
-# Ilustraciones originales de Pokémon Masters (pesan mucho): solo se sube lo ya optimizado en fondos/tarjeta/ y avatares/
-Pokémon Masters sprites/
+# Ilustraciones originales de Pokémon Masters (pesan mucho): solo se sube lo ya optimizado en assets/fondos/tarjeta/ y assets/avatares/
+material/pokemon_masters/
+
+# Copias de seguridad hechas a mano (el historial ya lo guarda Git)
+_backups/

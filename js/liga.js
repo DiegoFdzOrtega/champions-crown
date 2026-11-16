@@ -2,13 +2,13 @@
 /* =====================================================================
    LIGA (Historia) NUEVA — de momento solo KANTO
    - Arriba, en grande, el rival que toca (retrato, tipo, frase, su equipo oculto con «?», recompensa y «¡COMBATIR!»).
-   - Abajo, el «Camino de la Liga»: 8 medallas (lideres/<Región>/Medallas/), 4 puertas del Alto Mando y la sala del Campeón.
+   - Abajo, el «Camino de la Liga»: 8 medallas (assets/lideres/<Región>/Medallas/), 4 puertas del Alto Mando y la sala del Campeón.
      Pulsando una medalla o una puerta ya superada se ve ese rival (con su equipo ya descubierto) para repetirlo.
    - Para activarlo en otra región: añádela a LIGA_NEW y rellena su tabla en LIGA_INFO (frase, lugar y medalla de cada uno).
    - buildStory (menu.js) sigue construyendo la pantalla de siempre; aquí solo se añade la nueva y se ocultan las partes antiguas.
    ===================================================================== */
 const LIGA_NEW = new Set(['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova / Teselia', 'Kalos', 'Alola']);
-// medal = nombre del archivo lideres/<Región>/Medallas/Medalla_<medal>.webp (tal cual está en la carpeta: «Drag%3Fn» incluido). Sin medalla: sale el color de su tipo.
+// medal = nombre del archivo assets/lideres/<Región>/Medallas/Medalla_<medal>.webp (tal cual está en la carpeta: «Drag%3Fn» incluido). Sin medalla: sale el color de su tipo.
 // place = solo hace falta si el combate no lo trae ya (los de Kanto). q = la frase que dice en la ficha.
 const LIGA_INFO = {
   // ---- Kanto ----
@@ -97,7 +97,7 @@ const LIGA_INFO = {
   tileo:   {q:'Un combate es una cosecha de experiencia. Recojamos la nuestra.'},
   agata:   {q:'Los dragones respetan a quien tiene coraje. ¿Tú lo tienes?'},
   dianta:  {q:'En el escenario y en el combate, siempre doy lo mejor de mí.'},
-  // ---- Alola: capitanes con pruebas; en vez de medallas dan Cristales Z (lideres/Alola/Medallas/) ----
+  // ---- Alola: capitanes con pruebas; en vez de medallas dan Cristales Z (assets/lideres/Alola/Medallas/) ----
   ilima:     {medal:'Normastal', q:'Mi prueba es la primera, pero no la más fácil.'},
   lana:      {medal:'Hidrostal', q:'Shhh... algo enorme está a punto de picar.'},
   kiawe:     {medal:'Pirostal', q:'¡El fuego de mis bailes te va a dejar sin aliento!'},
@@ -141,7 +141,7 @@ function ligaRender(){
   const showTeam = S === 'done';                                                     // su equipo solo se descubre cuando ya le has ganado
   const balls = (F.teams || []).slice(0, 6).map(e => showTeam ? `<canvas width="64" height="64" data-d="${typeof e === 'number' ? e : e.dex}"></canvas>` : '<i>?</i>').join('') || '<i>?</i>'.repeat(6);
   const rw = typeof rewardOf === 'function' ? rewardOf(F) : null;
-  const medal = f => `lideres/${encodeURIComponent((typeof REGION_DIR !== 'undefined' && REGION_DIR[R]) || R)}/Medallas/Medalla_${encodeURIComponent((LIGA_INFO[f.id] || {}).medal || '')}.webp`;
+  const medal = f => `assets/lideres/${encodeURIComponent((typeof REGION_DIR !== 'undefined' && REGION_DIR[R]) || R)}/Medallas/Medalla_${encodeURIComponent((LIGA_INFO[f.id] || {}).medal || '')}.webp`;
   const node = ({F: f, gi: g}) => { const s = st(f), sel = g === gi;
     const tyc = tagColor(f), hasM = !!(LIGA_INFO[f.id] || {}).medal;
     const img = f.kind !== 'lider' ? `<img class="lg-por-s" data-leader="${f.id}" alt="">` : hasM ? `<img class="lg-med" data-src="${medal(f)}" alt="" data-c="${tyc}">` : `<span class="lg-noimg" style="--c:${tyc}"></span>`;
@@ -150,7 +150,7 @@ function ligaRender(){
   $('lgNew').innerHTML = `<div class="lg" style="--kc:${kc}">
     <div class="lg-top"><h1>Liga de ${esc(R)}<small>Modo ${save.storyMode === 'facil' ? 'Fácil' : 'Difícil'}</small></h1>
       <div class="lg-prog"><span><b>${doneK('lider')}/${cnt('lider').length}</b> ${R === 'Alola' ? 'Cristales Z' : 'medallas'}</span><span><b>${doneK('alto')}/${cnt('alto').length}</b> Alto Mando</span><span class="${champ ? 'gold' : ''}"><b>${champ ? '🏆' : '0/1'}</b> Campeón</span></div></div>
-    <div class="lg-hero ${F.kind}" style="--map:url(&quot;${new URL('region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[R]) || R) + '.webp', document.baseURI).href}&quot;)">
+    <div class="lg-hero ${F.kind}" style="--map:url(&quot;${new URL('assets/region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[R]) || R) + '.webp', document.baseURI).href}&quot;)">
       <div class="lg-por"><img id="lgPor" alt="${esc(F.leader)}"></div>
       <div class="lg-info"><span class="lg-kind">${F.kind === 'campeon' ? '♛ ' : ''}${kind}${S === 'done' ? ' · <b>✓ Vencido</b>' : ''}</span>
         <div class="lg-name">${esc(F.leader)}</div>

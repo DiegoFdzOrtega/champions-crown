@@ -30,10 +30,10 @@ const GACHA = [".....kkkkkk.....","...kkaaaaaakk...","..kaaapaaayaak..",".kaappp
   ".krrkddddddkrrk.",".krrkddddddkrrk.",".krrrkkkkkkrrrk.",".krrrrrwwrrrrrk.",".krrrrrrrrrrrrk.",".kkkkkkkkkkkkkk."];
 const PAL_GACHA = {k:'#0a0d14', a:'#8fd3ff', p:'#ff3ea5', y:'#ffcc33', w:'#ffffff', r:'#e23b3b', d:'#05070c'};
 
-// ICONOS NUEVOS de monedas y tickets (carpeta iconos/): si se pide el dibujo de la moneda o del ticket, se pinta la imagen en su lugar.
+// ICONOS NUEVOS de monedas y tickets (carpeta assets/iconos/): si se pide el dibujo de la moneda o del ticket, se pinta la imagen en su lugar.
 // Color del ticket: rosa = normal, dorado = legendario, cian = variocolor. CUR_IMG = false vuelve a los iconos pixelados de siempre.
 const CUR_IMG = true;
-const CUR_SRC = {bp:'iconos/bp.webp', ticket:'iconos/ticket.webp', ticket_l:'iconos/ticket_l.webp', ticket_s:'iconos/ticket_s.webp'};
+const CUR_SRC = {bp:'assets/iconos/bp.webp', ticket:'assets/iconos/ticket.webp', ticket_l:'assets/iconos/ticket_l.webp', ticket_s:'assets/iconos/ticket_s.webp'};
 const CUR_IM = {}; if(CUR_IMG) for(const k in CUR_SRC){ const im = new Image(); im.src = CUR_SRC[k]; CUR_IM[k] = im; }
 const curKey = (rows, col) => !CUR_IMG || typeof ICONS === 'undefined' ? '' : rows === ICONS.coin ? 'bp' : rows === ICONS.ticket ? (/^#(ffcc33|ffd|ffe)/i.test(col || '') ? 'ticket_l' : /^#(7af0ff|3ee0c8)/i.test(col || '') ? 'ticket_s' : 'ticket') : '';
 function bitmap(c, rows, col, pal){
@@ -126,13 +126,13 @@ function card(m, extra){                           // tarjeta de Pokémon con mi
 
 // ---- HISTORIA: regiones ----
 const REGIONS = ['Kanto','Johto','Hoenn','Sinnoh','Unova / Teselia','Kalos','Alola','Galar','Paldea'];
-const REGION_IMG = {'Unova / Teselia':'Unova'};                        // mapa de cada región: region/tarjetas/<nombre>.webp (recortado para la tarjeta). Solo hace falta si el archivo se llama distinto
+const REGION_IMG = {'Unova / Teselia':'Unova'};                        // mapa de cada región: assets/region/tarjetas/<nombre>.webp (recortado para la tarjeta). Solo hace falta si el archivo se llama distinto
 const leaguesWon = () => REGIONS.filter(champAny).length;      // Ligas superadas (save.champ). Con las 9 se desbloquea la Torre Batalla
 function buildRegions(){
   const grid = $('rgrid'); grid.innerHTML = '';
   storyToggle($('rMode'), buildRegions);                                                            // botón Fácil / Difícil, cada una con su avance (js/dificultad.js)
   $('rTower').textContent = !towerOpen() ? 'Torre Batalla: se abre al ser Campeón de Kanto.' : 'Torre Batalla: ¡abierta! Pulsa «Torre Batalla» en el menú principal.';
-  // Medallas de una región: la medalla real de cada líder (lideres/<Región>/Medallas/), los retratos del Alto Mando y del Campeón.
+  // Medallas de una región: la medalla real de cada líder (assets/lideres/<Región>/Medallas/), los retratos del Alto Mando y del Campeón.
   // Lo que aún no has vencido sale apagado (silueta); lo siguiente por superar parpadea. Si falta una imagen, sale un círculo del color del tipo.
   const medals = (n, nL, rec, cur) => {
     const fl = floorsOf(n), dir = encodeURIComponent((typeof REGION_DIR !== 'undefined' && REGION_DIR[n]) || n), R0 = save.region;
@@ -142,7 +142,7 @@ function buildRegions(){
     fl.forEach(f => {
       if(f.kind === 'lider'){
         const md = (typeof LIGA_INFO !== 'undefined' && (LIGA_INFO[f.id] || {}).medal) || '';
-        lead += md ? `<img class="mimg${stc(f)}" data-src="lideres/${dir}/Medallas/Medalla_${encodeURIComponent(md)}.webp" data-c="${tagColor(f)}" alt="" title="${esc(f.leader)}">`
+        lead += md ? `<img class="mimg${stc(f)}" data-src="assets/lideres/${dir}/Medallas/Medalla_${encodeURIComponent(md)}.webp" data-c="${tagColor(f)}" alt="" title="${esc(f.leader)}">`
                    : `<span class="mimg mc${stc(f)}" style="--c:${tagColor(f)}"></span>`;
       } else {
         save.region = n; const paths = leaderPaths(f.id); save.region = R0;                 // leaderPaths usa la región activa: se cambia un instante
@@ -166,7 +166,7 @@ function buildRegions(){
     const pct = open && total ? Math.round(Math.min(rec, total) / total * 100) : 0;
     items.push({n, i, total, playable, prev, open, nL, rec, done, elite, champ, st, pct});
     const d = document.createElement('div'); d.className = 'rcard ' + st + (open ? ' open' : ' lock');
-    d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
+    d.style.setProperty('--map', `url("../assets/region/tarjetas/${REGION_IMG[n] || n}.webp")`);        // imagen de fondo de la tarjeta (ver .rcard::before en style.css)
     const badge = champ ? '★ COMPLETADA' : open ? 'EN CURSO' : playable ? 'BLOQUEADA' : 'PRÓXIMAMENTE';
     d.title = open ? `${done}/${nL} líderes · Liga ${Math.max(0, Math.min(5, rec - nL))}/5${champ ? ' · Campeón' : ''}` : (playable ? 'Vence la Liga de ' + prev : 'Próximamente');
     d.innerHTML = `<small>${i+1}</small><span class="rbadge ${st}">${badge}</span>` +
@@ -191,7 +191,7 @@ function buildRegions(){
     const all = !!cur.champ, fls = floorsOf(cur.n), nextF = all ? null : fls.find(f => f.idx >= cur.rec);
     const nx = all ? 'Has superado todas las Ligas disponibles. ¡Puedes repasarlas cuando quieras!' : nextF ? `Siguiente: <b>${esc(nextF.leader)}</b>${nextF.kind === 'lider' ? ' · Líder ' + esc(nextF.tag) : nextF.kind === 'alto' ? ' · Alto Mando' : ' · Campeón'}${nextF.place ? ' · ' + esc(nextF.place) : ''}` : '';
     const d = document.createElement('div'); d.className = 'rfeat'; d.tabIndex = 0;
-    d.style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[cur.n] || cur.n}.webp")`);
+    d.style.setProperty('--map', `url("../assets/region/tarjetas/${REGION_IMG[cur.n] || cur.n}.webp")`);
     d.innerHTML = `<div class="rf-in"><div><span class="rf-tag">${all ? 'TODO AL DÍA' : 'CONTINÚA AQUÍ'}</span><h2>${cur.n}</h2><p>${nx}</p></div>` +
       `<div><div class="mdls${cur.nL > 8 ? ' many' : ''}">${medals(cur.n, cur.nL, cur.rec, !all)}</div><button class="rf-go" type="button">${all ? '↻ Repasar' : '▶ Continuar'}</button></div></div>`;
     const go = ()=>{ save.region = cur.n; persist(); goStory(); };
@@ -210,7 +210,7 @@ function buildStory(){
   const champDone = champOf(R);
   // ---- banner de la región: imagen de fondo, título y contadores ----
   $('stTitle').textContent = 'Historia · ' + R + ' · ' + (save.storyMode === 'facil' ? 'Fácil' : 'Difícil');
-  $('stBanner').style.setProperty('--map', `url("../region/tarjetas/${REGION_IMG[R] || R}.webp")`);
+  $('stBanner').style.setProperty('--map', `url("../assets/region/tarjetas/${REGION_IMG[R] || R}.webp")`);
   $('stChips').innerHTML =
     `<span class="stc"><b>★ ${doneK('lider')}/${cnt('lider')}</b> líderes</span><span class="stc"><b>${doneK('alto')}/${cnt('alto')}</b> Alto Mando</span><span class="stc${champDone ? ' gold' : ''}"><b>${champDone ? '🏆' : '0/1'}</b> Campeón</span>`;
   // ---- camino: un punto por combate (✓ hecho · dorado = el siguiente · candado = bloqueado) ----

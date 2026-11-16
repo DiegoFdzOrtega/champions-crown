@@ -5,7 +5,7 @@
 
    VERSIÓN DE REFERENCIA: Pokémon PLATINO (orden de líderes: Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro). Nombres en español de
    Diamante/Perla/Platino. Fuentes: Bulbapedia (combates de la Zona de Batalla de Platino y Alto Mando), Serebii (Alto Mando de Platino) y WikiDex.
-   Retratos: lideres/Sinnoh/<Nombre>.png.
+   Retratos: assets/lideres/Sinnoh/<Nombre>.png.
 
    CÓMO ESTÁ HECHO (igual que Kanto, Johto y Hoenn, ver teams.js):
      P(nº de Pokédex, 'Naturaleza', 'Habilidad', 'objeto', {EVs}, ['golpe', 'disparo', 'mejora', 'ataque fuerte'])
@@ -135,7 +135,7 @@ Object.assign(TEAMS, {
 
 // ---------------------------------------------------------------------
 // Los 13 combates de Sinnoh, en orden: 8 líderes, 4 del Alto Mando y la Campeona.
-// id = nombre del retrato (lideres/Sinnoh/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenassinnoh.js)
+// id = nombre del retrato (assets/lideres/Sinnoh/<Nombre>.png, ver LEADER_FILE en data.js) y de la arena (arenassinnoh.js)
 // ---------------------------------------------------------------------
 const SF = (id, leader, tag, kind, lvl, dn, place) =>
   ({id, leader, tag, kind, lvl, diff: kind === 'lider' ? 'dificil' : 'muy_dificil', teams: TEAMS[id], region: 'Sinnoh', idx: 0, dn, place});

@@ -18,7 +18,7 @@ const MM_ICO = {
   set: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'
 };
 const mmSvg = k => `<svg viewBox="0 0 24 24">${MM_ICO[k]}</svg>`;
-const mmIcon = (k, c) => { if(k === 'inv') return 'iconos/estrella.webp'; if(CUR_IMG && (k === 'coin' || k === 'ticket')) return CUR_SRC[k === 'coin' ? 'bp' : 'ticket']; const cv = document.createElement('canvas'); bitmap(cv, ICONS[k], c); return cv.toDataURL(); };
+const mmIcon = (k, c) => { if(k === 'inv') return 'assets/iconos/estrella.webp'; if(CUR_IMG && (k === 'coin' || k === 'ticket')) return CUR_SRC[k === 'coin' ? 'bp' : 'ticket']; const cv = document.createElement('canvas'); bitmap(cv, ICONS[k], c); return cv.toDataURL(); };
 const mmNum = n => Number(n || 0).toLocaleString('es-ES');
 
 // Siguiente combate de la Historia: la primera región abierta que no está terminada
@@ -39,7 +39,7 @@ function mmHero(){
     const F = nx.F, reg = String(nx.r).split(' / ').pop(), last = done + 1 >= total;
     const kind = F.kind === 'campeon' ? (/a$/.test(F.tag) ? 'Campeona' : 'Campeón') : F.kind === 'alto' ? 'Alto Mando' : nx.r === 'Alola' ? 'Capitán' : 'Líder';
     const q = typeof LIGA_INFO !== 'undefined' && LIGA_INFO[F.id] && LIGA_INFO[F.id].q;
-    const map = new URL('region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[nx.r]) || nx.r) + '.webp', document.baseURI).href;
+    const map = new URL('assets/region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[nx.r]) || nx.r) + '.webp', document.baseURI).href;
     return `<div class="m2-hero" style="--map:url(&quot;${map}&quot;)"><img class="por" id="mmPor" alt="">
       <div class="m2-hi"><span class="k">Continuar · Liga de ${esc(reg)}</span><h2>${kind} ${esc(F.leader)}</h2>
         <p>${nx.F.region === 'Kanto' && nx.F.kind === 'campeon' && !towerOpen() ? '¡Gánale para abrir la Torre Batalla!' : q ? '«' + esc(q) + '»' : `Combate ${nx.done + 1} de ${nx.total} en ${esc(reg)}.`}</p>
@@ -57,11 +57,11 @@ function mmHero(){
   return `<div class="m2-hero"><div class="m2-hi"><span class="k">Historia</span><h2>¡Elige una región!</h2><p>Vence a los líderes, al Alto Mando y al Campeón.</p>
     <div class="row"><button class="m2-go" data-mm="go" data-k="story">JUGAR</button></div></div></div>`;
 }
-// Ilustraciones grandes de los cuadros del menú (carpeta iconos/). La de la Torre ya está; las demás se ponen solas al añadir el archivo (iconos/mm_equipo.webp...): si no existe, el cuadro queda como siempre.
-const MM_TOWER = 'iconos/torre.webp';
+// Ilustraciones grandes de los cuadros del menú (carpeta assets/iconos/). La de la Torre ya está; las demás se ponen solas al añadir el archivo (assets/iconos/mm_equipo.webp...): si no existe, el cuadro queda como siempre.
+const MM_TOWER = 'assets/iconos/torre.webp';
 const MM_ART = {};                                                                           // (ilustraciones grandes a la derecha de un cuadro: ahora ninguna)
-const MM_COL = {team:'iconos/mm_equipo.webp', dex:'iconos/mm_pokedex.webp', gacha:'iconos/mm_gachapon.webp', inv:'iconos/mm_invocacion.webp', shop:'iconos/mm_tienda.webp'};   // cuadros de Colección: la ilustración hace de icono
-const MM_HEAD = {story:'iconos/ic_historia.webp', rank:'iconos/ic_rank.webp', campo:'iconos/ic_campo.webp', tower:MM_TOWER, ...MM_COL};     // icono pequeño ilustrado de los cuadros de Jugar (si falta el archivo, vale el de píxeles)
+const MM_COL = {team:'assets/iconos/mm_equipo.webp', dex:'assets/iconos/mm_pokedex.webp', gacha:'assets/iconos/mm_gachapon.webp', inv:'assets/iconos/mm_invocacion.webp', shop:'assets/iconos/mm_tienda.webp'};   // cuadros de Colección: la ilustración hace de icono
+const MM_HEAD = {story:'assets/iconos/ic_historia.webp', rank:'assets/iconos/ic_rank.webp', campo:'assets/iconos/ic_campo.webp', tower:MM_TOWER, ...MM_COL};     // icono pequeño ilustrado de los cuadros de Jugar (si falta el archivo, vale el de píxeles)
 Object.keys(MM_HEAD).forEach(k => { if(k !== 'tower') MM_HEAD[k] += '?v=2'; });         // (v=2: iconos reencuadrados; así el navegador no usa los antiguos guardados)
 function mmTile(k, c, name, sub, st, extra, cls){
   const ic = mmIcon(k, c), hd = MM_HEAD[k] ? `<img class="hd${MM_COL[k] ? ' col' : ''}" src="${MM_HEAD[k]}" alt="" onerror="this.onerror=null;this.classList.remove('hd','col');this.src='${ic}'">` : `<img src="${ic}" alt="">`, art = MM_ART[k] ? `<img class="art" src="${MM_ART[k]}" alt="" onerror="this.parentNode.classList.remove('hasart');this.remove()">` : '';
@@ -92,7 +92,7 @@ function mmRender(){
         <span style="--c:#ff3ea5"><img src="${mmIcon('ticket', '#ff3ea5')}" alt=""><span>${mmNum(save.tickets)}${save.ticketsL ? ` <em>+${save.ticketsL}★</em>` : ''}${save.ticketsS ? ` <em class="s">+${save.ticketsS}✦</em>` : ''}<small>Tickets Gachapon</small></span></span></div>
     </div>
     <div class="m2-body"><div class="m2-left">
-      <div class="m2-brand"><img src="icono-180.png?v=2" alt=""><div><h1>CHAMPIONS CROWN</h1><p>ROAD TO CHAMPION · ARENA 2D</p></div></div>
+      <div class="m2-brand"><img src="assets/iconos/app/icono-180.png?v=2" alt=""><div><h1>CHAMPIONS CROWN</h1><p>ROAD TO CHAMPION · ARENA 2D</p></div></div>
       ${mmHero()}
       <div class="m2-sec">Jugar</div>
       <div class="m2-play">

@@ -61,7 +61,7 @@ function hbTips(A){
   return out.slice(0, 4);
 }
 
-// ---- Fondo: la ilustración fondos/equipo.webp (2880x1921, ampliada x4 con Upscayl). Su círculo mágico está en el 49,7 % del ancho y el 20 % del alto.
+// ---- Fondo: la ilustración assets/fondos/equipo.webp (2880x1921, ampliada x4 con Upscayl). Su círculo mágico está en el 49,7 % del ancho y el 20 % del alto.
 // hbBgFit() la pone a tamaño «cubrir» (lo mínimo para llenar la pantalla, así se ve lo más nítida posible) y la desplaza para que el círculo
 // quede alineado en vertical con la carta del líder (y lo más cerca posible de ella en altura, sin dejar huecos).
 const HB_BG = {w:2880, h:1921, ex:.4967, ey:.20};

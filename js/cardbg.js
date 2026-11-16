@@ -1,17 +1,17 @@
 "use strict";
 /* =====================================================================
    FONDOS DE LA TARJETA DE ENTRENADOR (Perfil › «Fondo de la tarjeta»)
-   Son ilustraciones de lugares (carpeta fondos/tarjeta/, WebP de ~35 KB; las miniaturas están en fondos/tarjeta/mini/). Solo se descarga la que llevas puesta.
+   Son ilustraciones de lugares (carpeta assets/fondos/tarjeta/, WebP de ~35 KB; las miniaturas están en assets/fondos/tarjeta/mini/). Solo se descarga la que llevas puesta.
    - Cada fondo se desbloquea al DERROTAR a ese líder / miembro del Alto Mando / Campeón (en Fácil o en Difícil), o al hacer lo que diga su condición.
    - Tu elección se guarda en save.cardBg (id del fondo, '' = sin fondo). La tarjeta publica solo ese id: quien la ve lo busca en esta tabla (nunca se carga una ruta de fuera).
-   - PARA AÑADIR UNO: copia el PNG a fondos/tarjeta/ (como WebP) y su miniatura a fondos/tarjeta/mini/, y añade una línea abajo:
+   - PARA AÑADIR UNO: copia el PNG a assets/fondos/tarjeta/ (como WebP) y su miniatura a assets/fondos/tarjeta/mini/, y añade una línea abajo:
         B('id', 'archivo-sin-extension', ['id_del_lider', ...], 'posición')      → se desbloquea al derrotar a cualquiera de esos líderes (ids de FLOORS)
         {id, f, pos, champ:'Kanto'}                                                → al ser Campeón de esa región
         {id, f, pos, lg:3}                                                         → al superar 3 Ligas
         {id, f, pos, free:1}                                                       → desde el principio
    - 'pos' es el punto que se ve al recortar la ilustración al tamaño de la tarjeta (CSS background-position): '50% 0%' = se ve la parte de arriba, '50% 100%' = la de abajo.
    ===================================================================== */
-const CARD_BG_DIR = 'fondos/tarjeta/';
+const CARD_BG_DIR = 'assets/fondos/tarjeta/';
 const B = (id, f, fl, pos, n) => ({id, f, fl, pos: pos || '50% 50%', n});
 const CARD_BGS = [
   // --- desde el principio y por Ligas ---
