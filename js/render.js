@@ -638,6 +638,7 @@ function draw(){
   if(FARV) ctx.globalAlpha = farBarAlpha();        // cámara lejana: lo mismo
   if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás
   const bw = 104, gap = 8, tw = 5*bw + 4*gap + 24, x0 = (W - tw)/2, y0 = H - 82;
+  if(!(typeof hudBarImg === 'function' && hudBarImg(M))){     // con las piezas dibujadas (js/hudbar.js); si no, la de siempre
   // Barra de energía grande, siempre visible, con las marcas de Q (20) y E (40) y el tiempo que falta
   { const ey = y0 - 38, bx = x0 + 78, bwid = tw - 78 - 12, bh = 10, by = ey + 16;
     hudBox(x0, ey, tw, 34, '#4fb3ff');
@@ -673,6 +674,7 @@ function draw(){
       text(wait.toFixed(1) + 's', x+bw/2, y+47, 8, cdWait >= enWait ? '#fff' : '#4fb3ff', 'center');       // blanco = enfriamiento · azul = falta energía
     }
   });
+  }
   ctx.restore();
   if(PRV || FARV){ ctx.save(); ctx.globalAlpha = (PRV ? PR.barA : FAR.barA) || 1; megaHud(); ctx.restore(); } else
   megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
