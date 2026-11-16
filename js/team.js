@@ -378,7 +378,7 @@ function renderSel(){
   el.innerHTML = `<div class="pci-spr" style="--r:${r.col}"><canvas width="160" height="160"></canvas><span class="rb pci-rar" style="--c:${r.col}">${r.ic} ${r.n}</span></div>
     <h2>${esc(m.name)} <small>#${pad3(d)}</small></h2>
     <div class="tbs pci-ty">${typeBadges(m)}${canMega ? '<span class="tb mgb">MEGA</span>' : ''}</div>
-    <div class="pci-ch"><span title="${esc(abilDesc(ab))}"><em>Habilidad</em><b>${esc(ab)}</b></span><span title="${esc(natText(nat))}"><em>Naturaleza</em><b>${esc(nat[0])}</b></span></div>
+    <div class="pci-ch"><span title="${esc(abilDesc(ab))}"><em>Habilidad</em><b>${esc(ab)}</b></span><span title="${esc(natText(nat))}"><em>Naturaleza</em><b>${esc(nat[0])}</b></span>${typeof hwOf === 'function' ? `<span><em>Altura</em><b>${fmtAltura(hwOf(d)[0])}</b></span><span><em>Peso</em><b>${fmtPeso(hwOf(d)[1])}</b></span>` : ''}</div>
     <div class="pci-tg"><button class="pcb tog${save.fav.includes(d) ? ' on' : ''}" data-act="fav">${save.fav.includes(d) ? '★ Favorito' : '☆ Favorito'}</button>${hasSh ? `<button class="pcb tog${useShiny(d) ? ' on' : ''}" data-act="sh">⭐ ${useShiny(d) ? 'Shiny' : 'Normal'}</button>` : ''}</div>
     ${inTeam ? `<h3>Objeto</h3><div class="pci-item">${eq ? `<img class="iimg" src="${imgOf(eq)}" alt="" onerror="this.style.visibility='hidden'"><b>${esc(ITEMS[eq].n)}</b>` : '<span class="none">Sin objeto</span>'}</div>` : ''}
     <h3>Ataques</h3><div class="pci-mv">${moves}</div>

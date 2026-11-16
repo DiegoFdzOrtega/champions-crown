@@ -48,7 +48,7 @@ function teBuild(){
   if(TE_EST.img && TE_EST.img.ok){                                             // el estadio es la imagen tal cual
     const B = TE.B, c = TE.stad = document.createElement('canvas'); c.width = B.x1 - B.x0; c.height = B.y1 - B.y0;
     const s = c.getContext('2d'); s.imageSmoothingEnabled = true; s.imageSmoothingQuality = 'high'; s.drawImage(TE_EST.img, 0, 0, c.width, c.height);
-    TE.crowd.length = 0; TE.dec = document.createElement('canvas'); TE.dec.width = TE.W; TE.dec.height = TE.H; return;
+    teFans(); TE.dec = document.createElement('canvas'); TE.dec.width = TE.W; TE.dec.height = TE.H; return;
   }
   const B = TE.B, w = B.x1 - B.x0, h = B.y1 - B.y0;
   const c = TE.stad = document.createElement('canvas'); c.width = w; c.height = h;
@@ -127,6 +127,16 @@ function teBuild(){
   if(!TX) TE_FANS.forEach(([x, y, col]) => { R(x - 22, y - 16, 44, 34, '#06080f'); R(x - 20, y - 20, 40, 34, col); R(x - 12, y - 12, 5, 5, '#111'); R(x + 7, y - 12, 5, 5, '#111'); R(x - 20, y + 8, 40, 6, 'rgba(0,0,0,.25)'); teCut(x - 30, y - 28, 60, 52); });
   TE.dec = document.createElement('canvas'); TE.dec.width = TE.W; TE.dec.height = TE.H;
 }
+// PÚBLICO sobre la grada de la imagen: gente grande y animada (la pintada en la imagen es tan pequeña que no se distingue)
+const TE_CROWD = {z: 1.9, dens: .62, dx: 17, dy: 21,                       // [AJUSTE] tamaño de cada persona · cuánta grada se llena (0..1) · separación (px de la imagen)
+  bands: [[40, 70, 690, 190], [1360, 70, 2010, 190], [60, 248, 1990, 345], [35, 300, 200, 1180], [1850, 300, 2015, 1180], [160, 1212, 1990, 1322]],   // zonas con gradas [x0, y0, x1, y1] en píxeles de la imagen
+  holes: [[90, 715, 215, 845], [1830, 715, 1960, 845], [990, 1200, 1060, 1365]]};                                                                  // túneles y escaleras: sin gente
+function teFans(){
+  teSeed = 7; TE.crowd.length = 0; const C = TE_CROWD;
+  C.bands.forEach(([a, b, c, d]) => { for(let y = b; y < d; y += C.dy) for(let x = a + ((y / C.dy | 0) % 2) * C.dx / 2; x < c; x += C.dx){
+    if(teR() > C.dens || C.holes.some(([h0, h1, h2, h3]) => x > h0 && x < h2 && y > h1 && y < h3)) continue;
+    const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, s: TE_SHIRT[(teR() * 12) | 0], k: TE_SKIN[(teR() * 5) | 0], h: TE_HAIR[(teR() * 7) | 0], p: teR() * 6.28, wave: teR() < .12}); } });
+}
 function teSeat(x, y, row){ if(teTex() || teR() < .13) return; TE.crowd.push({x, y, s: TE_SHIRT[(teR() * 12) | 0], k: TE_SKIN[(teR() * 5) | 0], h: TE_HAIR[(teR() * 7) | 0], p: teR() * 6.28}); }
 function teCut(x, y, w, h){ for(let i = TE.crowd.length - 1; i >= 0; i--){ const q = TE.crowd[i]; if(q.x > x && q.x < x + w && q.y > y && q.y < y + h) TE.crowd.splice(i, 1); } }
 
@@ -197,13 +207,15 @@ function teDraw(){
   ctx.drawImage(TE.dec, 0, 0);
   // público visible: bota (más con los buenos golpes) y levanta los brazos
   const hy = TE.hype, sp = 4 + hy * 8, amp = 1 + hy * 4;
+  const Z = TE_EST.img && TE_EST.img.ok ? TE_CROWD.z : 1;
   for(const q of TE.crowd){
-    if(q.x < x0 - 12 || q.x > x1 || q.y < y0 - 12 || q.y > y1) continue;
-    const j = Math.max(0, Math.sin(t * sp + q.p)) * amp | 0;
-    ctx.fillStyle = q.s; ctx.fillRect(q.x, q.y + 4 - j, 6, 4);
-    ctx.fillStyle = q.k; ctx.fillRect(q.x + 1, q.y - j, 4, 4);
-    ctx.fillStyle = q.h; ctx.fillRect(q.x + 1, q.y - j, 4, 1.5);
-    if(hy > .45 && (q.p * 10 | 0) % 3 === 0){ ctx.fillStyle = q.k; ctx.fillRect(q.x - 1, q.y - 3 - j, 1.5, 4); ctx.fillRect(q.x + 5.5, q.y - 3 - j, 1.5, 4); }
+    if(q.x < x0 - 20 || q.x > x1 + 10 || q.y < y0 - 20 || q.y > y1 + 10) continue;
+    const j = (Math.max(0, Math.sin(t * sp + q.p)) * amp | 0) * Z, X = q.x, Y = q.y - j, up = q.wave || (hy > .45 && (q.p * 10 | 0) % 3 === 0);
+    if(Z > 1){ ctx.fillStyle = 'rgba(4,6,12,.75)'; ctx.fillRect(X - 1, Y - 1, 6 * Z + 2, 8 * Z + 2); }                         // contorno oscuro: se distingue sobre la grada pintada
+    ctx.fillStyle = q.s; ctx.fillRect(X, Y + 4 * Z, 6 * Z, 4 * Z);
+    ctx.fillStyle = q.k; ctx.fillRect(X + Z, Y, 4 * Z, 4 * Z);
+    ctx.fillStyle = q.h; ctx.fillRect(X + Z, Y, 4 * Z, 1.5 * Z);
+    if(up){ const w = Math.sin(t * 9 + q.p) > 0 ? Z : 0; ctx.fillStyle = q.k; ctx.fillRect(X - Z - w, Y - 3 * Z, 1.5 * Z, 5 * Z); ctx.fillRect(X + 5.5 * Z + w, Y - 3 * Z, 1.5 * Z, 5 * Z); }
   }
   if(TE.hype > .25 && teTex()){                                            // flashes de cámara en la grada
     const n = TE.hype * 14 | 0; ctx.fillStyle = '#ffffff';

@@ -183,7 +183,8 @@ function renderDetail(){
     : tab === 'moves' ? `<div class="dxmv">${moves}</div>`
     : `<div class="stats">${stats}<div class="sttot"><span>Total</span><b>${total}</b></div></div>
        <div class="dinfo"><p><span>Naturaleza</span> ${nat[0]}${nat[1] ? ` <small>▲ ${STAT_NAMES[nat[1]]} · ▼ ${STAT_NAMES[nat[2]]}</small>` : ' <small>(neutra)</small>'}</p>
-         <p><span>Habilidad</span> <em class="soft">${esc(abilityOf(m.dex))}</em></p></div>
+         <p><span>Habilidad</span> <em class="soft">${esc(abilityOf(m.dex))}</em></p>
+         ${typeof hwOf === 'function' ? `<p><span>Altura</span> ${fmtAltura(hwOf(m.dex)[0])}</p><p><span>Peso</span> ${fmtPeso(hwOf(m.dex)[1])}</p>` : ''}</div>
        <p class="lore">${esc(loreOf(m))}</p>`;
   $('dxDet').style.setProperty('--c', r.col); $('dxDet').style.setProperty('--t1', t1); $('dxDet').style.setProperty('--t2', t2);
   $('dxDet').classList.toggle('locked', !o);

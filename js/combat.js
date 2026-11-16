@@ -470,7 +470,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
     Sfx.play(R.dodge ? 'dodge' : 'hit_none');
     abPop(T, (R.imm || R.dodge).toUpperCase()); fxBurst(T.x, T.y - 20, ['#ffffff', '#c8c8d4'], 6, 70); return;
   }
-  const mult = R.mult;
+  const mult = R.mult * (typeof wgDmg === 'function' ? wgDmg(mvn, T, A) : 1);      // ataques de peso (js/pesos.js): Patada Baja, Hierba Lazo, Golpe Calor, Cuerpo Pesado
   const foeAtk = !g.pvp && !!(A && g.e.includes(A));                                              // (en un combate online nadie es «el rival»: no hay crítico extra)
   const scope = (A && A.item === 'periscopio') ? IFX.periscopio : 0;                                      // Periscopio: más probabilidad de crítico
   const crit = mult > 0 && !R.noCrit && Math.random() < (CRIT.chance + scope) * (big ? CRIT.big : 1) * (foeAtk ? CRIT.foe : 1);   // golpe crítico (solo si el golpe hace daño)
@@ -486,7 +486,8 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
   T.hp -= dealt;
   if(dealt > 0 && A && A !== T){                                                                       // retroceso: el golpe empuja al que lo recibe (FEEL)
     const ka = Math.atan2(T.y - A.y, T.x - A.x), kM = A.kbCh ? FEEL.chgMax : big ? FEEL.bigMax : FEEL.kbMax, kp = A.kbCh ? FEEL.chgPush + (FEEL.chgPushMax - FEEL.chgPush) * (A.chgP || 0) : ((big ? FEEL.kbBig + (FEEL.kbBigMax - FEEL.kbBig) * (A.kbP || 0) : close ? FEEL.kbMelee * (A.kbK || 1) : FEEL.kbShot * (A.kbS || 1)) * (mult >= 2 ? 1.25 : 1) * (crit ? 1.2 : 1));
-    T.kx = clamp((T.kx || 0) + Math.cos(ka)*kp, -kM, kM); T.ky = clamp((T.ky || 0) + Math.sin(ka)*kp, -kM, kM); T.kbHit = true;
+    const kw = typeof wgK === 'function' ? wgK(T, A) : 1;                                                    // peso (js/pesos.js): los pesados casi no se mueven, los ligeros vuelan
+    T.kx = clamp((T.kx || 0) + Math.cos(ka)*kp*kw, -kM, kM); T.ky = clamp((T.ky || 0) + Math.sin(ka)*kp*kw, -kM, kM); T.kbHit = true;
     if(!g.pvp && typeof fxhd !== 'undefined') fxhd.stop = Math.max(fxhd.stop, crit ? .07 : close ? .03 : 0);   // congelado del golpe también en críticos y cuerpo a cuerpo (js/fxhd.js; no en online)
   }
   if(mvn === 'Vendaval' && mult > 0 && T.hp > 0) T.lift = {t0:g.t, dur:1.1};                                  // Vendaval: el rival sale levantado por los aires un momento (solo visual: fxLift en fxtipos.js)
