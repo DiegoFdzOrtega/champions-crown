@@ -31,7 +31,8 @@ const FEEL = {
 };
 // LÍMITES DEL CAMPO: hasta dónde se mueven los Pokémon. Lo normal es 50 … W-50 y 140 … H-110; con la cámara lejana (FAR, js/render.js) el campo es más grande.
 const farB = () => typeof farOn === 'function' && farOn();
-const bx0 = () => farB() ? farBox().x0 + 40 : 50, bx1 = () => farB() ? farBox().x1 - 40 : W - 50, by0 = () => farB() ? farBox().y0 + 14 : 140, by1 = () => farB() ? farBox().y1 - 40 : H - 110;      // (farBox: el rectángulo del campo, js/render.js)
+const teB = () => typeof teOn === 'function' && teOn();          // estadio grande de la Torre (js/torreestadio.js): el campo ocupa todo el mundo
+const bx0 = () => teB() ? 40 : farB() ? farBox().x0 + 40 : 50, bx1 = () => teB() ? W - 40 : farB() ? farBox().x1 - 40 : W - 50, by0 = () => teB() ? 30 : farB() ? farBox().y0 + 14 : 140, by1 = () => teB() ? TE.H - 16 : farB() ? farBox().y1 - 40 : H - 110;      // (farBox: el rectángulo del campo, js/render.js)
 const feelFoe = f => !g.pvp && g.e.includes(f);                      // ¿es un rival movido por la IA?
 function dodgeOk(T){                                                 // ha esquivado un ataque con la carrera: aviso y premio (una vez por carrera)
   if(T.invUsed) return; T.invUsed = true;

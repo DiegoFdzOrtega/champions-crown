@@ -127,17 +127,20 @@ function farS2W(x, y){ return {x: (x - W / 2) / FAR.z + W / 2, y: (y - FAR.cy) /
 // ESTADIOS CON IMAGEN PROPIA: el fondo entero es una imagen (assets/fondos/estadios/) que ya trae pintadas las líneas del campo y la decoración de fuera.
 //   court = dónde está el rectángulo del campo DENTRO de la imagen, en píxeles: [izquierda, arriba, derecha, abajo] · w, h = tamaño de la imagen
 //   Para añadir otro: guarda la imagen y pon una línea con el id del líder (el de FLOORS, js/data.js). Si el campo está en otro sitio, mide su rectángulo.
-const EST = {
-  brock:    {src: 'assets/fondos/estadios/brock.png',    w: 1024, h: 572, court: [74, 110, 973, 480]},
-  misty:    {src: 'assets/fondos/estadios/misty.png',    w: 1024, h: 572, court: [75, 111, 972, 482]},
-  lt_surge: {src: 'assets/fondos/estadios/surge.png',    w: 1024, h: 572, court: [75, 110, 973, 484]},
-  erika:    {src: 'assets/fondos/estadios/erika.png',    w: 1024, h: 572, court: [76, 111, 971, 483]},
-  koga:     {src: 'assets/fondos/estadios/koga.png',     w: 1024, h: 572, court: [75, 111, 972, 484]},
-  sabrina:  {src: 'assets/fondos/estadios/sabrina.png',  w: 815,  h: 456, court: [59, 88, 773, 427]}       // recortada: la IA la hizo con el campo más pequeño
+const EST = {                                                       // imágenes 2048x1144 (WebP); court medido sobre 1024x572
+  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: [75, 109, 971, 481]},
+  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: [75, 111, 972, 482]},
+  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: [75, 110, 973, 482]},
+  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: [76, 110, 973, 481]},
+  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: [76, 112, 972, 484]},
+  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: [77, 111, 972, 534]},
+  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: [76, 112, 972, 484]},
+  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: [76, 112, 973, 484]},
+  lorelei:  {src: 'assets/fondos/estadios/lorelei.webp',  w: 1024, h: 572, court: [76, 112, 973, 485]}
 };
-function estOf(){ const E = g && g.o && EST[g.o.leader]; if(!E) return null; if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=2'; } return E.ok ? E : null; }
+function estOf(){ const E = g && g.o && EST[g.o.leader]; if(!E) return null; if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=3'; } return E.ok ? E : null; }
 function estDraw(E){                                                // la imagen llena la pantalla; arriba se oscurece un poco para que se lea el marcador
-  ctx.imageSmoothingEnabled = false; ctx.drawImage(E.img, 0, 0, W, H);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(E.img, 0, 0, W, H);
   const top = ctx.createLinearGradient(0, 0, 0, 150); top.addColorStop(0, 'rgba(3,4,10,.5)'); top.addColorStop(1, 'rgba(3,4,10,0)'); ctx.fillStyle = top; ctx.fillRect(0, 0, W, 150);
 }
 function farBox(){                                                  // las líneas de fuera del campo, en coordenadas del mundo (de aquí salen los límites bx0 … by1 de js/combat.js)
@@ -554,7 +557,7 @@ function viewCalc(){
   else{ VIEW.sx = cv.width / W; VIEW.sy = cv.height / H; VIEW.ox = VIEW.oy = 0; }
 }
 function draw(){
-  const PRV = typeof prOn === 'function' && prOn(), want = PRV ? PR.W : g && g.pvp ? PVP_W : 0;      // PRV = Campo de pruebas: vista de estadio (js/pruebas.js)
+  const PRV = typeof prOn === 'function' && prOn(), want = PRV ? (typeof teOn === 'function' && teOn() ? TE.W : PR.W) : g && g.pvp ? PVP_W : 0;   // (TE: estadio grande de la Torre, js/torreestadio.js)      // PRV = Campo de pruebas: vista de estadio (js/pruebas.js)
   if(want !== LOCKW){ LOCKW = want; resize(); }                        // al entrar o salir de un combate online
   viewCalc();
   if(LOCKW){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, cv.width, cv.height); }
@@ -611,6 +614,7 @@ function draw(){
 
   // Panel central: piso y temporizador
   const s = g.clock | 0;
+  if(typeof teOn === 'function' && teOn() && TE.hud) teCenter(s); else       // estadio grande de la Torre: marcador fino (js/torreestadio.js)
   hudAt(W/2, 0, () => {
   hudBox(W/2-110, 8, 220, 52, '#4a8cff');
   text(g.pvp ? (g.o.estadio ? 'CLASIFICATORIA' : 'ONLINE') : g.o.pruebas ? 'PRUEBAS' : g.o.torre ? 'TORRE · PISO ' + g.o.floor : g.o.title ? 'CAMPO' : 'PISO ' + g.o.floor, W/2, 29, 12, '#ffcc33', 'center');

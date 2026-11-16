@@ -54,7 +54,7 @@ const towerNeed = () => towerOpen() ? 0 : 1;
 let TORRE_RIV = null;
 function torreRivales(){
   if(TORRE_RIV) return TORRE_RIV;
-  const L = (typeof INV_LIST !== 'undefined' ? INV_LIST : []).filter(x => x.t !== 'C' && x.n !== '???' && !['ch', 'am', 'gy', 'ma'].some(t => invHas(x, t)));
+  const L = (typeof INV_LIST !== 'undefined' ? INV_LIST : []).filter(x => x.n !== '???' && !['ch', 'ma'].some(t => invHas(x, t)) && (typeof miniIdx !== 'function' || miniIdx(x.f) >= 0));   // solo los que tienen muñeco en el combate (assets/entrenadores_mini/todos.png), para que salgan en el estadio
   const R = invSeeded(20261106), byName = new Map();
   L.map(x => [x, R()]).sort((a, b) => a[1] - b[1]).forEach(([x]) => { if(!byName.has(x.n)) byName.set(x.n, x); });   // una versión de cada personaje
   return TORRE_RIV = [...byName.values()];

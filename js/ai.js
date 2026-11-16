@@ -1,4 +1,5 @@
 "use strict";
+const aiH = () => (typeof teOn === 'function' && teOn()) ? TE.H : H;      // alto del campo (en el estadio grande de la Torre es mayor que la pantalla: js/torreestadio.js)
 /* =====================================================================
    4b) IA DEL RIVAL (la llama update() de combat.js en cada fotograma)
    Qué hace (antes todos los rivales se movían y atacaban igual):
@@ -26,8 +27,8 @@ const AI_SWAP = {
 function aiRetreat(E, P, dt){                              // aléjate del jugador (o rodea hacia el centro si estás en una esquina)
   const ang = Math.atan2(P.y - E.y, P.x - E.x), dist = Math.hypot(P.x - E.x, P.y - E.y);
   let ax = -Math.cos(ang), ay = -Math.sin(ang), k = .9;
-  if(E.x < 110 || E.x > W - 110 || E.y < 190 || E.y > H - 140){
-    const px = Math.cos(ang + 1.57), py = Math.sin(ang + 1.57), sg = (px*(W/2 - E.x) + py*(H/2 - E.y)) >= 0 ? 1 : -1; ax = px*sg; ay = py*sg;
+  if(E.x < 110 || E.x > W - 110 || E.y < 190 || E.y > aiH() - 140){
+    const px = Math.cos(ang + 1.57), py = Math.sin(ang + 1.57), sg = (px*(W/2 - E.x) + py*(aiH()/2 - E.y)) >= 0 ? 1 : -1; ax = px*sg; ay = py*sg;
   }
   else if(dist >= AI_SWAP.back){ ax = Math.cos(ang + 1.57) * Math.sign(Math.sin(g.t*.8) || 1); ay = Math.sin(ang + 1.57) * Math.sign(Math.sin(g.t*.8) || 1); k = .25; }   // ya está lejos: solo da vueltas despacio
   move(E, ax, ay, dt, k);
@@ -102,9 +103,9 @@ function enemyAI(E, P, dt){
   if(st === 'melee'){ want = dist > reach*.78 ? 1 : dist < reach*.4 ? -.6 : 0; mag = dist > reach*1.6 ? .15 : .55; }
   else if(st === 'range'){ want = dist > 400 ? 1 : dist < 250 ? -1 : 0; mag = .8; }
   else { want = dist > 300 ? 1 : dist < 170 ? -1 : 0; mag = .6; }
-  if(want < 0 && (E.x < 110 || E.x > W - 110 || E.y < 190 || E.y > H - 140)){            // arrinconado: en vez de retroceder, rodea hacia el centro
+  if(want < 0 && (E.x < 110 || E.x > W - 110 || E.y < 190 || E.y > aiH() - 140)){            // arrinconado: en vez de retroceder, rodea hacia el centro
     const px = Math.cos(ang + 1.57), py = Math.sin(ang + 1.57);
-    E.orb = (px*(W/2 - E.x) + py*(H/2 - E.y)) >= 0 ? 1 : -1; want = 0; mag = 1;
+    E.orb = (px*(W/2 - E.x) + py*(aiH()/2 - E.y)) >= 0 ? 1 : -1; want = 0; mag = 1;
   }
   const los = !pilBlocks(E.x, E.y, P.x, P.y, 14);                                           // ¿te ve? (no hay un pilar en medio, combat.js)
   if(!los && want <= 0){ want = .7; mag = 1; }                                               // te has cubierto tras un pilar: lo rodea para volver a tenerte a tiro

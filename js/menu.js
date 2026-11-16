@@ -321,6 +321,7 @@ function openSettings(){
           <div class="stgCard stgCred">
             <p><b>Champions Crown</b> es un juego de fans, gratuito y sin ánimo de lucro, hecho por Diego Fernández Ortega.</p>
             <p><b>Sprites de entrenadores</b> (Invocación): <a href="https://play.pokemonshowdown.com/sprites/trainers/" target="_blank" rel="noopener">Pokémon Showdown</a> y los artistas que los dibujaron.</p>
+            <p><b>Retratos con expresiones</b> (HUD de combate): <a href="https://sprites.pmdcollab.org" target="_blank" rel="noopener">PMD Sprite Repository</a> y los artistas que los dibujaron.</p>
             <p><b>Datos de Pokémon, movimientos y evoluciones:</b> <a href="https://github.com/smogon/pokemon-showdown" target="_blank" rel="noopener">Pokémon Showdown</a> (Smogon).</p>
             <p class="stgTip">Pokémon y sus personajes son © Nintendo, Game Freak, Creatures y The Pokémon Company. Este juego no está afiliado a ellos.</p>
           </div>
