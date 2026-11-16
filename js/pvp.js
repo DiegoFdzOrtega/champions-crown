@@ -254,7 +254,8 @@ function pvpControl(f, side, dt){
   if(f.dead || f.ghost) return;
   const aim = Math.atan2(i.my - f.y, i.mx - f.x);
   move(f, i.dx, i.dy, dt, 1); f.dir = dirOf(aim); if(f.burst) f.burst.ang = aim; if(f.wind) f.wind.ang = aim;
-  meleeInput(f, !!i.l, aim, mine, dt);
+  if(f.ride && f.ride.free){ if(rideStop(f, !!i.l, !!i.r, !!i.e)){ f.mh = false; f.mc = 0; f.eh = false; } return; }      // en plena embestida (Pájaro Osado / Envite Ígneo): otro clic la para
+  if(!psiCtl(f, !!i.l, i.mx, i.my)) meleeInput(f, !!i.l, aim, mine, dt);      // con un rival atrapado por Psíquico, el clic lo lanza
   if(i.r) use(f, 2, aim, mine);
   if(i.sp) use(f, 0, (i.dx || i.dy) ? Math.atan2(i.dy, i.dx) : aim, mine);
   if(i.q) use(f, 3, aim, mine);

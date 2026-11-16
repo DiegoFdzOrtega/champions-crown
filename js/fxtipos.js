@@ -338,7 +338,7 @@ FXR.melee['_hgEngulf'] = (e, a) => {
 (function(){ const old = FXR.cast['Envite Ígneo'] || FXR.cast['_'];
   FXR.cast['Envite Ígneo'] = (f, s, name, big, ox, oy, ang) => {
     if(!fxhd.on) return old(f, s, name, big, ox, oy, ang);
-    fxAdd('melee', '_hgEngulf', {fol:f, x:f.x, y:f.y, dur:2, type:'fuego', dir:ang, pal:TP.fuego}); fx.shake = Math.max(fx.shake, 2); }; })();
+    fxAdd('melee', '_hgEngulf', {fol:f, x:f.x, y:f.y, dur:.5, type:'fuego', dir:ang, pal:TP.fenixR}); fx.shake = Math.max(fx.shake, 2); }; })();
 function hgRushFlight(s, a, an, P){       // estela de fuego y chispas detrás del Pokémon (que va pegado al proyectil)
   ctx.save(); const t = g.t, k = Math.floor(t * 16), ca = Math.cos(an), sa = Math.sin(an), px = -sa, py = ca;
   for(let i = 0; i < 7; i++){ const o = (i - 3) * 13, L = 80 + HH(i, k) * 40 - Math.abs(i - 3) * 12; tpTongue(s.x - ca * 26 + px * o, s.y - sa * 26 + py * o, L, 12 - Math.abs(i - 3), an + Math.PI + (i - 3) * .07, i === 3 ? P[2] : P[1], P[0]); }
@@ -355,16 +355,49 @@ function hgRushHit(e, a, P, ty, fe){
   ctx.save(); for(let i = 0; i < 28; i++){ const t = a - HH(i, 20) * .06; if(t < 0 || t > .85) continue; const an = HH(i, 21) * 6.283, v = 80 + HH(i, 22) * 170; ctx.globalAlpha = 1 - t / .85; ctx.fillStyle = i % 3 ? P[3] : P[2]; const sz = 4 + HH(i, 23) * 5; ctx.fillRect(x + Math.cos(an) * v * t - sz / 2, y + Math.sin(an) * v * t * .85 + 90 * t * t - sz / 2, sz, sz); } ctx.restore();   // brasas
   if(fe){ ctx.save(); for(let i = 0; i < 14; i++){ const t = a - HH(i, 90) * .05; if(t < 0 || t > .9) continue; const an = HH(i, 91) * 6.283, v = 60 + HH(i, 92) * 120, px = x + Math.cos(an) * v * t, py = y + Math.sin(an) * v * t * .8 + 40 * t * t, rot = an + t * 8; ctx.globalAlpha = 1 - t / .9; ctx.translate(px, py); ctx.rotate(rot); ctx.beginPath(); ctx.ellipse(0, 0, 9, 3.4, 0, 0, 6.283); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.strokeStyle = P[0]; ctx.lineWidth = 2; ctx.stroke(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.restore(); ctx.save(); } ctx.restore(); }
 }
-function hgEnviteFlight(s, a, an){ hgRushFlight(s, a, an, TP.fuego); }
-function hgEnviteHit(e, a){ hgRushHit(e, a, TP.fuego, 'fuego', false); }
+// ---- FÉNIX (Envite Ígneo en rojo, Pájaro Osado en azul): un ave de fuego con las alas abiertas que aletea, cabeza con pico y cresta, y cola larga de llamas. Va pegada al Pokémon y gira con él ----
+TP.fenixR = ['#5a0a05', '#d9281a', '#ff7a1a', '#ffd23a', '#fff6b0'];      // [AJUSTE] colores del fénix rojo: borde · alas · plumas · brillo · núcleo
+TP.fenixA = ['#0b1f66', '#1f6bff', '#5fc4ff', '#c8f0ff', '#ffffff'];      // [AJUSTE] colores del fénix azul
+function hgFenixWing(sg, sc, flap, col, edge){                      // un ala (sg = +1 abajo, -1 arriba) en el sistema girado: el morro mira a +x
+  const tipX = (-26 - flap * .35) * sc, tipY = sg * (84 + flap) * sc;
+  ctx.beginPath(); ctx.moveTo(16 * sc, sg * 4);
+  ctx.quadraticCurveTo(14 * sc, sg * 52 * sc, tipX, tipY);                                  // borde de ataque, hasta la punta
+  for(let j = 1; j <= 4; j++){ const u = j / 4.6, fx0 = tipX - 20 * sc * j, fy = tipY * (1 - u * .9); ctx.lineTo(fx0 - 16 * sc, fy + sg * 4 * sc); ctx.lineTo(fx0 + 10 * sc, fy - sg * 13 * sc); }      // plumas del borde de atrás
+  ctx.lineTo(-30 * sc, sg * 5); ctx.closePath();
+  if(edge){ ctx.strokeStyle = edge; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke(); }
+  ctx.fillStyle = col; ctx.fill();
+}
+function hgFenixFlight(s, a, an, P){
+  const t = g.t, flap = Math.sin(t * 15) * 16, k = Math.floor(t * 16), ca = Math.cos(an), sa = Math.sin(an), px = -sa, py = ca;
+  ctx.save();
+  for(let i = 0; i < 14; i++){ const u = (t * 2.6 + i / 14) % 1, d = 40 + u * 150, o = (HH(i, 11) - .5) * 90 * (.4 + u); ctx.globalAlpha = 1 - u; ctx.fillStyle = i % 2 ? P[3] : P[2]; const sz = 3 + (1 - u) * 5; ctx.fillRect(s.x - ca * d + px * o - sz / 2, s.y - sa * d + py * o - sz / 2, sz, sz); }      // chispas que deja atrás
+  ctx.globalAlpha = Math.min(1, a / .12);
+  ctx.translate(s.x, s.y - 6); ctx.rotate(an);
+  for(let i = 0; i < 5; i++){ const o = (i - 2) * 9, L = 96 + HH(i, k) * 34 - Math.abs(i - 2) * 16, w = Math.sin(t * 11 + i * 1.3) * .12;       // cola: cinco plumas largas de llama que ondean
+    tpTongue(-30, o, L, 13 - Math.abs(i - 2) * 2, Math.PI + (i - 2) * .16 + w, i === 2 ? P[2] : P[1], P[0]); }
+  tpTongue(-34, 0, 70, 6, Math.PI + Math.sin(t * 11) * .1, P[3], null);
+  hgFenixWing(1, 1, flap, P[1], P[0]); hgFenixWing(-1, 1, flap, P[1], P[0]);                // alas: tres capas, de la más oscura a la más clara
+  hgFenixWing(1, .74, flap, P[2], null); hgFenixWing(-1, .74, flap, P[2], null);
+  hgFenixWing(1, .46, flap, P[3], null); hgFenixWing(-1, .46, flap, P[3], null);
+  ctx.beginPath(); ctx.ellipse(2, 0, 34, 15, 0, 0, 6.283); ctx.strokeStyle = P[0]; ctx.lineWidth = 5; ctx.stroke(); ctx.fillStyle = P[2]; ctx.fill();      // cuerpo
+  ctx.beginPath(); ctx.ellipse(6, 0, 24, 9, 0, 0, 6.283); ctx.fillStyle = P[3]; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(10, 0, 13, 4.5, 0, 0, 6.283); ctx.fillStyle = P[4]; ctx.fill();
+  for(let i = -1; i <= 1; i++) tpTongue(36, i * 5, 26 + HH(i + 2, k) * 8, 6, Math.PI + i * .5 + Math.sin(t * 13 + i) * .15, P[2], P[0]);      // cresta
+  ctx.beginPath(); ctx.arc(42, 0, 11, 0, 6.283); ctx.strokeStyle = P[0]; ctx.lineWidth = 5; ctx.stroke(); ctx.fillStyle = P[3]; ctx.fill();               // cabeza
+  ctx.beginPath(); ctx.moveTo(50, -6); ctx.lineTo(68, 0); ctx.lineTo(50, 6); ctx.closePath(); ctx.strokeStyle = P[0]; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(); ctx.fillStyle = P[4]; ctx.fill();      // pico
+  ctx.fillStyle = P[0]; ctx.fillRect(43, -7, 4, 4); ctx.fillRect(43, 3, 4, 4);                                                                           // ojos
+  ctx.restore();
+}
+function hgEnviteFlight(s, a, an){ hgFenixFlight(s, a, an, TP.fenixR); }
+function hgEnviteHit(e, a){ hgRushHit(e, a, TP.fenixR, 'fuego', false); }
 // ---- Pájaro Osado: igual de rápido que el Envite, pero envuelto en viento y plumas (azul y blanco) ----
 TP.volador = ['#1d2f66', '#4f7fe0', '#a4c6ff', '#e4efff', '#ffffff'];
 (function(){ const old = FXR.cast['Pájaro Osado'] || FXR.cast['_'];
   FXR.cast['Pájaro Osado'] = (f, s, name, big, ox, oy, ang) => {
     if(!fxhd.on) return old(f, s, name, big, ox, oy, ang);
-    fxAdd('melee', '_hgEngulf', {fol:f, x:f.x, y:f.y, dur:2, type:'volador', dir:ang, pal:TP.volador}); fx.shake = Math.max(fx.shake, 2); }; })();
-function hgBraveFlight(s, a, an){ hgRushFlight(s, a, an, TP.volador); }
-function hgBraveHit(e, a){ hgRushHit(e, a, TP.volador, 'normal', true); }
+    fxAdd('melee', '_hgEngulf', {fol:f, x:f.x, y:f.y, dur:.5, type:'volador', dir:ang, pal:TP.fenixA}); fx.shake = Math.max(fx.shake, 2); }; })();
+function hgBraveFlight(s, a, an){ hgFenixFlight(s, a, an, TP.fenixA); }
+function hgBraveHit(e, a){ hgRushHit(e, a, TP.fenixA, 'normal', true); }
 // ---- Lanzallamas: acumula fuego en la boca → chorro ondulante con explosiones y brasas → llamas que envuelven al rival y humo/ceniza ----
 function hgFireCharge(x, y, u){
   const ease = 1 - Math.pow(1 - u, 2), k = Math.floor(g.t * 16); ctx.save(); ctx.globalCompositeOperation = 'source-over';

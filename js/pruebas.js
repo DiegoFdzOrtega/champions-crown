@@ -51,7 +51,7 @@ function prTopBegin(){ ctx.save(); W = PR.SW; }       // render.js: los paneles 
 function prTopEnd(){ ctx.restore(); W = PR.SW; }
 function prW2S(x, y){ const R = prRef(), c = PR.cam; return [R.ox + (x * c.s + c.ox) * R.k, R.oy + (y * c.s + c.oy) * R.k]; }
 function mouseWorld(){                                      // el ratón en coordenadas del mundo (para apuntar)
-  if(!prOn()) return mouse;
+  if(!prOn()) return (typeof farOn === 'function' && farOn()) ? farS2W(mouse.x, mouse.y) : mouse;      // cámara lejana de la Historia (js/render.js)
   const R = prRef(), c = PR.cam, rx = (mouse.x - R.ox) / R.k, ry = (mouse.y - R.oy) / R.k;
   return {x: (rx - c.ox) / c.s, y: (ry - c.oy) / c.s};
 }

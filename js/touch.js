@@ -24,7 +24,7 @@ const T_ACTS = ['dash', 'melee', 'shot', 'buff', 'strong'];
 const T_JIT = .2;                                                       // online: error al apuntar solo (radianes: ±0,2 ≈ ±11°). Apuntando a mano (arrastrando) no hay error             // acción de cada ataque (en el orden de MV)
 const touchUI = () => TOUCH.on && !!g && !g.over;                       // ¿se enseñan los controles táctiles? (render.js oculta entonces la barra de ataques)
 const tScrW = () => (typeof prOn === 'function' && prOn()) ? PR.SW : W; // ancho de la pantalla del juego (en el Estadio es distinto del ancho del mundo)
-function tW2S(x, y){ return (typeof prOn === 'function' && prOn()) ? prW2S(x, y) : [x, y]; }   // mundo → pantalla
+function tW2S(x, y){ return (typeof prOn === 'function' && prOn()) ? prW2S(x, y) : (typeof farOn === 'function' && farOn()) ? farW2S(x, y) : [x, y]; }   // mundo → pantalla
 
 // Posición de cada botón (se recalcula: depende del ancho de la pantalla)
 function tLayout(){

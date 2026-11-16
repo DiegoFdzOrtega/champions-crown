@@ -16,7 +16,7 @@ const swEaseIn = u => u * u, swEaseOut = u => 1 - (1 - u) * (1 - u) * (1 - u);
 const swBack = u => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };   // sale con un pequeño "rebote"
 
 // Dónde está la Poké Ball "en la mano" de cada lado (tu esquina de abajo a la izquierda · la del rival, arriba a la derecha)
-const swOrigin = side => side === 'p' ? {x:64, y:H - 150} : {x:W - 64, y:196};
+const swOrigin = side => (typeof farOn === 'function' && farOn() && MINI.ok && (side === 'p' || miniIdx(g.o.leader) >= 0)) ? miniPos(side) : side === 'p' ? {x:64, y:H - 150} : {x:W - 64, y:196};      // con los entrenadores en el campo, la Poké Ball sale de su mano
 function swBallType(f){ if(f.shiny) return 'shiny'; const d = DEX[f.m.dex - 1]; return (d && d.rar) || 'common'; }
 
 // ---------------------------------------------------------------------

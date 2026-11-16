@@ -1,0 +1,20 @@
+Entrenadores pequeños del combate (entrenadores_mini/todos.png)
+Sacados de "Team Aqua's Asset Repo": https://github.com/TeamAquasHideout/Team-Aquas-Asset-Repo  (carpeta "Overworld Trainer Sprites")
+El repositorio pide nombrar al autor de cada sprite. Autor (carpeta del repositorio) → personajes:
+
+- Black Fragrant: archer, ariana, chuck, clair, karen, petrel, proton, will
+- Delta231s Collaborative HGSS Resource: clerk, cueball, gamer, ninjaboy, pokemaniac, psychicf, rocketgrunt, sage, veteran
+- Galaxeeh: n, cyrus, ghetsis, jupiter, mars, nessa, plasmagrunt, plasmagruntf, rocketgruntf, roxie, saturn, zinzolin
+- Horo: blue, blaine, brock, bugsy, erika, falkner, giovanni, janine, koga, ltsurge, misty, morty, sabrina, whitney
+- IAG: elm, silver
+- Kasen: acerola, acetrainer, acetrainerf, clay, drayden, iris, jasmine, korrina, mina, pryce, skyla, volkner
+- Lhea: lucas
+- Pawkkie: elesa
+- PurrfectDoodle: bede, candice, dawn, gardenia, kiawe, larry, roark, shadowtriad
+- hyo: red, leaf, may, brendan, ethan, anabel, aquagrunt, aquagruntf, archie, artist, beauty, birch, blackbelt, brandon, brawly, bugcatcher, cameraman, camper, cook, drake, expert, expertf, fisherman, flannery, gentleman, glacia, greta, hexmaniac, hiker, juan, lass, liza, lucy, magmagrunt, magmagruntf, maxie, mom, noland, norman, nurse, phoebe, picnicker, pokefan, pokefanf, psychic, reporter, richboy, roxanne, sailor, schoolkid, scott, sidney, spenser, steven, tate, tucker, wallace, wally, wattson, winona, youngster
+- kwenio: colress
+- mudskip: daisy, oak
+- spilledpizza: aaron, acetrainersnow, barry, battlegirl, bertha, byron, charon, cheryl, cowgirl, crasherwake, cynthia, dragontamer, fantina, galacticgrunt, galacticgruntf, lady, lucian, marley, maylene, mira, painter, palmer, parasollady, pokekid, rancher, rocker, roughneck, rowan, ruinmaniac, scientist, skier, skierf, supernerd, waiter, waitress, worker
+- yoshord: lance
+
+Notas: Horo hizo los suyos por encargo de Paccy (piden crédito para los dos). Lance es el de yoshord (traje de Let's Go).

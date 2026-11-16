@@ -29,6 +29,9 @@ const FEEL = {
   blastR: 150, blastKb: 700,                  // [AJUSTE] onda del ataque fuerte al salir: aparta al rival si lo tienes a esta distancia (aunque el ataque no le dé) · fuerza del empujón
   slamV: 220, slamDmg: .12                    // [AJUSTE] estamparse contra un pilar: velocidad mínima del empujón para que cuente · vida que quita (0,12 = 12 % de la máxima; nunca debilita)
 };
+// LÍMITES DEL CAMPO: hasta dónde se mueven los Pokémon. Lo normal es 50 … W-50 y 140 … H-110; con la cámara lejana (FAR, js/render.js) el campo es más grande.
+const farB = () => typeof farOn === 'function' && farOn();
+const bx0 = () => farB() ? farBox().x0 + 40 : 50, bx1 = () => farB() ? farBox().x1 - 40 : W - 50, by0 = () => farB() ? farBox().y0 + 14 : 140, by1 = () => farB() ? farBox().y1 - 40 : H - 110;      // (farBox: el rectángulo del campo, js/render.js)
 const feelFoe = f => !g.pvp && g.e.includes(f);                      // ¿es un rival movido por la IA?
 function dodgeOk(T){                                                 // ha esquivado un ataque con la carrera: aviso y premio (una vez por carrera)
   if(T.invUsed) return; T.invUsed = true;
@@ -43,15 +46,165 @@ function koBonus(A, T){                                              // A ha deb
   if(!g.pvp && (g.p.includes(T) ? g.p : g.e).every(f => f.dead)){ g.slowT = FEEL.slowT; g.zoomAt = {x:T.x, y:T.y}; }      // era el último: remate a cámara lenta y con la cámara acercándose
 }
 const BIG_SPEED = {'Rayo Solar': 820, 'Hidrobomba': 820, 'Hiperrayo': 820};                                // [AJUSTE] ataques fuertes que van más deprisa que los demás (380): el Rayo Solar es un rayo, cruza la arena en un momento
+// ---- PSÍQUICO: si el ataque da, atrapas al rival en el aire. Apuntas con el ratón y con un clic lo lanzas adonde quieras; al caer queda aturdido ----
+const PSI = {hold: 1.5, fly: 1500, stun: 1, ai: .5, aiD: 340};      // [AJUSTE] segundos que lo tienes atrapado (si no haces clic, sale solo hacia el ratón) · velocidad del lanzamiento (px/s) · segundos aturdido al caer · lo que tarda la IA en lanzarte · lo lejos que te lanza la IA
+function psiGrab(A, T, mine){
+  if(!A || T.dead || T.ghost) return;
+  T.psi = {by: A, mine, t: PSI.hold, ph: true, mx: T.x, my: T.y, ai: feelFoe(A)};
+  T.kx = T.ky = 0; T.kbHit = false; T.burst = null; T.wind = null; T.boca = null; T.mh = false; T.mc = 0; if(T.ride){ T.ride.s.life = 0; T.ride = null; }
+  g.pops.push({x: T.x, y: T.y - 150, txt: '¡ATRAPADO!', t: 1, c: '#ff8fd0', s: 11});
+}
+function psiCtl(f, held, mx, my){                                    // lo llaman los controles: ¿tengo a alguien atrapado? Entonces el clic del golpe es «lanzar» (y devuelve true)
+  const T = [g.p[g.pi], g.e[g.ei]].find(t => t && t.psi && t.psi.by === f && !t.psi.fly); if(!T) return false;
+  const p = T.psi; p.mx = mx; p.my = my; if(held && !p.ph) p.go = true; p.ph = held; f.mh = false; f.mc = 0; return true;
+}
+function psiTick(T, dt){
+  const p = T.psi; if(!p) return;
+  if(T.dead || T.ghost){ T.psi = null; return; }
+  T.stun = Math.max(T.stun || 0, .12); T.kx = T.ky = 0;                                  // atrapado o volando: no puede hacer nada
+  if(p.fly){
+    const F = p.fly; F.t += dt; const u = Math.min(1, F.t / F.T), e = 1 - (1 - u) * (1 - u);
+    T.x = F.x0 + (F.x1 - F.x0) * e; T.y = F.y0 + (F.y1 - F.y0) * e;
+    if(u >= 1){                                                                          // cae: aturdido
+      T.psi = null; T.stun = PSI.stun; fx.shake = Math.max(fx.shake, 7); Sfx.play('hit', 1);
+      fxBurst(T.x, T.y, ['#ff5fb0', '#ffa8d8', '#7de3ff', '#ffffff'], 16, 170, undefined, 6.3, {life: .5});
+      g.pops.push({x: T.x, y: T.y - 150, txt: '¡ATURDIDO!', t: 1, c: '#ffe04a', s: 11});
+      for(const q of pilList()) if(Math.hypot(q.x - T.x, q.y - T.y) <= q.r + rad(T)) pilDamage(q, 1);
+    }
+    return;
+  }
+  p.t -= dt;
+  if(p.ai){ const A = p.by, a = Math.atan2(T.y - A.y, T.x - A.x); p.mx = T.x + Math.cos(a) * PSI.aiD; p.my = T.y + Math.sin(a) * PSI.aiD; if(p.t <= PSI.hold - PSI.ai) p.go = true; }      // la IA te lanza lejos de ella
+  if(p.by.dead || p.by.ghost) p.go = true;
+  if(p.go || p.t <= 0){ const x1 = clamp(p.mx, bx0(), bx1()), y1 = clamp(p.my, by0(), by1()), d = Math.hypot(x1 - T.x, y1 - T.y); p.fly = {x0: T.x, y0: T.y, x1, y1, t: 0, T: Math.max(.12, d / PSI.fly)}; Sfx.play('dodge'); }
+}
+// ---- A BOCAJARRO (Lucha, ataque fuerte): no dispara. Te lanzas hacia donde apuntas y, si alcanzas al rival, le sueltas una ráfaga de golpes; el último lo manda lejos ----
+// Como en los juegos, te deja con la defensa baja: durante unos segundos recibes más daño. Si la embestida no alcanza a nadie, se pierde.
+const BOCA = {dash: .26, spd: 950, reach: 52, n: 7, gap: .085, last: .34, vuln: 1.25, vulnT: 3, ai: 210};      // [AJUSTE] segundos y velocidad de la embestida · distancia a la que engancha · nº de golpes · segundos entre golpes · parte del daño que lleva el último · daño que recibes después (×) y cuánto dura · distancia desde la que lo usa la IA
+function bocaStart(f, w, wp){
+  f.boca = {ph: 0, t: 0, ang: w.ang, dmg: w.dmg * (1 + (FEEL.windK - 1) * wp), type: w.type, mine: w.mine, nm: w.nm, i: 0, kbP: wp};
+  setAct(f, 'Attack', BOCA.dash); Sfx.play('strong', w.vk); fxBurst(f.x, f.y, ['#ffffff', TC[w.type] || '#ffffff'], 8, 120, w.ang + Math.PI, .9, {life: .35});
+}
+function bocaEnd(f){ f.boca = null; f.vuln = BOCA.vulnT; g.pops.push({x: f.x, y: f.y - 150, txt: 'DEFENSA ↓', t: 1.1, c: '#ff9a3a', s: 10}); }
+function bocaTick(f, dt){
+  if(f.vuln > 0) f.vuln -= dt;
+  const b = f.boca; if(!b) return;
+  if(f.dead || f.ghost || cant(f)){ f.boca = null; return; }
+  const T = foe(b.mine), near = () => !T.dead && !T.ghost && Math.hypot(T.x - f.x, T.y - f.y) < rad(T) + BOCA.reach;
+  if(b.ph === 0){                                                    // embestida
+    b.t += dt;
+    if(near() && !(T.inv > 0)){ b.ph = 1; b.t = 0; }
+    else if(b.t >= BOCA.dash){ f.boca = null; return; }              // no ha alcanzado a nadie
+    else{ f.x = clamp(f.x + Math.cos(b.ang) * BOCA.spd * dt, bx0(), bx1()); f.y = clamp(f.y + Math.sin(b.ang) * BOCA.spd * dt, by0(), by1()); f.dir = dirOf(b.ang); f.mv = true; return; }
+  }
+  b.t -= dt;                                                         // ráfaga
+  while(b.t <= 0 && f.boca){
+    if(!near()) return bocaEnd(f);                                   // se ha escapado (carrera, cambio...)
+    const last = b.i >= BOCA.n - 1; f.dir = dirOf(Math.atan2(T.y - f.y, T.x - f.x)); setAct(f, 'Attack', .12);
+    fxBurst(T.x + (Math.random() - .5) * 30, T.y - 10 + (Math.random() - .5) * 36, ['#ffffff', '#ffe04a', TC[b.type] || '#ffffff'], last ? 14 : 5, last ? 190 : 110, undefined, 6.3, {life: .3});
+    if(last){ f.kbP = b.kbP; hit(T, b.dmg * BOCA.last, b.type, f, true, true, b.nm); f.kbP = 0; fx.shake = Math.max(fx.shake, 9); return bocaEnd(f); }
+    f.kbK = .01; hit(T, b.dmg * (1 - BOCA.last) / (BOCA.n - 1), b.type, f, true, false, b.nm); f.kbK = 1;
+    if(!T.dead){ T.kx = T.ky = 0; T.stun = Math.max(T.stun || 0, BOCA.gap + .06); }      // lo tienes cogido hasta el último golpe
+    fx.shake = Math.max(fx.shake, 3); b.i++; b.t += BOCA.gap;
+  }
+}
+// ---- ATAQUE RÁPIDO: un salto cortísimo y muy rápido hacia el rival (si lo tienes cerca va directo a por él; si no, hacia donde apuntas). Golpea al tocarlo ----
+const QUICK = {spd: 1150, t: .24, reach: 46, aim: 320};            // [AJUSTE] velocidad (px/s) · segundos que dura (≈ 275 px) · distancia a la que golpea · si el rival está más cerca que esto, va hacia él
+function quickStart(f, ang, dmg, type, mine, nm){
+  const T = foe(mine), d = Math.hypot(T.x - f.x, T.y - f.y);
+  if(!T.dead && !T.ghost && d < QUICK.aim) ang = Math.atan2(T.y - f.y, T.x - f.x);
+  f.quick = {ang, t: 0, dmg, type, mine, nm}; f.dir = dirOf(ang); setAct(f, 'Attack', QUICK.t + .1);
+}
+function quickTick(f, dt){
+  const q = f.quick; if(!q) return;
+  if(f.dead || f.ghost || cant(f)){ f.quick = null; return; }
+  const T = foe(q.mine); q.t += dt;
+  f.x = clamp(f.x + Math.cos(q.ang) * QUICK.spd * dt, bx0(), bx1()); f.y = clamp(f.y + Math.sin(q.ang) * QUICK.spd * dt, by0(), by1()); f.mv = true;
+  fxBurst(f.x - Math.cos(q.ang) * 20, f.y, ['#ffffff', '#dfe8ff'], 2, 60, q.ang + Math.PI, .6, {life: .25});
+  if(!T.dead && !T.ghost && Math.hypot(T.x - f.x, T.y - f.y) < rad(T) + QUICK.reach){ f.quick = null; hit(T, q.dmg, q.type, f, true, false, q.nm); return; }
+  if(q.t >= QUICK.t) f.quick = null;
+}
+// ---- TUMBA ROCAS: lanza tres rocas en abanico, de corto alcance. Hacen daño y dejan al rival lento unos segundos ----
+const ROCK = {n: 3, spread: .16, speed: 430, range: 340, r: 11, dmg: .45, slow: .55, t: 2.5};      // [AJUSTE] nº de rocas · cuánto se abren · velocidad · alcance (px) · tamaño · daño de cada una (1 = un golpe normal) · velocidad a la que se queda el rival (×) · segundos lento
+function rockThrow(f, ang, dmg, type, mine){
+  setAct(f, 'Shoot', .4);
+  for(let j = 0; j < ROCK.n; j++){ const s = shot(f, ang + (j - (ROCK.n - 1) / 2) * ROCK.spread, dmg * ROCK.dmg, ROCK.speed, ROCK.r, type, mine); s.life = s.L = ROCK.range / ROCK.speed; s.slow = 1; fxShotStart(f, s, 'Lanzarrocas', false); }
+}
+// ---- TERREMOTO: no dispara. Golpea el suelo: una onda se abre a tu alrededor, agrieta el suelo y daña al rival si lo pilla dentro. En el aire (Vuelo, Golpe Cuerpo) no le da ----
+const QUAKE = {R: 200, Rmax: 330, T: .4, ai: 210};                  // [AJUSTE] radio sin cargar y con la carga a tope · segundos que tarda la onda en llegar al borde · distancia desde la que lo usa la IA
+function quakeStart(f, w, wp){
+  const R = QUAKE.R + (QUAKE.Rmax - QUAKE.R) * wp;
+  f.quake = {x: f.x, y: f.y + 22, t: 0, R, dmg: w.dmg * (1 + (FEEL.windK - 1) * wp), type: w.type, mine: w.mine, nm: w.nm, kbP: wp, done: false};
+  setAct(f, 'Attack', .4); Sfx.play('strong', w.vk); Sfx.play('hit', 1); fx.shake = Math.max(fx.shake, 14);
+  if(typeof fxAdd === 'function') fxAdd('impact', '_terremoto', {x: f.x, y: f.y + 22, dur: 2.2, R, type: w.type});
+  for(const p of pilList()) if(Math.hypot(p.x - f.x, p.y - f.y) <= R + p.r) pilDamage(p, 2);
+}
+function quakeTick(f, dt){
+  const q = f.quake; if(!q) return;
+  q.t += dt; const T = foe(q.mine), d = Math.hypot(T.x - q.x, T.y + 22 - q.y), r = q.R * Math.min(1, q.t / QUAKE.T);
+  if(!q.done && !T.dead && !T.ghost && d <= r + rad(T)){ q.done = true; if(!T.jump){ f.kbP = q.kbP; hit(T, q.dmg, q.type, f, false, true, q.nm); f.kbP = 0; } }      // saltando (o bajo tierra) no le da
+  if(q.t >= QUAKE.T) f.quake = null;
+}
+// ---- VENTISCA: una ráfaga de viento helado en abanico, de alcance medio. Cada copo hace poco daño; si te pilla, puede CONGELARTE (no te mueves ni atacas) ----
+const GUST = {n: 7, spread: .1, speed: 560, vary: .12, range: 430, r: 12, dmg: .24, frz: .3, frzT: 1.6};      // [AJUSTE] nº de copos · cuánto se abren · velocidad · cuánto cambia de uno a otro · alcance (px) · tamaño · daño de cada uno (× el del ataque fuerte) · probabilidad de congelar (una tirada por ráfaga) · segundos congelado
+function gustStart(f, w, wp){
+  const grp = {done: false}, dmg = w.dmg * (1 + (FEEL.windK - 1) * wp) * GUST.dmg;
+  Sfx.play('strong', w.vk); f.swing = {t0: g.t, k: {reach: 60, arc: 1.2}, ang: w.ang, type: w.type, big: true};
+  for(let j = 0; j < GUST.n; j++){ const sp = GUST.speed * (1 + (HH(j, 5) - .5) * 2 * GUST.vary), s = shot(f, w.ang + (j - (GUST.n - 1) / 2) * GUST.spread, dmg, sp, GUST.r, w.type, w.mine);
+    s.life = s.L = GUST.range / sp; s.mvn = '_ventisca'; s.gust = grp; s.sd = j; s.kbS = .5; }
+}
+function gustHit(T, s){                                              // lo llama el bucle de disparos cuando un copo de Ventisca ha hecho daño
+  const G = s.gust; if(G.done) return; G.done = true;
+  if(Math.random() < GUST.frz && !(T.frz > 0)){ T.frz = GUST.frzT; T.stun = Math.max(T.stun || 0, GUST.frzT); T.kx = T.ky = 0; g.pops.push({x: T.x, y: T.y - 150, txt: '¡CONGELADO!', t: 1.2, c: '#9fe4ff', s: 11}); Sfx.play('hit_none', .8); }
+}
+// ---- ROCA AFILADA: lanza unas piedras pequeñas en abanico. Si alguna da, salen del suelo tres rocas afiladas bajo el rival, una detrás de otra, y cada una le quita vida ----
+const STONE = {n: 4, spread: .09, speed: 600, r: 8, dmg: .1, spikes: 3, delay: .15, gap: .2, R: 54, sdmg: .32};      // [AJUSTE] nº de piedras · cuánto se abren · velocidad · tamaño · daño de cada piedra (× el del ataque fuerte) · nº de rocas que salen del suelo · segundos hasta la primera · segundos entre una y otra · radio en el que golpea cada roca · daño de cada roca
+function stoneStart(f, w, wp){
+  const full = w.dmg * (1 + (FEEL.windK - 1) * wp), grp = {done: false, dmg: full * STONE.sdmg, type: w.type, mine: w.mine, by: f, nm: w.nm, kbP: wp};
+  Sfx.play('strong', w.vk); setAct(f, 'Shoot', .4);
+  for(let j = 0; j < STONE.n; j++){ const s = shot(f, w.ang + (j - (STONE.n - 1) / 2) * STONE.spread, full * STONE.dmg, STONE.speed * (1 + (HH(j, 7) - .5) * .16), STONE.r, w.type, w.mine); s.edge = grp; s.kbS = .4; fxShotStart(f, s, 'Lanzarrocas', false); }
+}
+function stoneHit(T, s){                                             // una piedra ha dado: empiezan a salir las rocas del suelo (una sola vez por ataque)
+  const G = s.edge; if(G.done) return; G.done = true;
+  (g.spk = g.spk || []).push({i: 0, t: STONE.delay, G});
+}
+function spkTick(dt){                                                // lo llama update() cada fotograma
+  if(!g.spk || !g.spk.length) return;
+  for(const S of g.spk){
+    S.t -= dt; const G = S.G, T = foe(G.mine);
+    while(S.t <= 0 && S.i < STONE.spikes){
+      const last = S.i === STONE.spikes - 1, x = T.x + (S.i - 1) * 16, y = T.y + 22;      // salen justo debajo de él, estén donde esté
+      if(typeof fxAdd === 'function') fxAdd('impact', '_pincho', {x, y, dur: .9, type: G.type, seed: S.i * 3 + 1});
+      fx.shake = Math.max(fx.shake, last ? 8 : 4); Sfx.play('hit', .7);
+      if(!T.dead && !T.ghost && !T.jump){ if(G.by) G.by.kbP = G.kbP; hit(T, G.dmg, G.type, G.by, false, last, G.nm); if(G.by) G.by.kbP = 0; }      // (con la carrera se puede esquivar cada una)
+      for(const p of pilList()) if(Math.hypot(p.x - x, p.y - (y - 22)) <= STONE.R + p.r) pilDamage(p, 1);
+      S.i++; S.t += STONE.gap;
+    }
+  }
+  g.spk = g.spk.filter(S => S.i < STONE.spikes);
+}
+const CLOSE_E = {'A Bocajarro': BOCA.ai, 'Terremoto': QUAKE.ai};      // ataques fuertes que solo sirven de cerca: la IA los usa a esta distancia o menos (js/ai.js)
+const RIDE = {t: 4, turn: 7};                                       // [AJUSTE] Pájaro Osado y Envite Ígneo: segundos máximos de embestida · lo deprisa que giras (rad/s)
+function rideStop(f, m, s, e){                                       // embestida dirigida: otro clic (golpe, disparo o E) la para. Devuelve true mientras dura
+  const r = f.ride; if(!r || !r.free) return false;
+  const stop = (m && !r.pm) || (s && !r.ps) || (e && !r.pe); r.pm = m; r.ps = s; r.pe = e;
+  if(stop){ r.s.life = 0; f.ride = null; fxBurst(f.x, f.y, ['#ffffff', TC[r.s.type] || '#ffffff'], 10, 110, undefined, 6.3, {life:.4}); return false; }
+  return true;
+}
 function windFire(f){                                                // el ataque fuerte sale al acabar la carga
   const w = f.wind; f.wind = null; f.dir = dirOf(w.ang);
+  const wp0 = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : 0;
+  if(w.nm === 'A Bocajarro') return bocaStart(f, w, wp0);
+  if(w.nm === 'Terremoto') return quakeStart(f, w, wp0);                         // golpea el suelo
+  if(w.nm === 'Roca Afilada') return stoneStart(f, w, wp0);                      // piedras + rocas del suelo
+  if(w.nm === 'Ventisca') return gustStart(f, w, wp0);                           // ráfaga en abanico      // A Bocajarro no dispara: embestida y ráfaga
   const B = foe(w.mine), bd = Math.hypot(B.x - f.x, B.y - f.y);                  // onda al soltarlo: si el rival está encima, lo aparta (para quitártelo cuando viene cuerpo a cuerpo)
   f.swing = {t0:g.t, k:{reach:FEEL.blastR - 16, arc:3.2}, ang:w.ang, type:w.type, big:true}; fx.shake = Math.max(fx.shake, 4);
   const wp = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : 0;                       // cuánto has cargado (0..1)
   if(!w.hold && !B.dead && !B.ghost && !(B.inv > 0) && bd < FEEL.blastR){ const a = bd < .01 ? w.ang : Math.atan2(B.y - f.y, B.x - f.x); B.kx = clamp((B.kx || 0) + Math.cos(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.ky = clamp((B.ky || 0) + Math.sin(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.kbHit = true; setAct(B, 'Hurt', .3); }
   Sfx.play('strong', w.vk);
   const s4 = shot(f, w.ang, w.dmg * (1 + (FEEL.windK - 1) * wp), BIG_SPEED[w.nm] || 380, 22, w.type, w.mine); s4.kbP = wp; fxShotStart(f, s4, w.nm, true);
-  if(w.nm === 'Surf') f.ride = {s:s4, a:w.ang, t:1.4}; else if(w.nm === 'Envite Ígneo' || w.nm === 'Pájaro Osado') f.ride = {s:s4, a:w.ang, t:1.2};   // Surf: el Pokémon se monta en la ola y viaja con ella
+  if(w.nm === 'Surf') f.ride = {s:s4, a:w.ang, t:1.4}; else if(w.nm === 'Envite Ígneo' || w.nm === 'Pájaro Osado') f.ride = w.hold ? {s:s4, a:w.ang, t:RIDE.t, free:true, sp:Math.hypot(s4.vx, s4.vy), pm:true, ps:true, pe:true} : {s:s4, a:w.ang, t:1.2};      // tú: te lanzas y diriges la embestida · la IA: recto, como siempre   // Surf: el Pokémon se monta en la ola y viaja con ella
 }
 // ---- PILARES: de vez en cuando cae una columna del cielo. Para los disparos (los tuyos y los del rival), no se atraviesa andando y se ROMPE a golpes ----
 // Solo en las arenas normales (Historia y Campo de Entrenamiento). En el Estadio (Torre, Clasificatoria, Campo de pruebas) y en el online NO hay pilares.
@@ -250,7 +403,7 @@ function spinTick(f, dt){
 // ---- SALTO (Golpe Cuerpo, Vuelo): salta fuera de la pantalla, eliges dónde caer moviéndote y aterriza golpeando en círculo ----
 // Mientras está en el aire no se le puede golpear, no puede atacar ni cambiar, y pasa por encima de pilares y franjas. El rival ve la diana en el suelo y tiene que apartarse.
 const JUMP = {up: .25, air: .75, down: .22, R: 92, dmg: 1.8, kb: 1.7, spd: 1.25, cd: 4};      // [AJUSTE] segundos subiendo / en el aire / cayendo · radio del golpe al caer · daño (1 = un golpe normal) · empujón · velocidad a la que te mueves en el aire · espera hasta el siguiente salto
-const JUMP_MOVE = {'Golpe Cuerpo': {}, 'Vuelo': {air: 1, R: 76, dmg: 1.55, spd: 1.6}};        // [AJUSTE] ataques cuerpo a cuerpo que son un salto, y lo que cada uno cambia de JUMP (Vuelo: más tiempo arriba y más rápido, cae en menos sitio)
+const JUMP_MOVE = {'Golpe Cuerpo': {}, 'Vuelo': {air: 1, R: 76, dmg: 1.55, spd: 1.6}, 'Excavar': {dig: 1, up: .3, air: 1.1, down: .2, R: 84, dmg: 1.7, spd: 1.35}};        // [AJUSTE] ataques cuerpo a cuerpo que son un salto, y lo que cada uno cambia de JUMP (Vuelo: más tiempo arriba y más rápido, cae en menos sitio)
 function jumpStart(f, dmg, type, mine, nm){
   const K = Object.assign({}, JUMP, JUMP_MOVE[nm]);
   f.jump = {t: 0, K, T: K.up + K.air + K.down, dmg: dmg * K.dmg, type, mine, nm, R: K.R};
@@ -282,7 +435,7 @@ function burstTick(f, dt){                                           // ristra d
 }
 function feelTick(f, dt){                                            // cada fotograma, para los dos Pokémon en combate
   if(f.inv > 0) f.inv -= dt;
-  burstTick(f, dt); spinTick(f, dt); jumpTick(f, dt);
+  burstTick(f, dt); spinTick(f, dt); jumpTick(f, dt); psiTick(f, dt); bocaTick(f, dt); quickTick(f, dt); quakeTick(f, dt); if(f.rslow > 0) f.rslow -= dt; if(f.frz > 0) f.frz -= dt;
   if(f.ctr > 0) f.ctr -= dt;
   if(f.wind){
     if(f.dead || f.ghost) f.wind = null;
@@ -295,7 +448,7 @@ function feelTick(f, dt){                                            // cada fot
   }
   if(f.kx || f.ky){                                                  // empujón del último golpe
     if(f.dead || f.ghost){ f.kx = f.ky = 0; f.kbHit = false; return; }
-    if(!f.ride){ f.x = clamp(f.x + f.kx*dt, 50, W-50); f.y = clamp(f.y + f.ky*dt, 140, H-110); if(prOn()) prClamp(f); }
+    if(!f.ride){ f.x = clamp(f.x + f.kx*dt, bx0(), bx1()); f.y = clamp(f.y + f.ky*dt, by0(), by1()); if(prOn()) prClamp(f); }
     const kd = Math.max(0, 1 - FEEL.kbDecay*dt); f.kx *= kd; f.ky *= kd;
     if(Math.abs(f.kx) + Math.abs(f.ky) < 4){ f.kx = f.ky = 0; f.kbHit = false; }
   }
@@ -321,7 +474,7 @@ function hit(T, dmg, type, A, close, big, mvn){       // A = quien ataca · clos
   const scope = (A && A.item === 'periscopio') ? IFX.periscopio : 0;                                      // Periscopio: más probabilidad de crítico
   const crit = mult > 0 && !R.noCrit && Math.random() < (CRIT.chance + scope) * (big ? CRIT.big : 1) * (foeAtk ? CRIT.foe : 1);   // golpe crítico (solo si el golpe hace daño)
   let dealt = dmg * mult * (crit ? CRIT.mult * R.critMul : 1) * (T.item === 'chaleco' && !(A && A.ab === 'Infiltrador') ? .8 : 1)   // Chaleco Asalto: -20% de daño
-              * R.out * R.inn                                                                          // habilidades: daño que haces y que recibes
+              * R.out * R.inn * (T.vuln > 0 ? BOCA.vuln : 1)                                                                          // habilidades: daño que haces y que recibes
               / (T.defm || 1)                                                                          // resistencia por IVs/EVs/naturaleza (solo tus Pokémon)
               * (A && A.item === 'cinturon' && mult >= 2 ? IFX.cinturon : 1);                              // Cinturón de Experto: +20% si es muy eficaz
   const robusto = defAb(T, A) === 'Robustez';                                                               // Robustez: con la vida al máximo siempre aguanta (no se gasta)
@@ -418,7 +571,7 @@ function mtype(f, i){
 
 function use(f, i, ang, mine){
   const m = MV[i], cost = enCost(f, i);                                         // enCost: Presión del rival
-  if(f.dead || f.wind || f.jump || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
+  if(f.dead || f.wind || f.jump || (f.ride && f.ride.free) || f.boca || f.quick || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
   if(i > 0 && f.truant > 0) return;                                             // Indolente: espera tras su último ataque
   f.cd[i] = m.cd; f.en -= cost; f.dir = dirOf(ang);
   if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede), confuso o enamorado: se pierde el ataque
@@ -434,6 +587,8 @@ function use(f, i, ang, mine){
   Sfx.play(i === 0 ? 'dash' : i === 1 ? 'swing' : i === 2 ? 'shot' : i === 4 ? 'buff' : sm ? 'status' : 'buff', vk);      // (el sonido de cada ataque; el del golpe lo pone hit())
   if(i === 0){ f.dash = .25; f.da = ang; f.inv = feelFoe(f) ? FEEL.invFoe : FEEL.inv; f.invUsed = false; }      // la carrera esquiva: un instante sin recibir golpes
   if(i === 1 && JUMP_MOVE[nm]) jumpStart(f, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm);      // salto (Golpe Cuerpo, Vuelo): ver JUMP
+  else if(i === 1 && nm === 'Ataque Rápido') quickStart(f, ang, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm);      // salto hacia el rival: ver QUICK
+  else if(i === 1 && nm === 'Tumba Rocas') rockThrow(f, ang, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1), t, mine);      // lanza rocas: ver ROCK
   else if(i === 1 && SPIN_MOVE[nm]) spinStart(f, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm);      // golpe giratorio (Torbellino): ver SPIN
   else if(i === 1){ setAct(f,'Attack',.45); fxMelee(f, ang, foe(mine), nm, t);  melee(f, ang, m.dmg*d*(f.chg ? FEEL.chgK + (FEEL.chgKMax - FEEL.chgK) * (f.chgP || 0) : 1)*(f.st && f.st.k === 'brn' ? STX.brn.melee : 1), t, mine, nm); }   // quemado: golpe a la mitad
   if(i === 2 && shotKind(f).burst){ const K = shotKind(f); setAct(f, 'Shoot', K.burst * K.gap + .15); f.burst = {K, n:K.burst, i:0, t:0, ang, dmg:m.dmg*d*K.dmg, type:t, mine, nm}; }      // ristra (Rayo Burbuja): los proyectiles van saliendo en burstTick()
@@ -450,16 +605,27 @@ function move(f, dx, dy, dt, k){
   if(!g.pvp && g.e && g.e.includes(f)) boost = Math.min(boost, ENEMY_SPEED_BUFF_CAP);                // un rival no se hace imposible de cazar al sumar Agilidad + Pañuelo
   const l = Math.hypot(dx,dy), sp = f.m.spd * (f.spdm || 1) * boost * (f.st && f.st.k === 'par' ? STX.par.spd : 1);
   let vx = 0, vy = 0;
+  if(f.boca || f.quick){ return; }                                                        // A Bocajarro: la embestida y la ráfaga lo mueven (bocaTick)
+  if(f.ride && f.ride.free){                                                   // Pájaro Osado / Envite Ígneo: vas con el ataque, lo diriges con las teclas hasta golpear, chocar o hacer otro clic
+    const r = f.ride; r.t -= dt;
+    if(r.t <= 0 || r.s.life <= 0 || f.dead || cant(f)){ r.s.life = 0; f.ride = null; }
+    else{
+      if(l){ let d = Math.atan2(dy, dx) - r.a; d = Math.atan2(Math.sin(d), Math.cos(d)); r.a += clamp(d, -RIDE.turn * dt, RIDE.turn * dt); }
+      r.s.vx = Math.cos(r.a) * r.sp; r.s.vy = Math.sin(r.a) * r.sp; r.s.life = Math.max(r.s.life, .5);
+      r.s.x = clamp(r.s.x, bx0(), bx1()); r.s.y = clamp(r.s.y, by0(), by1());                      // no sale de la arena: la embestida se queda en la pared hasta que giras
+      f.x = r.s.x - Math.cos(r.a) * 8; f.y = r.s.y - Math.sin(r.a) * 8; f.dir = dirOf(r.a); f.mv = true; return;
+    }
+  }
   if(f.ride){                                                                  // montado en Surf: va pegado a la ola hasta que se acaba o choca
     const r = f.ride; r.t -= dt;
     if(r.t <= 0 || r.s.life <= 0 || f.dead || cant(f)) f.ride = null;
-    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, 50, W-50); f.y = clamp(r.s.y - Math.sin(r.a) * 8, 140, H-110); if(prOn()) prClamp(f); f.mv = true; return; }
+    else{ f.x = clamp(r.s.x - Math.cos(r.a) * 8, bx0(), bx1()); f.y = clamp(r.s.y - Math.sin(r.a) * 8, by0(), by1()); if(prOn()) prClamp(f); f.mv = true; return; }
   }
   if(cant(f)){ f.mv = false; return; }                                          // amedrentado o dormido: no se mueve
   if(f.dash > 0){ vx = Math.cos(f.da)*sp*3; vy = Math.sin(f.da)*sp*3; }
-  else if(l){ if(f.wind) k *= FEEL.windSlow; if(f.jump) k *= f.jump.K.spd; else if(f.tslow) k *= f.tslow; vx = dx/l*sp*k; vy = dy/l*sp*k; }
+  else if(l){ if(f.wind) k *= FEEL.windSlow; if(f.jump) k *= f.jump.K.spd; else if(f.tslow) k *= f.tslow; if(f.rslow > 0 && !f.jump) k *= ROCK.slow; vx = dx/l*sp*k; vy = dy/l*sp*k; }
   f.mv = l > 0 || f.dash > 0;
-  f.x = clamp(f.x + vx*dt, 50, W-50); f.y = clamp(f.y + vy*dt, 140, H-110); if(prOn()) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
+  f.x = clamp(f.x + vx*dt, bx0(), bx1()); f.y = clamp(f.y + vy*dt, by0(), by1()); if(prOn()) prClamp(f);      // Campo de pruebas: no sale de las líneas del estadio (js/pruebas.js)
 }
 
 function update(dt){
@@ -482,11 +648,15 @@ function update(dt){
     const dy = (ctlHeld('down')?1:0) - (ctlHeld('up')?1:0);
     const mw = typeof mouseWorld === 'function' ? mouseWorld() : mouse, aim = Math.atan2(mw.y-P.y, mw.x-P.x);   // mouseWorld: en el Campo de pruebas el ratón va en la pantalla y el campo está reducido (js/pruebas.js)
     move(P, dx, dy, dt, 1); P.dir = dirOf(aim); if(P.burst) P.burst.ang = aim; if(P.wind) P.wind.ang = aim;      // mientras cargas el ataque fuerte sigues apuntando
+    if(P.ride && P.ride.free){ if(rideStop(P, ctlHeld('melee'), ctlHeld('shot'), ctlHeld('strong'))){ P.mh = false; P.mc = 0; P.eh = false; } }      // en plena embestida: solo se oye «otro clic = parar»
+    else{
+    if(!psiCtl(P, ctlHeld('melee'), mw.x, mw.y))             // con un rival atrapado por Psíquico, el clic lo lanza hacia el ratón
     meleeInput(P, ctlHeld('melee'), aim, true, dt);          // golpe normal al pulsar; cargado si lo mantienes
     if(ctlHeld('shot')) use(P,2,aim,true);
     if(ctlHeld('dash')) use(P,0, (dx||dy) ? Math.atan2(dy,dx) : aim, true);
     if(ctlHeld('buff')) use(P,3,aim,true);
     P.eh = ctlHeld('strong'); if(P.eh) use(P,4,aim,true);
+    }
   }
   if(!E.dead && !E.ghost){ if(aiSmart()) enemyAI(E, P, dt); else enemyBasic(E, P, dt); megaAI(E, dt); }
   }       // IA del rival (js/ai.js): estilo de combate, distancias, esquiva y uso inteligente de Q/E (no actúa mientras su Pokémon entra con la animación de cambio)
@@ -506,6 +676,7 @@ function update(dt){
   if(g.wx){ g.wx.t -= dt; if(g.wx.t <= 0) g.wx = null; }     // el clima dura ABX.climaDur segundos
   statusBench();                                 // quien espera en el banquillo no conserva estados
   const PL = pilList();
+  spkTick(dt);                                   // rocas que salen del suelo (Roca Afilada)
   shotClash();                                   // disparos tuyos y del rival que se encuentran (CLASH)
   for(const s of g.shots){                       // proyectiles
     if(s.hold > 0){ clashHold(s, dt); continue; }                                          // empujándose con otro disparo: no avanza ni golpea
@@ -518,9 +689,9 @@ function update(dt){
     const T = foe(s.mine);
     if(s.life > 0 && !s.dg && !T.dead && !T.ghost && Math.hypot(s.x-T.x, s.y-T.y) < rad(T) + s.r * abShotK(s, T)){
       if(T.inv > 0){ s.dg = true; dodgeOk(T); }                                  // esquivado con la carrera: el disparo pasa de largo y ya no puede darle
-      else{ if(s.status) statusShotHit(T, s); else{ if(s.o){ s.o.kbP = s.kbP || 0; s.o.kbS = s.kbS || 1; } hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); if(s.o){ s.o.kbP = 0; s.o.kbS = 1; } } s.life = 0; }
+      else{ if(s.status) statusShotHit(T, s); else{ if(s.o){ s.o.kbP = s.kbP || 0; s.o.kbS = s.kbS || 1; } const hp0 = T.hp; hit(T, s.dmg, s.type, s.o, false, s.r > 15, s.mvn); if(s.o){ s.o.kbP = 0; s.o.kbS = 1; } if(s.mvn === 'Psíquico' && T.hp < hp0 && T.hp > 0) psiGrab(s.o, T, s.mine); if(s.slow && T.hp < hp0 && T.hp > 0){ T.rslow = ROCK.t; g.pops.push({x: T.x, y: T.y - 150, txt: 'LENTO', t: 1, c: '#c9b28a', s: 10}); } if(s.gust && T.hp < hp0 && T.hp > 0) gustHit(T, s); if(s.edge && T.hp < hp0 && T.hp > 0) stoneHit(T, s); } s.life = 0; }
     }
-    if(s.x<0 || s.x>W || s.y<0 || s.y>H) s.life = 0;
+    if(s.x < bx0() - 50 || s.x > bx1() + 50 || s.y < by0() - 140 || s.y > by1() + 110) s.life = 0;      // sale del campo (con el campo normal: 0 … W y 0 … H)
   }
   g.shots = g.shots.filter(s => s.life > 0);
   g.pops.forEach(p => p.t -= dt); g.pops = g.pops.filter(p => p.t > 0);

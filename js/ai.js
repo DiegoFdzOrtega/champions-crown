@@ -50,7 +50,7 @@ function enemyBasic(E, P, dt){
   if(!aiNoAtk(P)){                             // tras el cambio espera un momento (AI_SWAP.grace) antes de atacar
     if(dist < (JUMP_MOVE[mvName(E, 1)] ? 300 : 120) && r() < dt*(JUMP_MOVE[mvName(E, 1)] ? 2 : 6)) use(E,1,ang,false);      // los saltos los usa desde más lejos
     else if(los && dist < (shotKind(E).range ? shotKind(E).range * .85 : 9999) && r() < dt*(1+3*sk)) use(E,2,ang+err,false);      // los ataques de poco alcance (Lanzallamas) solo de cerca
-    if(los && r() < dt*.5*sk) use(E,4,ang+err,false);
+    if(los && (!CLOSE_E[mvName(E, 4)] || dist < CLOSE_E[mvName(E, 4)]) && r() < dt*.5*sk) use(E,4,ang+err,false);      // A Bocajarro y Terremoto solo de cerca
     if(r() < dt*.25*sk) use(E,3,ang,false);
     if(r() < dt*.3*sk) use(E,0,ang+1.57,false);
   }
@@ -124,7 +124,8 @@ function enemyAI(E, P, dt){
   if(st !== 'melee' && dist < reach*.9 && can(0) && r() < rate(1.5)) return use(E, 0, ang + Math.PI + E.orb*.9, false);     // tirador con el rival encima: huye con la carrera
   if(st === 'melee' && dist > reach*2 && can(0) && r() < rate(1.2)) return use(E, 0, ang, false);                              // pegador lejos: se lanza con la carrera
   if(!(E.buff > 0) && can(3) && dist < 450 && (st === 'melee' || E.en >= 55) && r() < rate(.9)) return use(E, 3, ang, false);   // mejora (Q): al entrar en combate
-  if(los && can(4) && dist > 130 && dist < 560 && (st !== 'melee' || dist > reach*1.5) && r() < rate(1.1)) return use(E, 4, aimAt(380), false);   // ataque fuerte (E)
+  if(CLOSE_E[mvName(E, 4)]){ if(los && can(4) && dist < CLOSE_E[mvName(E, 4)] && r() < rate(1.6)) return use(E, 4, ang, false); }      // A Bocajarro y Terremoto: solo de cerca
+  else if(los && can(4) && dist > 130 && dist < 560 && (st !== 'melee' || dist > reach*1.5) && r() < rate(1.1)) return use(E, 4, aimAt(380), false);   // ataque fuerte (E)
   const needE = E.cd[4] < 1.5 ? 40 : 0;                                                    // guarda energía para el E si está a punto de poder usarlo
   if(los && can(2) && dist > reach*(st === 'melee' ? 2.2 : 1.15) && dist < (shotKind(E).range ? shotKind(E).range * .85 : 620) && E.en >= enCost(E, 2) + (st === 'melee' ? 36 : needE) && r() < rate(2.2)) use(E, 2, aimAt(shotKind(E).speed), false);   // disparo
 }

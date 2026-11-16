@@ -264,7 +264,9 @@ for(const n in NV_JET){
 // La mecánica está en JUMP (js/combat.js). Aquí: cuánto sube el sprite (nvJumpLift, lo usa drawF), la diana del suelo (nvJumpDraw, lo llama windDraw) y el impacto al caer (FXR.impact._salto).
 const NV_JUMP_H = 680;                                               // [AJUSTE] altura del salto en px (tiene que sacarlo de la pantalla)
 function nvJumpLift(f){
-  const j = f.jump, K = j.K, t = j.t; if(t < K.up) return NV_JUMP_H * Math.pow(t / K.up, 1.7);
+  const j = f.jump, K = j.K, t = j.t;
+  if(K.dig){ const d0 = t - (j.T - K.down); return d0 > 0 ? 54 * Math.sin(Math.min(1, d0 / K.down) * 3.1416) : 0; }      // Excavar: no sube; al salir da un brinco
+  if(t < K.up) return NV_JUMP_H * Math.pow(t / K.up, 1.7);
   const d = t - (j.T - K.down); return d < 0 ? NV_JUMP_H : NV_JUMP_H * (1 - Math.pow(Math.min(1, d / K.down), 2));
 }
 function nvJumpDraw(f){
@@ -276,6 +278,7 @@ function nvJumpDraw(f){
   for(let k = 0; k < 4; k++){ const a = k * 1.5708 + .785; ctx.beginPath(); ctx.moveTo(Math.cos(a) * R * .82, Math.sin(a) * R * .82); ctx.lineTo(Math.cos(a) * R * 1.08, Math.sin(a) * R * 1.08); ctx.stroke(); }
   ctx.globalAlpha = .15 + .4 * p; ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(0, 0, 10 + R * .42 * p, 0, 6.283); ctx.fill();      // la sombra del que cae, cada vez más grande
   ctx.restore();
+  if(K.dig){ nvDigDraw(f); return; }                              // Excavar: en vez de rayas de caída, el montículo de tierra que se mueve
   const d = j.t - (j.T - K.down);
   if(d > 0){ const h = nvJumpLift(f); ctx.save(); ctx.fillStyle = '#ffffff'; for(let k = 0; k < 5; k++){ ctx.globalAlpha = .55 - k * .08; ctx.fillRect(Math.round(f.x + (k - 2) * 11), Math.round(f.y - h - 70 - HH(k, 3) * 50), 3, 46 + HH(k, 5) * 30); } ctx.restore(); }      // rayas de velocidad mientras cae
   else if(j.t < K.up){ ctx.save(); ctx.fillStyle = '#e6dcc4'; for(let k = 0; k < 6; k++){ const u = j.t / K.up; ctx.globalAlpha = .8 * (1 - u); ctx.fillRect(Math.round(f.x + (k - 2.5) * 12 * (1 + u)), Math.round(f.y + 20 - u * 14 - HH(k, 7) * 8), 5, 5); } ctx.restore(); }      // polvo al despegar
@@ -291,5 +294,68 @@ FXR.impact._salto = (e, a, type) => {                                // al caer:
   ctx.restore();
   if(a < .7){ const q = a / .7; for(let k = 0; k < 14; k++){ const an = k * .449 + HH(sd, k + 20), d = R * .45 + q * (60 + 70 * HH(sd, k + 30)), z = Math.round(9 - q * 5);
     ctx.globalAlpha = .9 * (1 - q); ctx.fillStyle = k % 3 ? '#e6dcc4' : '#b9ab8c'; ctx.fillRect(Math.round(e.x + Math.cos(an) * d), Math.round(e.y + Math.sin(an) * d * .8 - Math.sin(q * 3.1416) * 22), z, z); } }
+  ctx.globalAlpha = 1;
+};
+
+/* =====================================================================
+   ATAQUES NUEVOS (16-11-2026, tanda 2): Excavar (montículo), Terremoto (grietas) y Ventisca (ráfaga). Mecánica en js/combat.js: JUMP_MOVE.Excavar, QUAKE, GUST.
+   ===================================================================== */
+// ---------- EXCAVAR: mientras va bajo tierra se ve un montículo marrón que avanza y echa terrones; al salir, la tierra salta ----------
+function nvDigDraw(f){
+  const j = f.jump, K = j.K, t = j.t, x = f.x, y = f.y + 22, out = t - (j.T - K.down);
+  ctx.save();
+  if(t < K.up + .1){ const u = Math.min(1, t / K.up); for(let k = 0; k < 9; k++){ const an = -3.1416 * (.15 + .7 * HH(k, 3)), v = 40 + 70 * HH(k, 5); ctx.globalAlpha = 1 - u; ctx.fillStyle = k % 2 ? '#8a5a2b' : '#5c3a1a'; ctx.fillRect(Math.round(x + Math.cos(an) * v * u), Math.round(y + Math.sin(an) * v * u + 60 * u * u), 6, 6); } }      // se mete: terrones hacia arriba
+  if(out < 0){                                                       // bajo tierra: montículo que tiembla
+    const wob = Math.sin(g.t * 26) * 2;
+    ctx.globalAlpha = 1; ctx.fillStyle = '#3d2610'; ctx.beginPath(); ctx.ellipse(x, y + 4, 34, 12, 0, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#5c3a1a'; ctx.beginPath(); ctx.ellipse(x + wob, y - 2, 28, 13, 0, 3.1416, 6.283); ctx.fill();
+    ctx.fillStyle = '#8a5a2b'; ctx.beginPath(); ctx.ellipse(x + wob - 4, y - 5, 17, 8, 0, 3.1416, 6.283); ctx.fill();
+    for(let k = 0; k < 6; k++){ const p = (g.t * 2.2 + k / 6) % 1, an = -3.1416 * (.2 + .6 * HH(k, 9)); ctx.globalAlpha = 1 - p; ctx.fillStyle = k % 2 ? '#8a5a2b' : '#b9895a'; ctx.fillRect(Math.round(x + Math.cos(an) * (16 + 26 * p)), Math.round(y - 4 + Math.sin(an) * 30 * p + 34 * p * p), 4, 4); }
+  } else { const u = Math.min(1, out / K.down); for(let k = 0; k < 14; k++){ const an = -3.1416 * (.08 + .84 * HH(k, 13)), v = 70 + 110 * HH(k, 15); ctx.globalAlpha = 1 - u * .7; ctx.fillStyle = k % 3 ? '#8a5a2b' : '#5c3a1a'; const z = 5 + HH(k, 17) * 5; ctx.fillRect(Math.round(x + Math.cos(an) * v * u), Math.round(y + Math.sin(an) * v * u + 90 * u * u), z, z); } }      // sale: la tierra revienta
+  ctx.restore();
+}
+// ---------- TERREMOTO: grietas largas y ramificadas que salen de donde golpea, onda de polvo que se abre y piedras que saltan. Las grietas se quedan un rato y se van borrando ----------
+FXR.impact._terremoto = (e, a, type) => {
+  const R = e.R || 200, u = Math.min(1, a / e.dur), sd = Math.floor(e.seed || 0) + 7, grow = Math.min(1, a / .3), fadeC = a < e.dur * .6 ? 1 : Math.max(0, 1 - (a - e.dur * .6) / (e.dur * .4));
+  ctx.save(); ctx.translate(e.x, e.y); ctx.scale(1, .8); ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+  for(let pass = 0; pass < 2; pass++){                               // grieta: trazo ancho oscuro y, encima, un hilo de luz naranja al principio
+    ctx.strokeStyle = pass ? '#ff9a3a' : 'rgba(20,12,6,1)'; ctx.globalAlpha = pass ? Math.max(0, 1 - a / .5) * .9 : .8 * fadeC; if(ctx.globalAlpha <= 0) continue;
+    for(let k = 0; k < 11; k++){ let an = k * .571 + HH(sd, k) * .4, r = 10, px = Math.cos(an) * r, py = Math.sin(an) * r; const L = R * (.7 + .35 * HH(sd + 3, k)) * grow, st = 7;
+      ctx.lineWidth = pass ? 2 : 6; ctx.beginPath(); ctx.moveTo(px, py);
+      for(let s = 0; s < st && r < L; s++){ r += L / st; an += (HH(sd + s, k + 9) - .5) * .8; px = Math.cos(an) * r; py = Math.sin(an) * r; ctx.lineTo(Math.round(px / 2) * 2, Math.round(py / 2) * 2);
+        if(!pass && s % 2 === 1){ const ba = an + (HH(sd + s, k + 40) > .5 ? .9 : -.9), bl = L * .22; ctx.moveTo(px, py); ctx.lineTo(Math.round((px + Math.cos(ba) * bl) / 2) * 2, Math.round((py + Math.sin(ba) * bl) / 2) * 2); ctx.moveTo(px, py); } }
+      ctx.stroke(); }
+  }
+  if(a < .5){ const q = a / .5; ctx.globalAlpha = 1 - q; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 9 * (1 - q) + 2; ctx.beginPath(); ctx.arc(0, 0, R * Math.min(1, a / .4), 0, 6.283); ctx.stroke();      // la onda (va a la vez que el daño)
+    ctx.strokeStyle = TC[type] || '#c9a45c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, R * Math.min(1, a / .4) * .86, 0, 6.283); ctx.stroke(); }
+  ctx.restore();
+  if(a < .9){ const q = a / .9; for(let k = 0; k < 22; k++){ const an = k * .2856 + HH(sd, k + 20), d = R * (.2 + .75 * HH(sd, k + 25)), hgt = Math.sin(q * 3.1416) * (30 + 50 * HH(sd, k + 30)), z = Math.round(4 + 7 * HH(sd, k + 35));
+    ctx.globalAlpha = 1 - q; ctx.fillStyle = k % 3 === 0 ? '#6e6253' : k % 3 === 1 ? '#a8977c' : '#e6dcc4'; ctx.fillRect(Math.round(e.x + Math.cos(an) * d), Math.round(e.y + Math.sin(an) * d * .8 - hgt), z, z); } }      // piedras y polvo que saltan
+  ctx.globalAlpha = 1;
+};
+// ---------- VENTISCA: cada copo de la ráfaga es una racha de viento (rayas blancas y azules) con un cristal de nieve delante ----------
+FXR.flight._ventisca = (s, a, an) => {
+  const ca = Math.cos(an), sa = Math.sin(an), px = -sa, py = ca, k = s.sd || 0, fade = s.L ? Math.min(1, s.life / (s.L * .3)) : 1;
+  ctx.save(); ctx.lineCap = 'round';
+  for(let i = 0; i < 3; i++){ const o = (i - 1) * 7 + Math.sin(g.t * 20 + k + i) * 3, L = 34 + HH(k, i) * 26; ctx.globalAlpha = (.75 - i * .15) * fade; ctx.strokeStyle = i === 1 ? '#ffffff' : '#9fdcff'; ctx.lineWidth = i === 1 ? 4 : 3;
+    ctx.beginPath(); ctx.moveTo(s.x + px * o, s.y + py * o); ctx.lineTo(s.x - ca * L + px * o * 1.6, s.y - sa * L + py * o * 1.6); ctx.stroke(); }
+  ctx.globalAlpha = fade; ctx.translate(s.x, s.y); ctx.rotate(g.t * 6 + k); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5;
+  for(let i = 0; i < 3; i++){ ctx.rotate(1.047); ctx.beginPath(); ctx.moveTo(-8, 0); ctx.lineTo(8, 0); ctx.stroke(); }
+  ctx.fillStyle = '#d6f2ff'; ctx.fillRect(-2, -2, 4, 4);
+  ctx.restore(); return true;
+};
+FXR.trail._ventisca = {rate: 26, cols: ['#ffffff', '#bfe8ff', '#7fc6f2'], life: .4, speed: 30, spread: 8, s: 2};
+
+// ---------- ROCA AFILADA: una roca puntiaguda que sale del suelo de golpe, se queda un momento y se deshace en cascotes ----------
+FXR.impact._pincho = (e, a, type) => {
+  const sd = Math.floor(e.seed || 0), up = Math.min(1, a / .1), out = a < .55 ? 1 : Math.max(0, 1 - (a - .55) / .35), h = (74 + HH(sd, 1) * 22) * (1 - Math.pow(1 - up, 3)) * (.35 + .65 * out), w = 22 + HH(sd, 2) * 8, lean = (HH(sd, 3) - .5) * 16, x = e.x, y = e.y;
+  ctx.save(); ctx.globalAlpha = Math.min(1, out * 1.6); ctx.lineJoin = 'round';
+  ctx.fillStyle = 'rgba(20,12,6,.55)'; ctx.beginPath(); ctx.ellipse(x, y + 2, w * 1.3, w * .45, 0, 0, 6.283); ctx.fill();                                    // el agujero del suelo
+  ctx.beginPath(); ctx.moveTo(x - w, y); ctx.lineTo(x - w * .45 + lean * .4, y - h * .55); ctx.lineTo(x + lean, y - h); ctx.lineTo(x + w * .55 + lean * .4, y - h * .5); ctx.lineTo(x + w, y); ctx.closePath();
+  ctx.strokeStyle = '#2b2119'; ctx.lineWidth = 5; ctx.stroke(); ctx.fillStyle = '#8c7a62'; ctx.fill();                                                        // la roca
+  ctx.beginPath(); ctx.moveTo(x + lean, y - h); ctx.lineTo(x + w * .55 + lean * .4, y - h * .5); ctx.lineTo(x + w, y); ctx.lineTo(x + w * .15, y); ctx.closePath(); ctx.fillStyle = '#5e5142'; ctx.fill();      // cara en sombra
+  ctx.beginPath(); ctx.moveTo(x - w * .6, y - 4); ctx.lineTo(x - w * .3 + lean * .4, y - h * .5); ctx.lineTo(x + lean * .9, y - h * .92); ctx.strokeStyle = '#d8ccb6'; ctx.lineWidth = 3; ctx.stroke();      // filo claro
+  ctx.restore();
+  if(a < .5){ const q = a / .5; for(let k = 0; k < 9; k++){ const an = -3.1416 * (.1 + .8 * HH(sd + k, 11)), v = 50 + 80 * HH(sd + k, 13), z = Math.round(4 + 4 * HH(sd + k, 15)); ctx.globalAlpha = 1 - q; ctx.fillStyle = k % 2 ? '#a8977c' : '#6e6253'; ctx.fillRect(Math.round(x + Math.cos(an) * v * q), Math.round(y + Math.sin(an) * v * q + 110 * q * q), z, z); } }      // cascotes que saltan al salir
   ctx.globalAlpha = 1;
 };

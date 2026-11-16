@@ -109,6 +109,141 @@ function terrClip(){                                             // recorta el d
   else ctx.rect(14, 146, W - 28, H - 70 - 146);                    // resto de arenas: la zona por la que se mueven los Pokémon (con un pequeño margen)
   ctx.clip();
 }
+// ---- ENTRENADORES EN EL CAMPO (de momento solo en la Historia de Kanto): tú a la izquierda y el líder a la derecha, fuera de las líneas del campo ----
+// Imagen: entrenadores_mini/kanto.png (una fila; cada entrenador ocupa 16x32 y mira a la IZQUIERDA). Créditos en entrenadores_mini/CREDITOS.txt
+// CÁMARA LEJANA (FAR): en la Historia de Kanto el combate se ve desde más lejos: un campo grande en el centro, con sus líneas, y una zona de fuera ancha con decoración del tipo del gimnasio.
+//   pantalla = (mundo - centro) × z + centro   ·   el ratón se pasa al mundo con mouseWorld() (js/pruebas.js) y el táctil / mando con tW2S() (js/touch.js)
+//   Los límites por donde se mueven los Pokémon salen de aquí (bx0, bx1, by0, by1 en js/combat.js).
+const FAR = {z: .75, cy: 300,                                       // [AJUSTE] z = tamaño con que se ve todo (1 = como antes; más bajo = más lejos) · cy = altura de la pantalla que no se mueve al alejar
+  fx: .58,                                                          // [AJUSTE] parte del ancho de la pantalla que ocupa el campo (el resto, a los lados, es la zona de fuera)
+  yt: .262, yb: .985};                                              // [AJUSTE] a qué altura de la pantalla empieza y acaba el campo (0 = arriba del todo, 1 = abajo) cuando el estadio NO tiene imagen propia
+const farOn = () => miniOn();
+function farW2S(x, y){ return [(x - W / 2) * FAR.z + W / 2, (y - FAR.cy) * FAR.z + FAR.cy]; }
+function farBarAlpha(){                                            // la barra de ataques se vuelve transparente si un Pokémon queda detrás
+  const behind = [g.p[g.pi], g.e[g.ei]].some(f => { if(!f || f.dead) return false; const [sx, sy] = farW2S(f.x, f.y); return sy > H - 150 && Math.abs(sx - W / 2) < 330; });
+  FAR.barA = (FAR.barA || 1) + ((behind ? .3 : 1) - (FAR.barA || 1)) * .15; return FAR.barA;
+}
+function farS2W(x, y){ return {x: (x - W / 2) / FAR.z + W / 2, y: (y - FAR.cy) / FAR.z + FAR.cy}; }
+// ESTADIOS CON IMAGEN PROPIA: el fondo entero es una imagen (fondos/estadios/) que ya trae pintadas las líneas del campo y la decoración de fuera.
+//   court = dónde está el rectángulo del campo DENTRO de la imagen, en píxeles: [izquierda, arriba, derecha, abajo] · w, h = tamaño de la imagen
+//   Para añadir otro: guarda la imagen y pon una línea con el id del líder (el de FLOORS, js/data.js). Si el campo está en otro sitio, mide su rectángulo.
+const EST = {
+  brock:    {src: 'fondos/estadios/brock.png',    w: 1024, h: 572, court: [74, 110, 973, 480]},
+  misty:    {src: 'fondos/estadios/misty.png',    w: 1024, h: 572, court: [75, 111, 972, 482]},
+  lt_surge: {src: 'fondos/estadios/surge.png',    w: 1024, h: 572, court: [75, 110, 973, 484]},
+  erika:    {src: 'fondos/estadios/erika.png',    w: 1024, h: 572, court: [76, 111, 971, 483]},
+  koga:     {src: 'fondos/estadios/koga.png',     w: 1024, h: 572, court: [75, 111, 972, 484]},
+  sabrina:  {src: 'fondos/estadios/sabrina.png',  w: 815,  h: 456, court: [59, 88, 773, 427]}       // recortada: la IA la hizo con el campo más pequeño
+};
+function estOf(){ const E = g && g.o && EST[g.o.leader]; if(!E) return null; if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=2'; } return E.ok ? E : null; }
+function estDraw(E){                                                // la imagen llena la pantalla; arriba se oscurece un poco para que se lea el marcador
+  ctx.imageSmoothingEnabled = false; ctx.drawImage(E.img, 0, 0, W, H);
+  const top = ctx.createLinearGradient(0, 0, 0, 150); top.addColorStop(0, 'rgba(3,4,10,.5)'); top.addColorStop(1, 'rgba(3,4,10,0)'); ctx.fillStyle = top; ctx.fillRect(0, 0, W, 150);
+}
+function farBox(){                                                  // las líneas de fuera del campo, en coordenadas del mundo (de aquí salen los límites bx0 … by1 de js/combat.js)
+  const E = estOf(), s = E ? [E.court[0] / E.w * W, E.court[1] / E.h * H, E.court[2] / E.w * W, E.court[3] / E.h * H] : [W * (1 - FAR.fx) / 2, H * FAR.yt, W * (1 + FAR.fx) / 2, H * FAR.yb];
+  const a = farS2W(s[0], s[1]), b = farS2W(s[2], s[3]); return {x0: a.x, y0: a.y, x1: b.x, y1: b.y};
+}
+// ---- ENTRENADORES EN EL CAMPO: tú a la izquierda y el líder a la derecha, justo por dentro de las líneas ----
+// Imagen: entrenadores_mini/todos.png (rejilla de 24 columnas; cada entrenador ocupa 32x32 y mira a la IZQUIERDA). Créditos en entrenadores_mini/CREDITOS.txt
+// Tu personaje es el del perfil (save.gender, js/vspanel.js): chico, chica, los de logros y los de la Invocación. Si no hay dibujo pequeño del tuyo, sale Red (o Leaf si elegiste la chica).
+const MINI = {ok: false, s: 2, x: 16, cols: 24,                     // [AJUSTE] tamaño en pantalla (x2) · a cuántos píxeles por DENTRO de la línea se ponen · columnas de la imagen
+  names: ['red', 'leaf', 'blue', 'lucas', 'may', 'n', 'lance', 'brendan', 'ethan', 'aaron', 'acerola', 'acetrainer', 'acetrainerf', 'acetrainersnow', 'anabel', 'aquagrunt', 'aquagruntf', 'archer', 'archie', 'ariana', 'artist', 'barry', 'battlegirl', 'beauty', 'bede', 'bertha', 'birch', 'blackbelt', 'blaine', 'brandon', 'brawly', 'brock', 'bugcatcher', 'bugsy', 'byron', 'cameraman', 'camper', 'candice', 'charon', 'cheryl', 'chuck', 'clair', 'clay', 'clerk', 'colress', 'cook', 'cowgirl', 'crasherwake', 'cueball', 'cynthia', 'cyrus', 'daisy', 'dawn', 'dragontamer', 'drake', 'drayden', 'elesa', 'elm', 'erika', 'expert', 'expertf', 'falkner', 'fantina', 'fisherman', 'flannery', 'galacticgrunt', 'galacticgruntf', 'gamer', 'gardenia', 'gentleman', 'ghetsis', 'giovanni', 'glacia', 'greta', 'hexmaniac', 'hiker', 'iris', 'janine', 'jasmine', 'juan', 'jupiter', 'karen', 'kiawe', 'koga', 'korrina', 'lady', 'larry', 'lass', 'liza', 'ltsurge', 'lucian', 'lucy', 'magmagrunt', 'magmagruntf', 'marley', 'mars', 'maxie', 'maylene', 'mina', 'mira', 'misty', 'mom', 'morty', 'nessa', 'ninjaboy', 'noland', 'norman', 'nurse', 'oak', 'painter', 'palmer', 'parasollady', 'petrel', 'phoebe', 'picnicker', 'plasmagrunt', 'plasmagruntf', 'pokefan', 'pokefanf', 'pokekid', 'pokemaniac', 'proton', 'pryce', 'psychic', 'psychicf', 'rancher', 'reporter', 'richboy', 'roark', 'rocker', 'rocketgrunt', 'rocketgruntf', 'roughneck', 'rowan', 'roxanne', 'roxie', 'ruinmaniac', 'sabrina', 'sage', 'sailor', 'saturn', 'schoolkid', 'scientist', 'scott', 'shadowtriad', 'sidney', 'silver', 'skier', 'skierf', 'skyla', 'spenser', 'steven', 'supernerd', 'tate', 'tucker', 'veteran', 'volkner', 'waiter', 'waitress', 'wallace', 'wally', 'wattson', 'whitney', 'will', 'winona', 'worker', 'youngster', 'zinzolin']};      // orden en la imagen: es el nombre del personaje como en la Invocación (js/invdata.js), sin lo que va detrás del guion
+const MINI_ALIAS = {m: 'red', r: 'red', f: 'leaf', maya: 'may', lt_surge: 'ltsurge', azul: 'blue', gold: 'ethan'};      // nombres del juego que en la imagen se llaman de otra forma
+function miniIdx(id){                                               // código de personaje (perfil, Invocación o id de líder) → su casilla en la imagen (-1 si no hay dibujo)
+  id = String(id || ''); if(id.startsWith('i:')) id = id.slice(2);
+  id = MINI_ALIAS[id] || id; const k = id.split('-')[0]; return MINI.names.indexOf(MINI_ALIAS[k] || k);
+}
+{ const i = new Image(); i.onload = () => { MINI.ok = true; }; i.src = 'entrenadores_mini/todos.png?v=1'; MINI.img = i; }
+const miniOn = () => { const F = g && g.o && !g.pvp && g.o.floor && typeof FLOORS !== 'undefined' ? FLOORS[g.o.n] : null; return !!(F && F.id === g.o.leader && F.region === 'Kanto'); };      // ¿es un combate de la Historia de Kanto?
+function campoLineas(){                                             // la zona de fuera se oscurece un poco y el campo lleva sus líneas bien marcadas: borde oscuro, línea central y círculo
+  const B = farBox(), cx = W / 2, cy = (B.y0 + B.y1) / 2, w = B.x1 - B.x0, big = 2000;
+  ctx.save();
+  ctx.fillStyle = 'rgba(4,6,12,.34)'; ctx.beginPath(); ctx.rect(-big, -big, big * 2 + W, big * 2 + H); ctx.rect(B.x0, B.y0, w, B.y1 - B.y0); ctx.fill('evenodd');      // fuera del campo, más oscuro
+  ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(B.x0, B.y0, w, B.y1 - B.y0);                                                                              // dentro, un pelín más claro
+  ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(cx, B.y0); ctx.lineTo(cx, B.y1); ctx.moveTo(B.x0 + w * .22, B.y0); ctx.lineTo(B.x0 + w * .22, B.y1); ctx.moveTo(B.x0 + w * .78, B.y0); ctx.lineTo(B.x0 + w * .78, B.y1); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(cx, cy, 96, 96 * .8, 0, 0, 6.283); ctx.stroke();
+  ctx.strokeStyle = '#0d0f15'; ctx.lineWidth = 7; ctx.lineJoin = 'miter'; ctx.strokeRect(B.x0, B.y0, w, B.y1 - B.y0);                                             // borde: oscuro y grueso...
+  ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = 2; ctx.strokeRect(B.x0 + 6, B.y0 + 6, w - 12, B.y1 - B.y0 - 12);                                    // ...con un filo claro por dentro
+  ctx.restore();
+}
+// ---- DECORACIÓN DE FUERA: cada gimnasio pone alrededor del campo cosas de su tipo (siempre en el mismo sitio). DECO: tipo del líder (tag de FLOORS) → qué se dibuja y con qué colores ----
+const DECO = {                                                      // [AJUSTE] k = forma (roca · charco · cristal · mata · poste · lapida · llama) · c = colores [borde, base, luz, sombra] · mix = segunda forma que se alterna
+  'Roca':      {k: 'roca',    c: ['#2a2c33', '#8b8f97', '#c3c7cf', '#5f636c']},
+  'Agua':      {k: 'charco',  c: ['#123a7a', '#2f7fe0', '#bfe6ff', '#1b56b0'], mix: {k: 'roca', c: ['#1d2f4a', '#6f8fb5', '#b9d2ee', '#48607f']}},
+  'Eléctrico': {k: 'poste',   c: ['#2a2a12', '#8f8f97', '#ffe04a', '#5a5a62']},
+  'Planta':    {k: 'mata',    c: ['#12401c', '#2f9a44', '#8ee07a', '#1f6a30'], mix: {k: 'roca', c: ['#233018', '#6f8a5a', '#a9c48f', '#4a6038']}},
+  'Veneno':    {k: 'charco',  c: ['#3a0f5c', '#8a3fc4', '#e0a8ff', '#5c2390'], mix: {k: 'mata', c: ['#2a1238', '#6a3a8a', '#b98ad8', '#45245e']}},
+  'Psíquico':  {k: 'cristal', c: ['#5a1050', '#e05fb8', '#ffd0f0', '#a03088'], flota: 1},
+  'Fuego':     {k: 'llama',   c: ['#5a0a05', '#d9381a', '#ffd23a', '#ff8a1f'], mix: {k: 'roca', c: ['#2a1410', '#6e4a40', '#a87a68', '#4a2e28']}},
+  'Tierra':    {k: 'roca',    c: ['#2e2112', '#8a6a44', '#c4a070', '#5e4528']},
+  'Hielo':     {k: 'cristal', c: ['#0f3a66', '#6fc4f2', '#e6f8ff', '#3a86c4']},
+  'Lucha':     {k: 'roca',    c: ['#2e241c', '#8f7a66', '#c9b49c', '#5e4e40'], mix: {k: 'poste', c: ['#2a1a0c', '#8a5a2b', '#c9955a', '#5c3a1a']}},
+  'Fantasma':  {k: 'lapida',  c: ['#1c1a26', '#6c6a80', '#a8a6c0', '#45435a'], mix: {k: 'llama', c: ['#1a0a3a', '#5a2aa8', '#d0a8ff', '#8a4fe0']}},
+  'Dragón':    {k: 'cristal', c: ['#1a1266', '#5a4ae0', '#c8c0ff', '#3a2aa8'], mix: {k: 'roca', c: ['#1c1a33', '#5f5c8a', '#9a97c4', '#3d3a5e']}},
+  'Campeón':   {k: 'cristal', c: ['#5c4205', '#e0b020', '#fff2b0', '#a87a10'], mix: {k: 'poste', c: ['#3a2a05', '#c9a030', '#ffe98a', '#8a6a14']}}
+};
+function decoDraw(k, x, y, s, c, sd, flota){
+  const sh = () => { ctx.globalAlpha = .4; ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.ellipse(x + s * .15, y + s * .5, s * 1.05, s * .36, 0, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1; };
+  ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = c[0];
+  if(k === 'roca'){ const q = HH(sd, 4); sh();
+    ctx.beginPath(); ctx.moveTo(x - s, y + s * .35); ctx.lineTo(x - s * .8, y - s * .25); ctx.lineTo(x - s * (.2 + .2 * q), y - s * .7); ctx.lineTo(x + s * .45, y - s * .6); ctx.lineTo(x + s, y - s * .05); ctx.lineTo(x + s * .85, y + s * .4); ctx.lineTo(x, y + s * .55); ctx.closePath(); ctx.fillStyle = c[1]; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - s * .8, y - s * .25); ctx.lineTo(x - s * (.2 + .2 * q), y - s * .7); ctx.lineTo(x + s * .45, y - s * .6); ctx.lineTo(x + s * .1, y - s * .1); ctx.closePath(); ctx.fillStyle = c[2]; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + s * .1, y - s * .1); ctx.lineTo(x + s, y - s * .05); ctx.lineTo(x + s * .85, y + s * .4); ctx.lineTo(x, y + s * .55); ctx.closePath(); ctx.fillStyle = c[3]; ctx.fill(); }
+  else if(k === 'charco'){ const w = s * 1.7, h = s * .7;                                    // charco: mancha ovalada con brillo y burbujas que suben
+    ctx.beginPath(); ctx.ellipse(x, y, w, h, 0, 0, 6.283); ctx.fillStyle = c[1]; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x + w * .15, y + h * .1, w * .6, h * .5, 0, 0, 6.283); ctx.fillStyle = c[3]; ctx.fill();
+    ctx.strokeStyle = c[2]; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(x - w * .3, y - h * .25, w * .3, h * .22, 0, 3.4, 5.6); ctx.stroke();
+    for(let i = 0; i < 3; i++){ const p = (g.t * (.5 + HH(sd, i) * .5) + HH(sd, i + 5)) % 1; ctx.globalAlpha = 1 - p; ctx.fillStyle = c[2]; const z = 3 + HH(sd, i + 9) * 3; ctx.fillRect(Math.round(x + (HH(sd, i + 12) - .5) * w * 1.2), Math.round(y - p * s * 1.6), z, z); } ctx.globalAlpha = 1; }
+  else if(k === 'cristal'){ const up = flota ? 10 + Math.sin(g.t * 2 + sd) * 6 : 0; sh();   // cristal: tres puntas; en Psíquico flota y sube y baja
+    for(const [dx, hh, ww] of [[-s * .55, s * 1.1, s * .34], [s * .5, s * 1.3, s * .36], [0, s * 2, s * .46]]){ const bx = x + dx, by = y + s * .3 - up;
+      ctx.beginPath(); ctx.moveTo(bx - ww, by); ctx.lineTo(bx - ww * .7, by - hh * .7); ctx.lineTo(bx, by - hh); ctx.lineTo(bx + ww * .7, by - hh * .7); ctx.lineTo(bx + ww, by); ctx.closePath(); ctx.fillStyle = c[1]; ctx.fill(); ctx.strokeStyle = c[0]; ctx.lineWidth = 3; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(bx - ww, by); ctx.lineTo(bx - ww * .7, by - hh * .7); ctx.lineTo(bx, by - hh); ctx.lineTo(bx - ww * .1, by); ctx.closePath(); ctx.fillStyle = c[2]; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(bx + ww * .35, by); ctx.lineTo(bx, by - hh); ctx.lineTo(bx + ww * .7, by - hh * .7); ctx.lineTo(bx + ww, by); ctx.closePath(); ctx.fillStyle = c[3]; ctx.fill(); }
+    const tw = .5 + .5 * Math.sin(g.t * 5 + sd * 3); ctx.globalAlpha = tw; ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(x - 2), Math.round(y - s * 1.9 - up), 4, 4); ctx.globalAlpha = 1; }
+  else if(k === 'mata'){ sh();                                                              // mata: tres bolas de hojas y alguna flor
+    for(const [dx, dy, rr, col] of [[-s * .6, 0, s * .62, c[3]], [s * .6, s * .05, s * .58, c[3]], [0, -s * .35, s * .8, c[1]]]){ ctx.beginPath(); ctx.arc(x + dx, y + dy, rr, 0, 6.283); ctx.fillStyle = col; ctx.fill(); ctx.strokeStyle = c[0]; ctx.lineWidth = 3; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(x - s * .2, y - s * .6, s * .34, 0, 6.283); ctx.fillStyle = c[2]; ctx.fill();
+    for(let i = 0; i < 3; i++){ ctx.fillStyle = i % 2 ? '#ffffff' : '#ffd23a'; ctx.fillRect(Math.round(x + (HH(sd, i) - .5) * s * 1.6), Math.round(y - s * .2 - HH(sd, i + 4) * s * .7), 4, 4); } }
+  else if(k === 'poste'){ sh();                                                             // poste: columna con una bola arriba que chisporrotea
+    ctx.fillStyle = c[1]; ctx.fillRect(x - s * .22, y - s * 1.8, s * .44, s * 2.2); ctx.strokeRect(x - s * .22, y - s * 1.8, s * .44, s * 2.2);
+    ctx.fillStyle = c[3]; ctx.fillRect(x + s * .04, y - s * 1.8, s * .16, s * 2.2); ctx.fillStyle = c[1]; ctx.fillRect(x - s * .5, y + s * .25, s, s * .25); ctx.strokeRect(x - s * .5, y + s * .25, s, s * .25);
+    ctx.beginPath(); ctx.arc(x, y - s * 2, s * .42, 0, 6.283); ctx.fillStyle = c[2]; ctx.fill(); ctx.stroke();
+    if(Math.sin(g.t * 9 + sd * 5) > .2){ ctx.strokeStyle = c[2]; ctx.lineWidth = 2; ctx.beginPath(); for(let i = 0; i < 3; i++){ const an = HH(sd + Math.floor(g.t * 9), i) * 6.283; ctx.moveTo(x + Math.cos(an) * s * .5, y - s * 2 + Math.sin(an) * s * .5); ctx.lineTo(x + Math.cos(an + .4) * s * .9, y - s * 2 + Math.sin(an + .4) * s * .9); ctx.lineTo(x + Math.cos(an) * s * 1.2, y - s * 2 + Math.sin(an) * s * 1.2); } ctx.stroke(); } }
+  else if(k === 'lapida'){ sh();                                                            // lápida: piedra redondeada con una cruz
+    ctx.beginPath(); ctx.moveTo(x - s * .6, y + s * .4); ctx.lineTo(x - s * .6, y - s * .7); ctx.arc(x, y - s * .7, s * .6, Math.PI, 0); ctx.lineTo(x + s * .6, y + s * .4); ctx.closePath(); ctx.fillStyle = c[1]; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = c[3]; ctx.fillRect(x + s * .2, y - s * .9, s * .3, s * 1.25); ctx.fillStyle = c[2]; ctx.fillRect(x - s * .08, y - s * .95, s * .16, s * .8); ctx.fillRect(x - s * .3, y - s * .7, s * .6, s * .16); }
+  else if(k === 'llama'){ const fl = .8 + .2 * Math.sin(g.t * 11 + sd * 4);                 // llama: cuenco oscuro con fuego que baila
+    sh(); ctx.fillStyle = c[0]; ctx.beginPath(); ctx.ellipse(x, y + s * .2, s * .8, s * .34, 0, 0, 6.283); ctx.fill();
+    for(const [kk, col] of [[1, c[1]], [.68, c[3]], [.38, c[2]]]){ const hh = s * 1.9 * kk * fl, ww = s * .62 * kk, lean = Math.sin(g.t * 6 + sd) * s * .18 * kk;
+      ctx.beginPath(); ctx.moveTo(x - ww, y + s * .1); ctx.quadraticCurveTo(x - ww * 1.2, y - hh * .5, x + lean, y - hh); ctx.quadraticCurveTo(x + ww * 1.2, y - hh * .5, x + ww, y + s * .1); ctx.closePath(); ctx.fillStyle = col; ctx.fill(); } }
+}
+function campoDeco(){
+  const F = FLOORS[g.o.n], D = DECO[F.tag] || DECO['Roca'], B = farBox(), sd = (g.o.n || 0) * 13 + 5, vx = W * (1 / FAR.z - 1) / 2, vyT = (140 - FAR.cy) / FAR.z + FAR.cy, vyB = (H - FAR.cy) / FAR.z + FAR.cy, L = [];
+  for(let i = 0; i < 70 && L.length < 30; i++){                                               // se reparten por los dos lados y por debajo, sin pisar el campo ni amontonarse
+    const x = -vx + 20 + HH(sd + i, 1) * (W + 2 * vx - 40), y = vyT + HH(sd + i, 2) * (vyB - vyT - 10);
+    if(x > B.x0 - 46 && x < B.x1 + 46 && y > B.y0 - 60 && y < B.y1 + 34) continue;
+    if(L.some(o => Math.abs(o.x - x) < 62 && Math.abs(o.y - y) < 48)) continue;
+    const m = D.mix && HH(sd + i, 6) > .55 ? D.mix : D; L.push({x, y, s: 15 + HH(sd + i, 3) * 15, k: m.k, c: m.c, sd: sd + i, fl: m.flota});
+  }
+  ctx.save(); L.sort((a, b) => a.y - b.y).forEach(o => decoDraw(o.k, o.x, o.y, o.s, o.c, o.sd, o.fl)); ctx.restore();
+}
+function miniOne(i, x, right){                                      // right = true: mira a la derecha (se voltea)
+  if(i < 0) return; const s = MINI.s / FAR.z, w = 32 * s, h = 32 * s, y = Math.round((by0() + by1()) / 2) + 26, bob = Math.sin(g.t * 2.4 + (right ? 0 : 1.7)) > .6 ? -s : 0;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  ctx.globalAlpha = .35; ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.ellipse(x, y, w * .18, w * .065, 0, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.translate(Math.round(x), y + bob); if(right) ctx.scale(-1, 1);
+  ctx.drawImage(MINI.img, (i % MINI.cols) * 32, Math.floor(i / MINI.cols) * 32, 32, 32, -w / 2, -h + 2 * s, w, h);
+  ctx.restore();
+}
+function miniPos(side){ const B = farBox(), y = Math.round((by0() + by1()) / 2); return side === 'p' ? {x: B.x0 + MINI.x + 16, y: y - 6} : {x: B.x1 - MINI.x - 16, y: y - 6}; }      // dónde está cada entrenador (de ahí sale la Poké Ball al cambiar: js/swap.js)
+function miniDraw(){
+  if(!MINI.ok) return;
+  let me = miniIdx(typeof skinOf === 'function' ? skinOf() : save.gender); if(me < 0) me = miniIdx(save.gender === 'f' ? 'f' : 'm');
+  miniOne(me, miniPos('p').x, true);                               // tú: el personaje de tu perfil
+  miniOne(miniIdx(g.o.leader), miniPos('e').x, false);   // el líder (si no hay dibujo suyo, no sale nadie)
+}
 function terrDraw(){
   if(!g.terr || !g.terr.length) return;
   ctx.save(); terrClip();
@@ -163,9 +298,35 @@ function chgFxDraw(f, k, ok){
   }
   ctx.restore();
 }
+function frzDraw(f){                                            // congelado: un bloque de hielo encima del Pokémon, con brillos; tiembla cuando está a punto de romperse
+  const u = Math.min(1, f.frz / .35), sh = f.frz < .35 ? Math.sin(g.t * 60) * 2 : 0, cx = f.x + sh, top = f.y - 62, bot = f.y + 30, hw = 40;
+  ctx.save(); ctx.globalAlpha = .62 * u + .2;
+  ctx.beginPath(); ctx.moveTo(cx - hw, bot); ctx.lineTo(cx - hw * 1.05, top + 30); ctx.lineTo(cx - hw * .5, top + 6); ctx.lineTo(cx, top - 6); ctx.lineTo(cx + hw * .55, top + 6); ctx.lineTo(cx + hw * 1.05, top + 30); ctx.lineTo(cx + hw, bot); ctx.closePath();
+  ctx.fillStyle = 'rgba(150,215,255,.6)'; ctx.fill(); ctx.strokeStyle = '#2a5fa8'; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(); ctx.strokeStyle = '#e6f6ff'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx - hw * .7, top + 34); ctx.lineTo(cx - hw * .35, top + 14); ctx.moveTo(cx - hw * .72, top + 52); ctx.lineTo(cx - hw * .6, top + 44); ctx.stroke();
+  for(let i = 0; i < 4; i++){ const tw = .5 + .5 * Math.sin(g.t * 6 + i * 1.7); ctx.globalAlpha = tw * u; ctx.fillStyle = '#ffffff'; ctx.fillRect(Math.round(cx + (HH(i, 3) - .5) * hw * 1.5), Math.round(top + 10 + HH(i, 5) * 70), 4, 4); }
+  ctx.restore();
+}
+function psiDraw(T){                                            // Psíquico: el rival atrapado (aura rosa que late) y, mientras eliges, la línea y la diana de adónde lo vas a lanzar
+  const p = T.psi, pul = .6 + .4 * Math.sin(g.t * 16), cx = T.x, cy = T.y - 8;
+  ctx.save();
+  ctx.globalAlpha = .35 * pul; ctx.fillStyle = '#ff5fb0'; ctx.beginPath(); ctx.arc(cx, cy, 44, 0, 6.3); ctx.fill();
+  ctx.lineWidth = 3;
+  for(let i = 0; i < 2; i++){ ctx.globalAlpha = .9; ctx.strokeStyle = i ? '#7de3ff' : '#ff8fd0'; ctx.beginPath(); ctx.ellipse(cx, cy, 46, 16, g.t * (i ? -3 : 3) + i * 1.57, 0, 6.3); ctx.stroke(); }
+  for(let i = 0; i < 6; i++){ const an = g.t * 4 + i * 1.05, rr = 40 + 6 * Math.sin(g.t * 9 + i); ctx.globalAlpha = .9; ctx.fillStyle = i % 2 ? '#ffffff' : '#ffa8d8'; ctx.fillRect(cx + Math.cos(an) * rr - 2, cy + Math.sin(an) * rr * .7 - 2, 4, 4); }
+  if(!p.fly && !p.ai){
+    const x1 = clamp(p.mx, bx0(), bx1()), y1 = clamp(p.my, by0(), by1());
+    ctx.globalAlpha = .85; ctx.strokeStyle = '#ff8fd0'; ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.lineDashOffset = -g.t * 60; ctx.beginPath(); ctx.moveTo(cx, cy + 20); ctx.lineTo(x1, y1 + 22); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(x1, y1 + 22, 30 * pul + 8, (30 * pul + 8) * .4, 0, 0, 6.3); ctx.stroke();
+    ctx.fillStyle = '#ff5fb0'; ctx.fillRect(x1 - 3, y1 + 19, 6, 6);
+  }
+  ctx.restore();
+}
 function windDraw(){
   for(const f of [g.p[g.pi], g.e[g.ei]]){
     if(f.ctr > 0 && !f.dead && !f.ghost){ ctx.save(); ctx.globalAlpha = .55 + .4 * Math.sin(g.t * 22); ctx.strokeStyle = '#7fe3ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y + 22, 34, 13, 0, 0, 6.3); ctx.stroke(); ctx.restore(); }      // contraataque listo: aro azul a sus pies
+    if(f.frz > 0 && !f.dead && !f.ghost) frzDraw(f);                                          // congelado por Ventisca
+    if(f.psi && !f.dead && !f.ghost) psiDraw(f);                                              // atrapado por Psíquico
     if(f.jump && !f.dead && !f.ghost && typeof nvJumpDraw === 'function') nvJumpDraw(f);      // salto (Golpe Cuerpo, Vuelo): la diana donde va a caer (js/fxnuevos.js)
     if(f.spin && !f.dead && !f.ghost && typeof nvSpinDraw === 'function') nvSpinDraw(f);      // Torbellino: los brazos de agua (js/fxnuevos.js)
     if(f.mc > .12 && !f.dead && !f.ghost) chgFxDraw(f, clamp(f.mc / FEEL.chgT, 0, 1), f.mc >= FEEL.chgMin);      // golpe cargándose (mantienes el clic)
@@ -291,7 +452,7 @@ function pilFxDraw(f){                                               // restos d
 function drawF(f, col){
   if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
   const I = idleInfo(f.m.dex);
-  const hid = f.hide > 0, lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0) + (f.jump && typeof nvJumpLift === 'function' ? nvJumpLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
+  const hid = f.hide > 0 || !!(f.jump && f.jump.K.dig && f.jump.t > .14 && f.jump.t < f.jump.T - f.jump.K.down), lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0) + (f.jump && typeof nvJumpLift === 'function' ? nvJumpLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
   const inv = f.inv > 0 && !f.dead && !f.jump; if(inv){ ctx.save(); ctx.globalAlpha = .5; }                                               // esquivando con la carrera: se ve translúcido
   const okSpr = hid || (f.spin && !f.dead && typeof nvShellDraw === 'function' && nvShellDraw(f, lg)) || drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny);      // Torbellino de Squirtle y familia: el caparazón en vez del sprite (js/fxnuevos.js)
@@ -404,9 +565,13 @@ function draw(){
   const WW = W;                                    // ancho del mundo (en el Campo de pruebas es mayor que la pantalla)
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
   g.zk = (g.zk || 0) + ((g.slowT > 0 ? 1 : 0) - (g.zk || 0)) * .16;                               // remate final: la cámara se acerca al Pokémon que cae (FEEL.zoom) y vuelve
-  if(g.zk > .01 && g.zoomAt && !PRV){ const z = 1 + FEEL.zoom * g.zk; ctx.translate(g.zoomAt.x, g.zoomAt.y); ctx.scale(z, z); ctx.translate(-g.zoomAt.x, -g.zoomAt.y); }
+  const FARV = !PRV && farOn();                    // cámara lejana (Historia de Kanto): el campo se dibuja más pequeño
+  if(g.zk > .01 && g.zoomAt && !PRV){ const z = 1 + FEEL.zoom * g.zk, zp = FARV ? farW2S(g.zoomAt.x, g.zoomAt.y) : [g.zoomAt.x, g.zoomAt.y]; ctx.translate(zp[0], zp[1]); ctx.scale(z, z); ctx.translate(-zp[0], -zp[1]); }
   if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
+  else if(FARV && estOf()) estDraw(estOf());       // estadio con imagen propia
   else arena();
+  if(FARV){ ctx.translate(W / 2, FAR.cy); ctx.scale(FAR.z, FAR.z); ctx.translate(-W / 2, -FAR.cy); }      // a partir de aquí todo el campo va reducido
+  if(FARV){ if(!estOf()){ campoLineas(); campoDeco(); } miniDraw(); }      // líneas del campo, decoración de fuera y los dos entrenadores      // Historia de Kanto: líneas del campo y los dos entrenadores
   fxhdGround();                                    // marcas en el suelo de los ataques (js/fxhd3.js)
   const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
 
@@ -426,8 +591,9 @@ function draw(){
   fxhdDraw(); fxhdEnd();                           // efectos HD: luces, golpes, carga y brillo (bloom)
   swapDraw();                                      // animación de cambio de Pokémon (rayo, Poké Ball y destello)
   megaDraw();                                      // animación de megaevolución (js/mega.js)
-  if(!PRV) abDrawWeather();                        // clima (sol, lluvia, granizo, arena): js/abilities.js
+  if(!PRV && !FARV) abDrawWeather();               // clima (sol, lluvia, granizo, arena): js/abilities.js
   ctx.restore();
+  if(FARV) abDrawWeather();                        // con la cámara lejana el clima cubre toda la pantalla
   if(PRV){ W = PR.SW; abDrawWeather(); }          // Campo de pruebas: el clima cubre toda la pantalla y el HUD se dibuja con el ancho de la pantalla (W se repone al final)
   if(typeof nvBannerDraw === 'function') nvBannerDraw();          // cartel grande de algunos ataques fuertes («¡Rayo Solar!») y la pantalla que se oscurece un instante (js/fxnuevos.js)
   if(!M.dead && !(typeof TOUCH !== 'undefined' && TOUCH.on)){             // cruz de puntería (con los dedos no se enseña)
@@ -435,6 +601,7 @@ function draw(){
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
   if(PRV) g.pops.forEach(p => { const [sx, sy] = prW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, sy, p.s || 9, p.c || '#ffe066', 'center'); });   // números del daño: a su sitio en la pantalla
+  else if(FARV) g.pops.forEach(p => { const [sx, sy] = farW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, Math.max(178, sy), p.s || 9, p.c || '#ffe066', 'center'); });
   else g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
 
   if(PRV) prTopBegin();                            // Campo de pruebas: los paneles de arriba van a la escala del estadio (js/pruebas.js)
@@ -464,6 +631,7 @@ function draw(){
   if(!(typeof TOUCH !== 'undefined' && TOUCH.on)){   // con pantalla táctil, la barra de ataques la sustituyen los botones (js/touch.js)
   // Barra de ataques, centrada abajo
   ctx.save(); ctx.translate(W/2, H); ctx.scale(HUD_SCALE, HUD_SCALE); ctx.translate(-W/2, -H);       // reducida desde el borde de abajo
+  if(FARV) ctx.globalAlpha = farBarAlpha();        // cámara lejana: lo mismo
   if(PRV) ctx.globalAlpha = prBarAlpha();          // Campo de pruebas: transparente si un Pokémon pasa por detrás
   const bw = 104, gap = 8, tw = 5*bw + 4*gap + 24, x0 = (W - tw)/2, y0 = H - 82;
   // Barra de energía grande, siempre visible, con las marcas de Q (20) y E (40) y el tiempo que falta
@@ -502,7 +670,7 @@ function draw(){
     }
   });
   ctx.restore();
-  if(PRV){ ctx.save(); ctx.globalAlpha = PR.barA || 1; megaHud(); ctx.restore(); } else
+  if(PRV || FARV){ ctx.save(); ctx.globalAlpha = (PRV ? PR.barA : FAR.barA) || 1; megaHud(); ctx.restore(); } else
   megaHud();                                       // aviso «R · MEGAEVOLUCIÓN» (js/mega.js)
   }
   megaTop();                                       // destello y cartel de la megaevolución, encima de todo
