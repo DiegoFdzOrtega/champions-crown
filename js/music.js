@@ -411,6 +411,47 @@ const Music = (() => {
     return T;
   })();
   Object.assign(SFX, shopSfx);
+  // ---- SONIDOS POR TIPO Y POR ATAQUE (js/sonidos.js): L_<tipo> al lanzar, I_<tipo> al dar, y algunos ataques con el suyo propio ----
+  { const B = (f, q, at, d, v, to) => ({n:1, ft:'bandpass', f, q, at, d, v, to}), H = (f, at, d, v, to) => ({n:1, ft:'highpass', f, at, d, v, to}), Lp = (f, at, d, v, to) => ({n:1, ft:'lowpass', f, at, d, v, to}),
+          O = (w, f, at, d, v, to, x) => ({w, f, at, d, v, to, x});
+    Object.assign(SFX, {
+      L_fuego:     [Lp(1800, 0, .35, .6, 600), B(3000, 2, .03, .05, .3), B(2600, 2, .12, .05, .25), B(3400, 2, .2, .04, .2)],            // fuego que ruge y chisporrotea
+      L_agua:      [B(900, 2, 0, .18, .6, 2200), O('sine', 600, 0, .12, .25, 1400), B(1600, 3, .1, .08, .25, 800)],                   // chorro de agua
+      L_planta:    [H(3500, 0, .3, .35), B(5000, 3, .05, .04, .2), B(4500, 3, .13, .04, .2), B(5200, 3, .21, .04, .18)],               // hojas que cortan el aire
+      L_electrico: [O('square', 1800, 0, .12, .22, 300), H(4000, 0, .08, .4), O('sawtooth', 120, 0, .15, .2), H(5000, .07, .04, .3)],  // chispazo
+      L_hielo:     [O('sine', 2600, 0, .18, .25, 3400), O('sine', 3900, .05, .15, .18), H(6000, 0, .1, .25)],                         // cristal
+      L_psiquico:  [O('sine', 500, 0, .32, .28, 1500), O('sine', 527, 0, .32, .28, 1560), O('triangle', 250, 0, .3, .12, 750)],       // zumbido psíquico (dos tonos que «baten»)
+      L_fantasma:  [O('triangle', 300, 0, .45, .28, 170), O('sine', 312, 0, .45, .25, 180), B(800, 4, 0, .4, .2, 500)],              // lamento
+      L_dragon:    [O('sawtooth', 110, 0, .42, .33, 70), Lp(900, 0, .42, .4, 300), O('square', 220, 0, .2, .08, 140)],               // rugido
+      L_siniestro: [O('sawtooth', 90, 0, .38, .33, 55), O('square', 180, 0, .38, .1, 110), Lp(600, 0, .32, .3)],                     // golpe oscuro
+      L_hada:      [O('sine', 1568, 0, .22, .22), O('sine', 2093, .06, .22, .2), O('sine', 2637, .12, .28, .18)],                     // campanillas
+      L_acero:     [O('square', 1250, 0, .25, .1), O('sine', 1870, 0, .32, .2), B(3000, 4, 0, .05, .3)],                              // metal
+      L_roca:      [Lp(700, 0, .25, .55, 200), B(1500, 2, .04, .04, .35), B(1200, 2, .1, .04, .3)],                                   // piedras
+      L_tierra:    [O('sine', 70, 0, .35, .55, 40, 1), Lp(400, 0, .35, .5, 120)],                                                     // tierra
+      L_volador:   [B(600, 1.5, 0, .3, .55, 1800)],                                                                                    // ráfaga de viento
+      L_veneno:    [O('sine', 300, 0, .08, .3, 700), O('sine', 400, .09, .08, .25, 900), O('sine', 350, .17, .08, .22, 800)],           // burbujas
+      L_bicho:     [O('sawtooth', 220, 0, .25, .14), O('square', 228, 0, .25, .07), H(4000, 0, .15, .12)],                             // zumbido
+      L_lucha:     [B(500, 1.2, 0, .12, .5, 1500)],                                                                                    // golpe de aire
+      I_fuego:     [Lp(2500, 0, .3, .7, 300), B(3000, 2, .05, .04, .35), B(2000, 2, .1, .05, .3)],                                     // estallido de fuego
+      I_agua:      [B(1200, 1.5, 0, .25, .7, 300), B(2600, 3, .05, .1, .3), B(2200, 3, .12, .08, .25)],                                // chapoteo
+      I_electrico: [H(3000, 0, .06, .6), O('square', 90, 0, .2, .25), H(4500, .08, .04, .4), H(4000, .14, .04, .3)],                   // descarga
+      I_hielo:     [H(5000, 0, .08, .55), O('sine', 3100, 0, .2, .2), O('sine', 4200, .04, .2, .15), B(2500, 3, .06, .05, .3)],          // se rompe el hielo
+      I_roca:      [Lp(900, 0, .3, .7, 150), B(1400, 2, .05, .05, .4), B(900, 2, .12, .06, .35), B(1200, 2, .2, .05, .25)],           // crujido de piedras
+      I_psiquico:  [O('sine', 1500, 0, .25, .25, 400), O('sine', 1560, 0, .25, .25, 420), H(5000, 0, .05, .3)],
+      I_fantasma:  [Lp(500, 0, .35, .45, 120), O('triangle', 200, 0, .35, .25, 90)],
+      I_siniestro: [Lp(400, 0, .3, .5, 90), O('sawtooth', 70, 0, .3, .25, 45)],
+      I_hada:      [O('sine', 2637, 0, .3, .22), O('sine', 3136, .05, .3, .2), H(6000, 0, .1, .25)],
+      I_planta:    [B(4000, 2, 0, .06, .4), B(3500, 2, .05, .06, .35), B(4500, 2, .1, .06, .3)],
+      bite:        [B(2500, 3, 0, .03, .6), O('square', 300, .01, .08, .35, 80, 1), H(3000, .02, .05, .4)],                          // ¡ÑAM! (mordisco)
+      crunch:      [B(2500, 3, 0, .03, .7), O('square', 260, .01, .1, .4, 60, 1), H(3000, .02, .05, .45), B(1200, 2, .07, .05, .45), B(900, 2, .12, .06, .4)],   // mordisco que cruje (Triturar, colmillos)
+      horn:        [O('sawtooth', 200, 0, .3, .2, 600), B(500, 1, 0, .35, .5, 2000)],                                                 // carga con el cuerno
+      wind:        [B(400, 2, 0, .8, .55, 1200), B(1200, 3, .3, .7, .35, 500), B(700, 2, .5, .6, .25, 1400)],                         // tornado
+      speed:       [H(1500, 0, .12, .6, 6000), O('sine', 900, 0, .1, .15, 2400)],                                                     // ¡ZAS! (a toda velocidad)
+      leaves:      [0, .06, .12, .18, .24, .3, .36].map((at, i) => B(4200 + (i % 3) * 600, 3, at, .05, .25)),                        // lluvia de hojas
+      pulse:       [0, .13, .26].map(at => O('sawtooth', 95, at, .11, .28, 60)).concat([Lp(500, 0, .4, .25)]),                       // ondas oscuras
+      slash:       [H(3000, 0, .08, .6, 8000), O('sine', 2500, 0, .06, .2, 1200)],                                                   // corte
+      clash:       [O('square', 1000, 0, .3, .14), O('sine', 1500, 0, .35, .2), B(2500, 3, 0, .08, .5)]                              // ¡CHOQUE!
+    }); }
   // ---- ATAQUES FUERTES (js/fxsuelo.js): Terremoto, Hiperrayo, Trueno y Cometa Draco, con golpes graves y crujidos como en el vídeo ----
   Object.assign(SFX, {
     quake:   [{f:62, to:34, x:1, at:0, d:1.1, w:'sine', v:1}, {n:1, ft:'lowpass', f:420, to:80, q:.7, at:0, d:1.3, v:.95},                 // retumbo largo

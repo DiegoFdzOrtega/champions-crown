@@ -183,7 +183,7 @@ const CAMPO = [
     P(979, 'Firme',   'Foco Interno',   'aguante',   {hp:252, atk:252, spd:4}, ['Puño Sombra',  'Tinieblas',       'Corpulencia',     'Onda Certera'])     // Annihilape: la furia
   ]},
   {id:'kamado', file:'kamado.png', name:'Maestro Kamado', cls:'Maestro herrero', theme:'Forja, brasas y fuego eterno', tier:3, arena:'blaine', team:[
-    P(839, 'Osada',   'Cuerpo Llama',   'restos',    {hp:252, def:252, spa:4}, ['Puño Fuego',   'Lanzallamas',     'Defensa Férrea',  'Llamarada']),       // Coalossal: el carbón vivo
+    P(324, 'Osada',   'Sequía',         'restos',    {hp:252, def:252, spa:4}, ['Puño Fuego',   'Lanzallamas',     'Defensa Férrea',  'Llamarada']),       // Torkoal: el carbón vivo (Coalossal no tiene sprite)
     P(157, 'Modesta', 'Mar Llamas',     'gafasesp',  {spa:252, spe:252, hp:4}, ['Colmillo Ígneo','Lanzallamas',    'Día Soleado',     'Llamarada']),       // Typhlosion: la forja en la espalda
     P(637, 'Miedosa', 'Cuerpo Llama',   'cuchara',   {spa:252, spe:252, hp:4}, ['Tijera X',     'Lanzallamas',     'Danza Aleteo',    'Llamarada']),       // Volcarona: el sol pequeño
     P(467, 'Modesta', 'Cuerpo Llama',   'gafaselec', {spa:252, hp:252, spe:4}, ['Puño Trueno',  'Rayo',            'Fuego Fatuo',     'Llamarada'])           // Magmortar: el cañón de lava

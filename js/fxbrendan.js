@@ -61,7 +61,7 @@ function brPPFlight(s, a, an){
 // Solo se libra si está haciendo la carrera (invulnerable) justo cuando le llega.
 function ppStart(f, s){
   const side = s.vx < 0 ? -1 : 1;                                           // se ponen a su lado, hacia el rival (como en el vídeo)
-  s.pp = {phase: 'up', t0: g.t, f, ox: side * 56}; s.life = 4; s.dg = true;      // (dg: mientras levita no golpea a nadie) s.vx0 = s.vx; s.vy0 = s.vy; s.vx = s.vy = 0;
+  s.pp = {phase: 'up', t0: g.t, f, ox: side * 56}; s.life = 4; s.dg = true; s.vx0 = s.vx; s.vy0 = s.vy; s.vx = s.vy = 0;      // (dg: mientras levita no golpea a nadie)
   setAct(f, 'Charge', PP.rise);
 }
 function ppSteer(){

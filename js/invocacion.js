@@ -419,11 +419,11 @@ const INV_SIG_X = {
   brendan:[254, 257, 260], may:[254, 257, 260, 267], wally:[282, 475], steven:[376, 306, 344, 346, 348, 227], archie:[319, 382, 342], maxie:[323, 383, 229],
   lucas:[389, 392, 395], dawn:[389, 392, 395, 417], barry:[389, 392, 395, 398], cyrus:[430, 461, 169, 130, 229, 487], mars:[429], jupiter:[454],
   hilbert:[497, 500, 503], hilda:[497, 500, 503], nate:[497, 500, 503], rosa:[497, 500, 503], hugh:[497, 500, 503, 521], cheren:[508, 510], bianca:[518, 497], n:[643, 571, 601, 567], ghetsis:[635, 604], colress:[462, 601],
-  calem:[652, 655, 658], serena:[652, 655, 658, 700], shauna:[652, 655, 658], lysandre:[668, 130, 430, 620], sycamore:[3, 6, 9],
+  calem:[652, 655, 658], serena:[652, 655, 658, 700], shauna:[652, 655, 658], lysandre:[130, 430, 620], sycamore:[3, 6, 9],
   elio:[724, 727, 730, 25], selene:[724, 727, 730], hau:[26, 724, 727, 730], gladion:[773, 169, 448], lillie:[790, 791, 792], lusamine:[793, 36, 229], guzma:[768, 794], plumeria:[757, 452], nanu:[53], hapu:[750],
   victor:[812, 815, 818], gloria:[812, 815, 818], hop:[888, 812, 815, 818], marnie:[861, 877], bede:[858, 214], leon:[6, 887, 681, 612], raihan:[884, 330], milo:[830], nessa:[834], kabu:[851, 59],
-  bea:[865, 68], allister:[94], opal:[869, 303], gordie:[839], melony:[131, 584], piers:[862], rose:[879, 884], oleana:[877],
-  florian:[908, 911, 914], juliana:[908, 911, 914], nemona:[903, 745], arven:[943, 908], penny:[700, 196, 197], kieran:[1015, 1011], carmine:[1016, 1017], geeta:[983, 970], iono:[939], larry:[398, 975], volo:[487],
+  bea:[865, 68], allister:[94], opal:[869, 303], gordie:[874], melony:[131, 584], piers:[862], rose:[879, 884], oleana:[877],
+  florian:[908, 911, 914], juliana:[908, 911, 914], nemona:[903, 745], arven:[908], penny:[700, 196, 197], kieran:[1015, 1011], carmine:[1016, 1017], geeta:[983, 970], iono:[939], larry:[398, 975], volo:[487],
   ash:[25, 6, 448, 724, 445], oak:[3, 6, 9], janine:[49]};
 const INV_SIG = {};
 function invSigOf(f){
