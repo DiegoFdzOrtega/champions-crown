@@ -173,9 +173,11 @@ function teFans(){
     if(teR() > C.dens || C.holes.some(([h0, h1, h2, h3]) => x > h0 && x < h2 && y > h1 && y < h3)) continue;
     const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, s: TE_SHIRT[(teR() * 12) | 0], k: TE_SKIN[(teR() * 5) | 0], h: TE_HAIR[(teR() * 7) | 0], p: teR() * 6.28, wave: teR() < .12}); } });
 }
+const TE_PUB_NO = [89, 97, 103, 104, 107, 108, 110, 113, 115, 116, 119, 125, 126, 189, 192];   // [AJUSTE] de publico.png, los que no son personas (bichos, estatuas, bultos): no se sientan en la grada
 function teFansSpr(){                                                        // público de entrenadores (estadio de las regiones)
   teSeed = 9; TE.crowd.length = 0; const C = TE_EST.crowd, n = TE_PUB.n || 200, hole = (x, y) => C.holes.some(([a, b, c, d]) => x > a && x < c && y > b && y < d);
-  const add = (x, y, face) => { if(teR() > C.dens || hole(x, y)) return; const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, i: (teR() * n) | 0, face, p: teR() * 6.28, wave: teR() < .1}); };
+  const ok = Array.from({length: n}, (_, i) => i).filter(i => !TE_PUB_NO.includes(i));
+  const add = (x, y, face) => { if(teR() > C.dens || hole(x, y)) return; const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, i: ok[(teR() * ok.length) | 0], face, p: teR() * 6.28, wave: teR() < .1}); };
   C.rows.forEach(([x0, x1, y, face]) => { for(let x = x0 + (teR() * 6 | 0); x < x1; x += C.dx) add(x, y, face); });
   C.cols.forEach(([x, y0, y1, face]) => { for(let y = y0; y < y1; y += C.dyS || C.dy) add(x, y, face); });
   TE.crowd.sort((a, b) => a.y - b.y);
