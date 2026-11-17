@@ -261,7 +261,7 @@ function torreFight(f){
     const im = new Image(); twLoadLeader(im, F.id); im.onload = () => { o.portrait = im.src; };                 // su retrato para la pantalla del estadio
     vs = {name:F.leader, id:F.id, enemies:en, label:`TORRE · PISO ${f} · CAMPEÓN`, music:o};
   }else{
-    const team2 = torreEquipo(P.x, f < 10 ? 4 : f < 25 ? 5 : 6, tw.run.r * 97 + f);      // 4 al principio, 6 desde el piso 25
+    const team2 = torreEquipo(P.x, TEAM_SIZE, tw.run.r * 97 + f);      // siempre 6 contra 6
     o = {torre:true, estTorre:true, torreFloor:f, floor:f, n:-1, leader:'torre_' + P.id, arena:'campo', leaderName:P.name, rival:P.name, portrait:P.path, title:'TORRE BATALLA', sub:`PISO ${f} · ${P.name.toUpperCase()}`, enemies:team2, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl};
     vs = {name:P.name, path:P.path, enemies:team2, label:`TORRE · PISO ${f}`, music:o};
   }

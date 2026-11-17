@@ -4076,7 +4076,7 @@ html.phone #guiaM .gnav button{min-height:2.8em}
 #tmHub{background:#070c1f}
 #tmHub::before{opacity:1;inset:-24px;background:url(../assets/fondos/equipo_pedestales.webp?v=1) center/cover no-repeat;filter:blur(7px) brightness(.42) saturate(1.1)}
 .hb6-scene{position:absolute;inset:0;background:url(../assets/fondos/equipo_pedestales.webp?v=1) no-repeat;image-rendering:pixelated;
-  -webkit-mask-image:radial-gradient(ellipse 72% 78% at 50% 52%,#000 62%,transparent 100%);mask-image:radial-gradient(ellipse 72% 78% at 50% 52%,#000 62%,transparent 100%)}
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}   /* solo se difuminan los lados: arriba y abajo la imagen llega hasta el borde */
 .hb6-mon{position:absolute;width:calc(10em * var(--k,1));transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;z-index:2;cursor:pointer;user-select:none}
 .hb6-mon canvas{width:100%;height:auto;aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 0 .5em color-mix(in srgb,var(--c1,#6aa0ff) 70%,transparent));transition:filter .15s,transform .15s}
 .hb6-mon:hover canvas{transform:translateY(-3%)}
@@ -4122,3 +4122,9 @@ html.phone #guiaM .gnav button{min-height:2.8em}
 .hb6-ws{display:flex;flex-direction:column;gap:.25em;font-size:.82em}.hb6-ws .bad{color:#ff8a6a}.hb6-ws .ok{color:#7dffa0}
 .hb6-ab{display:flex;flex-wrap:wrap;gap:.35em;margin-top:auto}
 .hb6-none{color:#9fb3e0}
+.hb6-table.hide{display:none}
+.hb6-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;image-rendering:pixelated;z-index:1}
+#hbCards{z-index:2}
+
+/* Equipo de 6: la ilustración llega hasta arriba del todo, por detrás de la barra del título */
+#tmHub #hbStage{overflow:visible}#tmHub .hb-top{z-index:3}#tmHub .hb-left,#tmHub .hb-right{position:relative;z-index:3}

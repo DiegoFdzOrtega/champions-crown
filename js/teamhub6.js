@@ -8,8 +8,12 @@
    - Botón «Tabla de tipos»: tabla 6 × 18 con lo que le hace a cada uno un ataque de cada tipo.
    ===================================================================== */
 const HB6 = {img: 'assets/fondos/equipo_pedestales.webp?v=1', w: 1672, h: 941,
+  up: .8,                                                                             // [AJUSTE] cuánto se sube la imagen (0 = arriba del todo visible, 1 = se ve la parte de abajo)
   ped: [[280, 653], [482, 603], [705, 578], [970, 578], [1188, 603], [1390, 653]],   // [AJUSTE] centro de la cara de arriba de cada pedestal (píxeles de la imagen)
   sel: null, tab: 'mon', raf: 0, place: null};
+// estrellas de la imagen que brillan (x, y, tamaño) y nubes que pasan (y, ancho, velocidad, opacidad) — en píxeles de la imagen
+const HB6_STARS = [[165,33,9],[1436,70,7],[1560,138,6],[824,159,6],[681,27,6],[140,121,6],[373,75,6],[748,321,5],[1232,161,5],[1030,296,5],[1023,247,5],[943,315,5],[1449,156,4],[439,262,4],[1390,206,4],[1193,282,4],[653,136,4],[615,317,4],[1275,62,4],[876,261,4],[88,56,4],[538,281,3],[344,209,3],[258,107,3],[1357,163,3],[1028,140,3]];
+const HB6_CLOUDS = [[255, 260, 9, .55], [300, 340, 6, .5], [345, 220, 11, .45], [470, 300, 7, .4], [505, 380, 5, .45], [205, 200, 13, .35]];
 const hb6Spr = d => { const M = hbMega(d); return M ? M.folder : d; };
 
 // ---- Estructura: se añade a la de teamhub.js ----
@@ -17,6 +21,7 @@ const hb6Spr = d => { const M = hbMega(d); return M ? M.folder : d; };
     o.apply(this, arguments);
     const st = $('hbStage'); ['hbLines'].forEach(id => { const e = $(id); if(e) e.remove(); }); const em = st.querySelector('.hb-emb'); if(em) em.remove();
     const sc = document.createElement('div'); sc.id = 'hb6Scene'; sc.className = 'hb6-scene'; st.insertBefore(sc, st.firstChild);
+    const fx = document.createElement('canvas'); fx.id = 'hb6Fx'; fx.className = 'hb6-fx'; sc.after(fx);
     const tb = document.createElement('div'); tb.className = 'hb6-tabs'; tb.innerHTML = '<button id="hb6Mx" class="hb-btn mini" title="Qué le hace a cada uno un ataque de cada tipo">▦ Tabla de tipos</button>'; st.appendChild(tb);
     const mx = document.createElement('div'); mx.id = 'hb6Table'; mx.className = 'hb6-table hide'; st.appendChild(mx);
     $('hb6Mx').onclick = () => { const t = $('hb6Table'); t.classList.toggle('hide'); if(!t.classList.contains('hide')) hb6Matrix(); };
@@ -41,10 +46,12 @@ const hb6Spr = d => { const M = hbMega(d); return M ? M.folder : d; };
 // ---- Coloca la ilustración (cubre el centro) y a cada Pokémon sobre su pedestal ----
 function hb6Place(){
   const st = $('hbStage'), sc = $('hb6Scene'); if(!st || !sc || !st.offsetWidth) return;
-  const W = st.clientWidth, H = st.clientHeight, s = Math.max(W / HB6.w, H / HB6.h), ox = (W - HB6.w * s) / 2, oy = Math.max(H - HB6.h * s, Math.min(0, (H - HB6.h * s) * .35));
+  const hub = $('tmHub'), T = hub ? Math.max(0, Math.round(st.getBoundingClientRect().top - hub.getBoundingClientRect().top)) : 0;   // la ilustración sube hasta arriba del todo (detrás de la barra del título): sin franja negra encima
+  const W = st.clientWidth, H = st.clientHeight + T, s = Math.max(W / HB6.w, H / HB6.h), ox = (W - HB6.w * s) / 2, oy = Math.max(H - HB6.h * s, Math.min(0, (H - HB6.h * s) * HB6.up));
+  [sc, $('hb6Fx')].forEach(e => { if(e){ e.style.top = -T + 'px'; e.style.height = H + 'px'; } });
   sc.style.backgroundSize = `${HB6.w * s}px ${HB6.h * s}px`; sc.style.backgroundPosition = `${ox}px ${oy}px`;
-  HB6.place = {s, ox, oy};
-  $('hbCards').querySelectorAll('.hb6-mon').forEach(c => { const [px, py] = HB6.ped[+c.dataset.i]; c.style.left = (ox + px * s) + 'px'; c.style.top = (oy + py * s) + 'px'; c.style.setProperty('--k', s / .64); });
+  HB6.place = {s, ox, oy, T};
+  $('hbCards').querySelectorAll('.hb6-mon').forEach(c => { const [px, py] = HB6.ped[+c.dataset.i]; c.style.left = (ox + px * s) + 'px'; c.style.top = (oy - T + py * s) + 'px'; c.style.setProperty('--k', s / .64); });
 }
 hbBgFit = function(){ hb6Place(); };
 hbLines = function(){};
@@ -66,7 +73,7 @@ function hb6Mark(){ $('hbCards').querySelectorAll('.hb6-mon').forEach(c => c.cla
 // arrastrar (lo mismo que hacían las cartas)
 { const o = hbBuild; hbBuild = function(){
     o.apply(this, arguments); const cards = $('hbCards');
-    cards.addEventListener('dragstart', e => { const c = e.target.closest('.hb6-mon[data-d]'); if(!c) return; e.dataTransfer.setData('text/plain', 'slot:' + c.dataset.i); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); });
+    cards.addEventListener('dragstart', e => { const c = e.target.closest('.hb6-mon[data-d]'); if(!c) return; e.stopPropagation(); e.dataTransfer.setData('text/plain', 'slot:' + c.dataset.i); e.dataTransfer.effectAllowed = 'move'; c.classList.add('dragging'); }, true);   // (antes que el de las cartas viejas, que cancelaba el arrastre)
     cards.addEventListener('dragend', () => cards.querySelectorAll('.dragging,.drop').forEach(c => c.classList.remove('dragging', 'drop')));
     cards.addEventListener('dragover', e => { const c = e.target.closest('.hb6-mon'); if(c){ e.preventDefault(); c.classList.add('drop'); } });
     cards.addEventListener('dragleave', e => { const c = e.target.closest('.hb6-mon'); if(c) c.classList.remove('drop'); });
@@ -81,6 +88,7 @@ function hb6Loop(){
     const v = $('teamv');
     if(!v || v.classList.contains('hide') || !v.classList.contains('hubv')){ HB6.raf = 0; return; }
     const t = performance.now() / 1000;
+    hb6Sky(t);
     $('hbCards').querySelectorAll('canvas[data-spr]').forEach((cv, i) => {
       const sp = cv.dataset.spr, dex = isNaN(+sp) ? sp : +sp, shiny = !isNaN(+sp) && useShiny(+sp), c = cv.getContext('2d');
       c.clearRect(0, 0, cv.width, cv.height);
@@ -94,10 +102,37 @@ function hb6Loop(){
   HB6.raf = requestAnimationFrame(step);
 }
 
+// ---- Vida del fondo: nubes que pasan despacio y estrellas que brillan poco a poco ----
+function hb6Sky(t){
+  const cv = $('hb6Fx'), P = HB6.place; if(!cv || !P) return;
+  const W = cv.clientWidth, H = cv.clientHeight; if(cv.width !== W || cv.height !== H){ cv.width = W; cv.height = H; }
+  const c = cv.getContext('2d'); c.clearRect(0, 0, W, H); c.imageSmoothingEnabled = false;
+  const X = x => P.ox + x * P.s, Y = y => P.oy + y * P.s, px = Math.max(2, Math.round(3 * P.s));
+  // nubes: bultos de píxeles lila oscuro que cruzan de izquierda a derecha y vuelven a entrar
+  HB6_CLOUDS.forEach(([cy, cw, sp, op], i) => {
+    const span = HB6.w + cw * 2, cx = ((t * sp + i * 397) % span) - cw;
+    for(let k = 0; k < 7; k++){
+      const bx = cx + (k - 3) * cw * .16, by = cy + Math.sin(k * 1.7 + i) * 10 - (k === 3 || k === 2 ? 14 : 0), rw = cw * (.22 + .1 * Math.sin(k * 2.3 + i)), rh = rw * .42;
+      c.globalAlpha = op * .85; c.fillStyle = '#3a3478';
+      for(let yy = -rh; yy < rh; yy += px / P.s){ const ww = rw * Math.sqrt(Math.max(0, 1 - (yy / rh) ** 2)); c.fillRect(Math.round(X(bx - ww) / px) * px, Math.round(Y(by + yy) / px) * px, Math.round(ww * 2 * P.s / px) * px, px); }
+      c.globalAlpha = op * .6; c.fillStyle = '#7a72c8';
+      for(let yy = -rh * .9; yy < -rh * .2; yy += px / P.s){ const ww = rw * .8 * Math.sqrt(Math.max(0, 1 - (yy / rh) ** 2)); c.fillRect(Math.round(X(bx - ww) / px) * px, Math.round(Y(by + yy) / px) * px, Math.round(ww * 2 * P.s / px) * px, px); }
+    }
+  });
+  // estrellas: cruz de luz que se enciende y apaga despacio
+  HB6_STARS.forEach(([x, y, z], i) => {
+    const a = Math.pow(.5 + .5 * Math.sin(t * (.35 + (i % 5) * .08) + i * 1.9), 2); if(a < .05) return;
+    const cx = X(x), cy = Y(y), L = (z * 1.6 + 3) * P.s * (.6 + .4 * a), w = Math.max(1, Math.round(P.s * 1.4));
+    c.globalAlpha = a * .9; c.fillStyle = '#e8f0ff'; c.fillRect(cx - L, cy - w / 2, L * 2, w); c.fillRect(cx - w / 2, cy - L, w, L * 2);
+    c.globalAlpha = a * .5; c.fillStyle = '#9ac4ff'; const g = w * 2.5; c.fillRect(cx - g / 2, cy - g / 2, g, g);
+  });
+  c.globalAlpha = 1;
+}
+
 // ---- Ficha del Pokémon elegido (derecha) ----
 const HB6_SLOT = ['Golpe · clic izq.', 'Disparo · clic der.', 'Mejora · Q', 'Fuerte · E'];
 function hb6Det(){
-  const el = $('hb6Det'); if(!el) return; const d = HB6.sel;
+  const el = $('hb6Det'); if(!el) return; const d = HB6.sel; el.dataset.d = d || '';
   if(!d){ el.innerHTML = '<h3>Pokémon</h3><p class="hb6-none">Elige un Pokémon de los pedestales para ver sus datos.</p>'; return; }
   const m = mon(d), M = hbMega(d), ty = M ? M.types : m.types, i = team.indexOf(d), hw = typeof hwOf === 'function' ? hwOf(d) : null;
   const mv = movesOf(d), L = {hp:'PS', atk:'Ataque', def:'Defensa', spa:'At. Esp.', spd:'Def. Esp.', spe:'Velocidad'}, C = {hp:'#e8503a', atk:'#ffc83a', def:'#4ccf6a', spa:'#3ea6ff', spd:'#8a7aff', spe:'#ff5aa0'};

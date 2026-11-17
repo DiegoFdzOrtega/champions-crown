@@ -22,3 +22,9 @@ material/pokemon_masters/
 
 # Copias de seguridad hechas a mano (el historial ya lo guarda Git)
 _backups/
+
+assets/fondos/torre/*.png
+!assets/fondos/torre/baldosas.png
+!assets/fondos/torre/barandilla.png
+!assets/fondos/torre/grada.png
+!assets/fondos/torre/hierba.png

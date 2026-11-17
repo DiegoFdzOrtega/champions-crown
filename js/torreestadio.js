@@ -52,7 +52,7 @@ const TE_EST_A = {src: 'assets/fondos/torre/estadio_vacio.webp?v=1', w: 2048, h:
     dx: 26, dy: 24, dyS: 30, dens: .85, sc: .95}};                                         // cinta LED encima del campo · dónde está cada entrenador (en el cuadro blanco de piedra de su lado)                                         // cinta LED encima del campo · dónde está cada entrenador (en el cuadro blanco de piedra de su lado)
 // ESTADIO DE LAS REGIONES (todas menos Kanto): assets/fondos/torre/estadio_galar.webp (1677 × 938), de «Estadio pixelado futurista vacío».
 // Sin pantallas ni cinta LED; el público son entrenadores en sprite de mapa (assets/entrenadores_mini/publico.png) y cada entrenador está en el área pequeña de su lado.
-const TE_EST_G = {src: 'assets/fondos/torre/estadio_galar.webp?v=1', w: 1677, h: 938, S: 1.4, Z: .5, Zmin: .4,   // Z / Zmin: [AJUSTE] zoom de la cámara en este estadio (menos = se ve más campo)
+const TE_EST_G = {src: 'assets/fondos/torre/estadio_galar.webp?v=2', w: 1677, h: 938, S: 1.4, Z: .5, Zmin: .4,   // Z / Zmin: [AJUSTE] zoom de la cámara en este estadio (menos = se ve más campo)
   org: [184, 245], W: 1834, H: 724, B: {x0: -258, x1: 2090, y0: -343, y1: 970},
   plat: [[216, 548], [1460, 548]], sprites: true,                              // dónde está cada entrenador (dentro del área pequeña de su lado)
   crowd: {rows: [                                                              // filas de asientos: [x0, x1, y, mira] (mira: d = hacia abajo/de frente · u = de espaldas · r / l = de perfil)
