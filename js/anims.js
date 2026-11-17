@@ -28,7 +28,10 @@ Object.entries(AN_EXTRA).forEach(([k, v]) => { if(!ANIMS[k]) ANIMS[k] = Object.a
 const AN_BASE = ['Idle', 'Walk', 'Attack', 'Shoot', 'Charge', 'Hurt', 'Faint'];
 let AN_HAS = {};                                                            // '6' -> Set('Hop', 'Sleep', ...)
 fetch(`${CARPETA}/anims.json?v=` + Date.now().toString().slice(0, 7)).then(r => r.ok ? r.json() : {}).then(j => { const o = {}; Object.entries(j || {}).forEach(([d, l]) => o[d] = new Set(l)); AN_HAS = o; }).catch(() => {});
-const anHas = (f, a) => AN.on && !f.shiny && typeof f.m.dex === 'number' && !!(AN_HAS[f.m.dex] && AN_HAS[f.m.dex].has(a));
+const anHas = (f, a) => { if(!(AN.on && !f.shiny && typeof f.m.dex === 'number' && AN_HAS[f.m.dex] && AN_HAS[f.m.dex].has(a))) return false;
+  const S = sheet(f.m.dex, a, false); if(S.bad) return false;
+  if(S.ok && (S.height < 8 * 16 || S.width < 16)){ AN_HAS[f.m.dex].delete(a); return false; }     // hojas de una sola fila o columna (p. ej. «coger aire» de Jolteon): no tienen las 8 direcciones y el Pokémon se volvía invisible
+  return true; };
 
 // Golpe según el nombre del ataque
 const AN_MELEE = [[/patada|pisot/i, 'Kick'], [/cabeza|testarazo|cornada|megacuerno|cuerno/i, 'Head'], [/doble|dos |combo|furia/i, 'Double'],
