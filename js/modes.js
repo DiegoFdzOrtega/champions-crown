@@ -12,7 +12,7 @@ function floorFight(n){                          // n = 0 es el primer líder
     hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl,
     arena, leaderName:who.leader                       // arena (opcional) y nombre de quien te toca (para la pantalla final)
   };
-  if(typeof TE_NEW !== 'undefined' && TE_NEW && String(F.region || '').split(' / ').pop() !== 'Kanto') o.estRegion = true;   // regiones (menos Kanto): estadio grande con público (js/torreestadio.js)
+  if(typeof TE_NEW !== 'undefined' && TE_NEW) o.estRegion = true;   // todas las regiones (Kanto incluida): estadio grande con público (js/torreestadio.js)
   if(!team.length){ startBattle(o); return; }                                              // (startBattle avisa de que el equipo está vacío)
   const kind = {lider:'Líder', alto:'Alto Mando', campeon:'Campeón'}[F.kind] || '', reg = String(F.region || '').split(' / ').pop();
   vsIntro({name:who.leader, id:who.id, enemies:F.teams, label:[reg, kind].filter(Boolean).join(' · ').toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS y, al terminar, empieza el combate

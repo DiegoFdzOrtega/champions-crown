@@ -411,6 +411,21 @@ const Music = (() => {
     return T;
   })();
   Object.assign(SFX, shopSfx);
+  // ---- ATAQUES FUERTES (js/fxsuelo.js): Terremoto, Hiperrayo, Trueno y Cometa Draco, con golpes graves y crujidos como en el vídeo ----
+  Object.assign(SFX, {
+    quake:   [{f:62, to:34, x:1, at:0, d:1.1, w:'sine', v:1}, {n:1, ft:'lowpass', f:420, to:80, q:.7, at:0, d:1.3, v:.95},                 // retumbo largo
+              {f:120, to:45, x:1, at:.22, d:.25, w:'sine', v:.7}, {f:110, to:40, x:1, at:.48, d:.25, w:'sine', v:.55},                    // sacudidas
+              ...[.12, .3, .41, .6, .74].map((at, i) => ({n:1, ft:'bandpass', f:1800 + i * 300, q:2, at, d:.06, v:.22}))],               // piedras que crujen
+    boom:    [{f:120, to:34, x:1, at:0, d:.5, w:'sine', v:1}, {n:1, ft:'lowpass', f:2600, to:110, q:.7, at:0, d:.55, v:.9}, {n:1, ft:'bandpass', f:4200, to:1400, q:.8, at:0, d:.08, v:.45}],
+    beam_ch: [{f:160, to:820, at:0, d:.45, w:'sawtooth', v:.16}, {n:1, ft:'bandpass', f:400, to:2600, q:1.4, at:0, d:.45, v:.32}],           // se carga
+    beam:    [{n:1, ft:'bandpass', f:1600, q:1, at:0, d:.09, v:.6}, {n:1, ft:'lowpass', f:2000, to:500, q:.8, at:0, d:1.1, v:.75},           // sale el rayo y ruge
+              {f:92, to:68, at:0, d:1.1, w:'sawtooth', v:.24}, {f:184, to:140, at:0, d:.9, w:'square', v:.07}, {n:1, ft:'highpass', f:4500, at:0, d:.5, v:.14}],
+    trueno:  [{n:1, ft:'highpass', f:2600, at:0, d:.09, v:.95}, {n:1, ft:'bandpass', f:1300, to:280, q:.8, at:0, d:.28, v:.85},             // ¡CRAC!
+              {f:78, to:38, x:1, at:.02, d:.9, w:'sine', v:.85}, {n:1, ft:'lowpass', f:650, to:70, at:.05, d:1.4, v:.75},                  // y el trueno que retumba
+              {n:1, ft:'highpass', f:3200, at:.13, d:.05, v:.5}, {n:1, ft:'highpass', f:3200, at:.21, d:.04, v:.4}],
+    meteoro: [{n:1, ft:'bandpass', f:3200, to:450, q:1.5, at:0, d:.24, v:.55}, {f:900, to:200, at:0, d:.24, w:'sine', v:.12}],             // silbido al caer
+    skid:    [{n:1, ft:'bandpass', f:1100, to:280, q:1.2, at:0, d:.38, v:.5}, {f:140, to:60, x:1, at:0, d:.2, w:'sine', v:.55}]                // ¡derribado!: se arrastra por el suelo
+  });
   const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
   function sfx(name, k){                                                           // k (opcional, 0-1): lo bajito que suena (los ataques del rival de la Historia suenan más suaves)
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;
