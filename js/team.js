@@ -110,13 +110,13 @@ function placeAt(dex, i){                                                       
     const [d] = team.splice(cur, 1); team.splice(Math.min(i, team.length), 0, d); persist();
     tm.selD = dex; renderTeamSlots(); toast(`${mon(dex).name} ahora es el nº ${team.indexOf(dex) + 1} del equipo.`); return;
   }
-  if(i >= team.length){ if(team.length >= 3) return toast('El equipo está completo.'); team.push(dex); }
+  if(i >= team.length){ if(team.length >= TEAM_SIZE) return toast('El equipo está completo.'); team.push(dex); }
   else{ delete save.equip[team[i]]; team[i] = dex; }                                              // sustituir: el objeto del anterior se libera
   persist(); tm.selD = dex; tm.selSlot = null; renderTeamSlots(); toast(`${mon(dex).name} se une al equipo.`);
 }
 function quickAdd(dex){                                                                           // doble clic en la caja
   if(team.includes(dex)){ tm.selD = dex; return renderTeamSlots(); }
-  if(team.length >= 3) return toast('El equipo está completo: arrástralo a un hueco o usa «Sustituir a...» en la ficha.');
+  if(team.length >= TEAM_SIZE) return toast('El equipo está completo: arrástralo a un hueco o usa «Sustituir a...» en la ficha.');
   placeAt(dex, team.length);
 }
 function removeMon(dex){                                                                          // quitar del equipo (siempre debe quedar al menos 1)
@@ -265,7 +265,7 @@ function boxDragEnd(e){
 }
 
 // ---- Lista de equipos (izquierda) ----
-const teamTotalText = () => `${save.teams[save.tsel].n} · ${team.length}/3 · ${boxCount()} Pokémon en la caja`;
+const teamTotalText = () => `${save.teams[save.tsel].n} · ${team.length}/${TEAM_SIZE} · ${boxCount()} Pokémon en la caja`;
 function teamVisibleList(){                                                                       // equipos que pasan la búsqueda y el filtro rápido
   const q = tl.q.trim().toLowerCase();
   return save.teams.map((t, i) => ({t, i, mons: i === save.tsel ? team : t.mons})).filter(({t, mons}) =>
@@ -334,7 +334,7 @@ function renderTeamSlots(){
   $('pcSub').textContent = teamTotalText(); renderTeamTabs(); renderCov(); renderSlots(); renderSel(); markBox();
 }
 function renderSlots(){
-  $('tmSlots').innerHTML = [0, 1, 2].map(i => {
+  $('tmSlots').innerHTML = Array.from({length: TEAM_SIZE}, (_, i) => i).map(i => {
     const dex = team[i];
     if(!dex) return `<article class="pcs empty${tm.selSlot === i && !tm.selD ? ' sel' : ''}" data-i="${i}"><i class="pcs-n">${i + 1}</i><div class="pcs-e"><b>Hueco libre</b><small>Arrastra aquí un Pokémon de la caja, o márcalo y pulsa «Añadir al equipo»</small></div></article>`;
     const m = mon(dex);
@@ -371,7 +371,7 @@ function renderSel(){
   const evT = STAT_KEYS.reduce((n, k) => n + (ev[k] || 0), 0), ivT = STAT_KEYS.reduce((n, k) => n + (iv[k] || 0), 0);
   const acts = inTeam
     ? `<button class="pcb main" data-act="data">Ver datos</button><button class="pcb" data-act="rm">✕ Quitar del equipo</button>`
-    : team.length < 3
+    : team.length < TEAM_SIZE
       ? `<button class="pcb main" data-act="add">＋ Añadir al equipo</button><button class="pcb" data-act="data">Ver datos</button>`
       : `<div class="pci-rep"><small>El equipo está completo. Sustituir a:</small>${team.map((x, i) => `<button class="pcb" data-act="rep" data-i="${i}">${i + 1} · ${esc(mon(x).name)}</button>`).join('')}</div><button class="pcb" data-act="data">Ver datos</button>`;
   el.dataset.d = d;

@@ -20,7 +20,7 @@
    REGLA: lo que dependa de algo que NO es igual en los dos ordenadores (el audio activado o no, el volumen, el tamaño de la ventana...) no puede llamar a Math.random dentro de un paso del combate,
    porque gastaría números del azar compartido solo en uno de los dos. Los efectos visuales sí pueden (los dos ordenadores los dibujan igual). Los sonidos NO (js/music.js crea su ruido con un generador propio).
    ===================================================================== */
-const PVP_VER = '23';                                   // (23: tamaño y peso de cada Pokémon, js/pesos.js · 22: Golpe Cuerpo y Vuelo son un salto · 21: Lanzallamas es un chorro sostenido · 20: Torbellino · 19: Hidrobomba e Hiperrayo van más deprisa · 18: el Rayo Solar va más deprisa · 17: el Rayo Burbuja es una ristra de burbujas · 16: Drenadoras, Burbuja y Rayo Burbuja · 15: el golpe cargado empuja mucho más · 14: el terreno es una franja recta · 13: el ataque fuerte empuja más y suelta una onda al salir · 12: terreno por tipo en forma de rastro, golpe cargado y entrada con impacto · 11: energía al debilitar y contraataque tras esquivar · 10: chocan todos los disparos y el golpe corta disparos · 9: choque de disparos, CLASH en combat.js · 8: formas de ataque por tipo, MELEE_KINDS y SHOT_KINDS en combat.js, sin rebotes · 7: retroceso, esquiva con la carrera y carga del ataque fuerte, FEEL en combat.js · 6: golpe cuerpo a cuerpo con más alcance y ángulo, MELEE en combat.js · 5: la Clasificatoria se juega en el Estadio: campo de 1250 de ancho con límites en perspectiva, js/pruebas.js · 2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
+const PVP_VER = '26';                                   // (26: equipos de 6 · 24: Clasificatoria en el estadio grande · 23: tamaño y peso de cada Pokémon, js/pesos.js · 22: Golpe Cuerpo y Vuelo son un salto · 21: Lanzallamas es un chorro sostenido · 20: Torbellino · 19: Hidrobomba e Hiperrayo van más deprisa · 18: el Rayo Solar va más deprisa · 17: el Rayo Burbuja es una ristra de burbujas · 16: Drenadoras, Burbuja y Rayo Burbuja · 15: el golpe cargado empuja mucho más · 14: el terreno es una franja recta · 13: el ataque fuerte empuja más y suelta una onda al salir · 12: terreno por tipo en forma de rastro, golpe cargado y entrada con impacto · 11: energía al debilitar y contraataque tras esquivar · 10: chocan todos los disparos y el golpe corta disparos · 9: choque de disparos, CLASH en combat.js · 8: formas de ataque por tipo, MELEE_KINDS y SHOT_KINDS en combat.js, sin rebotes · 7: retroceso, esquiva con la carrera y carga del ataque fuerte, FEEL en combat.js · 6: golpe cuerpo a cuerpo con más alcance y ángulo, MELEE en combat.js · 5: la Clasificatoria se juega en el Estadio: campo de 1250 de ancho con límites en perspectiva, js/pruebas.js · 2: los sonidos de golpe usaban Math.random al crear el ruido · 3: la arena medía distinto según la ventana de cada jugador → ahora ancho fijo PVP_W · 4: retraso mínimo 2 pasos y medida del ping)
 const PVP_DT = 1 / 60;                                  // segundos de cada paso del combate
 const PVP_DELAY = 3, PVP_DMIN = 2, PVP_DMAX = 18, PVP_CALM = 10;     // retraso al empezar (3 pasos = 50 ms), mínimo (2 = 33 ms) y máximo; segundos yendo bien antes de bajarlo un paso                     // retraso de las pulsaciones, en pasos (5 pasos ≈ 0,08 s): lo que tardas en ver moverse o atacar a TU Pokémon.
 // Por qué no puede ser más corto sin más: cada paso necesita la pulsación del rival, que sale de su paso anterior. Con una ida y vuelta de T segundos,
@@ -51,7 +51,7 @@ const pvpName = () => pvp && pvp.opp ? pvp.opp.name : (pvp ? pvp.match.opp.name 
 // Tu equipo, tal como lo mandas al rival (todo lo que cambia el combate; así los dos calculan exactamente lo mismo)
 // ---------------------------------------------------------------------
 function pvpTeamDesc(){
-  if(!team || team.length !== 3) return null;
+  if(!team || team.length !== TEAM_SIZE) return null;
   return team.map(id => {
     const b = combatBoost(id), item = save.equip[id] || null, mkey = item && ITEMS[item] && ITEMS[item].mega, M = mkey && MEGA[mkey], m = playerMon(id);
     return {m: JSON.parse(JSON.stringify(m)), hm: b.hm, dm: b.dm, spdm: b.spdm, defm: b.defm, item, shiny: !!useShiny(id), ab: abilityOf(id) || '',
@@ -146,11 +146,14 @@ function pvpBuild(){                                     // crea el combate (aú
   const P = pvp, hostT = P.me === 'p' ? P.mine : P.opp.team, guestT = P.me === 'p' ? P.opp.team : P.mine;
   const p = hostT.map(pvpFighter), e = guestT.map(pvpFighter);
   const EST = !!(P.match.ranked && typeof RANKED_ESTADIO !== 'undefined' && RANKED_ESTADIO);   // Clasificatoria: vista de Estadio (js/pruebas.js), igual en los dos ordenadores
-  LOCKW = EST ? PR.W : PVP_W; resize();                                                      // arena de ancho fijo: las posiciones de salida y los bordes dependen de W y tienen que ser iguales en los dos ordenadores
-  p.forEach(f => { f.x = W * .25; f.y = H / 2 + 10; f.dir = 2; }); e.forEach(f => { f.x = W * .75; f.y = H / 2 + 10; f.dir = 6; });
+  const TEN = EST && typeof TE_NEW !== 'undefined' && TE_NEW && TE.ranked;                   // el estadio grande de la Torre (js/torreestadio.js)
+  if(TEN && typeof teUse === 'function') teUse(TE_EST_A);                      // la Clasificatoria va en el estadio de la Torre
+  LOCKW = TEN ? TE.W : EST ? PR.W : PVP_W; resize();                                         // arena de ancho fijo: las posiciones de salida y los bordes dependen de W y tienen que ser iguales en los dos ordenadores
+  p.forEach(f => { f.x = TEN ? 230 : W * .25; f.y = (TEN ? TE.H : H) / 2 + 10; f.dir = 2; }); e.forEach(f => { f.x = TEN ? TE.W - 230 : W * .75; f.y = (TEN ? TE.H : H) / 2 + 10; f.dir = 6; });
   const hn = P.me === 'p' ? cloud.name : P.opp.name, gn = P.me === 'p' ? P.opp.name : cloud.name, ar = PVP_ARENAS[pvpHash('ar:' + P.match.id) % PVP_ARENAS.length];
   const o = {pvp: true, estadio: EST, rival: P.opp.name, foeSkin: P.opp.sk, sub: (hn + ' VS ' + gn).toUpperCase().slice(0, 40), arena: ar, floor: 0, hm: 1, dm: 1, skill: 1, spdm: 1};
   g = {o, p, e, pi: 0, ei: 0, shots: [], pops: [], t: 0, clock: 0, count: 3, over: false, sw: [], swCd: 0, swCdE: 0, swNote: 0, pvp: true, me: P.me, inp: {p: PVP_EMPTY, e: PVP_EMPTY}};
+  if(TEN) teStart();
   for(const k in keys) keys[k] = false; mouse.l = mouse.r = false;
   fxClear(); Music.battle({leader: 'azul'});
   pvpSeeded(() => { abEnter(g.p[0]); abEnter(g.e[0]); });
@@ -195,7 +198,7 @@ function pvpDec(a){
   if(!Array.isArray(a) || a.length < 7 || !a.every(pvpOk)) return PVP_EMPTY;
   const b = a[4] | 0;
   return {dx: Math.max(-1, Math.min(1, a[0] | 0)), dy: Math.max(-1, Math.min(1, a[1] | 0)), mx: Math.max(-200, Math.min(W + 200, a[2])), my: Math.max(-200, Math.min(H + 200, a[3])),
-    l: b & 1, r: (b >> 1) & 1, sp: (b >> 2) & 1, q: (b >> 3) & 1, e: (b >> 4) & 1, sw: Math.max(-1, Math.min(2, a[5] | 0)), mg: a[6] ? 1 : 0};
+    l: b & 1, r: (b >> 1) & 1, sp: (b >> 2) & 1, q: (b >> 3) & 1, e: (b >> 4) & 1, sw: Math.max(-1, Math.min(5, a[5] | 0)), mg: a[6] ? 1 : 0};
 }
 function pvpFlush(){ const P = pvp; if(!P || !P.out.length) return; pvpSend('inp', {t0: P.outT, a: P.out}); P.out = []; }
 function pvpOnInp(p){

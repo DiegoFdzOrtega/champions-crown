@@ -103,7 +103,7 @@ function mmRender(){
       </div>
       <div class="m2-sec">Colección</div>
       <div class="m2-col">
-        ${mmTile('team', '#3ea6ff', 'EQUIPO', '', `${team.length} / 3`, `<span class="m2-mini">${team.map(id => `<canvas width="64" height="64" data-d="${id}"></canvas>`).join('')}</span>`)}
+        ${mmTile('team', '#3ea6ff', 'EQUIPO', '', `${team.length} / ${TEAM_SIZE}`, `<span class="m2-mini">${team.map(id => `<canvas width="64" height="64" data-d="${id}"></canvas>`).join('')}</span>`)}
         ${mmTile('dex', '#3ea6ff', 'POKÉDEX', '', `${dex} / ${DEX_SHOWN}`, `<span class="pb"><i style="width:${dex / DEX_SHOWN * 100}%"></i></span>`)}
         ${mmTile('gacha', '#ff3ea5', 'GACHAPON', '', `${mmNum(save.tickets)} tickets`)}
         ${typeof openInv === 'function' ? mmTile('inv', '#b36bff', 'INVOCACIÓN', '', `${mmNum((save.items.estrella || 0) + (save.items.estrella_t || 0))} estrellas`) : ''}
@@ -135,7 +135,7 @@ if(MM_NEW){
     if(a === 'go'){ if(b.dataset.k === 'guide') openGuia(); else enter(b.dataset.k); }
     else if(a === 'fight' || a === 'liga'){
       save.region = b.dataset.r; if(typeof liga !== 'undefined') liga.sel = null;
-      if(a === 'fight' && team.length === 3) floorFight(+b.dataset.gi); else goStory();
+      if(a === 'fight' && team.length === TEAM_SIZE) floorFight(+b.dataset.gi); else goStory();
     }
     else if(a === 'daily') openDaily();
     else if(a === 'patch') patchOpen();

@@ -40,7 +40,7 @@ const EXTRA_MOVES = {
   'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3],
   'A Bocajarro':['lucha',4],                                        // nuevo (16-11-2026): embestida y ráfaga de golpes (BOCA en js/combat.js)
   'Drenadoras':['planta',3],
-  'Patada Baja':['lucha',1], 'Hierba Lazo':['planta',2], 'Golpe Calor':['fuego',1], 'Cuerpo Pesado':['acero',1]   // de peso (js/pesos.js): solo con MT                                         // nuevo (16-11-2026): estado «drenado» (js/status.js), dibujos en js/fxnuevos.js
+  'Patada Baja':['lucha',1], 'Hierba Lazo':['planta',2], 'Golpe Calor':['fuego',1], 'Cuerpo Pesado':['acero',1], 'Giro Fuego':['fuego',2]   // de peso (js/pesos.js): solo con MT                                         // nuevo (16-11-2026): estado «drenado» (js/status.js), dibujos en js/fxnuevos.js
 };
 // Nombre -> {t: tipo, s: hueco}
 const MOVES = {};

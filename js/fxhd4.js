@@ -212,21 +212,71 @@ function hdScallops(W, step, d, t, k){                                    // cam
   const n = Math.ceil(2 * W / step), f = v => -Math.pow(Math.abs(v) / W, 1.7) * 24;
   for(let i = 0; i < n; i++){ const vc = -W + step * (i + .5), xc = -d + f(vc) + Math.sin(t * 7 + i * 1.3 + k) * 2.2, r = step / 2 * (1 + .1 * Math.sin(t * 9 + i * 2 + k)); ctx.arc(xc, vc, r, -Math.PI / 2, Math.PI / 2, false); }
 }
+// ---- EFECTO 3D: la ola tiene ALTURA. Todo lo que está alto se dibuja desplazado hacia arriba en la pantalla, vaya la ola hacia donde vaya:
+//   · las bandas de agua suben en rampa desde atrás hasta la cresta · delante hay una PARED de agua (cara de la ola) con su degradado y regueros de espuma
+//   · la cresta de espuma va arriba del todo y tapa los pies del que va montado · la ola echa sombra en el suelo por delante · el Pokémon que la monta va subido (hdSurfLift)
+const HD_SURF_H = 40;                                                     // [AJUSTE] altura de la ola en píxeles (0 = plana, como antes)
+// ---- OLA CON DIBUJO: assets/objetos/surf.png (4 figuras en fila de 240x132: la ola vista de lado, yendo a la DERECHA). Si la imagen carga, sustituye a la ola dibujada por código.
+//   El Pokémon va SUBIDO en lo alto de la ola: la imagen se coloca debajo de él (su «asiento» es el punto sx, sy de la figura) y se voltea si va hacia la izquierda.
+const HD_SURF_SPR = {ok: false, fw: 240, fh: 132, n: 4, fps: 8,       // tamaño de cada figura · cuántas hay · figuras por segundo
+  S: 1.15,                                                              // [AJUSTE] tamaño de la ola en pantalla (1 = 240x132 px)
+  sx: 196, sy: 108,                                                     // [AJUSTE] punto de la figura que queda bajo el Pokémon: columna (0 = cola, 240 = punta) y fila del suelo
+  lift: 92};                                                            // [AJUSTE] cuánto sube el Pokémon para quedar encima de la cresta (px)
+{ const i = new Image(); i.onload = () => { HD_SURF_SPR.ok = true; }; i.src = 'assets/objetos/surf.png?v=1'; HD_SURF_SPR.img = i; }
+// Ola vista DE FRENTE (assets/objetos/surf_frente.png, 4 figuras de 168x141): se usa cuando el Pokémon va hacia arriba o hacia abajo.
+const HD_SURF_FRE = {ok: false, fw: 168, fh: 141, n: 4, S: 1.0, sx: 84, sy: 128};      // S = [AJUSTE] tamaño · sx, sy = punto de la figura que queda bajo el Pokémon
+{ const i = new Image(); i.onload = () => { HD_SURF_FRE.ok = true; }; i.src = 'assets/objetos/surf_frente.png?v=1'; HD_SURF_FRE.img = i; }
+function hdSurfSprite(e, G){
+  const K = HD_SURF_SPR, rx = G.x1 - G.ca * 34, ry = G.y1 - G.sa * 34;                    // dónde está el Pokémon (el frente de la ola va 34 px por delante de él)
+  const fl = G.ca < -.25 ? -1 : G.ca > .25 ? 1 : (e.sfl || 1); e.sfl = fl;                 // mira a la derecha o a la izquierda (si va casi en vertical, se queda como estaba)
+  const fr = Math.floor(g.t * K.fps) % K.n, av = Math.abs(G.sa);
+  e.sver = av > .8 ? true : av < .6 ? false : !!e.sver;                                    // ¿va en vertical? (con margen para que no parpadee entre las dos olas)
+  if(e.sver && HD_SURF_FRE.ok){ const F = HD_SURF_FRE, S2 = F.S * (.5 + .5 * G.grow);
+    ctx.save(); ctx.globalAlpha = G.al; ctx.imageSmoothingEnabled = false; ctx.globalCompositeOperation = 'source-over';
+    ctx.translate(Math.round(rx), Math.round(ry + 26)); ctx.scale(S2, S2);
+    ctx.drawImage(F.img, fr * F.fw, 0, F.fw, F.fh, -F.sx, -F.sy, F.fw, F.fh);
+    ctx.restore(); return; }
+  const S = K.S * (.5 + .5 * G.grow);
+  ctx.save(); ctx.globalAlpha = G.al; ctx.imageSmoothingEnabled = false; ctx.globalCompositeOperation = 'source-over';
+  ctx.translate(Math.round(rx), Math.round(ry + 26)); ctx.scale(fl * S, S);
+  ctx.drawImage(K.img, fr * K.fw, 0, K.fw, K.fh, -K.sx, -K.sy, K.fw, K.fh);
+  ctx.restore();
+}
+function hdSurfLift(f){ const r = f.ride; if(!r || r.free || typeof fxhd === 'undefined' || !fxhd.on) return 0; return (HD_SURF_SPR.ok ? HD_SURF_SPR.lift : HD_SURF_H * .5) * clamp01((1.4 - r.t) / .2) * clamp01(r.t / .18); }      // cuánto sube el Pokémon montado (lo usa render.js)
+function hdSurfFront(W, d, n){ const P = []; for(let i = 0; i <= n; i++){ const v = -W + 2 * W * i / n; P.push([-d - Math.pow(Math.abs(v) / W, 1.7) * 24, v]); } return P; }      // el frente curvo de la ola (sin festones), en coordenadas locales
 function hdSurfDraw(e, top){
   const G = hdSurfGeo(e); if(!G) return; const t = g.t, A = G.al, W = G.WH * G.grow, step = 22, L = G.len;
+  if(HD_SURF_SPR.ok){ if(!top) hdSurfSprite(e, G); return; }             // con dibujo: la ola entera va debajo del Pokémon
+  const H = HD_SURF_H * G.grow * clamp01(L / 120), ux = -G.sa, uy = -G.ca, hOf = d => H * Math.pow(clamp01(1 - d / 175), 1.4);      // (ux, uy) = «hacia arriba en la pantalla», visto desde el sistema girado · hOf = altura del agua a una distancia d del frente
   ctx.save(); ctx.translate(G.x1, G.y1); ctx.rotate(G.an); ctx.globalCompositeOperation = 'source-over'; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const face = () => {                                                    // la pared de delante: del suelo a la cresta
+    if(H < 4) return; const F = hdSurfFront(W, 2, 18), Hc = hOf(4);
+    const gr = ctx.createLinearGradient(0, 0, ux * Hc, uy * Hc); gr.addColorStop(0, '#0a2c78'); gr.addColorStop(.55, '#1c63c4'); gr.addColorStop(1, '#58bdf5');
+    ctx.globalAlpha = A; ctx.fillStyle = gr; ctx.beginPath(); F.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for(let i = F.length - 1; i >= 0; i--) ctx.lineTo(F[i][0] + ux * Hc, F[i][1] + uy * Hc); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#082663'; ctx.lineWidth = 2.5; ctx.beginPath(); F.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();                 // pie de la ola
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;                                                                                                                       // regueros de espuma que suben por la cara
+    for(let q = 0; q < 12; q++){ const v = (hd4rand(q, 11) - .5) * 1.85 * W, x0 = -2 - Math.pow(Math.abs(v) / W, 1.7) * 24, u = hdFract(hd4rand(q, 13) + t * 1.5), a0 = u * .7, a1 = Math.min(1, a0 + .3);
+      ctx.globalAlpha = A * .7 * Math.sin(Math.PI * u); ctx.beginPath(); ctx.moveTo(x0 + ux * Hc * a0, v + uy * Hc * a0); ctx.lineTo(x0 + ux * Hc * a1, v + uy * Hc * a1); ctx.stroke(); }
+  };
   if(!top){
     ctx.fillStyle = 'rgba(10,40,110,.18)'; ctx.beginPath(); ctx.ellipse(-L / 2, 12, L / 2, W * .8, 0, 0, 6.283); ctx.fill();   // sombra en el suelo
+    if(H >= 4){ const F = hdSurfFront(W, -6, 14), s = H * .45; ctx.globalAlpha = A * .32; ctx.fillStyle = '#04123a'; ctx.beginPath(); F.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); for(let i = F.length - 1; i >= 0; i--) ctx.lineTo(F[i][0] - ux * s + 10, F[i][1] - uy * s); ctx.closePath(); ctx.fill(); }      // sombra que la ola echa por delante
+    if(G.sa < -.15) face();                                               // si la ola se aleja (va hacia arriba), la pared queda detrás del agua
     for(let bi = HD_SURF_BANDS.length - 1; bi >= 0; bi--){ const B = HD_SURF_BANDS[bi]; if(B.d > L - 8) continue;       // de delante hacia atrás: los festones de cada banda tapan el final de la de delante
-      const last = bi === 0 || HD_SURF_BANDS[bi - 1].d > L - 8, rear = last ? Math.max(L, B.d + 40) : B.d + 36;
+      const last = bi === 0 || HD_SURF_BANDS[bi - 1].d > L - 8, rear = last ? Math.max(L, B.d + 40) : B.d + 36, hb = hOf(B.d);
+      ctx.save(); ctx.translate(ux * hb, uy * hb);                        // cada banda, a su altura: de atrás (baja) a delante (alta)
       ctx.globalAlpha = A; if(last){ const gr = ctx.createLinearGradient(-B.d, 0, -rear, 0); gr.addColorStop(0, B.c); gr.addColorStop(.55, B.c); gr.addColorStop(1, 'rgba(27,87,179,0)'); ctx.fillStyle = gr; } else ctx.fillStyle = B.c; ctx.beginPath(); ctx.moveTo(-rear, -W); ctx.lineTo(-B.d, -W); hdScallops(W, step, B.d, t, bi * 2); ctx.lineTo(-rear, W); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#0b3a8c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-B.d, -W); hdScallops(W, step, B.d, t, bi * 2); ctx.stroke(); }       // contorno de los festones
-    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2;                                    // rayitas de corriente
-    for(let q = 0; q < 14; q++){ const x = -hdFract(hd4rand(q, 2) + t * 1.2) * L, y = (hd4rand(q, 5) - .5) * 1.7 * W; ctx.globalAlpha = A * .8 * Math.sin(Math.PI * clamp01(-x / L)); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 13, y); ctx.stroke(); }
+      ctx.strokeStyle = '#0b3a8c'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-B.d, -W); hdScallops(W, step, B.d, t, bi * 2); ctx.stroke();       // contorno de los festones
+      ctx.restore(); }
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2;                                    // rayitas de corriente (siguen la rampa)
+    for(let q = 0; q < 14; q++){ const x = -hdFract(hd4rand(q, 2) + t * 1.2) * L, y = (hd4rand(q, 5) - .5) * 1.7 * W, hq = hOf(-x); ctx.globalAlpha = A * .8 * Math.sin(Math.PI * clamp01(-x / L)); ctx.beginPath(); ctx.moveTo(x + ux * hq, y + uy * hq); ctx.lineTo(x - 13 + ux * hq, y + uy * hq); ctx.stroke(); }
+    if(G.sa >= -.15) face();                                              // si viene hacia ti o va de lado, la pared tapa el pie del agua
   } else {
-    ctx.globalAlpha = A; [['#0b3a8c', 6], ['#ffffff', 3]].forEach(([c, lw]) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(0, -W); hdScallops(W, step, 4, t, 9); ctx.stroke(); });   // festón de espuma sobre todo lo demás
-    for(let j = 0; j < 20; j++){ const u = hdFract(j * .37 + t * 1.6), X = 6 + u * 36, Y = (hd4rand(j, 8) - .5) * 1.9 * W - Math.sin(u * 3.14) * 18;      // gotas con contorno
-      ctx.globalAlpha = A * (1 - u * .7); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#0b3a8c'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(X, Y, 2 + hd4rand(j, 5) * 2.2, 0, 6.283); ctx.fill(); ctx.stroke(); }
+    const Hc = hOf(4); ctx.translate(ux * Hc, uy * Hc);                   // la cresta y las gotas, arriba del todo
+    ctx.globalAlpha = A; [['#0b3a8c', 7], ['#ffffff', 4]].forEach(([c, lw]) => { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(0, -W); hdScallops(W, step, 4, t, 9); ctx.stroke(); });   // festón de espuma sobre todo lo demás
+    ctx.globalAlpha = A * .55; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-ux * 6, -W - uy * 6); ctx.save(); ctx.translate(-ux * 6, -uy * 6); hdScallops(W, step, 4, t + .3, 4); ctx.restore(); ctx.stroke();      // segunda línea de espuma, un poco más abajo (el rizo)
+    for(let j = 0; j < 22; j++){ const u = hdFract(j * .37 + t * 1.6), X = 6 + u * 36, Y = (hd4rand(j, 8) - .5) * 1.9 * W - Math.sin(u * 3.14) * 18, up = Math.sin(u * 3.14) * (10 + hd4rand(j, 3) * 16);      // gotas con contorno, que saltan hacia arriba
+      ctx.globalAlpha = A * (1 - u * .7); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#0b3a8c'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(X + ux * up, Y + uy * up, 2 + hd4rand(j, 5) * 2.2, 0, 6.283); ctx.fill(); ctx.stroke(); }
   }
   ctx.restore();
 }

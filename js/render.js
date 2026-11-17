@@ -455,10 +455,10 @@ function pilFxDraw(f){                                               // restos d
 function drawF(f, col){
   if(f.ghost || (g.mega && g.mega.f === f)) return;   // en pleno cambio (o megaevolucionando): lo dibuja su animación (swap.js / mega.js)
   const I = idleInfo(f.m.dex);
-  const hid = f.hide > 0 || !!(f.jump && f.jump.K.dig && f.jump.t > .14 && f.jump.t < f.jump.T - f.jump.K.down), lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0) + (f.jump && typeof nvJumpLift === 'function' ? nvJumpLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
+  const hid = f.hide > 0 || !!(f.jump && f.jump.K.dig && f.jump.t > .14 && f.jump.t < f.jump.T - f.jump.K.down), lg = fxLunge(f); lg.y -= (typeof fxLift === 'function' ? fxLift(f) : 0) + (f.jump && typeof nvJumpLift === 'function' ? nvJumpLift(f) : 0) + (f.ride && typeof hdSurfLift === 'function' ? hdSurfLift(f) : 0);                                   // hide: bajo tierra (Excavar) · lg: avance visual al atacar
   if(!hid) shadow(f.x, f.y + I.foot*ESCALA - 2, Math.max(30, I.fw*ESCALA*.42));
   const inv = f.inv > 0 && !f.dead && !f.jump; if(inv){ ctx.save(); ctx.globalAlpha = .5; }                                               // esquivando con la carrera: se ve translúcido
-  const okSpr = hid || (f.spin && !f.dead && typeof nvShellDraw === 'function' && nvShellDraw(f, lg)) || drawFrame(ctx, f.m.dex, f.act, f.at, f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny);      // Torbellino de Squirtle y familia: el caparazón en vez del sprite (js/fxnuevos.js)
+  const okSpr = hid || (f.spin && !f.dead && typeof nvShellDraw === 'function' && nvShellDraw(f, lg)) || ((AP) => drawFrame(ctx, f.m.dex, AP[0], AP[1], f.dir, f.x + lg.x, f.y + lg.y, ESCALA, 0, f.shiny))(typeof anPick === 'function' ? anPick(f) : [f.act, f.at]);      // anPick: animaciones extra (js/anims.js) · Torbellino de Squirtle y familia: el caparazón en vez del sprite (js/fxnuevos.js)
   if(inv) ctx.restore();
   if(!hid && !okSpr && sheet(f.m.dex, 'Idle', false).bad){      // sin sprite (de verdad, no solo cargando): círculo
     ctx.fillStyle = TC[f.m.types[0]]; ctx.beginPath(); ctx.arc(f.x + lg.x, f.y + lg.y, 30, 0, 7); ctx.fill();

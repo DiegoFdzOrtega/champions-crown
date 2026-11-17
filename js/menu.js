@@ -53,7 +53,7 @@ function bitmap(c, rows, col, pal){
 const NAV = [
   {k:'story',   n:'HISTORIA',        c:'#ffcc33', d:'Recorre las regiones y vence a los líderes de gimnasio y al Alto Mando.', f:()=>`Combates de la Liga (${save.storyMode === 'facil' ? 'Fácil' : 'Difícil'}): ${progTotal()} / ${FLOORS.length}`},
   {k:'campo',   n:'CAMPO DE ENTRENAMIENTO', c:'#4ccf6a', d:`Vence a entrenadores todas las veces que quieras y gana 1 tirada de Gachapon + de ${REWARD_CAMPO[1].bp} a ${REWARD_CAMPO[3].bp} BP + de ${REWARD_CAMPO[1].chapa} a ${REWARD_CAMPO[3].chapa} Chapas Plateadas y Doradas (según la dificultad) por cada victoria.`, f:()=>`Chapas: ${held('chapaplata')} plateadas · ${held('chapa')} doradas`},
-  {k:'team',    n:'EQUIPO POKÉMON',  c:'#3ea6ff', d:'Elige 3 Pokémon y equípales un objeto de combate.',                       f:()=>`Equipo: ${team.length} / 3`},
+  {k:'team',    n:'EQUIPO POKÉMON',  c:'#3ea6ff', d:'Elige 6 Pokémon y equípales un objeto de combate.',                       f:()=>`Equipo: ${team.length} / ${TEAM_SIZE}`},
   {k:'shop',    n:'TIENDA',          c:'#ffcc33', d:'Compra tickets de Gachapon y objetos con tus Puntos de Batalla.',         f:()=>`Puntos de Batalla: ${save.bp}`},
   {k:'dex',     n:'POKÉDEX',         c:'#3ea6ff', d:'Tu colección de Pokémon desbloqueados.',                                  f:()=>`Desbloqueados: ${boxCount()} / ${DEX_SHOWN}`},
   {k:'gacha',   n:'GACHAPON',        c:'#ff3ea5', d:'Gasta tickets para conseguir Pokémon de cada región.',         f:()=>`Tickets: ${save.tickets} · Legendarios: ${save.ticketsL}` + (save.ticketsS ? ` · Variocolor: ${save.ticketsS}` : '')},
@@ -232,7 +232,7 @@ function buildStory(){
     const it = document.createElement('span'); it.className = 'ti'; it.textContent = save.equip[id] ? ITEMS[save.equip[id]].n : 'Sin objeto';
     d.append(c, nm, ty, it); thumbs.push({c,m,s:useShiny(id)}); bar.appendChild(d);
   });
-  const ready = team.length === 3;
+  const ready = team.length === TEAM_SIZE;
   $('teamWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
   const fl = $('floors'), fl2 = $('floors2'), fl3 = $('floors3'); fl.innerHTML = ''; fl2.innerHTML = ''; fl3.innerHTML = '';   // líderes arriba, Alto Mando (con el Campeón) debajo
   fls.forEach(({F, gi}) => {                                         // gi = posición global (la que usa floorFight)

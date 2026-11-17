@@ -12,19 +12,21 @@
 const TE_NEW = true;
 const TE = {
   W: 1854,                       // ancho del campo (sale de la imagen del estadio: ver TE_EST)
-  H: 875,                        // alto del campo
+  H: 820,                        // alto del campo (875 con la imagen vieja, estadio.webp)
   Z: .64,                        // [AJUSTE] cuánto se acerca la cámara (1 = el mundo a tamaño normal; más = Pokémon más grandes y se ve menos campo)
   Zmin: .48,                     // [AJUSTE] lo más que se aleja cuando el rival está lejos
   tile: 190,                     // ancho de la zona de baldosas de cada fondo
-  B: {x0: -302, x1: 2155, y0: -502, y1: 1136},     // bordes del estadio entero = la imagen (la cámara no enseña nada de fuera)
+  B: {x0: -300, x1: 2157, y0: -483, y1: 1154},     // bordes del estadio entero = la imagen (la cámara no enseña nada de fuera)
   cam: {x: 950, y: 600, z: .5, t: 0},
+  ranked: true,                  // [AJUSTE] también en la Clasificatoria online (los dos jugadores tienen que tener esta versión)
   stad: null, dec: null, crowd: [], hype: 0, hp: new Map(), feed: null, feedN: 0
 };
 // Piezas dibujadas (assets/fondos/torre/): hierba, baldosas y grada se repiten para cubrir el estadio entero. Mientras no cargan, se usa el dibujo hecho con código.
 const TE_IMG = {}; ['hierba', 'baldosas', 'grada', 'barandilla'].forEach(k => { const im = new Image(); im.onload = () => { im.ok = true; if(['hierba', 'baldosas', 'grada', 'barandilla'].every(n => TE_IMG[n].ok)) TE.stad = null; }; im.src = 'assets/fondos/torre/' + k + '.png?v=1'; TE_IMG[k] = im; });
 const teTex = () => ['hierba', 'baldosas', 'grada', 'barandilla'].every(n => TE_IMG[n].ok);
 const WL_ = 40;
-const teOn = () => TE_NEW && !!(g && g.o && g.o.estTorre && !g.pvp);
+const teOn = () => TE_NEW && !!(g && g.o && (g.o.estTorre || g.o.pruebas || g.o.estCampo || g.o.estRegion || (g.o.estadio && TE.ranked)));      // Torre, Campo de pruebas y Clasificatoria online
+const teTitle = () => !g || !g.o ? '' : g.o.estTorre ? `TORRE · PISO ${g.o.torreFloor || g.o.floor}` : g.o.pruebas ? 'CAMPO DE PRUEBAS' : g.o.estCampo ? 'CAMPO DE ENTRENAMIENTO' : g.o.estRegion ? (g.o.sub || '') : 'CLASIFICATORIA';
 const teFoe = () => g.me === 'e' ? g.p[g.pi] : g.e[g.ei];
 
 // ---------------------------------------------------------------------
@@ -34,14 +36,47 @@ let teSeed = 11; const teR = () => (teSeed = (teSeed * 16807) % 2147483647) / 21
 const TE_SHIRT = ['#e8493a', '#3ea6ff', '#ffcc33', '#4ccf6a', '#b36bff', '#ff7ad9', '#f0803c', '#e8eeff', '#2d3b5c', '#7af0ff', '#c9d6f5', '#ff4d6d'];
 const TE_SKIN = ['#f3c9a0', '#e0a878', '#b97c50', '#8a5a3a', '#f7d9bd'], TE_HAIR = ['#2a1a10', '#5a3a20', '#d9b060', '#111111', '#8a3020', '#c9c9c9', '#3a2a6a'];
 // IMAGEN DEL ESTADIO (assets/fondos/torre/estadio.webp, 2048 × 1365). Medidas en píxeles de la imagen; el mundo es (px - org) × S.
-const TE_EST = {src: 'assets/fondos/torre/estadio.webp?v=1', w: 2048, h: 1365, S: 1.2, org: [252, 418],   // org = esquina de arriba a la izquierda del campo (donde empieza el suelo de piedra)
-  jumbo: [834, 62, 1213, 241], sideP: [[716, 76, 810, 156], [716, 172, 810, 238]], sideE: [[1237, 76, 1332, 156], [1237, 172, 1332, 238]],   // pantallas negras de la imagen
-  led: [405, 402, 1643, 417], plat: [[327, 830], [1721, 830]]};                                         // cinta LED encima del campo · dónde está cada entrenador (en el cuadro blanco de piedra de su lado)
+// Estadio VACÍO (assets/fondos/torre/estadio_vacio.webp, de «estadio vacio.png»): el público lo pone el juego (teFans). Medidas en píxeles de la imagen a 2048x1365.
+// (La imagen vieja con el público pintado era estadio.webp: org [252, 418], jumbo [834, 62, 1213, 241], sideP [[716,76,810,156],[716,172,810,238]], sideE [[1237,76,1332,156],[1237,172,1332,238]],
+//  led [405, 402, 1643, 417], plat [[327, 830], [1721, 830]], y TE.H 875, TE.B {x0:-302, x1:2155, y0:-502, y1:1136}.)
+const TE_EST_A = {src: 'assets/fondos/torre/estadio_vacio.webp?v=1', w: 2048, h: 1365, S: 1.2, org: [250, 403], W: 1854, H: 820, B: {x0: -300, x1: 2157, y0: -483, y1: 1154},   // org = esquina de arriba a la izquierda del campo (donde empieza el suelo de piedra)
+  jumbo: [831, 51, 1218, 219], sideP: [[714, 69, 811, 149], [714, 160, 811, 236]], sideE: [[1233, 69, 1330, 149], [1233, 160, 1330, 236]],   // pantallas negras de la imagen
+  led: [400, 379, 1612, 394], plat: [[322, 792], [1729, 792]], sprites: true,
+  crowd: {rows: [                                                            // público de entrenadores sentado en los bancos (como en las regiones). [x0, x1, y, mira]
+      ...[78, 112, 146, 178].flatMap(y => [[165, 690, y, 'd'], [1360, 1990, y, 'd']]), ...[242, 274, 306].map(y => [175, 1990, y, 'd']),
+      ...[1158, 1190, 1222, 1262, 1294, 1328].map(y => [165, 1990, y, 'u'])],
+    cols: [...[70, 110, 150, 190].map(x => [x, 360, 1120, 'r']), ...[1858, 1898, 1938, 1978].map(x => [x, 360, 1120, 'l'])],
+    holes: [[180, 0, 212, 330], [425, 0, 460, 330], [1588, 0, 1622, 330], [1836, 0, 1866, 330],
+            [425, 1140, 460, 1365], [722, 1140, 757, 1365], [998, 1140, 1050, 1365], [1290, 1140, 1325, 1365], [1586, 1140, 1622, 1365],
+            [60, 680, 230, 810], [1818, 680, 1990, 810]],
+    dx: 26, dy: 24, dyS: 30, dens: .85, sc: .95}};                                         // cinta LED encima del campo · dónde está cada entrenador (en el cuadro blanco de piedra de su lado)                                         // cinta LED encima del campo · dónde está cada entrenador (en el cuadro blanco de piedra de su lado)
+// ESTADIO DE LAS REGIONES (todas menos Kanto): assets/fondos/torre/estadio_galar.webp (1677 × 938), de «Estadio pixelado futurista vacío».
+// Sin pantallas ni cinta LED; el público son entrenadores en sprite de mapa (assets/entrenadores_mini/publico.png) y cada entrenador está en el área pequeña de su lado.
+const TE_EST_G = {src: 'assets/fondos/torre/estadio_galar.webp?v=1', w: 1677, h: 938, S: 1.4, Z: .5, Zmin: .4,   // Z / Zmin: [AJUSTE] zoom de la cámara en este estadio (menos = se ve más campo)
+  org: [184, 245], W: 1834, H: 724, B: {x0: -258, x1: 2090, y0: -343, y1: 970},
+  plat: [[216, 548], [1460, 548]], sprites: true,                              // dónde está cada entrenador (dentro del área pequeña de su lado)
+  crowd: {rows: [                                                              // filas de asientos: [x0, x1, y, mira] (mira: d = hacia abajo/de frente · u = de espaldas · r / l = de perfil)
+      ...[34, 54, 74, 94, 114].map(y => [150, 1530, y, 'd']), ...[858, 878, 898, 918].map(y => [140, 1540, y, 'u'])],
+    cols: [...[30, 55, 80].map(x => [x, 175, 790, 'r']), ...[1597, 1622, 1647].map(x => [x, 175, 790, 'l'])],
+    holes: [[100, 0, 162, 140], [402, 0, 462, 140], [668, 0, 730, 140], [938, 0, 1000, 140], [1206, 0, 1270, 140], [1512, 0, 1575, 140],
+            [95, 840, 158, 938], [405, 840, 465, 938], [672, 840, 732, 938], [942, 840, 1004, 938], [1210, 840, 1272, 938], [1515, 840, 1578, 938],
+            [0, 385, 100, 430], [1577, 385, 1677, 430]],
+    dx: 30, dy: 24, dyS: 32, dens: .82, sc: 1.15}};                          // separación en las filas · en los lados · cuánta grada se llena · tamaño de cada persona
+let TE_EST = TE_EST_A;
 const teR2W = q => ({x: (q[0] - TE_EST.org[0]) * TE_EST.S, y: (q[1] - TE_EST.org[1]) * TE_EST.S, w: (q[2] - q[0]) * TE_EST.S, h: (q[3] - q[1]) * TE_EST.S});
-const TE_JUMBO = teR2W(TE_EST.jumbo);
-const TE_SIDE = [{s: 'p', a: teR2W(TE_EST.sideP[0]), b: teR2W(TE_EST.sideP[1])}, {s: 'e', a: teR2W(TE_EST.sideE[0]), b: teR2W(TE_EST.sideE[1])}];
-const TE_LED = teR2W(TE_EST.led);
-{ const im = new Image(); im.onload = () => { im.ok = true; TE.stad = null; }; im.src = TE_EST.src; TE_EST.img = im; }
+let TE_JUMBO, TE_SIDE, TE_LED;
+function teDerive(){                                                         // pantallas y cinta LED del estadio que toca (el de las regiones no tiene)
+  TE_JUMBO = TE_EST.jumbo ? teR2W(TE_EST.jumbo) : null; TE_LED = TE_EST.led ? teR2W(TE_EST.led) : null;
+  TE_SIDE = TE_EST.sideP ? [{s: 'p', a: teR2W(TE_EST.sideP[0]), b: teR2W(TE_EST.sideP[1])}, {s: 'e', a: teR2W(TE_EST.sideE[0]), b: teR2W(TE_EST.sideE[1])}] : [];
+}
+teDerive();
+[TE_EST_A, TE_EST_G].forEach(cfg => { const im = new Image(); im.onload = () => { im.ok = true; if(TE_EST === cfg) TE.stad = null; }; im.src = cfg.src; cfg.img = im; });
+function teUse(cfg){                                                         // cambia de estadio (antes de empezar el combate)
+  if(TE_EST === cfg) return;
+  TE_EST = cfg; TE.W = cfg.W; TE.H = cfg.H; TE.B = cfg.B; TE.Z = cfg.Z || .64; TE.Zmin = cfg.Zmin || .48; teDerive(); TE.stad = null; TE.crowd.length = 0;
+}
+const teCfgFor = o => o && o.estRegion ? TE_EST_G : TE_EST_A;
+const TE_PUB = {cols: 4}; { const im = new Image(); im.onload = () => { TE_PUB.ok = true; TE_PUB.n = (im.height / 32) * TE_PUB.cols; if(TE_EST.sprites) TE.stad = null; }; im.src = 'assets/entrenadores_mini/publico.png?v=2'; TE_PUB.img = im; }   // público: 4 personas por fila, 4 cuadros de 32 cada una (frente, frente andando, espalda, perfil)
 const TE_FANS = [[150, -250, '#4a7a9a'], [1850, -110, '#e8c33a'], [-200, 120, '#f08aa8'], [2190, 400, '#6abf6a'], [640, 690, '#8a6ad8'], [1500, 650, '#e07850']];   // Pokémon espectadores (bultos)
 
 function teBuild(){
@@ -128,14 +163,22 @@ function teBuild(){
   TE.dec = document.createElement('canvas'); TE.dec.width = TE.W; TE.dec.height = TE.H;
 }
 // PÚBLICO sobre la grada de la imagen: gente grande y animada (la pintada en la imagen es tan pequeña que no se distingue)
-const TE_CROWD = {z: 1.9, dens: .62, dx: 17, dy: 21,                       // [AJUSTE] tamaño de cada persona · cuánta grada se llena (0..1) · separación (px de la imagen)
-  bands: [[40, 70, 690, 190], [1360, 70, 2010, 190], [60, 248, 1990, 345], [35, 300, 200, 1180], [1850, 300, 2015, 1180], [160, 1212, 1990, 1322]],   // zonas con gradas [x0, y0, x1, y1] en píxeles de la imagen
-  holes: [[90, 715, 215, 845], [1830, 715, 1960, 845], [990, 1200, 1060, 1365]]};                                                                  // túneles y escaleras: sin gente
+const TE_CROWD = {z: 1.9, dens: .8, dx: 17, dy: 21,                        // [AJUSTE] tamaño de cada persona · cuánta grada se llena (0..1) · separación (px de la imagen)
+  bands: [[40, 50, 700, 187], [1347, 50, 2007, 187], [53, 230, 2000, 327], [40, 342, 207, 1147], [1840, 342, 2008, 1147], [45, 1152, 2003, 1340]],   // zonas con gradas [x0, y0, x1, y1] en píxeles de la imagen
+  holes: [[85, 685, 230, 805], [1818, 685, 1965, 805], [985, 1140, 1060, 1365], [700, 187, 1347, 232]]};                                         // túneles, escaleras y bajo las pantallas: sin gente
 function teFans(){
+  if(TE_EST.sprites) return teFansSpr();
   teSeed = 7; TE.crowd.length = 0; const C = TE_CROWD;
   C.bands.forEach(([a, b, c, d]) => { for(let y = b; y < d; y += C.dy) for(let x = a + ((y / C.dy | 0) % 2) * C.dx / 2; x < c; x += C.dx){
     if(teR() > C.dens || C.holes.some(([h0, h1, h2, h3]) => x > h0 && x < h2 && y > h1 && y < h3)) continue;
     const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, s: TE_SHIRT[(teR() * 12) | 0], k: TE_SKIN[(teR() * 5) | 0], h: TE_HAIR[(teR() * 7) | 0], p: teR() * 6.28, wave: teR() < .12}); } });
+}
+function teFansSpr(){                                                        // público de entrenadores (estadio de las regiones)
+  teSeed = 9; TE.crowd.length = 0; const C = TE_EST.crowd, n = TE_PUB.n || 200, hole = (x, y) => C.holes.some(([a, b, c, d]) => x > a && x < c && y > b && y < d);
+  const add = (x, y, face) => { if(teR() > C.dens || hole(x, y)) return; const w = teR2W([x, y, x, y]); TE.crowd.push({x: w.x, y: w.y, i: (teR() * n) | 0, face, p: teR() * 6.28, wave: teR() < .1}); };
+  C.rows.forEach(([x0, x1, y, face]) => { for(let x = x0 + (teR() * 6 | 0); x < x1; x += C.dx) add(x, y, face); });
+  C.cols.forEach(([x, y0, y1, face]) => { for(let y = y0; y < y1; y += C.dyS || C.dy) add(x, y, face); });
+  TE.crowd.sort((a, b) => a.y - b.y);
 }
 function teSeat(x, y, row){ if(teTex() || teR() < .13) return; TE.crowd.push({x, y, s: TE_SHIRT[(teR() * 12) | 0], k: TE_SKIN[(teR() * 5) | 0], h: TE_HAIR[(teR() * 7) | 0], p: teR() * 6.28}); }
 function teCut(x, y, w, h){ for(let i = TE.crowd.length - 1; i >= 0; i--){ const q = TE.crowd[i]; if(q.x > x && q.x < x + w && q.y > y && q.y < y + h) TE.crowd.splice(i, 1); } }
@@ -207,7 +250,8 @@ function teDraw(){
   ctx.drawImage(TE.dec, 0, 0);
   // público visible: bota (más con los buenos golpes) y levanta los brazos
   const hy = TE.hype, sp = 4 + hy * 8, amp = 1 + hy * 4;
-  const Z = TE_EST.img && TE_EST.img.ok ? TE_CROWD.z : 1;
+  if(TE_EST.sprites){ if(TE_PUB.ok) teCrowdSpr(x0, y0, x1, y1, t, sp, amp, hy); }
+  else { const Z = TE_EST.img && TE_EST.img.ok ? TE_CROWD.z : 1;
   for(const q of TE.crowd){
     if(q.x < x0 - 20 || q.x > x1 + 10 || q.y < y0 - 20 || q.y > y1 + 10) continue;
     const j = (Math.max(0, Math.sin(t * sp + q.p)) * amp | 0) * Z, X = q.x, Y = q.y - j, up = q.wave || (hy > .45 && (q.p * 10 | 0) % 3 === 0);
@@ -216,20 +260,34 @@ function teDraw(){
     ctx.fillStyle = q.k; ctx.fillRect(X + Z, Y, 4 * Z, 4 * Z);
     ctx.fillStyle = q.h; ctx.fillRect(X + Z, Y, 4 * Z, 1.5 * Z);
     if(up){ const w = Math.sin(t * 9 + q.p) > 0 ? Z : 0; ctx.fillStyle = q.k; ctx.fillRect(X - Z - w, Y - 3 * Z, 1.5 * Z, 5 * Z); ctx.fillRect(X + 5.5 * Z + w, Y - 3 * Z, 1.5 * Z, 5 * Z); }
-  }
+  } }
   if(TE.hype > .25 && teTex()){                                            // flashes de cámara en la grada
     const n = TE.hype * 14 | 0; ctx.fillStyle = '#ffffff';
     for(let i = 0; i < n; i++){ const fx = x0 + Math.random() * (x1 - x0), fy = y0 + Math.random() * (y1 - y0);
       if(fx > -WL_ && fx < TE.W + WL_ && fy > -WL_ && fy < TE.H + WL_) continue; ctx.globalAlpha = .5 + Math.random() * .5; ctx.fillRect(fx, fy, 3, 3); ctx.globalAlpha = .25; ctx.fillRect(fx - 3, fy - 3, 9, 9); }
     ctx.globalAlpha = 1; }
-  if(y0 < 0) teLed(t);
-  if(y0 < -180){ teJumbo(t); TE_SIDE.forEach(r => teSide(r)); }
+  if(y0 < 0 && TE_LED) teLed(t);
+  if(y0 < -180 && TE_JUMBO){ teJumbo(t); TE_SIDE.forEach(r => teSide(r)); }
   teTrainers(t);
+}
+function teCrowdSpr(x0, y0, x1, y1, t, sp, amp, hy){                       // cada persona: su sprite mirando al campo; bota y, si el combate se calienta, se levanta
+  const S = TE_EST.crowd.sc * 2, im = TE_PUB.img, C = TE_PUB.cols;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  for(const q of TE.crowd){
+    if(q.x < x0 - 40 || q.x > x1 + 40 || q.y < y0 - 40 || q.y > y1 + 60) continue;
+    const j = Math.max(0, Math.sin(t * sp + q.p)) * amp * 1.4, up = q.wave || (hy > .45 && (q.p * 10 | 0) % 3 === 0);
+    const cell = q.face === 'd' ? (up && Math.sin(t * 8 + q.p) > 0 ? 1 : 0) : q.face === 'u' ? 2 : 3;
+    const sx = ((q.i % C) * 4 + cell) * 32, sy = Math.floor(q.i / C) * 32, w = 32 * S, h = 32 * S;
+    ctx.save(); ctx.translate(Math.round(q.x), Math.round(q.y - j - (up ? 4 : 0)));
+    if(q.face === 'r') ctx.scale(-1, 1);
+    ctx.drawImage(im, sx, sy, 32, 32, -w / 2, -h + 6 * S, w, h); ctx.restore();
+  }
+  ctx.restore();
 }
 function teLed(t){                                                         // cinta LED encima del campo (la franja con cuadritos de la imagen)
   const M = myMon(), O = teFoe(), R = TE_LED;
   const msg = TE.hype > .6 ? '   ¡QUÉ GOLPE!   ¡QUÉ GOLPE!   ¡QUÉ GOLPE!   '
-    : `   TORRE BATALLA · PISO ${g.o.torreFloor || ''} · ${(M ? M.m.name : '').toUpperCase()} VS ${(O ? O.m.name : '').toUpperCase()} · ${(g.o.rival || '').toUpperCase()}   `;
+    : `   ${g.o.estTorre ? 'TORRE BATALLA · PISO ' + (g.o.torreFloor || '') : g.o.pruebas ? 'CAMPO DE PRUEBAS' : g.o.estCampo ? 'CAMPO DE ENTRENAMIENTO' : 'CLASIFICATORIA'} · ${(M ? M.m.name : '').toUpperCase()} VS ${(O ? O.m.name : '').toUpperCase()} · ${(g.o.rival || '').toUpperCase()}   `;
   ctx.fillStyle = '#14070b'; ctx.fillRect(R.x, R.y, R.w, R.h);
   ctx.save(); ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
   ctx.font = `${Math.round(R.h * .62)}px ${FONT}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = TE.hype > .6 ? '#ffe680' : '#ff5a6a';
@@ -296,16 +354,17 @@ function teSide(r){                                                        // pa
 function teTrainerOf(ids){                                                  // el muñeco pequeño del combate (assets/entrenadores_mini/todos.png)
   for(const id0 of ids){
     if(!id0) continue; const id = String(id0).replace(/^torre_/, '').replace(/^inv_/, '').replace(/^i:/, '');
-    if(typeof MINI !== 'undefined' && MINI.ok){ const i = miniIdx(id); if(i >= 0) return {i}; }
+    if(typeof MINI !== 'undefined' && MINI.ok){ let i = miniIdx(id); if(i < 0 && typeof INV_TEAM_KEY !== 'undefined'){ const en = Object.keys(INV_TEAM_KEY).find(k => INV_TEAM_KEY[k] === id); if(en) i = miniIdx(en); } if(i >= 0) return {i}; }   // los líderes van en español (pegaso) y en la imagen en inglés (falkner)
   }
   return null;
 }
 function teTrainers(t){                                                    // tú y el rival de pie en sus plataformas
   const sk = typeof skinOf === 'function' ? skinOf() : save.gender;
   const me = teTrainerOf([sk, save.gender === 'f' ? 'f' : 'm']);
-  const foe = teTrainerOf([g.o.leader, g.o.rival, g.o.leaderName && g.o.leaderName.toLowerCase()]);
+  const foe = teTrainerOf([g.o.foeSkin, g.o.leader, g.o.rival, (g.o.portrait || '').split('/').pop().replace(/\.\w+$/, ''), g.o.leaderName && g.o.leaderName.toLowerCase()]);
   const s = 2.2, P0 = teR2W([...TE_EST.plat[0], 0, 0]), P1 = teR2W([...TE_EST.plat[1], 0, 0]), y = P0.y + 8;
-  [[me, P0.x, true], [foe, P1.x, false]].forEach(([T, x, right]) => {
+  const sw = g.pvp && g.me === 'e';                                          // online siendo el invitado: tus Pokémon salen a la derecha, y tu entrenador también
+  [[sw ? foe : me, P0.x, true], [sw ? me : foe, P1.x, false]].forEach(([T, x, right]) => {
     if(!T) return; const bob = Math.sin(t * 2.4 + (right ? 0 : 1.7)) > .6 ? -2 : 0;
     ctx.save(); ctx.translate(x, y + bob); ctx.imageSmoothingEnabled = false;
     if(right) ctx.scale(-1, 1); ctx.drawImage(MINI.img, (T.i % MINI.cols) * 32, Math.floor(T.i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s);
@@ -336,12 +395,20 @@ function teArrow(){                                                        // fl
     PR.barA = (PR.barA || 1) + ((behind ? .35 : 1) - (PR.barA || 1)) * .15; return PR.barA; }; }
 { const o = prFront; prFront = function(){ o.apply(this, arguments); if(teOn()) teArrow(); }; }
 { const o = terrClip; terrClip = function(){ if(!teOn()) return o.apply(this, arguments); ctx.beginPath(); ctx.rect(0, 0, TE.W, TE.H); ctx.clip(); }; }
+function teStart(){                                                          // deja el estadio listo para un combate nuevo (Torre, pruebas y Clasificatoria)
+  TE.hp = new Map(); TE.hype = 0; if(TE.dec) TE.dec.getContext('2d').clearRect(0, 0, TE.W, TE.H);
+  g.p.forEach(f => { f.x = 230; f.y = TE.H / 2 + 10; }); g.e.forEach(f => { f.x = TE.W - 230; f.y = TE.H / 2 + 10; });   // delante de su entrenador
+  TE.cam.x = TE.W / 2; TE.cam.y = TE.H / 2 - 30; TE.cam.z = teFitZ(); TE.cam.t = 0;                                     // empieza ya en el plano del campo (sin barrido)
+}
+const teWants = o => TE_NEW && !!(o && (o.estTorre || o.pruebas || o.estCampo || o.estRegion));
+{ const o = startBattle; startBattle = function(o2){                       // combates en el estadio grande (también al reintentar): estadio que toca, ancho del mundo y posiciones de salida
+    if(!teWants(o2)) return o.apply(this, arguments);
+    teUse(teCfgFor(o2)); LOCKW = TE.W; resize();
+    const r = o.apply(this, arguments); teStart(); return r;
+  }; }
 { const o = prGo; prGo = function(o2){
-    if(!(TE_NEW && o2 && o2.estTorre)) return o.apply(this, arguments);
-    TE.hp = new Map(); TE.hype = 0; if(TE.dec) TE.dec.getContext('2d').clearRect(0, 0, TE.W, TE.H);   // campo limpio en cada piso
-    LOCKW = TE.W; resize(); startBattle(o2);
-    g.p.forEach(f => { f.x = 230; f.y = TE.H / 2 + 10; }); g.e.forEach(f => { f.x = TE.W - 230; f.y = TE.H / 2 + 10; });   // delante de su entrenador
-    TE.cam.x = TE.W / 2; TE.cam.y = TE.H / 2 - 30; TE.cam.z = teFitZ(); TE.cam.t = 0;                                     // empieza ya en el plano del campo (sin barrido)
+    if(!teWants(o2)) return o.apply(this, arguments);
+    startBattle(o2);
   }; }
 
 // ---------------------------------------------------------------------
@@ -419,7 +486,7 @@ function teCenter(s){                                                     // mar
     const w = 110, x = W / 2 - w / 2;
     ctx.fillStyle = 'rgba(8,11,20,.82)'; ctx.beginPath(); ctx.moveTo(x - 10, 6); ctx.lineTo(x + w + 10, 6); ctx.lineTo(x + w, 40); ctx.lineTo(x, 40); ctx.closePath(); ctx.fill();
     text(`${(s / 60 | 0)}:${String(s % 60).padStart(2, '0')}`, W / 2, 30, 14, '#ffffff', 'center');
-    text(`TORRE · PISO ${g.o.torreFloor || g.o.floor}`, W / 2, 52, 6, '#c9d6f5', 'center');
+    text(teTitle(), W / 2, 52, 6, '#c9d6f5', 'center');
   });
 }
 { const o = hud; hud = function(x, y, list, idx, col){ if(teHudOn()) return teHud(x, y, list, idx, col); return o.apply(this, arguments); }; }
@@ -494,4 +561,4 @@ function teExtras(f, list, x, right){                                     // obj
     hudAt(W / 2, 0, () => { const w = 150, h = w * TE_HUDI.timer.height / TE_HUDI.timer.width, x = W / 2 - w / 2;
       ctx.imageSmoothingEnabled = true; ctx.drawImage(TE_HUDI.timer, x, 4, w, h);
       text(`${(s / 60 | 0)}:${String(s % 60).padStart(2, '0')}`, W / 2, 4 + h * .55, 13, '#ffffff', 'center');
-      text(`TORRE · PISO ${g.o.torreFloor || g.o.floor}`, W / 2, 4 + h + 10, 6, '#c9d6f5', 'center'); }); }; }
+      text(teTitle(), W / 2, 4 + h + 10, 6, '#c9d6f5', 'center'); }); }; }

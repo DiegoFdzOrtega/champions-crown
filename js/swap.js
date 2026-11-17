@@ -23,13 +23,14 @@ function swBallType(f){ if(f.shiny) return 'shiny'; const d = DEX[f.m.dex - 1]; 
 // Dibujo de la Poké Ball (reutiliza el sprite del Gachapon, partido en dos mitades al abrirse)
 // ---------------------------------------------------------------------
 const SW_IMG = {};
+const SW_BALL = .7;                                                // [AJUSTE] tamaño de la Poké Ball (antes 1.25: era casi tan grande como el Pokémon)
 function swBallImg(type){
   if(typeof ballURL !== 'function') return null;
   let im = SW_IMG[type]; if(!im){ im = new Image(); im.src = ballURL(type); SW_IMG[type] = im; }
   return im.complete && im.naturalWidth ? im : null;
 }
 function swBall(type, x, y, sc, rot, open){                       // open = ángulo (rad) de la tapa superior; 0 = cerrada
-  const im = swBallImg(type), s = sc * ESCALA * 1.25;
+  const im = swBallImg(type), s = sc * ESCALA * SW_BALL;
   ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.imageSmoothingEnabled = false;
   if(!im){ ctx.fillStyle = '#e23b3b'; ctx.beginPath(); ctx.arc(0, 0, 8 * s, 0, 7); ctx.fill(); ctx.restore(); return; }
   ctx.rotate(rot || 0);

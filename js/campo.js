@@ -215,12 +215,13 @@ function campoFight(id){
   const T = campoById(id), S = campoStats(T);
   if(!campoOpen(T.tier)){ toast('Esta dificultad está bloqueada: supera antes la anterior.'); return; }
   const o = {
-    campo:true, campoId:id, floor:0, n:-1, leader:'campo_' + id, arena:T.arena === 'campo_prueba' ? 'campo_prueba' : 'campo',     /* PRUEBA: el Maestro Cafetero usa el campo nuevo */ portrait:'assets/entrenadores/' + T.file,
+    campo:true, estCampo:true, campoId:id,                                         /* estCampo: se juega en el estadio grande (js/torreestadio.js) */
+    floor:0, n:-1, leader:'campo_' + id, arena:T.arena === 'campo_prueba' ? 'campo_prueba' : 'campo',     /* PRUEBA: el Maestro Cafetero usa el campo nuevo */ portrait:'assets/entrenadores/' + T.file,
     title:'CAMPO DE ENTRENAMIENTO', sub:`${T.name.toUpperCase()} · ${CAMPO_TIER[T.tier].nombre.toUpperCase()}`,
     enemies:T.team, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl
   };
   if(!team.length){ startBattle(o); return; }
-  vsIntro({name:T.name, path:'assets/entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS antes del combate
+  vsIntro({name:T.name, path:'assets/entrenadores/' + T.file, enemies:T.team, label:('Campo · ' + CAMPO_TIER[T.tier].nombre).toUpperCase(), music:o, go:() => (typeof prGo === 'function' ? prGo(o) : startBattle(o))});   // panel VS antes del combate
 }
 function campoEnd(won){                                    // lo llama endBattle (modes.js) cuando el combate es del Campo de Entrenamiento
   g.over = true;
@@ -298,7 +299,7 @@ function renderCampo(){
 }
 function renderCampoHero(){
   const T = campoSel && campoById(campoSel), box = $('cpHero'); if(!box) return;
-  const ready = team.length === 3;
+  const ready = team.length === TEAM_SIZE;
   if(!T){ box.innerHTML = ''; return; }
   const open = campoOpen(T.tier), won = !!save.campoWins[T.id], col = campoColor(T);
   box.style.setProperty('--tc', col);

@@ -127,7 +127,7 @@ buildStory = function(){
 
 function ligaRender(){
   const R = save.region, fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === R);
-  const rec = PREVIEW[R] ? 99 : progOf(R), ready = team.length === 3, champ = champOf(R);
+  const rec = PREVIEW[R] ? 99 : progOf(R), ready = team.length === TEAM_SIZE, champ = champOf(R);
   const st = F => F.idx < rec ? 'done' : F.idx === rec ? 'cur' : 'lock';
   const nextK = fls.findIndex(x => x.F.idx >= rec);
   let k = liga.sel != null ? fls.findIndex(x => x.gi === liga.sel) : -1;

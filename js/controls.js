@@ -21,7 +21,10 @@ const CTL_ACTIONS = [
   {id:'mega',   n:'Megaevolución',    def:['KeyR', null]},
   {id:'sw1',    n:'Cambiar al Pokémon 1', def:['Digit1', null]},
   {id:'sw2',    n:'Cambiar al Pokémon 2', def:['Digit2', null]},
-  {id:'sw3',    n:'Cambiar al Pokémon 3', def:['Digit3', null]}
+  {id:'sw3',    n:'Cambiar al Pokémon 3', def:['Digit3', null]},
+  {id:'sw4',    n:'Cambiar al Pokémon 4', def:['Digit4', null]},
+  {id:'sw5',    n:'Cambiar al Pokémon 5', def:['Digit5', null]},
+  {id:'sw6',    n:'Cambiar al Pokémon 6', def:['Digit6', null]}
 ];
 const CTL_RESERVED = /^(Escape|KeyM|F\d+|Tab|ContextMenu|MetaLeft|MetaRight|OSLeft|OSRight)$/;      // no se pueden asignar
 const CTL_OK = c => typeof c === 'string' && /^[A-Za-z0-9]{2,20}$/.test(c);

@@ -18,3 +18,7 @@ El repositorio pide nombrar al autor de cada sprite. Autor (carpeta del reposito
 - yoshord: lance
 
 Notas: Horo hizo los suyos por encargo de Paccy (piden crédito para los dos). Lance es el de yoshord (traje de Let's Go).
+
+
+Público de los estadios (entrenadores_mini/publico.png): sprites de mapa del mismo repositorio (Team Aqua's Asset Repo, carpeta "Overworld Trainer Sprites").
+Autores (carpetas del repositorio): Bivurnum, Black Fragrant, Delta231s Collaborative HGSS Resource, Deneb, Francis III, Galaxeeh, Horo, IAG, Jaizu, Kasen, Leob0505 Zelda Minish Quest, Lhea, Pawkkie, Poffin_Case, PurrfectDoodle, RavePossum.

@@ -103,7 +103,7 @@ const MUSIC_TRACKS = {
   win_campeon_alola:{name:'Victoria: Campeón de Alola',            file:'Alola/Victoria Campeon', once:true, ref:'"Victory! Champion" de Alola (Sol y Luna)'},
   torre:        {name:'Torre Batalla', file:'Kalos/Combate Alto Mando', win:'win_lider_kalos', ref:'"Battle! Elite Four" de Kalos (X/Y): épica, para subir piso a piso',
                  synth:{seed:58, bpm:150, root:57, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.85}},
-  campo:        {name:'Campo de Entrenamiento',    ref:'"Battle! Trainer" (entrenador normal)',
+  campo:        {name:'Campo de Entrenamiento', file:'Alola/Combate Lideres', win:'win_lider_alola', ref:'"Battle! Trainer / Kahuna" de Alola (Sol y Luna). Para poner otra: cambia file por la ruta de tu archivo en assets/musica (sin .ogg)',
                  synth:{seed:51, bpm:138, root:60, scale:'major',    prog:[0,3,4,0],      bass:'drive', lead:'drive', pad:false, arp:false, drums:'rock',   density:.7}}
 };
 

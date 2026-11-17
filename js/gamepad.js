@@ -30,6 +30,9 @@ const GP_ACTIONS = [
   {id:'sw1',    n:'Pokémon 1',      def:[14, null]},
   {id:'sw2',    n:'Pokémon 2',      def:[13, null]},
   {id:'sw3',    n:'Pokémon 3',      def:[15, null]},
+  {id:'sw4',    n:'Pokémon 4',      def:[null, null]},
+  {id:'sw5',    n:'Pokémon 5',      def:[null, null]},
+  {id:'sw6',    n:'Pokémon 6',      def:[null, null]},
   {id:'pause',  n:'Pausa',          def:[9, null]}
 ];
 const GP_NAMES = ['A','B','X','Y','LB','RB','LT','RT','SELECT','START','L3','R3','CRUZ ↑','CRUZ ↓','CRUZ ←','CRUZ →'];
@@ -135,7 +138,7 @@ function gpTick(){
     };
     GP.aim = Math.hypot(rx, ry) > .4 ? Math.atan2(ry, rx) : null;
     if(gpHeldId('mega', pr)) megaPlayer();
-    if(gpHeldId('sw1', pr)) switchMon(0); if(gpHeldId('sw2', pr)) switchMon(1); if(gpHeldId('sw3', pr)) switchMon(2);
+    if(gpHeldId('sw1', pr)) switchMon(0); if(gpHeldId('sw2', pr)) switchMon(1); if(gpHeldId('sw3', pr)) switchMon(2); if(gpHeldId('sw4', pr)) switchMon(3); if(gpHeldId('sw5', pr)) switchMon(4); if(gpHeldId('sw6', pr)) switchMon(5);
     if(gpHeldId('pause', pr)) pauseBattle(true);
   }else{
     GP.held = {}; GP.aim = null;

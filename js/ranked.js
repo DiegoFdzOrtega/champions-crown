@@ -108,7 +108,7 @@ function rkCanPlay(){
   if(typeof cloud === 'undefined' || !cloud.ok) return ['nocloud', 'No hay conexión con el servidor del juego.'];
   if(!cloud.user || !cloud.name) return ['login', 'Para jugar la Clasificatoria necesitas una cuenta. Entra en «Amigos» para crearla o iniciar sesión.'];
   if(!cloud.rt) return ['wait', 'Conectando con el servidor... espera un momento.'];
-  if(team.length !== 3) return ['team', 'Necesitas un equipo de 3 Pokémon.'];
+  if(team.length !== TEAM_SIZE) return ['team', `Necesitas un equipo de ${TEAM_SIZE} Pokémon.`];
   return null;
 }
 // El escenario: tus 3 Pokémon sobre los pedestales, el selector de equipo junto al aro central, el botón grande en la consola y los Hitos de Temporada

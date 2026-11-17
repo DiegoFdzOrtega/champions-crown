@@ -30,13 +30,13 @@ function hbAnalyze(T){
   const weak = [], res = [];
   all.forEach(t => { const w = ms.filter(m => eff(t, m.types) > 1).length, r = ms.filter(m => eff(t, m.types) < 1).length; if(w) weak.push([t, w]); if(r >= 2) res.push([t, r]); });
   weak.sort((a, b) => b[1] - a[1]);
-  const shared = weak.filter(([, w]) => w >= 2);
+  const shared = weak.filter(([, w]) => w >= Math.max(2, Math.ceil(n / 2)));            // «compartida» = la mitad del equipo o más (2 de 3 · 3 de 6)
   const phys = T.filter(d => st(d, 'atk') >= st(d, 'spa')).length, spec = n - phys;
   const ofe = hbPct(avg(d => Math.max(st(d, 'atk'), st(d, 'spa'))), 50, 175);
   const def = hbPct(avg(d => (st(d, 'hp') + st(d, 'def') + st(d, 'spd')) / 3), 70, 165);
   const vel = hbPct(avg(d => st(d, 'spe')), 35, 165);
   const cob = Math.round(cov.length / all.length * 100);
-  const sin = n < 2 ? 50 : Math.max(0, Math.min(100, 92 - shared.reduce((s, [, w]) => s + (w >= 3 ? 26 : 14), 0) + res.length * 3 + (new Set(ms.flatMap(m => m.types)).size - n) * 4));
+  const sin = n < 2 ? 50 : Math.max(0, Math.min(100, 92 - shared.reduce((s, [, w]) => s + (w >= Math.max(3, n * .5) ? 22 : w >= Math.max(2, n * .34) ? 10 : 0), 0) + res.length * 3 + (new Set(ms.flatMap(m => m.types)).size - n) * 4));
   const uti = Math.round(Math.min(100, T.filter(d => save.equip[d]).length / n * 55 + Math.min(1, mvT.size / (n * 2.2)) * 45));
   const axes = {ofe, def, vel, cob, sin, uti};
   const score = Math.round((sin * .25 + cob * .2 + ofe * .15 + def * .15 + vel * .15 + uti * .1) * Math.min(1, .55 + n * .15));
@@ -46,18 +46,18 @@ function hbAnalyze(T){
 // Recomendaciones: frases cortas con ⚠ (aviso), ✓ (bien) o ✕ (peligro)
 function hbTips(A){
   const out = [];
-  if(A.n < 3) out.push(['warn', `Te ${3 - A.n === 1 ? 'falta 1 Pokémon' : 'faltan ' + (3 - A.n) + ' Pokémon'} para completar el equipo.`]);
+  if(A.n < TEAM_SIZE) out.push(['warn', `Te ${TEAM_SIZE - A.n === 1 ? 'falta 1 Pokémon' : 'faltan ' + (TEAM_SIZE - A.n) + ' Pokémon'} para completar el equipo.`]);
   if(!A.n) return out;
   const big = ['tierra', 'roca', 'fuego', 'agua', 'hielo', 'lucha', 'hada', 'dragon', 'acero', 'siniestro'];
   const m = A.miss.filter(t => big.includes(t)).slice(0, 2);
   if(m.length) out.push(['warn', `Tu equipo no tiene ataques eficaces contra ${m.map(t => TYPE_ES[t]).join(' ni ')}.`]);
-  A.shared.slice(0, 2).forEach(([t, w]) => out.push([w >= 3 ? 'bad' : 'warn', `Debilidad ante ${TYPE_ES[t]}: ${w} de tus ${A.n} Pokémon.`]));
+  A.shared.filter(([, w]) => w >= Math.max(2, Math.ceil(A.n / 3))).slice(0, 2).forEach(([t, w]) => out.push([w >= Math.max(3, A.n / 2) ? 'bad' : 'warn', `Debilidad ante ${TYPE_ES[t]}: ${w} de tus ${A.n} Pokémon.`]));
   const strong = Object.keys(CH).map(t => [t, team.filter(d => movesOf(d).some(x => MOVES[x] && eff(MOVES[x].t, [t]) > 1)).length]).filter(([, k]) => k >= 2).sort((a, b) => b[1] - a[1]);
   if(strong.length) out.push(['ok', `Excelente contra equipos de tipo ${TYPE_ES[strong[0][0]]}${strong[1] ? ' y ' + TYPE_ES[strong[1][0]] : ''}.`]);
   const noItem = team.filter(d => !save.equip[d]);
   if(noItem.length) out.push(['warn', `${noItem.map(d => mon(d).name).join(' y ')} no ${noItem.length > 1 ? 'llevan' : 'lleva'} objeto.`]);
   if(A.n >= 2 && (!A.phys || !A.spec)) out.push(['warn', `Todos atacan por el lado ${A.phys ? 'físico' : 'especial'}: un Pokémon del otro tipo lo equilibraría.`]);
-  if(A.n === 3 && !A.shared.length) out.push(['ok', 'Ningún tipo es súper eficaz contra 2 o más de tus Pokémon.']);
+  if(A.n === TEAM_SIZE && !A.shared.length) out.push(['ok', 'Ningún tipo es súper eficaz contra 2 o más de tus Pokémon.']);
   return out.slice(0, 4);
 }
 
@@ -291,7 +291,7 @@ function hbPickBar(){
   if(!d){ el.innerHTML = '<em>Clic en un Pokémon para marcarlo · doble clic para añadirlo</em>'; return; }
   const m = mon(d);
   el.innerHTML = team.includes(d) ? `<b>${esc(m.name)}</b> ya está en el equipo <button data-act="x">✕</button>`
-    : team.length < 3 ? `<b>${esc(m.name)}</b><button data-act="add" class="go">＋ Añadir al equipo</button><button data-act="x">✕</button>`
+    : team.length < TEAM_SIZE ? `<b>${esc(m.name)}</b><button data-act="add" class="go">＋ Añadir al equipo</button><button data-act="x">✕</button>`
     : `<b>${esc(m.name)}</b> · sustituir a: ${team.map((x, i) => `<button data-act="rep" data-i="${i}">${i ? i + 1 : '♛'} ${esc(mon(x).name)}</button>`).join('')}<button data-act="x">✕</button>`;
 }
 function hbClock(){ const n = new Date(); $('hbCK').textContent = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); }
@@ -301,8 +301,8 @@ function hbOptimize(){
   const base = hbAnalyze(team).score, out = [];
   const pool = save.box.filter(d => mon(d) && !hidden(d) && !team.includes(d));
   pool.forEach(d => {
-    if(team.length < 3){ const s = hbAnalyze([...team, d]).score; out.push({d, i:team.length, s}); return; }
-    let best = null; for(let i = 0; i < 3; i++){ const T = team.slice(); T[i] = d; const s = hbAnalyze(T).score; if(!best || s > best.s) best = {d, i, s}; } out.push(best);
+    if(team.length < TEAM_SIZE){ const s = hbAnalyze([...team, d]).score; out.push({d, i:team.length, s}); return; }
+    let best = null; for(let i = 0; i < TEAM_SIZE; i++){ const T = team.slice(); T[i] = d; const s = hbAnalyze(T).score; if(!best || s > best.s) best = {d, i, s}; } out.push(best);
   });
   out.sort((a, b) => b.s - a.s); const top = out.filter(o => o.s > base).slice(0, 4);
   hb.sug = top.map(o => o.d); hbMark();

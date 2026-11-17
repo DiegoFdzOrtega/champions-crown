@@ -711,8 +711,9 @@ function update(dt){
 const SWITCH_CD = 5;                              // segundos de espera entre un cambio tuyo y el siguiente (empieza a contar cuando el nuevo Pokémon ya ha salido)
 function switchMon(i){                            // cambio VOLUNTARIO (teclas 1 2 3 · R · clic en los cuadritos del HUD). El cambio por debilitamiento no pasa por aquí.
   if(!g || g.over || g.paused || g.count > 0) return;
+  if(i !== undefined && !(g.pvp ? myList() : g.p)[i]) return;           // equipo con menos Pokémon que la tecla pulsada
   if(g.pvp){ if(i !== undefined) pvpEvent('sw', i); return; }       // combate online: el cambio se manda como pulsación y lo hacen los dos a la vez (js/pvp.js)
-  if(i === undefined){ for(let k=1;k<=3;k++){ const j=(g.pi+k)%3; if(!g.p[j].dead){ i=j; break; } } }
+  if(i === undefined){ const N = g.p.length; for(let k=1;k<=N;k++){ const j=(g.pi+k)%N; if(!g.p[j].dead){ i=j; break; } } }
   if(i===undefined || g.p[i].dead || i===g.pi || g.p[g.pi].dead || g.p[g.pi].jump) return;      // (en pleno salto no se puede cambiar)
   if(swapBusy()) return;                          // ya hay un cambio en marcha: no se empieza otro hasta que acabe la animación
   const trap = abTrapped(g.p[g.pi], g.e[g.ei]);   // Sombra Trampa · Trampa Arena · Imán del rival

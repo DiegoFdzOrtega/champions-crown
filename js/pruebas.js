@@ -39,7 +39,7 @@ function prImg(src){
   if(!c[src]){ const im = c[src] = new Image(); im.onload = () => im.ok = true; im.src = src; }
   return c[src];
 }
-const prOn = () => !!(g && g.o && (g.o.pruebas || g.o.estadio || g.o.estTorre));      // pruebas = Campo de pruebas (contra la IA) · estadio = Clasificatoria online · estTorre = Torre Batalla
+const prOn = () => !!(g && g.o && (g.o.pruebas || g.o.estadio || g.o.estTorre || g.o.estCampo || g.o.estRegion));      // pruebas = Campo de pruebas (contra la IA) · estadio = Clasificatoria online · estTorre = Torre Batalla
 // PANTALLA COMPLETA: la pantalla mide PR.SW × H (PR.SW sale de la forma de la ventana). El estadio se ve SIEMPRE entero (nunca se recorta el campo):
 //  - ventana más ancha que la imagen: la imagen ocupa todo el alto y los lados que sobran se rellenan con la grada de sus bordes (prSides);
 //  - ventana más estrecha: la imagen ocupa todo el ancho y queda una franja oscura abajo, detrás de la barra de ataques.
@@ -68,7 +68,7 @@ function prClamp(f){                                        // lo llama combat.j
 // ---- Entrar al Campo de pruebas: un entrenador del Campo al azar ----
 let prLast = '';
 function openPruebas(){
-  if(team.length < 3){ toast('Necesitas un equipo de 3 Pokémon (Equipo Pokémon).'); return; }
+  if(team.length < TEAM_SIZE){ toast(`Necesitas un equipo de ${TEAM_SIZE} Pokémon (Equipo Pokémon).`); return; }
   const pool = CAMPO.filter(T => T.id !== prLast), T = pool[(Math.random() * pool.length) | 0]; prLast = T.id;
   prImg(PR_BG.pruebas);
   const S = campoStats(T), o = {
@@ -289,5 +289,5 @@ function prFront(){                                           // encima del HUD:
     ctx.restore();
     ctx.restore();
   }
-  if(!g.pvp) text(g.o.estTorre ? `TORRE · PISO ${g.o.torreFloor}${g.o.boss ? ' · JEFE' : ''} · RÉCORD ${save.tower.best}` : 'CAMPO DE PRUEBAS · RIVAL: IA · SIN RECOMPENSAS', 14, H - 12, 6, '#6d7899');   // online: ahí va el ping (js/pvp.js)
+  if(!g.pvp) text(g.o.estTorre ? `TORRE · PISO ${g.o.torreFloor}${g.o.boss ? ' · JEFE' : ''} · RÉCORD ${save.tower.best}` : g.o.estCampo ? 'CAMPO DE ENTRENAMIENTO · ' + (g.o.sub || '') : g.o.estRegion ? (g.o.sub || '') : 'CAMPO DE PRUEBAS · RIVAL: IA · SIN RECOMPENSAS', 14, H - 12, 6, '#6d7899');   // online: ahí va el ping (js/pvp.js)
 }

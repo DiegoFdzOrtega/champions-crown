@@ -31,6 +31,7 @@ let team = [3, 6, 9];                            // equipo inicial: Venusaur, Ch
 // items = objetos en la mochila · equip = objeto equipado a cada Pokémon {nº: id}
 // box = Pokémon que tienes (en orden de llegada) · shiny/fav = nº de Pokédex · nat = naturaleza de cada uno
 // pity = tiradas sin legendaria por región · used = veces que lo has llevado a un combate
+const TEAM_SIZE = 6;                                                                       // [AJUSTE] Pokémon por equipo (antes 3) · tiene que ir ANTES de cargar la partida
 const save = {record:0, bp:0, tickets:0, ticketsL:0, ticketsS:0, name:'ENTRENADOR', vol:100, region:'Kanto', gachaRegion:'Kanto',
               items:{}, equip:{}, teams:[], tsel:0, box:[3,6,9], shiny:[], fav:[], nat:{}, pity:{}, used:{},
               profileFav:[], profileSh:[], ach:{}, charms:{}, keys:{}, shinyOff:[], avatar:'', gender:'m', cardBg:'', cardFrame:'rank', welcome:0, login:{streak:0, last:''}, firstWin:'',
@@ -39,7 +40,7 @@ try{
   const s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null');
   if(s){
     if(Array.isArray(s.box) && s.box.every(id => mon(id))) save.box = s.box;
-    if(Array.isArray(s.team) && s.team.length === 3 && s.team.every(id => save.box.includes(id) && !hidden(id))) team = s.team;
+    if(Array.isArray(s.team) && s.team.length >= 1 && s.team.length <= TEAM_SIZE && s.team.every(id => save.box.includes(id) && !hidden(id))) team = s.team;
     save.ticketsL = s.ticketsL || 0; save.ticketsS = Math.max(0, Math.min(1e6, Math.floor(+s.ticketsS) || 0)); save.region = s.region || 'Kanto'; save.items = s.items || {};
     save.equip = s.equip || {}; save.shiny = s.shiny || []; save.fav = s.fav || []; save.nat = s.nat || {};
     save.pity = s.pity || {}; save.used = s.used || {}; save.gachaRegion = s.gachaRegion || 'Kanto';
@@ -88,7 +89,7 @@ const useShiny = d => save.shiny.includes(d) && !save.shinyOff.includes(d);
 const TEAM_MAX = 18, TEAM_START = 5;                                                        // máximo de equipos / con cuántos empieza una partida nueva
 (function initTeams(){
   let s = null; try{ s = JSON.parse(localStorage.getItem('arena2d_v2') || 'null'); }catch(e){}
-  const okMons = a => Array.isArray(a) && a.length <= 3 && new Set(a).size === a.length && a.every(id => save.box.includes(id) && !hidden(id));
+  const okMons = a => Array.isArray(a) && a.length <= TEAM_SIZE && new Set(a).size === a.length && a.every(id => save.box.includes(id) && !hidden(id));
   const obj = v => (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
   const T = [];
   if(s && Array.isArray(s.teams)) s.teams.slice(0, TEAM_MAX).forEach((t, i) => T.push({n:String((t && t.n) || '').slice(0, 14) || 'Equipo ' + (i + 1), mons:t && okMons(t.mons) ? t.mons.slice() : [], equip:obj(t && t.equip), fav:!!(t && t.fav)}));
@@ -133,7 +134,7 @@ function enemyMon(e){
 }
 
 function startBattle(o, again){
-  if(!team.length){ toast('Tu equipo está vacío: añade Pokémon en Equipo Pokémon.'); return; }                // por seguridad (los botones de combate ya se desactivan si no hay 3)                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
+  if(!team.length){ toast('Tu equipo está vacío: añade Pokémon en Equipo Pokémon.'); return; }                // por seguridad (los botones de combate ya se desactivan si no está completo)                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
   if(!again){ team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist(); }                 // para ordenar por "más usados"
   const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; f.ab = abilityOf(id); megaSetup(f, 'p'); return f; }),   // IVs, EVs, naturaleza, ataques de MT y habilidad
          e = o.enemies.map(s => { const b = enemyBoost(s), f = mk(enemyMon(s), o.hm * b.hm, o.dm * b.dm, s.item); f.spdm = (o.spdm || 1) * b.spdm; f.defm = b.defm; f.ab = (s && s.ab) || ''; megaSetup(f, 'e', s); return f; });   // plantilla del rival: objeto + IVs/EVs/naturaleza (teams.js)

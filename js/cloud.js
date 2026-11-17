@@ -298,7 +298,7 @@ function cloudRtStop(){
 }
 const cloudSend = (event, payload) => { if(cloud.rt) cloud.rt.send({type: 'broadcast', event, payload}); };
 const cloudBusy = () => (typeof g !== 'undefined' && g && !g.over) || !!cloud.match;               // ya hay un combate en marcha (o uno online preparándose)
-const cloudNoTeam = () => typeof team !== 'undefined' && team.length !== 3;                          // para el combate online hace falta un equipo de 3 Pokémon
+const cloudNoTeam = () => typeof team !== 'undefined' && team.length !== TEAM_SIZE;                          // para el combate online hace falta el equipo completo
 function cloudChalEnd(msg){ if(cloud.chal) clearTimeout(cloud.chal.timer); cloud.chal = null; if(typeof cloudChalUi === 'function') cloudChalUi(); if(msg && typeof toast === 'function') toast(msg); }
 function cloudChalTimer(id){ return setTimeout(() => { if(cloud.chal && cloud.chal.id === id){ const c = cloud.chal; if(c.dir === 'out') cloudSend('cancel', {id, from: cloud.user.id, to: c.uid}); cloudChalEnd(c.dir === 'out' ? c.name + ' no ha respondido.' : 'Desafío de ' + c.name + ' caducado.'); } }, CLOUD_CHAL_MS); }
 

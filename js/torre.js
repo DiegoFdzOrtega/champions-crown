@@ -209,7 +209,7 @@ function twLoadLeader(im, id, onfail){                                          
 }
 function twKingClean(r){                                                                 // lo que viene de la nube es DATO NO FIABLE: se valida todo
   const f = fpNum(r && r.floor); if(!TW_KFL.includes(f) || !Array.isArray(r.mons)) return null;
-  const mons = r.mons.map(m => Array.isArray(m) ? [fpNum(m[0]), m[1] ? 1 : 0] : null).filter(m => m && m[0] && mon(m[0]) && !hidden(m[0])).slice(0, 3);
+  const mons = r.mons.map(m => Array.isArray(m) ? [fpNum(m[0]), m[1] ? 1 : 0] : null).filter(m => m && m[0] && mon(m[0]) && !hidden(m[0])).slice(0, TEAM_SIZE);
   if(!mons.length) return null;
   const nm = fpStr(r.username, 16) || 'Jugador', c = r.card && typeof r.card === 'object' ? r.card : {};
   const g = c.g === 'f' ? 'f' : (c.g === 'r' ? (nm.toLowerCase() === VS_MASTERS_USER ? 'r' : 'm') : (vsKnown(c.g) ? c.g : 'm'));
@@ -238,11 +238,11 @@ async function twClaim(f){                                                      
 }
 function torreCampeon(id, seed){                                                       // los Campeones llevan 6; en la Torre luchas contra 3: su último (el más fuerte) y 2 más (siempre los mismos en esa subida)
   const T = TEAMS[id] || [], R = invSeeded(seed || 1), rest = T.slice(0, -1).map(x => [x, R()]).sort((a, b) => a[1] - b[1]).map(q => q[0]);
-  return T.length <= 3 ? T.slice() : [...rest.slice(0, 2), T[T.length - 1]];
+  return T.slice();                                                                   // con equipos de 6, los Campeones salen con los 6
 }
 function torreFight(f){
   if(!towerOpen()){ toast('La Torre Batalla se abre al ser Campeón de Kanto.'); return; }
-  if(team.length !== 3){ toast('Elige 3 Pokémon en EQUIPO POKÉMON para subir a la Torre.'); return; }
+  if(team.length !== TEAM_SIZE){ toast(`Elige ${TEAM_SIZE} Pokémon en EQUIPO POKÉMON para subir a la Torre.`); return; }
   const tw = save.tower;
   if(f === 1 && tw.run && tw.run.f > 0) torreAcabar();                                   // empezar otra subida con una a medias: esa se da por terminada
   if(!tw.run){ tw.run = {f:0, r:tw.rot || 0}; tw.runs++; persist(); f = 1; }             // nueva subida
@@ -261,7 +261,7 @@ function torreFight(f){
     const im = new Image(); twLoadLeader(im, F.id); im.onload = () => { o.portrait = im.src; };                 // su retrato para la pantalla del estadio
     vs = {name:F.leader, id:F.id, enemies:en, label:`TORRE · PISO ${f} · CAMPEÓN`, music:o};
   }else{
-    const team2 = torreEquipo(P.x, f < 15 ? 3 : 4, tw.run.r * 97 + f);
+    const team2 = torreEquipo(P.x, f < 10 ? 4 : f < 25 ? 5 : 6, tw.run.r * 97 + f);      // 4 al principio, 6 desde el piso 25
     o = {torre:true, estTorre:true, torreFloor:f, floor:f, n:-1, leader:'torre_' + P.id, arena:'campo', leaderName:P.name, rival:P.name, portrait:P.path, title:'TORRE BATALLA', sub:`PISO ${f} · ${P.name.toUpperCase()}`, enemies:team2, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl};
     vs = {name:P.name, path:P.path, enemies:team2, label:`TORRE · PISO ${f}`, music:o};
   }
