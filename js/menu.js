@@ -233,7 +233,7 @@ function buildStory(){
     d.append(c, nm, ty, it); thumbs.push({c,m,s:useShiny(id)}); bar.appendChild(d);
   });
   const ready = team.length === TEAM_SIZE;
-  $('teamWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
+  $('teamWarn').textContent = ready ? '' : `Elige ${TEAM_SIZE} Pokémon en EQUIPO POKÉMON para poder combatir.`;
   const fl = $('floors'), fl2 = $('floors2'), fl3 = $('floors3'); fl.innerHTML = ''; fl2.innerHTML = ''; fl3.innerHTML = '';   // líderes arriba, Alto Mando (con el Campeón) debajo
   fls.forEach(({F, gi}) => {                                         // gi = posición global (la que usa floorFight)
     const i = F.idx, locked = i > rec, done = i < rec, cur = i === rec;

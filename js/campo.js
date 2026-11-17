@@ -319,7 +319,7 @@ function renderCampoHero(){
   const tm = $('cpTM'); team.forEach(d => { const m = mon(d); if(!m) return; const c = document.createElement('canvas'); c.width = c.height = 64; c.title = m.name; tm.appendChild(c); dexThumbs.push({c, m}); });
   if(!team.length) tm.innerHTML = '<span class="hte">Sin equipo todavía</span>';
   const go = $('cpGo'); go.disabled = !ready || !open; go.onclick = () => campoFight(T.id);
-  $('cmpWarn').textContent = ready ? '' : 'Elige 3 Pokémon en EQUIPO POKÉMON para poder combatir.';
+  $('cmpWarn').textContent = ready ? '' : `Elige ${TEAM_SIZE} Pokémon en EQUIPO POKÉMON para poder combatir.`;
   $('cmpTeam').onclick = () => openTeam('campo'); fillTeamSel('cpTeamSel', openCampo);
 }
 

@@ -160,7 +160,7 @@ function ligaRender(){
       <div class="lg-side">
         ${rw ? `<div class="lg-rw"><small>Recompensa${F.kind === 'alto' ? ' · Alto Mando ×2' : F.kind === 'campeon' ? ' · Campeón ×3' : ''}</small><div id="lgRw"></div></div>` : '<span></span>'}
         <button class="lg-go${S === 'done' ? ' rep' : ''}" id="lgGo" ${ready ? '' : 'disabled'}>${S === 'done' ? 'Repetir combate' : '¡COMBATIR!'}</button>
-        ${ready ? '' : '<p class="warn lg-warn">Elige 3 Pokémon en tu equipo para combatir.</p>'}
+        ${ready ? '' : `<p class="warn lg-warn">Elige ${TEAM_SIZE} Pokémon en tu equipo para combatir.</p>`}
       </div>
     </div>
     <div class="lg-road"><h3>Camino de la Liga</h3>

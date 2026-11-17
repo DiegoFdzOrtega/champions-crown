@@ -11,7 +11,7 @@ const GUIA_SECCIONES = [
       <li>En el menú pulsa <b>¡COMBATIR!</b> (o entra en <b>Historia</b> y elige <b>Kanto</b>). Vas venciendo a los <b>líderes de gimnasio</b>, luego al <b>Alto Mando</b> y por último al <b>Campeón</b>.</li>
       <li>Cada victoria te da <b>Puntos de Batalla</b> y, en los combates importantes, <b>tickets</b> y <b>estrellas</b>.</li>
       <li>Gasta los tickets en el <b>Gachapon</b> para conseguir <b>Pokémon nuevos</b>.</li>
-      <li>En <b>Equipo</b> eliges <b>3 Pokémon</b> para combatir (puedes guardar hasta 18 equipos distintos).</li>
+      <li>En <b>Equipo</b> eliges <b>6 Pokémon</b> para combatir (puedes guardar hasta 18 equipos distintos).</li>
       <li>Cuando seas Campeón de Kanto se abre la <b>Torre Batalla</b> y puedes seguir con las demás regiones.</li>
     </ol>
     <p class="gn">Consejo: empieza en dificultad <b>Fácil</b>. Cada dificultad guarda su propio avance, así que puedes cambiar sin perder nada.</p>`],

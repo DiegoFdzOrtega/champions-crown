@@ -198,7 +198,7 @@ function torrePlan(){                                                           
 const torreRun = {get active(){ return !!save.tower.run; }, get floor(){ return save.tower.run ? save.tower.run.f : 0; }};
 function torreAcabar(){ const tw = save.tower; if(tw.run){ tw.rot = tw.run.r + TORRE_SALTO; tw.run = null; } persist(); }   // fin de la subida: todos los rivales cambian
 // ---- REYES DE LA TORRE ----
-// Los pisos de Campeón (10, 20, 30, 40, 50) los puede ocupar un JUGADOR: el primero que llega se queda el trono con su tarjeta y los 3 Pokémon con los que subió.
+// Los pisos de Campeón (10, 20, 30, 40, 50) los puede ocupar un JUGADOR: el primero que llega se queda el trono con su tarjeta y los 6 Pokémon con los que subió.
 // Si otro jugador le gana, el trono cambia cuando empieza la hora siguiente. Todo vive en Supabase (torre_reyes.sql); sin cuenta o sin la tabla, quedan los Campeones de siempre.
 const TW_KFL = [10, 20, 30, 40, 50];
 let TW_K = {at:0, list:{}};
@@ -250,7 +250,7 @@ function torreFight(f){
   const P = torrePlan()[f - 1], boss = !!P.boss, S = torreStats(f, boss);
   let o, vs;
   const K = boss ? twKing(f) : null;
-  if(K){                                                                                  // piso de Campeón ocupado por un jugador: su personaje y sus 3 Pokémon
+  if(K){                                                                                  // piso de Campeón ocupado por un jugador: su personaje y sus 6 Pokémon
     const F = FLOORS.find(x => x.id === P.id), en = K.mons.map(m => m[0]), sh = K.mons.filter(m => m[1]).map(m => m[0]);
     o = {torre:true, estTorre:true, torreFloor:f, floor:f, n:-1, leader:F.id, boss:F.kind, arena:F.arena, leaderName:K.nm, rival:K.nm, portrait:K.av, kingOf:f, title:'TORRE BATALLA', sub:`PISO ${f} · REY · ${K.nm.toUpperCase()}`, enemies:en, hm:S.hm, dm:S.dm, skill:S.skill, spdm:S.spdm, lvl:S.lvl};
     vs = {name:K.nm, skin:K.g, sub:`Rey del piso ${f}`, enemies:en, shinyOf:dex => sh.includes(dex), label:`TORRE · PISO ${f} · REY`, music:o};
@@ -340,10 +340,10 @@ function openTorre(){
     addEventListener('resize', () => { if(!$('torrev').classList.contains('hide')) twFit(); });
   }
   twPage = -1;
-  const tw = save.tower, ready = team.length === 3, open = towerOpen(), run = !!tw.run, nx = twNext(), P = torrePlan(), rivN = P[nx - 1], done = run ? tw.run.f : 0;
+  const tw = save.tower, ready = team.length === TEAM_SIZE, open = towerOpen(), run = !!tw.run, nx = twNext(), P = torrePlan(), rivN = P[nx - 1], done = run ? tw.run.f : 0;
   const nextBoss = Math.ceil(nx / TORRE_BOSS_CADA) * TORRE_BOSS_CADA, hNext = TORRE_HITOS.find(h => !tw.ms[h.f]);
   const TN = {normal:'Normal', fuego:'Fuego', agua:'Agua', planta:'Planta', electrico:'Eléctrico', hielo:'Hielo', lucha:'Lucha', veneno:'Veneno', tierra:'Tierra', volador:'Volador', psiquico:'Psíquico', bicho:'Bicho', roca:'Roca', fantasma:'Fantasma', dragon:'Dragón', siniestro:'Siniestro', acero:'Acero', hada:'Hada'};
-  const mons = [1, 0, 2].map(ti => { const d = team[ti]; if(!d) return `<div class="tw-mon empty"><span>Hueco ${ti + 1}</span></div>`;
+  const mons = Array.from({length: TEAM_SIZE}, (_, ti) => ti).map(ti => { const d = team[ti]; if(!d) return `<div class="tw-mon empty"><span>Hueco ${ti + 1}</span></div>`;
     const m = mon(d); return `<div class="tw-mon${ti === 0 ? ' lead' : ''}" style="--c1:${TC[m.types[0]]};--c2:${TC[m.types[1] || m.types[0]]}"><i class="ped"></i><canvas width="160" height="160" data-d="${d}"></canvas>
       <b>${esc(m.name)}</b><span class="tys">${m.types.map(t => `<i style="--t:${TC[t]}">${TN[t] || t}</i>`).join('')}</span></div>`; }).join('');
   // tu subida: barra de 50 pisos con los 5 Campeones y el siguiente rival en grande
@@ -384,7 +384,7 @@ function openTorre(){
       <section class="v-road"><h4>Premios únicos</h4>${meds}</section>
       <section class="v-kings"><h4>Reyes de la Torre</h4><div id="twKings"></div></section>
     </aside>
-    <div class="v-go">${!open ? '<p class="tw-warn">Se abre al ser Campeón de Kanto.</p>' : !ready ? '<p class="tw-warn">Elige 3 Pokémon en Equipo Pokémon.</p>' : ''}
+    <div class="v-go">${!open ? '<p class="tw-warn">Se abre al ser Campeón de Kanto.</p>' : !ready ? `<p class="tw-warn">Elige ${TEAM_SIZE} Pokémon en Equipo Pokémon.</p>` : ''}
       <button class="tw-go" data-tw="go" ${open && ready ? '' : 'disabled'}><span>${run && done ? 'Seguir' : '¡Subir!'}</span><small>Piso ${nx} · ${esc(rivN.boss ? 'Campeón' : rivN.name)}</small></button></div>
   </div>`;
   show('torrev');
@@ -420,7 +420,7 @@ function twGuide(on){
       <li>Los pisos <b>10, 20, 30, 40 y 50</b> son de Campeón: más difíciles y con premios mucho mejores.</li>
       <li>Si el piso lo ocupa un jugador (un Rey), luchas contra su equipo. Si no, contra un Campeón del juego.</li></ul></section>
     <section><h3>3 · Los tronos (Reyes de la Torre)</h3><ul>
-      <li>Cada piso de Campeón tiene <b>un trono</b>. El primer jugador que llega a ese piso <b>se queda el trono</b> con su personaje y los <b>3 Pokémon con los que subió</b>.</li>
+      <li>Cada piso de Campeón tiene <b>un trono</b>. El primer jugador que llega a ese piso <b>se queda el trono</b> con su personaje y los <b>6 Pokémon con los que subió</b>.</li>
       <li>Los demás jugadores tienen que vencerle para pasar de ese piso.</li>
       <li>Si alguien le gana, <b>el trono cambia cuando empieza la hora siguiente</b> y pasa al último que le venció. Así el Rey puede cambiar cada hora.</li>
       <li>Necesitas <b>iniciar sesión</b> para reclamar un trono. Verás quién manda en cada piso en el panel «Reyes de la Torre».</li></ul></section>
