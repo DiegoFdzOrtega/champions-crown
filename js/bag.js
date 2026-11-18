@@ -1,6 +1,6 @@
 "use strict";
 /* =====================================================================
-   13b) MOCHILA: pantalla para ver todo lo que tienes (tickets, mejoras, MTs y objetos de combate).
+   13b) MOCHILA: pantalla para ver todo lo que tienes (tickets, mejoras y objetos de combate).
    Se abre desde la barra de arriba (Perfil › Logros › Amigos › Mochila). Solo se mira; los objetos se usan en Equipo Pokémon.
    Reutiliza: save.items / held() / used() (economy.js), ITEMS y CONS (data.js, training.js), imgOf(), itemName(), panel() y userBar().
    ===================================================================== */
@@ -17,9 +17,7 @@ function bagSections(){
   if(ch.length) out.push({t:'Amuletos', list:ch});
   const up = Object.keys(CONS).filter(id => held(id) > 0 && has(CONS[id].n)).map(id => ({id, n:CONS[id].n, c:held(id), d:CONS[id].d, img:CONS[id].icon}));
   if(up.length) out.push({t:'Mejoras', list:up, note:'Se usan en Equipo Pokémon › Ver datos.'});
-  const mt = Object.keys(MT_ID).filter(id => held(id) > 0 && has(itemName(id))).sort((a, b) => itemName(a).localeCompare(itemName(b), 'es'))
-    .map(id => { const mv = MOVES[MT_ID[id]]; return {id, mt:true, n:itemName(id), c:held(id), d:`Enseña «${MT_ID[id]}» a un Pokémon. Se usa en Equipo Pokémon › Ver datos.`, img:trainIcon(id), tags:[[TYPE_ES[mv.t], TC[mv.t]], [SLOT_SHORT[mv.s]]]}; });
-  if(mt.length) out.push({t:'MTs', list:mt});
+  // (sin MTs: cada Pokémon ya sabe todos los ataques que puede aprender y se eligen gratis en Equipo Pokémon › Ver datos)
   for(const cat of Object.keys(ITEM_CATS)){
     const l = Object.keys(ITEMS).filter(id => ITEMS[id].cat === cat && held(id) > 0 && has(ITEMS[id].n)).map(id => ({id, n:ITEMS[id].n, c:held(id), eq:used(id), d:ITEMS[id].d, og:ITEMS[id].og, img:imgOf(id)}));
     if(l.length) out.push({t:cat === 'mega' ? 'Megapiedras' : 'Objetos de ' + ITEM_CATS[cat].toLowerCase(), list:l});

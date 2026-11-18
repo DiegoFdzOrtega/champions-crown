@@ -530,6 +530,6 @@ const Music = (() => {
     if(want) play(want);
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, unlock, {passive: true}));
-  return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx};
+  return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx, addSfx: o => Object.assign(SFX, o)};      // addSfx: otros archivos añaden sus efectos (js/gachasonido.js)
 })();
 const Sfx = {play: (name, k) => Music.sfx(name, k)};

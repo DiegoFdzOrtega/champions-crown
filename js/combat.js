@@ -211,7 +211,7 @@ function windFire(f){                                                // el ataqu
 // ---- PILARES: de vez en cuando cae una columna del cielo. Para los disparos (los tuyos y los del rival), no se atraviesa andando y se ROMPE a golpes ----
 // Solo en las arenas normales (Historia y Campo de Entrenamiento). En el Estadio (Torre, Clasificatoria, Campo de pruebas) y en el online NO hay pilares.
 const PIL = {
-  on: true,                                   // [AJUSTE] false = sin pilares en ningún combate
+  on: false,                                  // [AJUSTE] false = sin pilares en ningún combate (quitados; true los vuelve a poner)
   r: 22,                                      // [AJUSTE] radio del pilar (el dibujo crece o encoge con él)
   body: 20,                                   // [AJUSTE] lo que ocupa un Pokémon al chocar con él
   hp: 3,                                      // [AJUSTE] golpes que aguanta (un disparo o un golpe = 1 · Ráfaga = medio cada uno · Pesado = 2 · el ataque fuerte lo revienta y sigue adelante)

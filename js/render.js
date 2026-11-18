@@ -126,25 +126,65 @@ function farBarAlpha(){                                            // la barra d
 function farS2W(x, y){ return {x: (x - W / 2) / FAR.z + W / 2, y: (y - FAR.cy) / FAR.z + FAR.cy}; }
 // ESTADIOS CON IMAGEN PROPIA: el fondo entero es una imagen (assets/fondos/estadios/) que ya trae pintadas las líneas del campo y la decoración de fuera.
 //   court = dónde está el rectángulo del campo DENTRO de la imagen, en píxeles: [izquierda, arriba, derecha, abajo] · w, h = tamaño de la imagen
+//   nuevo: true = estadio nuevo (estilo Gemini): ese líder deja el estadio grande con público (js/torreestadio.js) y usa esta imagen.
 //   Para añadir otro: guarda la imagen y pon una línea con el id del líder (el de FLOORS, js/data.js). Si el campo está en otro sitio, mide su rectángulo.
-const EST = {                                                       // imágenes 2048x1144 (WebP); court medido sobre 1024x572
-  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: [75, 109, 971, 481]},
-  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: [75, 111, 972, 482]},
-  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: [75, 110, 973, 482]},
-  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: [76, 110, 973, 481]},
-  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: [76, 112, 972, 484]},
-  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: [77, 111, 972, 534]},
-  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: [76, 112, 972, 484]},
-  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: [76, 112, 973, 484]},
-  lorelei:  {src: 'assets/fondos/estadios/lorelei.webp',  w: 1024, h: 572, court: [76, 112, 973, 485]}
+// gradas = dónde se ponen los líderes que ya has vencido (pies, sobre 1024x572), de dentro a fuera; los de la izquierda miran a la derecha. Si no se pone, se usan las de Brock (GRADAS).
+const GRADAS = [[362, 102], [327, 100], [292, 98], [257, 96], [662, 102], [697, 100], [732, 98], [767, 96]];      // en la parte de la grada que no tapa el marcador (los de las esquinas quedarían debajo)
+// MEDIDAS: el suelo de combate de cada imagen se ha colocado en el MISMO sitio en todas (sobre 1024x572): un trapecio, como se ve en perspectiva
+//   (más estrecho arriba). EST_T = x izquierda y derecha arriba (y = 170) y abajo (y = 445); EST_C = el rectángulo que lo contiene.
+//   Los Pokémon se mueven por ese trapecio (estTrap): llegan a cada esquina del suelo sin salirse. Para uno nuevo: medir las 4 esquinas de su suelo y llevarlas a EST_T.
+const EST_T = [225, 800, 135, 890], EST_C = [135, 170, 890, 445];
+const EST = {                                                       // imágenes 2048x1144 (WebP, ~250 KB); court medido sobre 1024x572 · solo los estadios nuevos
+  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // cueva de roca
+  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true,       // piscina (imagen ajustada para que el campo mida igual que el de Brock)
+             gradas: [[318, 74], [292, 72], [266, 70], [244, 68], [706, 74], [732, 72], [758, 70], [780, 68]]},
+  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // gimnasio eléctrico (suelo dorado)
+  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // jardín
+  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // dojo ninja
+  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // azotea de neón
+  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // volcán de Isla Canela
+  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true}       // gimnasio de Ciudad Verde (Team Rocket)
 };
-function estOf(){ const E = g && g.o && EST[g.o.leader]; if(!E) return null; if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=3'; } return E.ok ? E : null; }
+function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=11'; } }
+Object.values(EST).forEach(estLoad);                                // se cargan al abrir el juego: al entrar al combate ya están listas
+const estEnt = () => (g && g.o && EST[g.o.leader]) || null;          // el estadio de este combate (aunque su imagen aún no haya cargado)
+function estOf(){ const E = estEnt(); if(!E) return null; estLoad(E); return E.ok ? E : null; }
+// LÍDERES VENCIDOS EN LA GRADA (Historia de Kanto): los que ya has derrotado antes que este vienen a verte (Brock en el de Misty; Brock y Misty en el de Surge...).
+const FANS = {s: 1.6, on: false};      // (desactivado: no quedaba bien; true lo vuelve a poner)                                    // [AJUSTE] tamaño de cada entrenador en la grada (1 = 32 px) · false = sin público de líderes
+function estFans(E){
+  if(!FANS.on || !MINI.ok || !g || !g.o || typeof FLOORS === 'undefined') return;
+  const cur = FLOORS[g.o.n]; if(!cur || cur.region !== 'Kanto') return;
+  const hecho = typeof progOf === 'function' ? progOf('Kanto') : 0, seats = E.gradas || GRADAS;
+  const fans = FLOORS.filter(F => F.region === 'Kanto' && F.idx < cur.idx && F.idx < hecho && F.id !== cur.id).map(F => miniIdx(F.id)).filter(i => i >= 0);
+  const order = [0, 4, 1, 5, 2, 6, 3, 7];                             // se van llenando por los dos lados a la vez, de dentro a fuera
+  const sx = W / E.w, sy = H / E.h, s = FANS.s * sy;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  fans.slice(0, seats.length).forEach((i, k) => {
+    const q = seats[order[k] % seats.length] || seats[k], x = q[0] * sx, y = q[1] * sy, left = q[0] < E.w / 2;
+    const bob = Math.sin(g.t * 3 + k * 1.3) > .7 ? -s : 0;             // de vez en cuando dan un saltito (animan)
+    ctx.globalAlpha = .3; ctx.fillStyle = '#000'; ctx.beginPath(); ctx.ellipse(x, y, 7 * s, 2.4 * s, 0, 0, 6.283); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y + bob)); if(left) ctx.scale(-1, 1);
+    ctx.drawImage(MINI.img, (i % MINI.cols) * 32, Math.floor(i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s); ctx.restore();
+  });
+  ctx.restore();
+}
+// ---- El campo en forma de trapecio: en cada altura, los Pokémon no pasan de los bordes del suelo (más cerca entre sí arriba que abajo) ----
+function estTrapX(y){                                                // → [x izquierda, x derecha] del suelo a esa altura (en el mundo), o null si este combate no lo usa
+  const E = typeof farOn === 'function' && farOn() ? estEnt() : null; if(!E || !E.trap) return null;
+  const t = E.trap, c = E.court, sx = W / E.w, sy = H / E.h;
+  const a = farS2W(t[0] * sx, c[1] * sy), b = farS2W(t[1] * sx, c[1] * sy), d = farS2W(t[2] * sx, c[3] * sy), e = farS2W(t[3] * sx, c[3] * sy);
+  const k = Math.max(0, Math.min(1, (y - a.y) / (d.y - a.y)));
+  return [a.x + (d.x - a.x) * k, b.x + (e.x - b.x) * k];
+}
+const EST_M = 40;                                                    // [AJUSTE] margen por dentro del borde (lo mismo que bx0 / bx1 en js/combat.js)
+function estTrap(f){ if(!f) return; const X = estTrapX(f.y); if(!X) return; f.x = Math.max(X[0] + EST_M, Math.min(X[1] - EST_M, f.x)); }
+if(typeof update === 'function'){ const o = update; update = function(){ const r = o.apply(this, arguments); try{ if(g && !g.pvp){ g.p.concat(g.e).forEach(f => { if(f && !f.dead) estTrap(f); }); } }catch(e){} return r; }; }
 function estDraw(E){                                                // la imagen llena la pantalla; arriba se oscurece un poco para que se lea el marcador
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(E.img, 0, 0, W, H);
   const top = ctx.createLinearGradient(0, 0, 0, 150); top.addColorStop(0, 'rgba(3,4,10,.5)'); top.addColorStop(1, 'rgba(3,4,10,0)'); ctx.fillStyle = top; ctx.fillRect(0, 0, W, 150);
 }
 function farBox(){                                                  // las líneas de fuera del campo, en coordenadas del mundo (de aquí salen los límites bx0 … by1 de js/combat.js)
-  const E = estOf(), s = E ? [E.court[0] / E.w * W, E.court[1] / E.h * H, E.court[2] / E.w * W, E.court[3] / E.h * H] : [W * (1 - FAR.fx) / 2, H * FAR.yt, W * (1 + FAR.fx) / 2, H * FAR.yb];
+  const E = estEnt(), s = E ? [E.court[0] / E.w * W, E.court[1] / E.h * H, E.court[2] / E.w * W, E.court[3] / E.h * H] : [W * (1 - FAR.fx) / 2, H * FAR.yt, W * (1 + FAR.fx) / 2, H * FAR.yb];
   const a = farS2W(s[0], s[1]), b = farS2W(s[2], s[3]); return {x0: a.x, y0: a.y, x1: b.x, y1: b.y};
 }
 // ---- ENTRENADORES EN EL CAMPO: tú a la izquierda y el líder a la derecha, justo por dentro de las líneas ----
@@ -240,7 +280,7 @@ function miniOne(i, x, right){                                      // right = t
   ctx.drawImage(MINI.img, (i % MINI.cols) * 32, Math.floor(i / MINI.cols) * 32, 32, 32, -w / 2, -h + 2 * s, w, h);
   ctx.restore();
 }
-function miniPos(side){ const B = farBox(), y = Math.round((by0() + by1()) / 2); return side === 'p' ? {x: B.x0 + MINI.x + 16, y: y - 6} : {x: B.x1 - MINI.x - 16, y: y - 6}; }      // dónde está cada entrenador (de ahí sale la Poké Ball al cambiar: js/swap.js)
+function miniPos(side){ const B = farBox(), y = Math.round((by0() + by1()) / 2), X = typeof estTrapX === 'function' && estTrapX(y) || [B.x0, B.x1]; return side === 'p' ? {x: X[0] + MINI.x + 16, y: y - 6} : {x: X[1] - MINI.x - 16, y: y - 6}; }      // (con suelo en trapecio: justo por dentro de su borde a media altura)      // dónde está cada entrenador (de ahí sale la Poké Ball al cambiar: js/swap.js)
 function miniDraw(){
   if(!MINI.ok) return;
   let me = miniIdx(typeof skinOf === 'function' ? skinOf() : save.gender); if(me < 0) me = miniIdx(save.gender === 'f' ? 'f' : 'm');
@@ -571,10 +611,10 @@ function draw(){
   const FARV = !PRV && farOn();                    // cámara lejana (Historia de Kanto): el campo se dibuja más pequeño
   if(g.zk > .01 && g.zoomAt && !PRV){ const z = 1 + FEEL.zoom * g.zk, zp = FARV ? farW2S(g.zoomAt.x, g.zoomAt.y) : [g.zoomAt.x, g.zoomAt.y]; ctx.translate(zp[0], zp[1]); ctx.scale(z, z); ctx.translate(-zp[0], -zp[1]); }
   if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
-  else if(FARV && estOf()) estDraw(estOf());       // estadio con imagen propia
+  else if(FARV && estEnt()){ const E = estOf(); if(E){ estDraw(E); estFans(E); } else { ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H); } }      // estadio con imagen propia (mientras carga: fondo oscuro, nunca el estadio antiguo)
   else arena();
   if(FARV){ ctx.translate(W / 2, FAR.cy); ctx.scale(FAR.z, FAR.z); ctx.translate(-W / 2, -FAR.cy); }      // a partir de aquí todo el campo va reducido
-  if(FARV){ if(!estOf()){ campoLineas(); campoDeco(); } miniDraw(); }      // líneas del campo, decoración de fuera y los dos entrenadores      // Historia de Kanto: líneas del campo y los dos entrenadores
+  if(FARV){ if(!estEnt()){ campoLineas(); campoDeco(); } miniDraw(); }      // líneas del campo, decoración de fuera y los dos entrenadores      // Historia de Kanto: líneas del campo y los dos entrenadores
   fxhdGround();                                    // marcas en el suelo de los ataques (js/fxhd3.js)
   const P = g.p[g.pi], E = g.e[g.ei], M = myMon(), gm = g.me === 'e';        // M = el Pokémon que controlas tú (en un combate online el invitado lleva el bando 'e')
 

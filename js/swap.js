@@ -52,13 +52,21 @@ function swGlow(x, y, r, a, col){
 // ---------------------------------------------------------------------
 // Pokémon teñido (silueta roja o blanca): se dibuja su cuadro actual en un lienzo aparte y se le pone el color encima
 // ---------------------------------------------------------------------
+//   El lienzo crece solo si el Pokémon no cabe: los grandes (Onix, Steelix, Wailord...) se dibujan más grandes por su altura (js/pesos.js) y antes se cortaban.
 const SWC = document.createElement('canvas'); SWC.width = SWC.height = 320; const SWX = SWC.getContext('2d');
+function swFit(f){                                                    // tamaño que necesita el lienzo para que quepa el cuadro de ese Pokémon entero
+  const im = sheet(f.m.dex, f.act), I = im.ok && im.info ? im.info : null; if(!I) return;
+  const idle = sheet(f.m.dex, 'Idle'), k = typeof szAll === 'function' && idle.ok ? szAll(f.m.dex, idle.info) : 1;
+  const need = Math.ceil(Math.max(I.fw, I.fh) * ESCALA * k) + 16, S = Math.min(2048, Math.ceil(need / 64) * 64);
+  if(S > SWC.width){ SWC.width = SWC.height = S; }
+}
 function swSprite(f, x, y, sc, tint, amt, alpha){
-  SWX.setTransform(1, 0, 0, 1, 0, 0); SWX.clearRect(0, 0, 320, 320); SWX.globalCompositeOperation = 'source-over'; SWX.globalAlpha = 1;
-  drawFrame(SWX, f.m.dex, f.act, f.at, f.dir, 160, 160, ESCALA, 0, f.shiny);
-  if(amt > 0){ SWX.globalCompositeOperation = 'source-atop'; SWX.globalAlpha = swClamp(amt); SWX.fillStyle = tint; SWX.fillRect(0, 0, 320, 320); SWX.globalAlpha = 1; SWX.globalCompositeOperation = 'source-over'; }
+  swFit(f); const S = SWC.width, C = S / 2;
+  SWX.setTransform(1, 0, 0, 1, 0, 0); SWX.clearRect(0, 0, S, S); SWX.globalCompositeOperation = 'source-over'; SWX.globalAlpha = 1;
+  drawFrame(SWX, f.m.dex, f.act, f.at, f.dir, C, C, ESCALA, 0, f.shiny);
+  if(amt > 0){ SWX.globalCompositeOperation = 'source-atop'; SWX.globalAlpha = swClamp(amt); SWX.fillStyle = tint; SWX.fillRect(0, 0, S, S); SWX.globalAlpha = 1; SWX.globalCompositeOperation = 'source-over'; }
   ctx.save(); ctx.globalAlpha = swClamp(alpha); ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(SWC, Math.round(x - 160 * sc), Math.round(y - 160 * sc), Math.round(320 * sc), Math.round(320 * sc)); ctx.restore();
+  ctx.drawImage(SWC, Math.round(x - C * sc), Math.round(y - C * sc), Math.round(S * sc), Math.round(S * sc)); ctx.restore();
 }
 
 // Rayo de energía de la Poké Ball (pixel art: capas roja, naranja y núcleo blanco, con ondulación)

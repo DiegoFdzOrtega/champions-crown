@@ -194,12 +194,9 @@ const trainIcon = id => CONS[id] ? CONS[id].icon : MT_ID[id] ? 'assets/objetos/m
 const itemName = id => CONS[id] ? CONS[id].n : MT_ID[id] ? 'MT ' + MT_ID[id] : (ITEMS[id] ? ITEMS[id].n : id);
 Object.keys(CONS).forEach(id => SHOP.push({id, n:CONS[id].n, d:CONS[id].d, p:CONS[id].p, cat:'mejora', icon:CONS[id].icon}));
 
-// Mete en la tienda todos los MTs (se llama al abrir la tienda)
+// Ya no se venden MTs (cada Pokémon aprende gratis sus ataques en Ver datos): solo se quitan de la tienda si quedara alguno
 function refreshMtShop(){
   for(let i = SHOP.length - 1; i >= 0; i--) if(SHOP[i].cat === 'mt') SHOP.splice(i, 1);
-  mtStock().forEach(n => { const mv = MOVES[n];
-    SHOP.push({id:mtId(n), n:'MT ' + n, p:TRAIN.price.mt[mv.s], cat:'mt', mv:n, icon:trainIcon(mtId(n)),
-      d:`Enseña «${n}» (${TYPE_ES[mv.t]}) en el hueco de ${SLOT_NAMES[mv.s]}. Se gasta al usarla.`}); });
 }
 function buyError(id, n){                                             // por qué ha fallado una compra
   if(!SHOP.find(s => s.id === id)) return 'Ese objeto ya no está a la venta.';
