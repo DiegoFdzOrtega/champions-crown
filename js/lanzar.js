@@ -65,7 +65,7 @@ if(typeof teTrainers === 'function'){
       ctx.save(); ctx.translate(x, y + bob + (P ? P.dy : 0)); ctx.imageSmoothingEnabled = false;
       if(right) ctx.scale(-1, 1);                                          // (a la izquierda el dibujo va dado la vuelta: mira hacia el campo)
       if(P){ ctx.rotate(-P.rot); ctx.scale(P.sx, P.sy); }                  // gira desde los pies: atrás al coger impulso, adelante al soltar
-      ctx.drawImage(MINI.img, (T.i % MINI.cols) * 32, Math.floor(T.i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s);
+      if(T.im){ ctx.imageSmoothingEnabled = false; ctx.drawImage(T.im, -34, -64, 68, 68); } else ctx.drawImage(MINI.img, (T.i % MINI.cols) * 32, Math.floor(T.i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s);
       if(P && P.ball){ const mf = side === 'p' ? g.p[g.pi] : g.e[g.ei], im = mf && mf.m ? swBallImg(swBallType(mf)) : null, bs = 16;   // la bola en la mano, por encima del hombro de atrás
         if(im && im.complete && im.naturalWidth) ctx.drawImage(im, 9 * s - bs / 2, -26 * s - bs / 2, bs, bs);
         else { ctx.fillStyle = '#e23b3b'; ctx.beginPath(); ctx.arc(9 * s, -26 * s, bs / 2, 0, 6.283); ctx.fill(); } }

@@ -287,6 +287,19 @@ function recallMove(d, s, n){
   if(n !== origMove(d, s)){ const err = teachCheck(d, n); if(err) return err; }
   putMove(d, s, n); persist(); return '';
 }
+// Sin MTs: cualquier ataque de ese hueco que el Pokémon pueda aprender se pone gratis.
+function learnables(d, s){
+  const orig = origMove(d, s);
+  return Object.keys(MOVES).filter(n => MOVES[n].s === s && (n === orig || canLearn(d, n)))
+    .sort((a, b) => (b === orig) - (a === orig) || MOVES[a].t.localeCompare(MOVES[b].t, 'es') || a.localeCompare(b, 'es'));
+}
+function learnFree(d, s, n){
+  if(!MOVES[n] || MOVES[n].s !== s) return 'Ese ataque no va en este hueco.';
+  if(!save.box.includes(d)) return 'No tienes ese Pokémon.';
+  if(n !== origMove(d, s) && !canLearn(d, n)) return NO_LEARN;
+  if(movesOf(d)[s - 1] === n) return 'Ya conoce ese movimiento.';
+  putMove(d, s, n); persist(); return '';
+}
 function resetMoves(d){ Object.keys(save.mv[d] || {}).forEach(s => putMove(d, +s, origMove(d, +s))); persist(); }   // volver a los originales (gratis; los que tenía quedan en «anteriores»)
 // Partidas antiguas: los MT enseñados antes de existir la compatibilidad que no sean válidos se quitan y el MT se devuelve a la mochila
 function migrateMoves(){

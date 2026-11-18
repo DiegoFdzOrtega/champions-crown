@@ -69,8 +69,12 @@ const ACHIEVEMENT_DATA = [
   {"id":"lideres_alola",    "cat":"historia", "name":"Líderes de Alola",   "desc":"Derrota a los 7 Líderes de las pruebas de Alola.",             "icon":"story",  "metric":"leaders",  "region":"Alola", "goal":7, "reward":{"bp":700, "tickets":7}},
   {"id":"alto_alola",      "cat":"historia", "name":"Alto Mando de Alola","desc":"Derrota a los 4 miembros del Alto Mando de Alola.",            "icon":"tower",  "metric":"elite",    "region":"Alola", "goal":4, "reward":{"bp":600, "tickets":5}},
   {"id":"campeon_alola",   "cat":"historia", "name":"Campeón de Alola",   "desc":"Derrota al Profesor Kukui y conviértete en el Campeón de Alola.","icon":"trophy", "metric":"champion", "region":"Alola", "goal":1, "reward":{"title":"Campeón de Alola", "frame":"alola", "bp":1400,"tickets":14}},
+  {"id":"lideres_galar",    "cat":"historia", "name":"Líderes de Galar",   "desc":"Derrota a los 10 Líderes de Gimnasio de Galar.",               "icon":"story",  "metric":"leaders",  "region":"Galar", "goal":10, "reward":{"bp":800, "tickets":8}},
+  {"id":"copa_galar",       "cat":"historia", "name":"Copa de Campeones",  "desc":"Derrota a Berto en la Copa de Campeones de Galar.",             "icon":"tower",  "metric":"elite",    "region":"Galar", "goal":1, "reward":{"bp":600, "tickets":5}},
+  {"id":"campeon_galar",    "cat":"historia", "name":"Campeón de Galar",   "desc":"Derrota a Lionel y conviértete en el Campeón de Galar.",       "icon":"trophy", "metric":"champion", "region":"Galar", "goal":1, "reward":{"title":"Campeón de Galar", "bp":1500,"tickets":15}},
   {"id":"seis_campeon",    "cat":"historia", "name":"Maestro de seis Ligas","desc":"Sé el Campeón de las seis Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia y Kalos.","icon":"trophy", "metric":"champion", "goal":6,  "reward":{"title":"Maestro de las seis Ligas", "frame":"arcoiris", "bp":6000, "tickets":35}},
   {"id":"siete_campeon",   "cat":"historia", "name":"Maestro de siete Ligas","desc":"Sé el Campeón de las siete Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos y Alola.","icon":"trophy", "metric":"champion", "goal":7,  "reward":{"title":"Maestro de las siete Ligas", "frame":"atardecer", "bp":7000, "tickets":40}},
+  {"id":"ocho_campeon",     "cat":"historia", "name":"Maestro de ocho Ligas","desc":"Sé el Campeón de las ocho Ligas: Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos, Alola y Galar.","icon":"trophy", "metric":"champion", "goal":8,  "reward":{"title":"Maestro de las ocho Ligas", "bp":8000, "tickets":45}},
 
   // ---------- CAMPO DE ENTRENAMIENTO ----------
   {"id":"campo_1",         "cat":"campo",    "name":"Primer entrenamiento","desc":"Vence a un entrenador del Campo de Entrenamiento.",           "icon":"campo",  "metric":"campo_wins", "goal":1,   "reward":{"bp":50,   "tickets":0}},
@@ -266,7 +270,7 @@ setTimeout(() => achSync(), 900);                                               
 // ---- Pantalla ----
 // Lista compacta: una fila por logro (medalla pequeña, nombre y descripción, barra, recompensa y botón). Pestañas por categoría, los listos arriba del todo
 // y los logros secretos como «???» hasta que los consigues. La medalla de cada logro se dibuja por código (achMedal), sin imágenes.
-const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8', Alola:'#ffa23a'};   // color de cada región
+const ACH_REG_COL = {Kanto:'#e23b3b', Johto:'#f0b429', Hoenn:'#2bb3a3', Sinnoh:'#7b8cff', 'Unova / Teselia':'#b4bdd2', Kalos:'#ff7ab8', Alola:'#ffa23a', Galar:'#c05cff'};   // color de cada región
 const ACH_REG_NAME = {'Unova / Teselia':'Teselia'};                                          // cómo se escribe el grupo en pantalla
 const ACH_GROUP = {primer_gimnasio:'Primeros pasos', mega_aro:'Unova / Teselia'};            // logros que van a un grupo concreto (si no, se agrupan por región o por métrica)
 const ACH_TABS = [['all', 'Todos'], ['historia', 'Historia'], ['campo', 'Campo'], ['torre', 'Torre'], ['ranked', 'Clasificatoria'], ['invocacion', 'Invocación'], ['coleccion', 'Colección'], ['secreto', 'Secretos']];

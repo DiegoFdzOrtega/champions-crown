@@ -7,7 +7,7 @@
    Los dibujos de cada ataque están en js/fxstatus.js.
    ===================================================================== */
 const STX = {
-  speed: 440, r: 11,                                  // velocidad (px/s) y tamaño del proyectil de estado
+  speed: 560, r: 11,                                  // velocidad (px/s) y tamaño del proyectil de estado
   par: {dur: 5, spd: .5, fail: .25},                  // paralizado: se mueve a la mitad y el 25 % de los ataques fallan
   psn: {dur: 6, base: .003},                          // envenenado grave: pierde (base × (segundos + 1)) de la vida máxima por segundo → sube cada segundo (~6 % en total)
   brn: {dur: 8, tick: 0, melee: .5},                  // quemado: su golpe cuerpo a cuerpo hace la mitad. Daño por segundo: ver «tick» justo debajo (se calcula para que sea el MISMO daño total que el veneno)

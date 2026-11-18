@@ -13,7 +13,7 @@ Add-Type -AssemblyName System.Net.Http
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $root  = Split-Path -Parent $PSScriptRoot
 $poke  = Join-Path $root 'assets\pokemon'
-$quiero = 'Hop','Sleep','Pose','Strike','Swing','Kick','Double','Head','Rotate','Tumble','Pain','Cringe','DeepBreath','LookUp','Nod','Sit','Float','Twirl'
+$quiero = 'Hop','Sleep','Pose','Strike','Swing','Kick','Double','Head','Rotate','Tumble','Pain','Cringe','DeepBreath','LookUp','Nod','Sit','Float','Twirl','Ricochet','Emit','Withdraw','RearUp','LeapForth','HitGround','Wake','LostBalance','Trip'
 $base  = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite'
 $http  = New-Object System.Net.Http.HttpClient
 $http.Timeout = [TimeSpan]::FromSeconds(30)

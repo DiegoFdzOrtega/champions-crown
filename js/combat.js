@@ -19,8 +19,9 @@ const FEEL = {
   kbDecay: 9, kbMax: 1700,                     // [AJUSTE] lo rápido que se frena el empujón y su tope
   inv: .22, invFoe: .13,                      // [AJUSTE] segundos de invulnerabilidad al empezar la carrera (tú y el online / el rival de la IA)
   dodgeEn: 15, dodgeCd: 1,                    // [AJUSTE] premio por esquivar un ataque con la carrera: energía que recuperas y segundos que se le quitan a la espera de la carrera
-  wind: .38, windFoe: .5, windLock: .4,       // [AJUSTE] carga del ataque fuerte antes de salir (tú y el online / el rival de la IA) · la IA deja de apuntar cuando queda este tramo (0,4 = el último 40 %)
-  windSlow: .35, windMax: 3.5, windK: 3,                              // [AJUSTE] velocidad al andar mientras cargas el ataque fuerte (0,35 = 35 %)
+  wind: 1.2, windFoe: 1.2, windLock: .4,   // [AJUSTE] segundos de carga de los ataques fuertes (E), con su animación de carga en js/fxvideo.js (antes 2 s)
+        // [AJUSTE] carga del ataque fuerte antes de salir (tú y el online / el rival de la IA) · la IA deja de apuntar cuando queda este tramo (0,4 = el último 40 %)
+  windSlow: .35, windMax: 4, windK: 3,                              // [AJUSTE] velocidad al andar mientras cargas el ataque fuerte (0,35 = 35 %)
   koEn: 30, koCd: 1.5,                        // [AJUSTE] premio por debilitar a un rival con un ataque: energía que recuperas y segundos que se le quitan a la espera de la carrera
   ctr: .7, ctrK: 1.3,                         // [AJUSTE] contraataque: segundos que tienes tras esquivar para que tu siguiente ataque pegue más · cuánto más (1,3 = +30 %)
   slowT: .9, slowK: .3, zoom: .22,            // [AJUSTE] remate final (cae el último Pokémon de un bando; no en online): segundos de cámara lenta · velocidad durante ella · cuánto se acerca la cámara (0,22 = 22 %)
@@ -126,7 +127,7 @@ function quickTick(f, dt){
   if(q.t >= QUICK.t) f.quick = null;
 }
 // ---- TUMBA ROCAS: lanza tres rocas en abanico, de corto alcance. Hacen daño y dejan al rival lento unos segundos ----
-const ROCK = {n: 3, spread: .16, speed: 430, range: 340, r: 11, dmg: .45, slow: .55, t: 2.5};      // [AJUSTE] nº de rocas · cuánto se abren · velocidad · alcance (px) · tamaño · daño de cada una (1 = un golpe normal) · velocidad a la que se queda el rival (×) · segundos lento
+const ROCK = {n: 3, spread: .16, speed: 520, range: 340, r: 11, dmg: .45, slow: .55, t: 2.5};      // [AJUSTE] nº de rocas · cuánto se abren · velocidad · alcance (px) · tamaño · daño de cada una (1 = un golpe normal) · velocidad a la que se queda el rival (×) · segundos lento
 function rockThrow(f, ang, dmg, type, mine){
   setAct(f, 'Shoot', .4);
   for(let j = 0; j < ROCK.n; j++){ const s = shot(f, ang + (j - (ROCK.n - 1) / 2) * ROCK.spread, dmg * ROCK.dmg, ROCK.speed, ROCK.r, type, mine); s.life = s.L = ROCK.range / ROCK.speed; s.slow = 1; fxShotStart(f, s, 'Lanzarrocas', false); }
@@ -147,7 +148,7 @@ function quakeTick(f, dt){
   if(q.t >= QUAKE.T) f.quake = null;
 }
 // ---- VENTISCA: una ráfaga de viento helado en abanico, de alcance medio. Cada copo hace poco daño; si te pilla, puede CONGELARTE (no te mueves ni atacas) ----
-const GUST = {n: 7, spread: .1, speed: 560, vary: .12, range: 430, r: 12, dmg: .24, frz: .3, frzT: 1.6};      // [AJUSTE] nº de copos · cuánto se abren · velocidad · cuánto cambia de uno a otro · alcance (px) · tamaño · daño de cada uno (× el del ataque fuerte) · probabilidad de congelar (una tirada por ráfaga) · segundos congelado
+const GUST = {n: 7, spread: .1, speed: 680, vary: .12, range: 430, r: 12, dmg: .24, frz: .3, frzT: 1.6};      // [AJUSTE] nº de copos · cuánto se abren · velocidad · cuánto cambia de uno a otro · alcance (px) · tamaño · daño de cada uno (× el del ataque fuerte) · probabilidad de congelar (una tirada por ráfaga) · segundos congelado
 function gustStart(f, w, wp){
   const grp = {done: false}, dmg = w.dmg * (1 + (FEEL.windK - 1) * wp) * GUST.dmg;
   Sfx.play('strong', w.vk); f.swing = {t0: g.t, k: {reach: 60, arc: 1.2}, ang: w.ang, type: w.type, big: true};
@@ -194,17 +195,17 @@ function rideStop(f, m, s, e){                                       // embestid
 }
 function windFire(f){                                                // el ataque fuerte sale al acabar la carga
   const w = f.wind; f.wind = null; f.dir = dirOf(w.ang);
-  const wp0 = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : 0;
+  const wp0 = w.hold ? clamp((w.c - FEEL.wind) / (FEEL.windMax - FEEL.wind), 0, 1) : 0;   // lo que has cargado DE MÁS (0 = la carga mínima)
   if(w.nm === 'A Bocajarro') return bocaStart(f, w, wp0);
   if(w.nm === 'Terremoto') return quakeStart(f, w, wp0);                         // golpea el suelo
   if(w.nm === 'Roca Afilada') return stoneStart(f, w, wp0);                      // piedras + rocas del suelo
   if(w.nm === 'Ventisca') return gustStart(f, w, wp0);                           // ráfaga en abanico      // A Bocajarro no dispara: embestida y ráfaga
   const B = foe(w.mine), bd = Math.hypot(B.x - f.x, B.y - f.y);                  // onda al soltarlo: si el rival está encima, lo aparta (para quitártelo cuando viene cuerpo a cuerpo)
   f.swing = {t0:g.t, k:{reach:FEEL.blastR - 16, arc:3.2}, ang:w.ang, type:w.type, big:true}; fx.shake = Math.max(fx.shake, 4);
-  const wp = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : 0;                       // cuánto has cargado (0..1)
+  const wp = w.hold ? clamp((w.c - FEEL.wind) / (FEEL.windMax - FEEL.wind), 0, 1) : 0;                       // cuánto has cargado (0..1)
   if(!w.hold && !B.dead && !B.ghost && !(B.inv > 0) && bd < FEEL.blastR){ const a = bd < .01 ? w.ang : Math.atan2(B.y - f.y, B.x - f.x); B.kx = clamp((B.kx || 0) + Math.cos(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.ky = clamp((B.ky || 0) + Math.sin(a) * FEEL.blastKb, -FEEL.kbMax, FEEL.kbMax); B.kbHit = true; setAct(B, 'Hurt', .3); }
   Sfx.play('strong', w.vk);
-  const s4 = shot(f, w.ang, w.dmg * (1 + (FEEL.windK - 1) * wp), BIG_SPEED[w.nm] || 380, 22, w.type, w.mine); s4.kbP = wp; fxShotStart(f, s4, w.nm, true);
+  const s4 = shot(f, w.ang, w.dmg * (1 + (FEEL.windK - 1) * wp), BIG_SPEED[w.nm] || 500, 22, w.type, w.mine); s4.kbP = wp; fxShotStart(f, s4, w.nm, true);
   if(w.nm === 'Surf') f.ride = {s:s4, a:w.ang, t:1.4}; else if(w.nm === 'Envite Ígneo' || w.nm === 'Pájaro Osado') f.ride = w.hold ? {s:s4, a:w.ang, t:RIDE.t, free:true, sp:Math.hypot(s4.vx, s4.vy), pm:true, ps:true, pe:true} : {s:s4, a:w.ang, t:1.2};      // tú: te lanzas y diriges la embestida · la IA: recto, como siempre   // Surf: el Pokémon se monta en la ola y viaja con ella
 }
 // ---- PILARES: de vez en cuando cae una columna del cielo. Para los disparos (los tuyos y los del rival), no se atraviesa andando y se ROMPE a golpes ----
@@ -521,11 +522,11 @@ const MELEE_KINDS = {
 };
 // DISPARO · speed = velocidad · r = tamaño · dmg = daño de cada proyectil · n3 + spread = cuántos salen y cuánto se abren · pw = fuerza en un choque de disparos (CLASH) · pd = lo que le quita a un pilar (PIL)
 const SHOT_KINDS = {
-  directo: {n:'Directo', speed:520, r:9,  dmg:1},                                  // el de siempre
-  rafaga:  {n:'Ráfaga',  speed:540, r:7,  dmg:.4,  n3:3, spread:.17, pw:.5, pd:.5},              // [AJUSTE] tres pequeños en abanico: de cerca entran los tres (1,2 en total), de lejos uno
-  veloz:   {n:'Veloz',   speed:780, r:6,  dmg:.95},                                // [AJUSTE] muy rápido y fino: casi no da tiempo a esquivarlo
-  pesado:  {n:'Pesado',  speed:330, r:15, dmg:1.3, pw:1.5, pd:2},                                // [AJUSTE] lento, grande y fuerte
-  chorro:  {n:'Chorro',  speed:430, r:7,  dmg:.15, burst:9, gap:.065, spread:.07, vary:.12, pw:.35, pd:.34, kb:.16},      // [AJUSTE] una RISTRA: burst proyectiles seguidos, uno cada gap segundos (1,35 de daño si entran todos) · spread = cuánto se abren · vary = cuánto cambia la velocidad de uno a otro · kb = empujón de cada uno
+  directo: {n:'Directo', speed:640, r:9,  dmg:1},                                  // el de siempre
+  rafaga:  {n:'Ráfaga',  speed:660, r:7,  dmg:.4,  n3:3, spread:.17, pw:.5, pd:.5},              // [AJUSTE] tres pequeños en abanico: de cerca entran los tres (1,2 en total), de lejos uno
+  veloz:   {n:'Veloz',   speed:900, r:6,  dmg:.95},                                // [AJUSTE] muy rápido y fino: casi no da tiempo a esquivarlo
+  pesado:  {n:'Pesado',  speed:440, r:15, dmg:1.3, pw:1.5, pd:2},                                // [AJUSTE] lento, grande y fuerte
+  chorro:  {n:'Chorro',  speed:520, r:7,  dmg:.15, burst:9, gap:.065, spread:.07, vary:.12, pw:.35, pd:.34, kb:.16},      // [AJUSTE] una RISTRA: burst proyectiles seguidos, uno cada gap segundos (1,35 de daño si entran todos) · spread = cuánto se abren · vary = cuánto cambia la velocidad de uno a otro · kb = empujón de cada uno
   llama:   {n:'Llama',   speed:480, r:8,  dmg:.1,  burst:16, gap:.055, spread:.09, vary:.1, pw:.3, pd:.25, kb:.1, range:250, jet:1}      // [AJUSTE] CHORRO SOSTENIDO (Lanzallamas): 16 llamas seguidas durante 0,9 s que salen de donde estés y hacia donde apuntes en cada momento (1,6 de daño si entran todas) · range = hasta dónde llega (px) · jet = se dibuja como chorro (js/fxnuevos.js)
 };
 const SHOT_MOVE = {'Rayo Burbuja':'chorro', 'Lanzallamas':'llama'};                                           // ataques con una forma propia, sea cual sea su tipo
@@ -573,7 +574,7 @@ function mtype(f, i){
 
 function use(f, i, ang, mine){
   const m = MV[i], cost = enCost(f, i);                                         // enCost: Presión del rival
-  if(f.dead || f.wind || f.jump || (f.ride && f.ride.free) || f.boca || f.quick || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
+  if(f.dead || (f.wind && i !== 0) || f.jump || (f.ride && f.ride.free) || f.boca || f.quick || cant(f) || f.cd[i] > 0 || f.en < cost) return;                   // amedrentado (Roca del Rey) o dormido: no puede atacar
   if(i > 0 && f.truant > 0) return;                                             // Indolente: espera tras su último ataque
   f.cd[i] = m.cd; f.en -= cost; f.dir = dirOf(ang);
   if(i > 0 && statusBlock(f)) return;                                           // paralizado (a veces no puede), confuso o enamorado: se pierde el ataque

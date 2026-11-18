@@ -190,6 +190,7 @@ function fxStatusAura(f, I){
     const p = FXP.fuego, n = Math.floor(t * 14);
     for(let i = 0; i < 3; i++) puff(hx + (i - 1) * bw * .9 + (HH(n, i) - .5) * 4, foot - 6 - (HH(n, i + 3)) * 10, 3 + (i % 2), HH(n, i + 6) * .5, p);
   } else if(k === 'slp'){
+    if(!(typeof v11Zzz === 'function' && v11Zzz(hx, top, t)))                                 // Zzz de Gemini (js/fxvideo6.js); si no, las letras de siempre
     for(let i = 0; i < 3; i++){ const u = (t * .55 + i * .33) % 1; ctx.globalAlpha = u < .8 ? 1 : (1 - u) * 5; text(i % 2 ? 'z' : 'Z', hx + 10 + u * 22, top - 4 - u * 28, 7 + i * 2, '#c9d6f5', 'center'); }
   }
   if(f.cnf > 0){

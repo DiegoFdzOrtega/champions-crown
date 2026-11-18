@@ -86,7 +86,8 @@ function fxMelee(f, ang, T, name, type){
 }
 // Disparo (huecos 2 y 4): crea los efectos que acompañan al proyectil (corriente, rayo, carga...)
 function fxShotStart(f, s, name, big){
-  s.mvn = name; const ang = Math.atan2(s.vy, s.vx), ox = s.x + Math.cos(ang) * 26, oy = s.y + Math.sin(ang) * 26 - 6;
+  s.mvn = name; const ang = Math.atan2(s.vy, s.vx), mo = typeof mouthOf === 'function' && f ? mouthOf(f) : null,
+        ox = mo ? mo[0] + Math.cos(ang) * 8 : s.x + Math.cos(ang) * 26, oy = mo ? mo[1] + Math.sin(ang) * 6 : s.y + Math.sin(ang) * 26 - 6;   // los efectos de salida (chorros, destellos) desde la boca
   (FXR.cast[name] || FXR.cast['_'])(f, s, name, big, ox, oy, ang);
   if(FXR.stream[name]) fxAdd('stream', name, {shot:s, fol:f, type:s.type, dur:4, big, ox, oy, hx:s.x, hy:s.y, hang:ang});
   if(FXR.shotStart[name]) FXR.shotStart[name](f, s, big);

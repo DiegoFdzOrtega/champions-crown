@@ -6,7 +6,7 @@
    moveInfo() (moveinfo.js) y los MTs de training.js. Los estilos están al final de css/style.css (clases sa-...).
    ===================================================================== */
 const shopSt = {cat:'oferta', sort:'reco', qty:{}, q:'', slot:'', type:'', sel:''};   // q = texto buscado · slot/type = filtros de MTs · sel = objeto elegido
-const SHOP_TABS = [['oferta','⚡ Ofertas'], ['todo','Todo'], ['ticket','Tickets'], ['ataque','Ataque'], ['defensa','Defensa'], ['tipo','Tipos'], ['util','Utilidad'], ['mejora','Mejoras'], ['mega','Mega'], ['mt','MTs'], ['canje','Canje']];
+const SHOP_TABS = [['oferta','⚡ Ofertas'], ['todo','Todo'], ['ticket','Tickets'], ['ataque','Ataque'], ['defensa','Defensa'], ['tipo','Tipos'], ['util','Utilidad'], ['mejora','Mejoras'], ['mega','Mega'], ['canje','Canje']];   // (sin MTs: cada Pokémon ya sabe todos los ataques que aprende, se eligen gratis en Ver datos)
 // ---- OFERTAS DEL DÍA: 5 objetos con descuento que cambian cada día (a las 00:00). Salen de la fecha, así que son iguales para todos y no se guardan.
 const SHOP_DESC = [20, 25, 30, 40, 50];                                          // posibles descuentos (%)
 const shopToday = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
@@ -113,12 +113,12 @@ function shopPic(it, cls){
 function drawShop(){
   refreshMtShop();                                                              // todos los MTs a la venta
   $('shTabs').innerHTML = SHOP_TABS.map(([k,n]) => {
-    const c = k === 'oferta' ? Object.keys(shopDeals()).length : SHOP.filter(it => k === 'todo' ? it.cat !== 'canje' : it.cat === k).length;
+    const c = k === 'oferta' ? Object.keys(shopDeals()).length : SHOP.filter(it => k === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === k).length;
     const ic = k === 'ticket' ? CUR_SRC.ticket : SHOP_ICO[k] ? imgOf(SHOP_ICO[k]) : '', hot = k === 'oferta' ? ' hot' : '';
     return `<div class="sa-cat${shopSt.cat === k ? ' on' : ''}${hot}" data-c="${k}" tabindex="0">${ic ? `<img src="${ic}" alt="" onerror="this.style.visibility='hidden'">` : '<i class="ph"></i>'}<span>${n.replace('⚡ ', '')}</span><small>${c}</small></div>`; }).join('');
   const mtTab = shopSt.cat === 'mt', qn = shopSt.q.trim().toLowerCase();
   document.querySelectorAll('.sa-filt .mtf').forEach(l => l.style.display = mtTab ? '' : 'none');          // Hueco y Tipo solo en la pestaña MTs
-  let list = SHOP.filter(it => (shopSt.cat === 'oferta' ? shopPct(it) > 0 : shopSt.cat === 'todo' ? it.cat !== 'canje' : it.cat === shopSt.cat)
+  let list = SHOP.filter(it => (shopSt.cat === 'oferta' ? shopPct(it) > 0 : shopSt.cat === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === shopSt.cat)
     && (!qn || it.n.toLowerCase().includes(qn))
     && (!mtTab || ((!shopSt.slot || MOVES[it.mv].s === +shopSt.slot) && (!shopSt.type || MOVES[it.mv].t === shopSt.type))));
   if(shopSt.sort === 'pa') list.sort((a,b) => shopPrice(a) - shopPrice(b)); else if(shopSt.sort === 'pd') list.sort((a,b) => shopPrice(b) - shopPrice(a));

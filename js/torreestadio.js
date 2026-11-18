@@ -369,7 +369,7 @@ function teTrainers(t){                                                    // tÃ
   [[sw ? foe : me, P0.x, true], [sw ? me : foe, P1.x, false]].forEach(([T, x, right]) => {
     if(!T) return; const bob = Math.sin(t * 2.4 + (right ? 0 : 1.7)) > .6 ? -2 : 0;
     ctx.save(); ctx.translate(x, y + bob); ctx.imageSmoothingEnabled = false;
-    if(right) ctx.scale(-1, 1); ctx.drawImage(MINI.img, (T.i % MINI.cols) * 32, Math.floor(T.i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s);
+    if(right) ctx.scale(-1, 1); if(T.im){ ctx.imageSmoothingEnabled = false; ctx.drawImage(T.im, -34, -64, 68, 68); } else ctx.drawImage(MINI.img, (T.i % MINI.cols) * 32, Math.floor(T.i / MINI.cols) * 32, 32, 32, -16 * s, -30 * s, 32 * s, 32 * s);
     ctx.restore();
   });
 }

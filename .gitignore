@@ -28,3 +28,6 @@ assets/fondos/torre/*.png
 !assets/fondos/torre/barandilla.png
 !assets/fondos/torre/grada.png
 !assets/fondos/torre/hierba.png
+
+# Música original de Galar sin comprimir (la que usa el juego es la de assets/musica/Galar/ con nombre en español)
+assets/musica/Galar/SwSh*

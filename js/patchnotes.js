@@ -6,6 +6,12 @@
    El botón enseña un punto rojo "NUEVO" hasta que abres las notas (save.patchSeen guarda el último que viste).
    ===================================================================== */
 const PATCHES = [
+  {v:'Galar: la octava Liga', date:'17 nov 2026', sections:[
+    {t:'Nueva región', i:[
+      'Llega Galar: 10 líderes de gimnasio (Percy, Cathy, Naboru, Judith, Alistair, Sally, Morris, Mel, Nerio y Roy), Berto en la Copa de Campeones y el Campeón Lionel. 12 combates con 6 Pokémon cada uno.',
+      'Sustituciones por falta de sprite: Coalossal → Torkoal (Naboru) y Rhyperior (Morris), Falinks → Hawlucha y Mr. Rime → Mr. Mime. Yamask, Weezing, Darmanitan y Rapidash de Galar salen con su forma normal y movimientos de su tipo de Galar.',
+      'El Charizard Gigamax de Lionel megaevoluciona a Mega-Charizard X.',
+      'Logros nuevos: Líderes de Galar, Copa de Campeones, Campeón de Galar y Maestro de ocho Ligas.']}]},
   {v:'Online más rápido', date:'2 nov 2026', sections:[
     {t:'Combates online', i:[
       'El retraso de los controles en los combates online baja de 83 ms a 50 ms al empezar, y puede bajar hasta 33 ms si la conexión va bien (antes nunca bajaba de 83 ms).',

@@ -19,7 +19,13 @@ function closeData(quiet){ if(!tm.built) return; $('tmData').classList.add('hide
 function dataEsc(){ if(dt.view !== 'main'){ dt.view = 'main'; dt.pick = null; renderData(); } else closeData(); }   // Esc: vuelve a la ficha; otra vez, cierra
 
 const natText = n => n[1] ? `▲ ${STAT_NAMES[n[1]]} · ▼ ${STAT_NAMES[n[2]]}` : 'neutra';
-const typeChip = t => `<span class="tb" style="background:${TC[t]}">${TYPE_ES[t]}</span>`;
+const tIco = (t, c) => TYPE_ES[t] ? `<img class="${c || 'tico'}" src="assets/iconos/tipos/${t}.png" alt="">` : '';        // icono redondo del tipo (pokesprite, Pokémon Masters)
+const typeChip = t => `<span class="tb tbi" style="background:${TC[t]}">${tIco(t)}${TYPE_ES[t]}</span>`;
+// Categoría del ataque (físico / especial / estado) con su sello (pokesprite, Pokémon HOME)
+const MV_FIS4 = /envite|terremoto|gigaimpacto|bocajarro|megacuerno|roca afilada|p[aá]jaro osado|cuerpo pesado|doble filo|acr[oó]bata|pu[ñn]o|garra|colmillo|cola|cabezazo|patada|tajo|golpe|v[eé]rtigo|vuelo|excavar|carga|placaje|lanza|atadura|ataque/i;
+const mvCat = (s, n) => s === 3 ? 'estado' : s === 1 ? 'fisico' : s === 2 ? 'especial' : (MV_FIS4.test(n || '') ? 'fisico' : 'especial');
+const MV_CATN = {fisico: 'Físico', especial: 'Especial', estado: 'Estado'};
+const catIco = (s, n) => { const c = mvCat(s, n); return `<span class="cat cat-${c}" title="${MV_CATN[c]}"><img src="assets/iconos/cat/${c}.png" alt="">${MV_CATN[c]}</span>`; };
 const mult = v => '×' + v.toFixed(2);
 const ownedChip = id => `<span class="own-chip"><img class="iimg" src="${imgOf(id)}" alt="">${CONS[id].n} <b>×${held(id)}</b></span>`;
 
@@ -58,8 +64,8 @@ function dataMainOld(){
   // Derecha: entrenamiento (aquí se suben los IVs con Chapas Doradas y los EVs con Chapas Plateadas)
   const ivRows = STAT_KEYS.map(k => trRow('iv', k)).join(''), evRows = STAT_KEYS.map(k => trRow('ev', k)).join('');   // barras deslizantes (ver más abajo)
   const moves = [1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], ch = (save.mv[d] || {})[s];
-    return `<div class="mvrow${ch ? ' chg' : ''}"><span class="sl">${SLOT_NAMES[s]}</span><b>${esc(n)}</b>${typeChip(t)}${ch ? '<em title="Enseñado con un MT">MT</em>' : ''}
-      <button data-act="mtview" data-s="${s}" title="Aprender un MT o recuperar un ataque anterior">Cambiar ataque</button></div>`; }).join('');
+    return `<div class="mvrow${ch ? ' chg' : ''}"><span class="sl">${SLOT_NAMES[s]}</span><b>${esc(n)}</b>${typeChip(t)}${ch ? '<em title="Ataque cambiado">✎</em>' : ''}
+      <button data-act="mtview" data-s="${s}" title="Elegir otro ataque que pueda aprender">Cambiar ataque</button></div>`; }).join('');
   return `${dataHead()}
     <div class="dtc">
       <aside class="dtl"><div class="viewer"><canvas id="dtSpr" width="224" height="224"></canvas></div>
@@ -99,7 +105,7 @@ function dataMainOld(){
 // =====================================================================
 const DT_NEW = true;
 const DT_LT = new Set(['electrico', 'tierra', 'hielo', 'acero', 'normal', 'hada', 'roca', 'bicho', 'planta', 'volador']);     // tipos claros: letra oscura
-const dtChip = t => `<span class="tb${DT_LT.has(t) ? ' lt' : ''}" style="background:${TC[t]}">${TYPE_ES[t]}</span>`;
+const dtChip = t => `<span class="tb tbi${DT_LT.has(t) ? ' lt' : ''}" style="background:${TC[t]}">${tIco(t)}${TYPE_ES[t]}</span>`;
 const DT_PRESETS = {                                                     // reparto de EVs (se colocan las barras; se gasta al pulsar «Aplicar»)
   spa:  {n:'Atacante especial', ev:{spa:252, spe:252, hp:6}},
   atk:  {n:'Atacante físico',   ev:{atk:252, spe:252, hp:6}},
@@ -169,15 +175,15 @@ function dtTrain(){
 function dtMoves(){
   const d = dt.dex, m = mon(d), mv = movesOf(d);
   return `${movesChanged(d) ? '<div class="fd-mvtop"><button class="fd-mini" data-act="reset">↺ Restaurar ataques originales</button></div>' : ''}<div class="fd-mv">${[1, 2, 3, 4].map(s => { const n = mv[s - 1], t = (MOVES[n] || {}).t || m.types[0], M = MV[s], inf = moveInfo(n), ch = (save.mv[d] || {})[s];
-    return `<div class="fd-m" style="--t:${TC[t]}"><div class="top"><span class="sl">${SLOT_SHORT[s].toUpperCase()}</span><span class="key">${{1: 'Clic izq.', 2: 'Clic dcho.', 3: 'Q', 4: 'E'}[s]}</span>${ch ? '<span class="mt">MT</span>' : ''}</div>
+    return `<div class="fd-m" style="--t:${TC[t]}">${tIco(t, 'wm')}<div class="top"><span class="sl">${SLOT_SHORT[s].toUpperCase()}</span><span class="key">${{1: 'Clic izq.', 2: 'Clic dcho.', 3: 'Q', 4: 'E'}[s]}</span>${catIco(s, n)}${ch ? '<span class="mt">✎</span>' : ''}</div>
       <h4>${esc(n)} ${dtChip(t)}</h4>
       <div class="nums"><span>Daño<b>${s === 3 ? '—' : M.dmg}</b></span><span>Energía<b>${M.en}</b></span><span>Recarga<b>${String(M.cd).replace('.', ',')} s</b></span></div>
-      <p>${esc(inf.real)}</p><button class="chg" data-act="mtview" data-s="${s}" title="Aprender un MT o recuperar un ataque anterior">Cambiar</button></div>`; }).join('')}</div>`;
+      <p>${esc(inf.real)}</p><button class="chg" data-act="mtview" data-s="${s}" title="Elegir otro ataque que pueda aprender">Cambiar</button></div>`; }).join('')}</div>`;
 }
 const DT_HELP = {
   sum: 'Las estadísticas son a nivel 50. Total = Base + IV + EV, y la naturaleza sube un 10 % una y baja un 10 % otra. En combate se nota una parte de esa mejora.',
   tr: 'IV: de 0 a 31 en cada estadística (cada Chapa Dorada +5). EV: hasta 252 en cada una y 510 en total (cada Chapa Plateada +10). Los presets solo colocan las barras: no se gasta nada hasta pulsar «Aplicar». Restablecer devuelve las chapas.',
-  mv: 'Cada Pokémon tiene 4 huecos: Golpe (cuerpo a cuerpo), Disparo (a distancia), Mejora (te potencia) y Fuerte (el que más daño hace). Para cambiar uno necesitas un MT de ese hueco o recuperar uno que ya olvidó.'
+  mv: 'Cada Pokémon tiene 4 huecos: Golpe (cuerpo a cuerpo), Disparo (a distancia), Mejora (te potencia) y Fuerte (el que más daño hace). Para cambiar uno, pulsa «Cambiar» y elige cualquier ataque de ese hueco que pueda aprender (es gratis).'
 };
 function dataMainNew(){
   const tab = dt.tab || 'sum';
@@ -191,10 +197,20 @@ function cbar(text){
 function subHead(title, item){
   return `${dataHead()}<div class="dtsub"><button data-act="back">${dt.view === 'moves' ? '← Cancelar y volver' : '← Volver'}</button><h2>${title}</h2>${item ? ownedChip(item) : ''}</div>`;
 }
+// Menta: tabla 5 × 5 como la de los juegos. Fila = estadística que SUBE · columna = la que BAJA · diagonal = neutras.
+const NAT_ORD = ['atk', 'def', 'spa', 'spd', 'spe'], NAT_COL = {atk: '#f5a06a', def: '#f6dc6e', spa: '#8fb0f2', spd: '#9edb84', spe: '#f58fb0'};
+const NAT_NEUTRAL = {atk: 'Fuerte', def: 'Dócil', spa: 'Tímida', spd: 'Rara', spe: 'Seria'};
 function dataNature(){
-  const d = dt.dex, cur = natureOf(d), cards = NATURES.map((n, i) =>
-    `<button class="optb nat${n === cur ? ' cur' : ''}${dt.pick === String(i) ? ' pick' : ''}" data-act="pick" data-v="${i}"${n === cur ? ' disabled' : ''}><img class="iimg" src="${mintImg(n)}" alt=""><b>${n[0]}</b><small>${natText(n)}</small></button>`).join('');
-  return `${subHead(`Naturaleza de ${esc(mon(d).name)}: ahora es ${cur[0]}`, 'menta')}<div class="optgrid">${cards}</div>
+  const d = dt.dex, cur = natureOf(d);
+  const idxOf = (up, dn) => NATURES.findIndex(n => up === dn ? n[0] === NAT_NEUTRAL[up] : (n[1] === up && n[2] === dn));
+  const head = `<div class="nt-c nt-corner"><i>Sin cambio</i><span>↘</span></div>` + NAT_ORD.map(k => `<div class="nt-c nt-h" style="--c:${NAT_COL[k]}">${STAT_NAMES[k]}<span>▼</span></div>`).join('');
+  const rows = NAT_ORD.map(up => `<div class="nt-c nt-h nt-row" style="--c:${NAT_COL[up]}">${STAT_NAMES[up]}<span>▲</span></div>` + NAT_ORD.map(dn => {
+    const i = idxOf(up, dn), n = NATURES[i], isCur = n === cur, neu = up === dn;
+    return `<button class="nt-c nt-b${neu ? ' neu' : ''}${isCur ? ' cur' : ''}${dt.pick === String(i) ? ' pick' : ''}" data-act="pick" data-v="${i}"${isCur ? ' disabled' : ''} title="${n[0]}: ${natText(n)}" style="--u:${NAT_COL[up]};--d:${NAT_COL[dn]}">
+      <b>${n[0]}</b><small>${neu ? 'neutra' : `<em class="nu">▲${TR_SHORT ? TR_SHORT[up] : ''}</em> <em class="nd">▼${TR_SHORT ? TR_SHORT[dn] : ''}</em>`}</small>${isCur ? '<u>Actual</u>' : ''}</button>`; }).join('')).join('');
+  return `${subHead(`Naturaleza de ${esc(mon(d).name)}: ahora es ${cur[0]}`, 'menta')}
+    <p class="note">Fila: la estadística que <b class="nu">sube un 10 %</b> · columna: la que <b class="nd">baja un 10 %</b> · en la diagonal, las neutras (no cambian nada).</p>
+    <div class="nt-grid">${head}${rows}</div>
     ${cbar(dt.pick !== null ? `Gastar 1 Menta para que pase a ser <b>${NATURES[dt.pick][0]}</b> (${natText(NATURES[dt.pick])})` : '')}`;
 }
 function dataAbil(){
@@ -209,35 +225,28 @@ const SLOT_DESC = {1:'Golpe cuerpo a cuerpo', 2:'Disparo a distancia', 3:'Mejora
 const mvType = (d, n) => (MOVES[n] || {}).t || mon(d).types[0];
 function mvCard(d, sl, n, cls, tag){
   const q = MV[sl];
-  return `<div class="mvc ${cls}"><span class="sl">${SLOT_SHORT[sl]}</span><b>${esc(n)}</b>${typeChip(mvType(d, n))}
+  return `<div class="mvc ${cls}" style="--t:${TC[mvType(d, n)]}">${tIco(mvType(d, n), 'wm')}<span class="sl">${SLOT_SHORT[sl]}</span><b>${esc(n)}</b><span class="lrr">${typeChip(mvType(d, n))}${catIco(sl, n)}</span>
     <small>${slotDesc(sl, n)} · Energía ${q.en} · Recarga ${String(q.cd).replace('.', ',')} s</small>${tag ? `<em>${tag}</em>` : ''}</div>`;
 }
 // «Cambiar ataque»: un hueco concreto. Aquí solo se elige y se muestra; quien decide si se puede aprender es teachCheck() (training.js).
 function dataMoves(){
   const d = dt.dex, s = dt.slot, cur = movesOf(d)[s - 1], nm = esc(mon(d).name);
   const now = [1, 2, 3, 4].map(sl => mvCard(d, sl, movesOf(d)[sl - 1], sl === s ? 'tgt' : 'keep', sl === s ? 'Se cambia este' : 'Se queda')).join('');
-  const mts = myMTs(s).sort((a, b) => mtMove(a).localeCompare(mtMove(b), 'es'));
-  const mtCards = mts.map(id => { const n = mtMove(id), err = teachCheck(dt.dex, n), bad = err === NO_LEARN, known = err === 'Ya conoce ese movimiento.', key = 'mt:' + id;
-    return `<button class="optb big mt${bad ? ' bad' : ''}${dt.pick === key ? ' pick' : ''}" data-act="${bad ? 'nolearn' : 'pick'}" data-v="${key}"${known ? ' disabled' : ''}>
-      <img class="iimg" src="${imgOf(id)}" alt=""><b>MT ${esc(n)}</b>${typeChip(MOVES[n].t)}<small>Tienes ×${held(id)}</small>
-      <em class="${bad ? 'no' : 'yes'}">${bad ? '✕ No compatible' : known ? 'Ya lo conoce' : '✓ Compatible'}</em></button>`; }).join('');
-  const rcCards = forgotten(d, s).map(n => { const key = 'rc:' + n, orig = n === origMove(d, s), bad = !orig && !canLearn(d, n);
-    return `<button class="optb big rc${bad ? ' bad' : ''}${dt.pick === key ? ' pick' : ''}" data-act="${bad ? 'nolearn' : 'pick'}" data-v="${key}">
-      <b>${esc(n)}</b>${typeChip(mvType(d, n))}<small>${orig ? 'Ataque original' : 'Ataque anterior'} · gratis, no gasta MT</small>
-      <em class="${bad ? 'no' : 'yes'}">${bad ? '✕ No compatible' : '↺ Recuperar'}</em></button>`; }).join('');
+  const lrCards = learnables(d, s).map(n => { const key = 'lr:' + n, orig = n === origMove(d, s), known = n === cur;
+    return `<button class="optb big rc lrc${dt.pick === key ? ' pick' : ''}" style="--t:${TC[mvType(d, n)]}" data-act="pick" data-v="${key}"${known ? ' disabled' : ''}>${tIco(mvType(d, n), 'wm')}
+      <b>${esc(n)}</b><span class="lrr">${typeChip(mvType(d, n))}${catIco(s, n)}</span><small>${slotDesc(s, n)}</small>
+      <em class="yes">${known ? 'Lo conoce ahora' : orig ? '★ Ataque original' : '✓ Puede aprenderlo'}</em></button>`; }).join('');
   let bar = `<div class="cbar"><span>Elige un movimiento. No se cambia nada hasta que pulses Confirmar.</span><button data-act="back">Cancelar y volver</button></div>`;
   if(dt.pick){
     const k = dt.pick.slice(0, 2), v = dt.pick.slice(3), nn = k === 'mt' ? mtMove(v) : v;
     bar = `<div class="cbar mtsumbar"><div class="mtsum"><div><em>Aprende</em><b>${esc(nn)}</b>${typeChip(mvType(d, nn))}</div><div><em class="o">Olvida</em><b>${esc(cur)}</b>${typeChip(mvType(d, cur))}</div>
-      <small>${k === 'mt' ? `Gasta 1 MT (te quedarán ${held(v) - 1}). ` : 'Es gratis. '}«${esc(cur)}» quedará en «Ataques anteriores» por si quieres recuperarlo.</small></div>
+      <small>Es gratis. Puedes volver a cambiarlo cuando quieras.</small></div>
       <button class="main" data-act="ok">Confirmar el cambio</button><button data-act="cancel">Cancelar</button></div>`;
   }
   return `${subHead(`Cambiar ataque de ${nm}: hueco «${SLOT_NAMES[s]}»`)}
     <h3 class="mvh">Ataques de ${nm} ahora</h3><div class="mvcs">${now}</div>
-    <h3 class="mvh">Aprender un MT <small>(los de este hueco que tienes)</small></h3>
-    ${mts.length ? `<div class="optgrid two">${mtCards}</div>` : `<p class="note big">No tienes ningún MT para este hueco (${SLOT_SHORT[s]}). La Tienda renueva sus MTs cada 24 horas.</p><button data-act="shop">Ir a la Tienda</button>`}
-    <h3 class="mvh">Ataques anteriores <small>(recuperarlos es gratis)</small></h3>
-    ${rcCards ? `<div class="optgrid two">${rcCards}</div>` : `<p class="note">Todavía no ha olvidado ningún ataque en este hueco.</p>`}
+    <h3 class="mvh">Ataques que puede aprender <small>(${learnables(d, s).length} · gratis)</small></h3>
+    <div class="optgrid two">${lrCards}</div>
     ${bar}`;
 }
 
@@ -328,7 +337,8 @@ function confirmPick(){
   else if(dt.view === 'reset'){ const iv = dt.what === 'iv', n = iv ? capOf(d).gold : capOf(d).silver; err = iv ? resetIVs(d) : resetEVs(d); ok = `${iv ? 'IVs' : 'EVs'} restablecidos: recuperas ${n} ${iv ? 'Chapas Doradas' : 'Chapas Plateadas'}.`; dt.view = 'main'; toast(err || ok); return; }
   else if(dt.view === 'moves'){
     const k = dt.pick.slice(0, 2), v = dt.pick.slice(3);
-    if(k === 'mt'){ const n = mtMove(v); err = useMT(d, v); ok = `${mon(d).name} aprendió ${n}.`; }
+    if(k === 'lr'){ err = learnFree(d, dt.slot, v); ok = `${mon(d).name} aprendió ${v}.`; }
+    else if(k === 'mt'){ const n = mtMove(v); err = useMT(d, v); ok = `${mon(d).name} aprendió ${n}.`; }
     else { err = recallMove(d, dt.slot, v); ok = `${mon(d).name} recuperó ${v}.`; }
   }
   toast(err || ok); dt.pick = null; if(!err) dt.view = 'main';

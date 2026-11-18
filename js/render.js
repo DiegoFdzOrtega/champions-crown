@@ -567,7 +567,7 @@ function draw(){
     menuBg(performance.now()/1000); return; }
   const WW = W;                                    // ancho del mundo (en el Campo de pruebas es mayor que la pantalla)
   ctx.save(); fxShakeApply();                      // temblor de pantalla (solo el campo, no el HUD)
-  g.zk = (g.zk || 0) + ((g.slowT > 0 ? 1 : 0) - (g.zk || 0)) * .16;                               // remate final: la cámara se acerca al Pokémon que cae (FEEL.zoom) y vuelve
+  g.zk = (g.zk || 0) + ((g.slowT > 0 ? 1 : (g.camZ || 0)) - (g.zk || 0)) * .16;   // g.camZ: acercamiento de cámara al cargar / en golpes fuertes (js/fxvideo2.js)                               // remate final: la cámara se acerca al Pokémon que cae (FEEL.zoom) y vuelve
   const FARV = !PRV && farOn();                    // cámara lejana (Historia de Kanto): el campo se dibuja más pequeño
   if(g.zk > .01 && g.zoomAt && !PRV){ const z = 1 + FEEL.zoom * g.zk, zp = FARV ? farW2S(g.zoomAt.x, g.zoomAt.y) : [g.zoomAt.x, g.zoomAt.y]; ctx.translate(zp[0], zp[1]); ctx.scale(z, z); ctx.translate(-zp[0], -zp[1]); }
   if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
@@ -603,9 +603,9 @@ function draw(){
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(mouse.x-9, mouse.y); ctx.lineTo(mouse.x+9, mouse.y); ctx.moveTo(mouse.x, mouse.y-9); ctx.lineTo(mouse.x, mouse.y+9); ctx.stroke();
   }
-  if(PRV) g.pops.forEach(p => { const [sx, sy] = prW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, sy, p.s || 9, p.c || '#ffe066', 'center'); });   // números del daño: a su sitio en la pantalla
-  else if(FARV) g.pops.forEach(p => { const [sx, sy] = farW2S(p.x, p.y - (1-p.t)*20); textO(p.txt, sx, Math.max(178, sy), p.s || 9, p.c || '#ffe066', 'center'); });
-  else g.pops.forEach(p => textO(p.txt, p.x, Math.max(178, p.y - (1-p.t)*20), p.s || 9, p.c || '#ffe066', 'center'));
+  if(PRV) g.pops.forEach(p => { const [sx, sy] = prW2S(p.x, p.y - (1-p.t)*20); if(typeof popStyled === 'function' && popStyled(p, sx, sy)) return; textO(p.txt, sx, sy, p.s || 9, p.c || '#ffe066', 'center'); });   // números del daño: a su sitio en la pantalla
+  else if(FARV) g.pops.forEach(p => { const [sx, sy] = farW2S(p.x, p.y - (1-p.t)*20); if(typeof popStyled === 'function' && popStyled(p, sx, Math.max(178, sy))) return; textO(p.txt, sx, Math.max(178, sy), p.s || 9, p.c || '#ffe066', 'center'); });
+  else g.pops.forEach(p => { const y = Math.max(178, p.y - (1-p.t)*20); if(!(typeof popStyled === 'function' && popStyled(p, p.x, y))) textO(p.txt, p.x, y, p.s || 9, p.c || '#ffe066', 'center'); });   // «¡Es muy eficaz!» y compañía, en cuadro de texto (js/fxvideo3.js)
 
   if(PRV) prTopBegin();                            // Campo de pruebas: los paneles de arriba van a la escala del estadio (js/pruebas.js)
   hudAt(0, 0, () => hud(10, 10, myList(), myIdx(), '#4a8cff'));

@@ -7,7 +7,7 @@
    - Para activarlo en otra región: añádela a LIGA_NEW y rellena su tabla en LIGA_INFO (frase, lugar y medalla de cada uno).
    - buildStory (menu.js) sigue construyendo la pantalla de siempre; aquí solo se añade la nueva y se ocultan las partes antiguas.
    ===================================================================== */
-const LIGA_NEW = new Set(['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova / Teselia', 'Kalos', 'Alola']);
+const LIGA_NEW = new Set(['Kanto', 'Johto', 'Hoenn', 'Sinnoh', 'Unova / Teselia', 'Kalos', 'Alola', 'Galar']);
 // medal = nombre del archivo assets/lideres/<Región>/Medallas/Medalla_<medal>.webp (tal cual está en la carpeta: «Drag%3Fn» incluido). Sin medalla: sale el color de su tipo.
 // place = solo hace falta si el combate no lo trae ya (los de Kanto). q = la frase que dice en la ficha.
 const LIGA_INFO = {
@@ -109,7 +109,20 @@ const LIGA_INFO = {
   olivia:    {q:'Las rocas brillan como joyas. Mi equipo, también.'},
   acerola_am:{q:'Ahora soy del Alto Mando... ¡y mis fantasmas son más fuertes!'},
   kahili:    {q:'Un golpe perfecto, como en el golf. ¡Allá voy!'},
-  kukui:     {q:'¡Woo! ¡Llevo mucho esperando este combate!'}
+  kukui:     {q:'¡Woo! ¡Llevo mucho esperando este combate!'},
+  // ---- Galar (galar.js): medallas en assets/lideres/Galar/Medallas/Medalla_<medal>.webp. ----
+  percy:    {medal:'Planta', q:'¡Mis Pokémon crecen fuertes como el trigo de la granja!'},
+  cathy:    {medal:'Agua', q:'¡Mi equipo te va a arrastrar al fondo del mar!'},
+  naboru:   {medal:'Fuego', q:'Llevo años en esto. Mi fuego todavía no se ha apagado.'},
+  judith:   {medal:'Lucha', q:'He entrenado cada día. No pienso perder.'},
+  alistair: {medal:'Fantasma', q:'... Mis fantasmas tienen ganas de jugar contigo.'},
+  sally:    {medal:'Hada', q:'¿Tienes lo que hace falta para ser mi sucesor? Veamos.'},
+  morris:   {medal:'Roca', q:'¡Las rocas de mi equipo no se rompen tan fácil!'},
+  mel:      {medal:'Hielo', q:'Frío y elegancia. Así combate mi familia.'},
+  nerio:    {medal:'Siniestro', q:'Pujanza no tiene estadio Dinamax. Tampoco nos hace falta.'},
+  roy:      {medal:'Dragon', q:'¡Voy a ganarte y después iré a por Lionel!'},
+  berto:    {q:'Yo soy el que va a heredar el gimnasio. Apártate.'},
+  lionel:   {q:'¡Que empiece el mejor combate de mi vida! ¡Hagámoslo campeón!'}
 };
 const liga = {sel: null, reg: ''};                                       // sel = combate que se ve arriba (null = el siguiente)
 
@@ -136,7 +149,7 @@ function ligaRender(){
   const kc = F.kind === 'alto' ? '#a35cff' : F.kind === 'campeon' ? '#ffcc33' : tagColor(F);
   const ty = TYPE_OF_TAG[F.tag], cnt = kd => fls.filter(x => x.F.kind === kd), doneK = kd => cnt(kd).filter(x => x.F.idx < rec).length;
   const pos = cnt(F.kind).findIndex(x => x.gi === gi) + 1;
-  const ALO = R === 'Alola', kind = F.kind === 'lider' ? `${ALO ? 'Capitán' : 'Líder de gimnasio'} · ${pos}/${cnt('lider').length}` : F.kind === 'alto' ? `Alto Mando · ${pos}/${cnt('alto').length}` : 'Campeón de la Liga';
+  const ALO = R === 'Alola', kind = F.kind === 'lider' ? `${ALO ? 'Capitán' : 'Líder de gimnasio'} · ${pos}/${cnt('lider').length}` : F.kind === 'alto' ? `${R === 'Galar' ? 'Copa de Campeones' : 'Alto Mando'} · ${pos}/${cnt('alto').length}` : 'Campeón de la Liga';
   const badge = F.kind === 'campeon' ? '<span class="tb" style="background:#b8860b">Campeón</span>' : ty ? `<span class="tb" style="background:${TC[ty]}">${esc(F.tag)}</span>` : '';
   const showTeam = S === 'done';                                                     // su equipo solo se descubre cuando ya le has ganado
   const balls = (F.teams || []).slice(0, 6).map(e => showTeam ? `<canvas width="64" height="64" data-d="${typeof e === 'number' ? e : e.dex}"></canvas>` : '<i>?</i>').join('') || '<i>?</i>'.repeat(6);
@@ -149,7 +162,7 @@ function ligaRender(){
   const seg = kd => `<div class="lg-seg">${cnt(kd).map(node).join('')}</div>`;
   $('lgNew').innerHTML = `<div class="lg" style="--kc:${kc}">
     <div class="lg-top"><h1>Liga de ${esc(R)}<small>Modo ${save.storyMode === 'facil' ? 'Fácil' : 'Difícil'}</small></h1>
-      <div class="lg-prog"><span><b>${doneK('lider')}/${cnt('lider').length}</b> ${R === 'Alola' ? 'Cristales Z' : 'medallas'}</span><span><b>${doneK('alto')}/${cnt('alto').length}</b> Alto Mando</span><span class="${champ ? 'gold' : ''}"><b>${champ ? '🏆' : '0/1'}</b> Campeón</span></div></div>
+      <div class="lg-prog"><span><b>${doneK('lider')}/${cnt('lider').length}</b> ${R === 'Alola' ? 'Cristales Z' : 'medallas'}</span><span><b>${doneK('alto')}/${cnt('alto').length}</b> ${R === 'Galar' ? 'Copa' : 'Alto Mando'}</span><span class="${champ ? 'gold' : ''}"><b>${champ ? '🏆' : '0/1'}</b> Campeón</span></div></div>
     <div class="lg-hero ${F.kind}" style="--map:url(&quot;${new URL('assets/region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[R]) || R) + '.webp', document.baseURI).href}&quot;)">
       <div class="lg-por"><img id="lgPor" alt="${esc(F.leader)}"></div>
       <div class="lg-info"><span class="lg-kind">${F.kind === 'campeon' ? '♛ ' : ''}${kind}${S === 'done' ? ' · <b>✓ Vencido</b>' : ''}</span>

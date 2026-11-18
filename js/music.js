@@ -101,6 +101,15 @@ const MUSIC_TRACKS = {
                  synth:{seed:47, bpm:176, root:62, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.92}},
   win_lider_alola:  {name:'Victoria: Líderes y Alto Mando de Alola', file:'Alola/Victoria Lideres',  once:true, ref:'"Victory! Trainer" de Alola (Sol y Luna)'},
   win_campeon_alola:{name:'Victoria: Campeón de Alola',            file:'Alola/Victoria Campeon', once:true, ref:'"Victory! Champion" de Alola (Sol y Luna)'},
+  // Galar: carpeta assets/musica/Galar/ (Combate Lideres, Combate Campeon, Victoria Lideres, Victoria Campeon). Berto (Copa de Campeones) usa la de los líderes. Si falta un archivo suena la música generada
+  lider_galar:  {name:'Líderes de Galar', file:'Galar/Combate Lideres', win:'win_lider_galar',          ref:'"Battle! Gym Leader" de Galar (Espada y Escudo)',
+                 synth:{seed:28, bpm:158, root:62, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'rock',   density:.82}},
+  alto_galar:   {name:'Copa de Campeones de Galar', file:'Galar/Combate Lideres', win:'win_lider_galar', ref:'"Battle! Champion Cup" de Galar (Espada y Escudo)',
+                 synth:{seed:38, bpm:166, root:57, scale:'harmonic', prog:[0,4,5,3],      bass:'drive', lead:'drive', pad:false, arp:true,  drums:'double', density:.86}},
+  campeon_galar:{name:'Campeón Lionel (Galar)', file:'Galar/Combate Campeon', win:'win_campeon_galar', ref:'"Battle! Champion Leon" de Galar (Espada y Escudo)',
+                 synth:{seed:48, bpm:178, root:60, scale:'major',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.94}},
+  win_lider_galar:  {name:'Victoria: Líderes de Galar', file:'Galar/Victoria Lideres',  once:true, ref:'"Victory! Gym Leader" de Galar (Espada y Escudo)'},
+  win_campeon_galar:{name:'Victoria: Campeón de Galar', file:'Galar/Victoria Campeon', once:true, ref:'"Victory! Champion" de Galar (Espada y Escudo)'},
   torre:        {name:'Torre Batalla', file:'Kalos/Combate Alto Mando', win:'win_lider_kalos', ref:'"Battle! Elite Four" de Kalos (X/Y): épica, para subir piso a piso',
                  synth:{seed:58, bpm:150, root:57, scale:'minor',    prog:[0,5,3,4],      bass:'drive', lead:'epic',  pad:true,  arp:true,  drums:'double', density:.85}},
   campo:        {name:'Campo de Entrenamiento', file:'Alola/Combate Lideres', win:'win_lider_alola', ref:'"Battle! Trainer / Kahuna" de Alola (Sol y Luna). Para poner otra: cambia file por la ruta de tu archivo en assets/musica (sin .ogg)',
@@ -139,7 +148,10 @@ const MUSIC_BY_TRAINER = {
   // Alola: 7 líderes, Alto Mando (4; Acerola del Alto Mando = acerola_am) y Campeón Kukui
   ilima:'lider_alola', lana:'lider_alola', kiawe:'lider_alola', mallow:'lider_alola', sophocles:'lider_alola', acerola:'lider_alola', mina:'lider_alola',
   hala:'alto_alola', olivia:'alto_alola', acerola_am:'alto_alola', kahili:'alto_alola',
-  kukui:'campeon_kukui'
+  kukui:'campeon_kukui',
+  // Galar: 10 líderes, Berto (Copa de Campeones) y Campeón Lionel
+  percy:'lider_galar', cathy:'lider_galar', naboru:'lider_galar', judith:'lider_galar', alistair:'lider_galar', sally:'lider_galar', morris:'lider_galar', mel:'lider_galar', nerio:'lider_galar', roy:'lider_galar',
+  berto:'alto_galar', lionel:'campeon_galar'
 };
 // Si un combate nuevo (otra región) no está en la lista, se elige por región y tipo: lider_<región>, alto_<región>, campeon_<región>; si no existe, la de Kanto.
 function musicTrackFor(o){
@@ -350,7 +362,20 @@ const Music = (() => {
     hit_weak: [{f:120, to:62, x:1, at:0, d:.13, w:'sine', v:.5}, {n:1, ft:'lowpass', f:520, to:220, at:0, d:.11, v:.32}],    // flojo y apagado
     hit_none: [{n:1, ft:'bandpass', f:420, to:260, q:.7, at:0, d:.09, v:.16}, {f:95, to:70, x:1, at:0, d:.08, w:'sine', v:.14}],   // casi nada: no le hace daño
     crit:     [{n:1, ft:'highpass', f:2600, at:0, d:.07, v:.55}, {f:1760, at:.01, d:.09, w:'triangle', v:.28}, {f:2349, at:.07, d:.14, w:'triangle', v:.25}],   // se suma al golpe
-    dash:     [{n:1, ft:'bandpass', f:500, to:2600, q:1.1, at:0, d:.2, v:1.1}, {n:1, ft:'lowpass', f:900, to:250, at:0, d:.16, v:.35}],   // carrera: 'fuuush' corto y rápido
+    dash:     [{n:1, ft:'bandpass', f:300, to:3800, q:1.8, at:0, d:.14, v:1.5}, {n:1, ft:'bandpass', f:3600, to:700, q:1.3, at:.1, d:.2, v:.85},
+               {f:900, to:2600, at:0, d:.12, w:'sine', v:.14}, {n:1, ft:'lowpass', f:600, to:120, at:0, d:.14, v:.6},   // carrera (como el vídeo de Rojo vs Cintia): '¡fiuuush!' que sube y baja...
+               {f:150, to:55, x:1, at:0, d:.09, w:'sine', v:.6}, {n:1, ft:'highpass', f:6000, at:.02, d:.1, v:.2}, {f:2093, to:3136, at:.04, d:.08, w:'triangle', v:.07}],   // ...con el golpe del pie, el aire y un brillo
+    dash_old: [{n:1, ft:'bandpass', f:500, to:2600, q:1.1, at:0, d:.2, v:1.1}, {n:1, ft:'lowpass', f:900, to:250, at:0, d:.16, v:.35}],   // la carrera de antes
+    charge2:  [{f:110, to:440, at:0, d:2, w:'sawtooth', v:.1}, {f:220, to:880, at:0, d:2, w:'sine', v:.1}, {n:1, ft:'bandpass', f:200, to:3200, q:3, at:0, d:2, v:.4},   // carga del ataque fuerte (2 s): sube y sube...
+               {n:1, ft:'lowpass', f:180, to:420, at:0, d:2, v:.35}, {n:1, ft:'highpass', f:6000, at:1.5, d:.5, v:.16}],                                                       // ...con un retumbo debajo
+    swords:   [{n:1, ft:'bandpass', f:900, to:3000, q:2, at:0, d:.25, v:.6}, {f:2637, to:3520, at:.18, d:.18, w:'triangle', v:.18}, {f:3136, at:.3, d:.25, w:'sine', v:.16},   // Danza Espada: «¡sshing!» de espadas...
+               {n:1, ft:'highpass', f:6000, at:.3, d:.3, v:.25}, {f:3951, at:.45, d:.3, w:'sine', v:.12}, {f:523, to:1046, at:.95, d:.35, w:'triangle', v:.2}, {f:784, to:1568, at:1.05, d:.35, w:'triangle', v:.18}],   // ...y sube el Ataque
+    v_ready:  [{f:1568, at:0, d:.1, w:'triangle', v:.22}, {f:2093, at:.05, d:.22, w:'sine', v:.2}, {n:1, ft:'highpass', f:5000, at:0, d:.16, v:.18}],   // el ataque fuerte ya está cargado: ¡tin!
+    impact4:  [{f:75, to:28, x:1, at:0, d:.55, w:'sine', v:1}, {n:1, ft:'lowpass', f:2400, to:90, at:0, d:.5, v:.9}, {n:1, ft:'highpass', f:3000, at:0, d:.12, v:.65},   // golpe de «cuadro de impacto»: ¡BUM! grave...
+               {f:55, to:30, x:1, at:.09, d:.4, w:'square', v:.22}, {n:1, ft:'bandpass', f:5200, to:1500, q:1, at:.02, d:.25, v:.4}],          // ...con crujido
+    canto:    [{f:1047, at:0, d:.24, w:'sine', v:.2}, {f:1319, at:.24, d:.24, w:'sine', v:.2}, {f:1568, at:.48, d:.34, w:'sine', v:.22}, {f:1319, at:.82, d:.22, w:'sine', v:.18},
+               {f:1175, at:1.04, d:.22, w:'sine', v:.18}, {f:1047, at:1.26, d:.5, w:'sine', v:.2}, {f:523, at:0, d:.7, w:'triangle', v:.07}, {f:392, at:.7, d:1.05, w:'triangle', v:.07}],   // Canto: nana suave (do-mi-sol-mi-re-do)
+    aura_cast:[{f:300, to:1200, at:0, d:.22, w:'sine', v:.25}, {f:305, to:1215, at:0, d:.22, w:'triangle', v:.12}, {n:1, ft:'bandpass', f:800, to:4200, q:2, at:0, d:.22, v:.35}, {f:1760, at:.2, d:.12, w:'sine', v:.15}],   // la esfera se forma en las manos
     dodge:    [{n:1, ft:'bandpass', f:600, to:3200, q:1.5, at:0, d:.22, v:1.2}],
     // ---- Al LANZAR un ataque (antes del golpe): cada uno suena distinto para que se oiga qué se está usando ----
     swing:    [{n:1, ft:'bandpass', f:700, to:2300, q:1.3, at:0, d:.14, v:1.3}, {n:1, ft:'highpass', f:2500, at:.02, d:.07, v:.3}],       // cuerpo a cuerpo: un 'fffsh' de golpe de brazo, más corto y agudo que el dash

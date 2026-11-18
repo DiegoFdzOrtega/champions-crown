@@ -135,17 +135,28 @@ function hb6Det(){
   const el = $('hb6Det'); if(!el) return; const d = HB6.sel; el.dataset.d = d || '';
   if(!d){ el.innerHTML = '<h3>Pokémon</h3><p class="hb6-none">Elige un Pokémon de los pedestales para ver sus datos.</p>'; return; }
   const m = mon(d), M = hbMega(d), ty = M ? M.types : m.types, i = team.indexOf(d), hw = typeof hwOf === 'function' ? hwOf(d) : null;
-  const mv = movesOf(d), L = {hp:'PS', atk:'Ataque', def:'Defensa', spa:'At. Esp.', spd:'Def. Esp.', spe:'Velocidad'}, C = {hp:'#e8503a', atk:'#ffc83a', def:'#4ccf6a', spa:'#3ea6ff', spd:'#8a7aff', spe:'#ff5aa0'};
+  const mv = movesOf(d), nat = natureOf(d) || [], L = {hp:'PS', atk:'Ataque', def:'Defensa', spa:'At. Esp.', spd:'Def. Esp.', spe:'Velocidad'}, C = {hp:'#e8503a', atk:'#ffc83a', def:'#4ccf6a', spa:'#3ea6ff', spd:'#8a7aff', spe:'#ff5aa0'};
+  const ico = (t, c) => typeof tIco === 'function' ? tIco(t, c) : '';
   const weak = Object.keys(CH).map(t => [t, eff(t, ty)]).filter(([, v]) => v > 1).sort((a, b) => b[1] - a[1]);
   const good = Object.keys(CH).filter(t => mv.some(x => MOVES[x] && eff(MOVES[x].t, [t]) > 1));
-  el.innerHTML = `<h3>${i === 0 ? '♛ ' : `${i + 1} · `}${esc(M ? M.form : m.name)}</h3>
-    <div class="hb6-dh"><span>#${pad3(m.dex)}${hw ? ` · ${fmtAltura(hw[0])} · ${fmtPeso(hw[1])}` : ''}</span><span class="hb6-ty">${ty.map(t => `<u style="background:${TC[t]}">${TYPE_ES[t]}</u>`).join('')}</span></div>
-    <div class="hb6-dl">Habilidad: <b>${esc(abilityOf(d))}</b> · Naturaleza: <b>${esc((natureOf(d) || [])[0] || '')}</b></div>
+  const tot = STAT_KEYS.reduce((a, k) => a + realStat(d, k), 0), ab = abilityOf(d);
+  el.innerHTML = `<div class="hb6-hero" style="--t1:${TC[ty[0]]};--t2:${TC[ty[1] || ty[0]]}">
+      <canvas id="hb6Spr" width="120" height="120"></canvas>
+      <div class="hb6-hi"><h3>${i === 0 ? '♛ ' : `${i + 1} · `}${esc(M ? M.form : m.name)}</h3>
+        <span class="hb6-no">#${pad3(m.dex)}${hw ? ` · ${fmtAltura(hw[0])} · ${fmtPeso(hw[1])}` : ''}</span>
+        <span class="hb6-ty">${ty.map(t => `<u style="background:${TC[t]}">${ico(t)}${TYPE_ES[t]}</u>`).join('')}</span>
+        ${typeof ribStrip === 'function' ? `<span class="hb6-rb">${ribStrip(d).replace(/class="rbstrip"[^>]*>/, 'class="hb6-rbs">')}</span>` : ''}</div></div>
+    <div class="hb6-cards"><div><small>Habilidad</small><b>${esc(ab)}</b><p>${esc(typeof abilDesc === 'function' ? abilDesc(ab) : '')}</p></div>
+      <div><small>Naturaleza</small><b>${esc(nat[0] || '')}</b><p>${nat[1] ? `<span class="nu">▲ ${L[nat[1]]}</span> <span class="nd">▼ ${L[nat[2]]}</span>` : 'Neutra'}</p></div></div>
     ${itemDd(d)}
-    <h4>Ataques</h4><div class="hb6-mv">${mv.map((n, k) => { const t = (MOVES[n] || {}).t; return `<div style="--c:${TC[t] || '#888'}"><b>${esc(n)}</b><small>${HB6_SLOT[k] || ''}</small></div>`; }).join('')}</div>
-    <h4>Estadísticas</h4><div class="hb6-st">${STAT_KEYS.map(k => { const v = realStat(d, k); return `<span>${L[k]}</span><i><s style="width:${Math.min(100, v / 2.2)}%;background:${C[k]}"></s></i><b>${v}</b>`; }).join('')}</div>
-    <div class="hb6-ws"><span class="bad">✖ Débil a: ${weak.length ? weak.map(([t, v]) => TYPE_ES[t] + (v >= 4 ? ' ×4' : '')).join(', ') : 'nada'}</span><span class="ok">✔ Eficaz contra: ${good.length ? good.map(t => TYPE_ES[t]).join(', ') : '—'}</span></div>
-    <div class="hb6-ab"><button class="hb-btn" data-act="data">📋 Datos y ataques (MT)</button>${i > 0 ? '<button class="hb-btn" data-act="lead">♛ Hacer líder</button>' : ''}<button class="hb-btn" data-act="rm" title="Quitar del equipo">✕ Quitar</button></div>`;
+    <h4>Ataques</h4><div class="hb6-mv">${mv.map((n, k) => { const t = (MOVES[n] || {}).t || ty[0];
+      return `<div style="--c:${TC[t] || '#888'}">${ico(t, 'hb6-mi')}<span><b>${esc(n)}</b><small>${HB6_SLOT[k] || ''}</small></span>${typeof catIco === 'function' ? catIco(k + 1, n).replace(/<\/?span[^>]*>/g, '').replace(/>[^<]*$/, '>') : ''}</div>`; }).join('')}</div>
+    <h4>Estadísticas <small>Total ${tot}</small></h4><div class="hb6-st">${STAT_KEYS.map(k => { const v = realStat(d, k), ar = nat[1] === k ? '<em class="nu">▲</em>' : nat[2] === k ? '<em class="nd">▼</em>' : '';
+      return `<span>${L[k]}${ar}</span><i><s style="width:${Math.min(100, v / 2.2)}%;background:${C[k]}"></s></i><b>${v}</b>`; }).join('')}</div>
+    <div class="hb6-ws"><div class="bad"><span>✖ Débil a</span>${weak.length ? weak.map(([t, v]) => `<em title="${TYPE_ES[t]}${v >= 4 ? ' ×4' : ''}">${ico(t)}${v >= 4 ? '<i>×4</i>' : ''}</em>`).join('') : ' nada'}</div>
+      <div class="ok"><span>✔ Eficaz contra</span>${good.length ? good.map(t => `<em title="${TYPE_ES[t]}">${ico(t)}</em>`).join('') : ' —'}</div></div>
+    <div class="hb6-ab"><button class="hb-btn" data-act="data">📋 Datos y ataques</button>${i > 0 ? '<button class="hb-btn" data-act="lead">♛ Hacer líder</button>' : ''}<button class="hb-btn" data-act="rm" title="Quitar del equipo">✕ Quitar</button></div>`;
+  const cv = $('hb6Spr'); if(cv && typeof paintSprite === 'function') paintSprite(cv, M ? (M.folder || d) : d, {sc: 3, fit: 110, shiny: typeof useShiny === 'function' && useShiny(d)});
 }
 
 // ---- Tabla de tipos ----

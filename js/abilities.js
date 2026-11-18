@@ -76,7 +76,7 @@ const WX_OF = {'Sequía': 'sun', 'Llovizna': 'rain', 'Nevada': 'hail', 'Chorro A
 
 // ---------- utilidades ----------
 const abAx = () => ({atk: 1, spd: 1, moxie: 0, just: 0, par: 0, anger: false, comp: false, light: false, t: 0});     // lo que cambia durante el combate (se pierde al salir)
-const abPop = (f, txt, c) => { if(g) g.pops.push({x: f.x, y: f.y - 172, txt, t: 1.3, c: c || '#9be29b', s: 9}); };      // anuncio de la habilidad sobre el Pokémon
+const abPop = (f, txt, c) => { if(g) g.pops.push({x: f.x, y: f.y - 172, txt, t: 1.3, c: c || '#9be29b', s: 9}); if(typeof abBanner === 'function') abBanner(f, txt, c); };   // abBanner: cartel grande (js/fxvideo7.js)      // anuncio de la habilidad sobre el Pokémon
 const abMold = A => !!(A && A.ab === 'Rompemoldes');                                  // ignora las habilidades defensivas del rival
 const defAb = (T, A) => abMold(A) ? '' : (T.ab || '');                               // la habilidad defensiva que cuenta de verdad
 const wxIs = k => !!(g && g.wx && g.wx.k === k);

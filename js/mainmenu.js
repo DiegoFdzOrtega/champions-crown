@@ -37,7 +37,7 @@ function mmHero(){
   const nx = mmNext(), total = FLOORS.length, done = progTotal();
   if(nx){
     const F = nx.F, reg = String(nx.r).split(' / ').pop(), last = done + 1 >= total;
-    const kind = F.kind === 'campeon' ? (/a$/.test(F.tag) ? 'Campeona' : 'Campeón') : F.kind === 'alto' ? 'Alto Mando' : nx.r === 'Alola' ? 'Capitán' : 'Líder';
+    const kind = F.kind === 'campeon' ? (/a$/.test(F.tag) ? 'Campeona' : 'Campeón') : F.kind === 'alto' ? (nx.r === 'Galar' ? 'Copa de Campeones ·' : 'Alto Mando') : nx.r === 'Alola' ? 'Capitán' : 'Líder';
     const q = typeof LIGA_INFO !== 'undefined' && LIGA_INFO[F.id] && LIGA_INFO[F.id].q;
     const map = new URL('assets/region/' + encodeURIComponent((typeof REGION_IMG !== 'undefined' && REGION_IMG[nx.r]) || nx.r) + '.webp', document.baseURI).href;
     return `<div class="m2-hero" style="--map:url(&quot;${map}&quot;)"><img class="por" id="mmPor" alt="">
