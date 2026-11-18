@@ -130,22 +130,26 @@ function farS2W(x, y){ return {x: (x - W / 2) / FAR.z + W / 2, y: (y - FAR.cy) /
 //   Para añadir otro: guarda la imagen y pon una línea con el id del líder (el de FLOORS, js/data.js). Si el campo está en otro sitio, mide su rectángulo.
 // gradas = dónde se ponen los líderes que ya has vencido (pies, sobre 1024x572), de dentro a fuera; los de la izquierda miran a la derecha. Si no se pone, se usan las de Brock (GRADAS).
 const GRADAS = [[362, 102], [327, 100], [292, 98], [257, 96], [662, 102], [697, 100], [732, 98], [767, 96]];      // en la parte de la grada que no tapa el marcador (los de las esquinas quedarían debajo)
-// MEDIDAS: el suelo de combate de cada imagen se ha colocado en el MISMO sitio en todas (sobre 1024x572): un trapecio, como se ve en perspectiva
-//   (más estrecho arriba). EST_T = x izquierda y derecha arriba (y = 170) y abajo (y = 445); EST_C = el rectángulo que lo contiene.
-//   Los Pokémon se mueven por ese trapecio (estTrap): llegan a cada esquina del suelo sin salirse. Para uno nuevo: medir las 4 esquinas de su suelo y llevarlas a EST_T.
+// MEDIDAS: las imágenes van TAL CUAL (sin recortar ni deformar). De cada una se miden las 4 esquinas de su suelo de combate (sobre 1024x572):
+//   trap = [x arriba izquierda, x arriba derecha, x abajo izquierda, x abajo derecha] · court = [x mínima, y de arriba, x máxima, y de abajo].
+//   Los Pokémon se mueven por ese trapecio (estTrap): llegan a cada esquina del suelo sin salirse.
+//   edge (opcional, en vez de trap) = el borde del suelo con más puntos, para suelos que no son un trapecio: [[y, x izquierda, x derecha], ...] de arriba abajo.
 const EST_T = [225, 800, 135, 890], EST_C = [135, 170, 890, 445];
 const EST = {                                                       // imágenes 2048x1144 (WebP, ~250 KB); court medido sobre 1024x572 · solo los estadios nuevos
-  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // cueva de roca
-  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true,       // piscina (imagen ajustada para que el campo mida igual que el de Brock)
+  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: [40, 158, 945, 452], nuevo: true,
+             edge: [[158, 240, 800], [235, 100, 915], [340, 40, 945], [400, 130, 930], [452, 205, 845]]},      // el suelo entero, rodeando las rocas      // cueva de roca
+  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: [140, 175, 885, 458], trap: [220, 805, 140, 885], nuevo: true,       // piscina (imagen ajustada para que el campo mida igual que el de Brock)
              gradas: [[318, 74], [292, 72], [266, 70], [244, 68], [706, 74], [732, 72], [758, 70], [780, 68]]},
-  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // gimnasio eléctrico (suelo dorado)
-  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // jardín
-  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // dojo ninja
-  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // azotea de neón
-  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true},      // volcán de Isla Canela
-  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: EST_C, trap: EST_T, nuevo: true}       // gimnasio de Ciudad Verde (Team Rocket)
+  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: [102, 170, 924, 445], trap: [150, 875, 102, 924], nuevo: true},      // gimnasio eléctrico (suelo dorado)
+  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: [150, 200, 880, 440], trap: [215, 825, 150, 880], nuevo: true},      // jardín
+  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: [135, 190, 890, 418], trap: [245, 780, 135, 890], nuevo: true},      // dojo ninja
+  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: [125, 195, 900, 440], trap: [235, 790, 125, 900], nuevo: true},      // azotea de neón
+  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: [35, 162, 975, 452], nuevo: true,
+             edge: [[162, 250, 770], [228, 110, 925], [330, 35, 975], [362, 90, 940], [400, 185, 860], [452, 235, 800]]},      // el suelo entero, rodeando las rocas y las máquinas      // volcán de Isla Canela
+  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: [180, 193, 835, 412], trap: [262, 765, 180, 835], nuevo: true},       // gimnasio de Ciudad Verde (Team Rocket)
+  lorelei:  {src: 'assets/fondos/estadios/lorelei.webp',  w: 1024, h: 572, court: [102, 188, 935, 450], trap: [172, 852, 102, 935], nuevo: true}       // Alto Mando: sala de hielo
 };
-function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=11'; } }
+function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=15'; } }
 Object.values(EST).forEach(estLoad);                                // se cargan al abrir el juego: al entrar al combate ya están listas
 const estEnt = () => (g && g.o && EST[g.o.leader]) || null;          // el estadio de este combate (aunque su imagen aún no haya cargado)
 function estOf(){ const E = estEnt(); if(!E) return null; estLoad(E); return E.ok ? E : null; }
@@ -170,8 +174,13 @@ function estFans(E){
 }
 // ---- El campo en forma de trapecio: en cada altura, los Pokémon no pasan de los bordes del suelo (más cerca entre sí arriba que abajo) ----
 function estTrapX(y){                                                // → [x izquierda, x derecha] del suelo a esa altura (en el mundo), o null si este combate no lo usa
-  const E = typeof farOn === 'function' && farOn() ? estEnt() : null; if(!E || !E.trap) return null;
+  const E = typeof farOn === 'function' && farOn() ? estEnt() : null; if(!E || !(E.trap || E.edge)) return null;
   const t = E.trap, c = E.court, sx = W / E.w, sy = H / E.h;
+  if(E.edge){                                                        // borde con varios puntos: se busca el tramo de esa altura
+    const P = E.edge.map(([py, l, rr]) => { const a = farS2W(l * sx, py * sy), b = farS2W(rr * sx, py * sy); return [a.y, a.x, b.x]; });
+    if(y <= P[0][0]) return [P[0][1], P[0][2]]; const L = P[P.length - 1]; if(y >= L[0]) return [L[1], L[2]];
+    for(let i = 1; i < P.length; i++) if(y <= P[i][0]){ const A = P[i - 1], B = P[i], k = (y - A[0]) / (B[0] - A[0]); return [A[1] + (B[1] - A[1]) * k, A[2] + (B[2] - A[2]) * k]; }
+  }
   const a = farS2W(t[0] * sx, c[1] * sy), b = farS2W(t[1] * sx, c[1] * sy), d = farS2W(t[2] * sx, c[3] * sy), e = farS2W(t[3] * sx, c[3] * sy);
   const k = Math.max(0, Math.min(1, (y - a.y) / (d.y - a.y)));
   return [a.x + (d.x - a.x) * k, b.x + (e.x - b.x) * k];
