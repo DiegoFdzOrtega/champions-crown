@@ -245,6 +245,46 @@ const VIDA_FX = {
     C.forEach((p, i) => vGlow(S, p[0], p[1], 40, 'rgba(255,90,20,A)', .16 + .1 * Math.sin(S.t * 1.6 + i * 1.3)));
     ctx.globalCompositeOperation = 'source-over';
     vMotas(S, 34, [0, 0, 1024, 572], {vy: -20, sw: 12, swf: 1.8, col: ['#ffb347', '#ff7a1a', '#ffe08a'], a: .85, s: 3, tw: 1});      // brasas
+  },
+  // ---------------- ALTO MANDO Y CAMPEÓN DE JOHTO ----------------
+  mento(S){                                                                                                 // paneles de teletransporte que laten, ventanas azules, destellos rosas
+    ctx.globalCompositeOperation = 'lighter';
+    [[208, 144], [728, 128], [792, 184], [215, 180]].forEach((p, i) => vGlow(S, p[0], p[1] + Math.sin(S.t * 1.3 + i) * 4, 40, 'rgba(120,240,255,A)', .3 + .2 * Math.sin(S.t * 2.4 + i * 1.7)));
+    vLuces(S, [[495, 34], [530, 34], [600, 120], [625, 120], [300, 500], [740, 500], [20, 300], [1005, 300]], 18, 'rgba(110,190,255,A)', .45, 2);
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 14, [[90, 200, 930, 450]], '#ffffff', {s: 3, per: 1.6, a: .7});
+    vMotas(S, 20, [0, 60, 1024, 560], {vy: -8, sw: 12, col: ['#ffd6f5', '#c8f4ff', '#ffffff'], a: .6, s: 2, tw: 1});
+  },
+  j_koga(S){                                                                                                // charcos de veneno que burbujean y niebla morada
+    vNiebla(S, 7, [0, 120, 220, 560], 'rgba(120,60,170,A)', .12); vNiebla(S, 7, [800, 120, 1024, 560], 'rgba(120,60,170,A)', .12);
+    ctx.globalCompositeOperation = 'lighter';
+    [[784, 216], [168, 424], [912, 456], [120, 445]].forEach((p, i) => vGlow(S, p[0], p[1], 34, 'rgba(110,255,90,A)', .18 + .12 * Math.sin(S.t * 2 + i)));
+    ctx.globalCompositeOperation = 'source-over';
+    [[784, 216], [168, 424], [912, 456]].forEach((p, j) => vMotas(S, 5, [p[0] - 26, p[1] - 30, p[0] + 26, p[1] + 4], {vy: -14, sw: 4, col: ['#8cff5a', '#c8ff9a'], a: .8, s: 3, seed: 40 + j}));
+    vMotas(S, 16, [0, 80, 1024, 560], {vy: -5, vx: 3, sw: 10, col: ['#b98cff', '#7ad65a'], a: .4, s: 2, tw: 1});
+  },
+  j_bruno(S){                                                                                               // torres de lava que laten y brasas que suben
+    ctx.globalCompositeOperation = 'lighter';
+    [[32, 99], [992, 99], [32, 347], [992, 347]].forEach((p, i) => vGlow(S, p[0], p[1], 70, 'rgba(255,110,20,A)', .32 + .16 * Math.sin(S.t * 1.7 + i * 1.3)));
+    vLuces(S, [[230, 110], [790, 110], [400, 30], [630, 30]], 40, 'rgba(255,140,40,A)', .22, 1.2);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 30, [0, 60, 1024, 572], {vy: -22, sw: 12, swf: 1.6, col: ['#ffb347', '#ff7a1a', '#ffe08a'], a: .85, s: 3, tw: 1});
+  },
+  karen(S){                                                                                                 // el suelo de estrellas titila, ventanas azules y polvo dorado
+    vBrillos(S, 34, [[100, 195, 930, 455]], '#ffe58a', {s: 4, per: 1.3, a: .9});
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[505, 30], [535, 30], [20, 330], [1005, 330], [460, 100], [570, 100]], 22, 'rgba(90,150,255,A)', .4, 1.6);
+    vGlow(S, 80, 60, 120, 'rgba(160,20,60,A)', .12); vGlow(S, 944, 60, 120, 'rgba(160,20,60,A)', .12);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 18, [0, 0, 1024, 560], {vy: 6, sw: 10, col: ['#ffe58a', '#ffffff'], a: .55, s: 2, tw: 1});
+  },
+  j_lance(S){                                                                                               // el salón dorado brilla: destellos en el oro, la puerta y la alfombra
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[512, 40]], 60, 'rgba(160,120,255,A)', .22 + .1 * Math.sin(S.t * 1.5), 1);
+    vLuces(S, [[60, 200], [964, 200], [60, 420], [964, 420], [250, 90], [775, 90]], 46, 'rgba(255,210,90,A)', .22, 1.4);
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 18, [[0, 40, 140, 540], [884, 40, 1024, 540], [300, 470, 724, 560]], '#fff4c0', {s: 5, per: 1.4});
+    vMotas(S, 24, [0, 0, 1024, 572], {vy: -6, sw: 12, col: ['#ffe58a', '#ffd040', '#ffffff'], a: .7, s: 2, tw: 1});
   }
 };
 function estVida(E, id){

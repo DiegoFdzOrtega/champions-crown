@@ -7,7 +7,7 @@
    Si falta la imagen de un tipo, se ve la carga de siempre (la dibujada con código).
    ===================================================================== */
 const CARGA = {
-  tipos: ['fuego', 'agua', 'planta', 'electrico', 'hielo', 'lucha', 'veneno', 'tierra', 'volador', 'psiquico', 'bicho', 'roca', 'fantasma'],   // [AJUSTE] los tipos que ya tienen imagen: añade aquí el nombre cuando llegue una nueva
+  tipos: ['fuego', 'agua', 'planta', 'electrico', 'hielo', 'lucha', 'veneno', 'tierra', 'volador', 'psiquico', 'bicho', 'roca', 'fantasma', 'siniestro'],   // [AJUSTE] los tipos que ya tienen imagen: añade aquí el nombre cuando llegue una nueva
   propias: ['Envite Ígneo', 'Rayo Solar'],                                     // ataques con carga propia dibujada (js/embestida.js, js/fxnuevos.js)
   tam: 1.95,                                                                       // [AJUSTE] tamaño respecto al alto del Pokémon
   min: 95,                                                                         // [AJUSTE] tamaño mínimo (px), para que en los Pokémon pequeños también se vea
@@ -15,7 +15,7 @@ const CARGA = {
   // Ataques que NO salen de la boca (te lanzas con todo el cuerpo o golpeas el suelo): su remolino va alrededor del Pokémon.
   // Todos los demás salen de la boca: el remolino nace pequeño en la boca y crece hasta que lo lanzas (en lugar de la bola de js/fxvideo.js).
   cuerpo: /envite|p[aá]jaro osado|voltio cruel|giga ?impacto|doble filo|placaje|terremoto|magnitud|megacuerno|a[eé]rea|vuelo|bote|golpe cuerpo|cuerpo pesado|carga|embestida|pu[ñn]o|patada|machada|demolici[oó]n|martillo|cabezazo|tajo|garra|colmillo|lanzarse|ida y vuelta|u-turn/i,
-  boca: {min: 16, max: 1.05, maxPx: 120, giro: 2.2},                               // [AJUSTE] en la boca: tamaño al empezar (px) · al estar listo (× alto del Pokémon, como mucho maxPx) · lo que gira
+  boca: {min: 14, max: .85, maxPx: 92, giro: 2.2},                               // [AJUSTE] en la boca: tamaño al empezar (px) · al estar listo (× alto del Pokémon, como mucho maxPx) · lo que gira
   img: {}
 };
 CARGA.tipos.forEach(t => { const i = new Image(), o = CARGA.img[t] = {i, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / 6; o.fh = i.height; }; i.src = 'assets/objetos/cargas/carga_' + t + '.png?v=2'; });

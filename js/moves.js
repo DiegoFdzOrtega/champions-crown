@@ -40,6 +40,8 @@ const EXTRA_MOVES = {
   'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3],
   'A Bocajarro':['lucha',4],                                        // nuevo (16-11-2026): embestida y ráfaga de golpes (BOCA en js/combat.js)
   'Drenadoras':['planta',3],
+  'Aerochorro':['volador',4],
+  'Pantalla de Luz':['psiquico',3], 'Golpe Aéreo':['volador',1],          // nuevos (19-11-2026): dibujos en js/ataquesgemini.js                                        // nuevo (19-11-2026): ataque propio de Lugia, rayo de aire (dibujo en js/ataquesgemini.js)
   'Patada Baja':['lucha',1], 'Hierba Lazo':['planta',2], 'Golpe Calor':['fuego',1], 'Cuerpo Pesado':['acero',1], 'Giro Fuego':['fuego',2]   // de peso (js/pesos.js): solo con MT                                         // nuevo (16-11-2026): estado «drenado» (js/status.js), dibujos en js/fxnuevos.js
 };
 // Nombre -> {t: tipo, s: hueco}
@@ -55,6 +57,9 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
 const PUNCHES = new Set(['Vendaval', 'Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
 // Ataque propio de un Pokémon concreto: {nº Pokédex: {hueco: ataque}}. Greninja (siniestro) lleva el Shuriken de Agua, que es de agua.
 const SIGNATURE = {658: {2:'Shuriken de Agua'},
+  249: {4:'Aerochorro'},
+  380: {3:'Pantalla de Luz'}, 381: {3:'Pantalla de Luz'},           // Latias y Latios traen Pantalla de Luz
+  276: {1:'Golpe Aéreo'}, 277: {1:'Golpe Aéreo'},                   // Taillow y Swellow traen Golpe Aéreo                                            // Lugia trae Aerochorro (su ataque propio)
   1: {3:'Drenadoras'}, 2: {3:'Drenadoras'},                         // Bulbasaur e Ivysaur traen Drenadoras de serie (en vez de Desarrollo)
   56: {4:'A Bocajarro'}, 57: {4:'A Bocajarro'}, 66: {4:'A Bocajarro'}, 67: {4:'A Bocajarro'}, 68: {4:'A Bocajarro'}, 106: {4:'A Bocajarro'}, 107: {4:'A Bocajarro'},      // Mankey / Primeape, Machop / Machoke / Machamp, Hitmonlee y Hitmonchan traen A Bocajarro (en vez de Onda Certera)
   16: {1:'Vuelo'}, 17: {1:'Vuelo'}, 18: {1:'Vuelo'},                 // Pidgey, Pidgeotto y Pidgeot traen Vuelo (en vez de Ataque Ala)
@@ -70,4 +75,5 @@ DEX.forEach(m => {
   const t1 = m.types[0], t2 = m.types[1] || t1, pick = (t, s, k) => { const l = MOVESET[t][s].filter(n => !PUNCHES.has(n) || learnHas(n, m.dex)); return l[(m.dex + k) % l.length]; };
   m.mv = [pick(t1, 1, 0), pick(t2, 2, 1), pick(t1, 3, 0), pick(t1, 4, 2)];
   Object.entries(SIGNATURE[m.dex] || {}).forEach(([s, n]) => m.mv[s - 1] = n);
+  if(m.mv[3] === 'Aerochorro') m.mt = [m.types[0], m.types[1] || m.types[0], 'volador'];      // Aerochorro es de tipo volador (el hueco 4 si no usaría el primer tipo del Pokémon)
 });
