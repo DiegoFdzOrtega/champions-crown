@@ -527,7 +527,7 @@ const SHOT_KINDS = {
   veloz:   {n:'Veloz',   speed:900, r:6,  dmg:.95},                                // [AJUSTE] muy rápido y fino: casi no da tiempo a esquivarlo
   pesado:  {n:'Pesado',  speed:440, r:15, dmg:1.3, pw:1.5, pd:2},                                // [AJUSTE] lento, grande y fuerte
   chorro:  {n:'Chorro',  speed:520, r:7,  dmg:.15, burst:9, gap:.065, spread:.07, vary:.12, pw:.35, pd:.34, kb:.16},      // [AJUSTE] una RISTRA: burst proyectiles seguidos, uno cada gap segundos (1,35 de daño si entran todos) · spread = cuánto se abren · vary = cuánto cambia la velocidad de uno a otro · kb = empujón de cada uno
-  llama:   {n:'Llama',   speed:480, r:8,  dmg:.1,  burst:16, gap:.055, spread:.09, vary:.1, pw:.3, pd:.25, kb:.1, range:250, jet:1}      // [AJUSTE] CHORRO SOSTENIDO (Lanzallamas): 16 llamas seguidas durante 0,9 s que salen de donde estés y hacia donde apuntes en cada momento (1,6 de daño si entran todas) · range = hasta dónde llega (px) · jet = se dibuja como chorro (js/fxnuevos.js)
+  llama:   {n:'Llama',   speed:480, r:8,  dmg:.1,  burst:16, gap:.055, spread:.09, vary:.1, pw:.3, pd:.25, kb:.1, range:460, jet:1}      // [AJUSTE] CHORRO SOSTENIDO (Lanzallamas): 16 llamas seguidas durante 0,9 s que salen de donde estés y hacia donde apuntes en cada momento (1,6 de daño si entran todas) · range = hasta dónde llega (px) · jet = se dibuja como chorro (js/fxnuevos.js)
 };
 const SHOT_MOVE = {'Rayo Burbuja':'chorro', 'Lanzallamas':'llama'};                                           // ataques con una forma propia, sea cual sea su tipo
 const MELEE_BY = {lucha:'estocada', bicho:'estocada', volador:'estocada', veneno:'estocada', acero:'estocada', hielo:'estocada', electrico:'estocada',

@@ -2218,7 +2218,7 @@ body:has(#main:not(.hide)) .toast{left:3rem;right:auto;bottom:5.6rem;transform:n
 #rankv:not(.hide){display:flex}
 #rankv{font:700 clamp(9px,1.4vh,16px)/1.4 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#e6ecfb;text-align:left;overflow:hidden}
 .rk{position:relative;width:100%;height:100%;display:grid;grid-template-columns:minmax(15em,21em) minmax(0,1fr) minmax(16em,22em);grid-template-rows:auto minmax(0,1fr);gap:.8em 1em;padding:.8em 1.1em 1em;
-  background:linear-gradient(90deg,rgba(4,8,20,.55),rgba(4,8,20,0) 22%,rgba(4,8,20,0) 78%,rgba(4,8,20,.55)),url(../assets/fondos/clasificatoria.webp) var(--bgp,center)/var(--bgs,cover) no-repeat,#070c1f}
+  background:linear-gradient(90deg,rgba(4,8,20,.55),rgba(4,8,20,0) 22%,rgba(4,8,20,0) 78%,rgba(4,8,20,.55)),url(../assets/fondos/clasificatoria.webp?v=3) var(--bgp,center)/var(--bgs,cover) no-repeat,#070c1f}
 .rk-bg{display:none}
 .rk h1,.rk h2,.rk h3{margin:0;font-family:"Press Start 2P","Courier New",monospace;font-weight:normal}
 .rk button{margin:0;font:inherit;cursor:pointer}
@@ -4245,3 +4245,8 @@ html.phone #guiaM .gnav button{min-height:2.8em}
 .pz-keys h4{grid-column:1/-1;margin:0 0 .2rem;font-size:.65rem;color:#8fb3e8;font-weight:normal;letter-spacing:.08em;text-transform:uppercase}
 .pz-keys kbd{display:inline-block;margin-right:.4em;padding:.15em .4em;border-radius:.3em;background:#1d2a50;border:1px solid #3e64b0;border-bottom-width:2px;color:#fff;font-family:inherit;font-size:.95em}
 @media (max-width:900px){.pz-cols{grid-template-columns:1fr}}
+
+/* ---- Clasificatoria con 6 huecos (js/ranked.js, RK_BG.ped): los nombres más pequeños para que no se monten ---- */
+.rk-ped .plate{font-size:.72em;padding:.15em .55em;max-width:calc(var(--ped) * 1.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk-ped.empty span{font-size:.7em}
+.rk-ped:nth-child(4) canvas{animation-delay:-.5s}.rk-ped:nth-child(5) canvas{animation-delay:-1.5s}.rk-ped:nth-child(6) canvas{animation-delay:-2.5s}

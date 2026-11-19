@@ -136,20 +136,33 @@ const GRADAS = [[362, 102], [327, 100], [292, 98], [257, 96], [662, 102], [697, 
 //   edge (opcional, en vez de trap) = el borde del suelo con más puntos, para suelos que no son un trapecio: [[y, x izquierda, x derecha], ...] de arriba abajo.
 const EST_T = [225, 800, 135, 890], EST_C = [135, 170, 890, 445];
 const EST = {                                                       // imágenes 2048x1144 (WebP, ~250 KB); court medido sobre 1024x572 · solo los estadios nuevos
-  brock:    {src: 'assets/fondos/estadios/brock.webp',    w: 1024, h: 572, court: [40, 158, 945, 452], nuevo: true,
+  brock:    {src: 'assets/fondos/estadios/Kanto/brock.webp',    w: 1024, h: 572, court: [40, 158, 945, 452], nuevo: true,
              edge: [[158, 240, 800], [235, 100, 915], [340, 40, 945], [400, 130, 930], [452, 205, 845]]},      // el suelo entero, rodeando las rocas      // cueva de roca
-  misty:    {src: 'assets/fondos/estadios/misty.webp',    w: 1024, h: 572, court: [140, 175, 885, 458], trap: [220, 805, 140, 885], nuevo: true,       // piscina (imagen ajustada para que el campo mida igual que el de Brock)
+  misty:    {src: 'assets/fondos/estadios/Kanto/misty.webp',    w: 1024, h: 572, court: [140, 175, 885, 458], trap: [220, 805, 140, 885], nuevo: true,       // piscina (imagen ajustada para que el campo mida igual que el de Brock)
              gradas: [[318, 74], [292, 72], [266, 70], [244, 68], [706, 74], [732, 72], [758, 70], [780, 68]]},
-  lt_surge: {src: 'assets/fondos/estadios/surge.webp',    w: 1024, h: 572, court: [102, 170, 924, 445], trap: [150, 875, 102, 924], nuevo: true},      // gimnasio eléctrico (suelo dorado)
-  erika:    {src: 'assets/fondos/estadios/erika.webp',    w: 1024, h: 572, court: [150, 200, 880, 440], trap: [215, 825, 150, 880], nuevo: true},      // jardín
-  koga:     {src: 'assets/fondos/estadios/koga.webp',     w: 1024, h: 572, court: [135, 190, 890, 418], trap: [245, 780, 135, 890], nuevo: true},      // dojo ninja
-  sabrina:  {src: 'assets/fondos/estadios/sabrina.webp',  w: 1024, h: 572, court: [125, 195, 900, 440], trap: [235, 790, 125, 900], nuevo: true},      // azotea de neón
-  blaine:   {src: 'assets/fondos/estadios/blaine.webp',   w: 1024, h: 572, court: [35, 162, 975, 452], nuevo: true,
+  lt_surge: {src: 'assets/fondos/estadios/Kanto/surge.webp',    w: 1024, h: 572, court: [102, 170, 924, 445], trap: [150, 875, 102, 924], nuevo: true},      // gimnasio eléctrico (suelo dorado)
+  erika:    {src: 'assets/fondos/estadios/Kanto/erika.webp',    w: 1024, h: 572, court: [150, 200, 880, 440], trap: [215, 825, 150, 880], nuevo: true},      // jardín
+  koga:     {src: 'assets/fondos/estadios/Kanto/koga.webp',     w: 1024, h: 572, court: [135, 190, 890, 418], trap: [245, 780, 135, 890], nuevo: true},      // dojo ninja
+  sabrina:  {src: 'assets/fondos/estadios/Kanto/sabrina.webp',  w: 1024, h: 572, court: [125, 195, 900, 440], trap: [235, 790, 125, 900], nuevo: true},      // azotea de neón
+  blaine:   {src: 'assets/fondos/estadios/Kanto/blaine.webp',   w: 1024, h: 572, court: [35, 162, 975, 452], nuevo: true,
              edge: [[162, 250, 770], [228, 110, 925], [330, 35, 975], [362, 90, 940], [400, 185, 860], [452, 235, 800]]},      // el suelo entero, rodeando las rocas y las máquinas      // volcán de Isla Canela
-  giovanni: {src: 'assets/fondos/estadios/giovanni.webp', w: 1024, h: 572, court: [180, 193, 835, 412], trap: [262, 765, 180, 835], nuevo: true},       // gimnasio de Ciudad Verde (Team Rocket)
-  lorelei:  {src: 'assets/fondos/estadios/lorelei.webp',  w: 1024, h: 572, court: [102, 188, 935, 450], trap: [172, 852, 102, 935], nuevo: true}       // Alto Mando: sala de hielo
+  giovanni: {src: 'assets/fondos/estadios/Kanto/giovanni.webp', w: 1024, h: 572, court: [180, 193, 835, 412], trap: [262, 765, 180, 835], nuevo: true},       // gimnasio de Ciudad Verde (Team Rocket)
+  lorelei:  {src: 'assets/fondos/estadios/Kanto/lorelei.webp',  w: 1024, h: 572, court: [102, 188, 935, 450], trap: [172, 852, 102, 935], nuevo: true},      // Alto Mando: sala de hielo
+  bruno:    {src: 'assets/fondos/estadios/Kanto/bruno.webp',    w: 1024, h: 572, court: [85, 190, 940, 450], trap: [175, 840, 85, 940], nuevo: true},       // Alto Mando: sala de lucha
+  agatha:   {src: 'assets/fondos/estadios/Kanto/agatha.webp',   w: 1024, h: 572, court: [85, 190, 940, 455], trap: [160, 860, 85, 940], nuevo: true},       // Alto Mando: sala fantasma
+  azul:     {src: 'assets/fondos/estadios/Kanto/azul.webp',     w: 1024, h: 572, court: [70, 205, 955, 455], trap: [150, 875, 70, 955], nuevo: true, anim: 'azul'},   // Campeón: paneles de luz que se mueven (estAzulFx)
+  lance:    {src: 'assets/fondos/estadios/Kanto/lance.webp',    w: 1024, h: 572, court: [95, 195, 930, 445], trap: [210, 815, 95, 930], nuevo: true},      // Alto Mando: sala dorada del dragón
+  // ---- Johto (los campos son las líneas blancas pintadas en cada imagen) ----
+  pegaso:   {src: 'assets/fondos/estadios/Johto/pegaso.webp', w: 1024, h: 572, court: [140, 197, 882, 393], trap: [232, 800, 140, 882], nuevo: true},      // Ciudad Malva: torre de madera al aire libre
+  anton:    {src: 'assets/fondos/estadios/Johto/anton.webp', w: 1024, h: 572, court: [110, 208, 924, 427], trap: [198, 828, 110, 924], nuevo: true},      // Azalea: invernadero del bosque
+  blanca:   {src: 'assets/fondos/estadios/Johto/blanca.webp', w: 1024, h: 572, court: [100, 208, 927, 429], trap: [198, 826, 100, 927], nuevo: true},      // Ciudad Trigal: gimnasio rosa
+  morti:    {src: 'assets/fondos/estadios/Johto/morti.webp', w: 1024, h: 572, court: [100, 208, 926, 428], trap: [200, 828, 100, 926], nuevo: true},      // Ciudad Iris: templo encantado
+  anibal:   {src: 'assets/fondos/estadios/Johto/anibal.webp', w: 1024, h: 572, court: [97, 208, 928, 430], trap: [198, 826, 97, 928], nuevo: true},      // Ciudad Orquídea: dojo con cascada
+  yasmina:  {src: 'assets/fondos/estadios/Johto/yasmina.webp', w: 1024, h: 572, court: [97, 208, 929, 430], trap: [198, 830, 97, 929], nuevo: true},      // Ciudad Olivo: gimnasio de acero
+  fredo:    {src: 'assets/fondos/estadios/Johto/fredo.webp', w: 1024, h: 572, court: [100, 208, 926, 431], trap: [192, 830, 100, 926], nuevo: true},      // Pueblo Caoba: palacio de hielo
+  debora:   {src: 'assets/fondos/estadios/Johto/debora.webp', w: 1024, h: 572, court: [96, 209, 928, 430], trap: [200, 828, 96, 928], nuevo: true}      // Ciudad Endrino: templo del dragón en el volcán
 };
-function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=15'; } }
+function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=18'; } }
 Object.values(EST).forEach(estLoad);                                // se cargan al abrir el juego: al entrar al combate ya están listas
 const estEnt = () => (g && g.o && EST[g.o.leader]) || null;          // el estadio de este combate (aunque su imagen aún no haya cargado)
 function estOf(){ const E = estEnt(); if(!E) return null; estLoad(E); return E.ok ? E : null; }
@@ -188,6 +201,31 @@ function estTrapX(y){                                                // → [x i
 const EST_M = 40;                                                    // [AJUSTE] margen por dentro del borde (lo mismo que bx0 / bx1 en js/combat.js)
 function estTrap(f){ if(!f) return; const X = estTrapX(f.y); if(!X) return; f.x = Math.max(X[0] + EST_M, Math.min(X[1] - EST_M, f.x)); }
 if(typeof update === 'function'){ const o = update; update = function(){ const r = o.apply(this, arguments); try{ if(g && !g.pvp){ g.p.concat(g.e).forEach(f => { if(f && !f.dead) estTrap(f); }); } }catch(e){} return r; }; }
+// ---- SALA DEL CAMPEÓN (Azul): los paneles de rayas azules tienen un brillo que los recorre, como en el juego original ----
+//   Cada panel es un cuadrilátero (4 esquinas sobre 1024x572); v: 1 = el brillo baja (paneles de los lados), 0 = va de lado (paneles del fondo).
+const AZUL_PANELS = (() => {
+  const L = [[[14, 155], [39, 120], [39, 295], [14, 320]], [[56, 92], [80, 65], [80, 202], [56, 217]], [[93, 41], [115, 19], [115, 155], [93, 180]]];
+  const side = L.map(q => ({q, v: 1})).concat(L.map(q => ({q: q.map(([x, y]) => [1024 - x, y]), v: 1})));
+  const back = [];
+  [[403, 468], [553, 619]].forEach(([x0, x1], s) => [[4, 17], [22, 35], [40, 53]].forEach(([y0, y1], r) => back.push({q: [[x0, y0], [x1, y0], [x1, y1], [x0, y1]], v: 0, rev: s === 0})));
+  return side.concat(back);
+})();
+const AZUL_FX = {vel: .55, ancho: .22, a: .8};                        // [AJUSTE] velocidad del brillo · ancho de la banda (0-1) · intensidad
+function estAzulFx(E){
+  const sx = W / E.w, sy = H / E.h, t = g ? g.t : performance.now() / 1000, F = AZUL_FX;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  AZUL_PANELS.forEach((P, i) => {
+    const q = P.q.map(([x, y]) => [x * sx, y * sy]), mid = (p, r) => [(p[0] + r[0]) / 2, (p[1] + r[1]) / 2];
+    let a = P.v ? mid(q[0], q[1]) : mid(q[0], q[3]), b = P.v ? mid(q[3], q[2]) : mid(q[1], q[2]); if(P.rev){ const c = a; a = b; b = c; }
+    const k = ((t * F.vel + (i % 6) * .17) % 1.5) - .25, cl = v => Math.max(0, Math.min(1, v));
+    const gr = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+    gr.addColorStop(cl(k - F.ancho), 'rgba(120,230,255,0)'); gr.addColorStop(cl(k), `rgba(170,245,255,${F.a})`); gr.addColorStop(cl(k + F.ancho), 'rgba(120,230,255,0)');
+    ctx.save(); ctx.beginPath(); q.forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath(); ctx.clip();
+    ctx.fillStyle = gr; const xs = q.map(p => p[0]), ys = q.map(p => p[1]);
+    ctx.fillRect(Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); ctx.restore();
+  });
+  ctx.restore();
+}
 function estDraw(E){                                                // la imagen llena la pantalla; arriba se oscurece un poco para que se lea el marcador
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.drawImage(E.img, 0, 0, W, H);
   const top = ctx.createLinearGradient(0, 0, 0, 150); top.addColorStop(0, 'rgba(3,4,10,.5)'); top.addColorStop(1, 'rgba(3,4,10,0)'); ctx.fillStyle = top; ctx.fillRect(0, 0, W, 150);
@@ -201,13 +239,13 @@ function farBox(){                                                  // las líne
 // Tu personaje es el del perfil (save.gender, js/vspanel.js): chico, chica, los de logros y los de la Invocación. Si no hay dibujo pequeño del tuyo, sale Red (o Leaf si elegiste la chica).
 const MINI = {ok: false, s: 2, x: 16, cols: 24,                     // [AJUSTE] tamaño en pantalla (x2) · a cuántos píxeles por DENTRO de la línea se ponen · columnas de la imagen
   names: ['red', 'leaf', 'blue', 'lucas', 'may', 'n', 'lance', 'brendan', 'ethan', 'aaron', 'acerola', 'acetrainer', 'acetrainerf', 'acetrainersnow', 'anabel', 'aquagrunt', 'aquagruntf', 'archer', 'archie', 'ariana', 'artist', 'barry', 'battlegirl', 'beauty', 'bede', 'bertha', 'birch', 'blackbelt', 'blaine', 'brandon', 'brawly', 'brock', 'bugcatcher', 'bugsy', 'byron', 'cameraman', 'camper', 'candice', 'charon', 'cheryl', 'chuck', 'clair', 'clay', 'clerk', 'colress', 'cook', 'cowgirl', 'crasherwake', 'cueball', 'cynthia', 'cyrus', 'daisy', 'dawn', 'dragontamer', 'drake', 'drayden', 'elesa', 'elm', 'erika', 'expert', 'expertf', 'falkner', 'fantina', 'fisherman', 'flannery', 'galacticgrunt', 'galacticgruntf', 'gamer', 'gardenia', 'gentleman', 'ghetsis', 'giovanni', 'glacia', 'greta', 'hexmaniac', 'hiker', 'iris', 'janine', 'jasmine', 'juan', 'jupiter', 'karen', 'kiawe', 'koga', 'korrina', 'lady', 'larry', 'lass', 'liza', 'ltsurge', 'lucian', 'lucy', 'magmagrunt', 'magmagruntf', 'marley', 'mars', 'maxie', 'maylene', 'mina', 'mira', 'misty', 'mom', 'morty', 'nessa', 'ninjaboy', 'noland', 'norman', 'nurse', 'oak', 'painter', 'palmer', 'parasollady', 'petrel', 'phoebe', 'picnicker', 'plasmagrunt', 'plasmagruntf', 'pokefan', 'pokefanf', 'pokekid', 'pokemaniac', 'proton', 'pryce', 'psychic', 'psychicf', 'rancher', 'reporter', 'richboy', 'roark', 'rocker', 'rocketgrunt', 'rocketgruntf', 'roughneck', 'rowan', 'roxanne', 'roxie', 'ruinmaniac', 'sabrina', 'sage', 'sailor', 'saturn', 'schoolkid', 'scientist', 'scott', 'shadowtriad', 'sidney', 'silver', 'skier', 'skierf', 'skyla', 'spenser', 'steven', 'supernerd', 'tate', 'tucker', 'veteran', 'volkner', 'waiter', 'waitress', 'wallace', 'wally', 'wattson', 'whitney', 'will', 'winona', 'worker', 'youngster', 'zinzolin']};      // orden en la imagen: es el nombre del personaje como en la Invocación (js/invdata.js), sin lo que va detrás del guion
-const MINI_ALIAS = {m: 'red', r: 'red', f: 'leaf', maya: 'may', lt_surge: 'ltsurge', azul: 'blue', gold: 'ethan'};      // nombres del juego que en la imagen se llaman de otra forma
+const MINI_ALIAS = {m: 'red', r: 'red', f: 'leaf', maya: 'may', lt_surge: 'ltsurge', azul: 'blue', gold: 'ethan', pegaso: 'falkner', anton: 'bugsy', blanca: 'whitney', morti: 'morty', anibal: 'chuck', yasmina: 'jasmine', fredo: 'pryce', debora: 'clair'};      // nombres del juego que en la imagen se llaman de otra forma
 function miniIdx(id){                                               // código de personaje (perfil, Invocación o id de líder) → su casilla en la imagen (-1 si no hay dibujo)
   id = String(id || ''); if(id.startsWith('i:')) id = id.slice(2);
   id = MINI_ALIAS[id] || id; const k = id.split('-')[0]; return MINI.names.indexOf(MINI_ALIAS[k] || k);
 }
 { const i = new Image(); i.onload = () => { MINI.ok = true; }; i.src = 'assets/entrenadores_mini/todos.png?v=1'; MINI.img = i; }
-const miniOn = () => { const F = g && g.o && !g.pvp && g.o.floor && typeof FLOORS !== 'undefined' ? FLOORS[g.o.n] : null; return !!(F && F.id === g.o.leader && F.region === 'Kanto'); };      // ¿es un combate de la Historia de Kanto?
+const miniOn = () => { const F = g && g.o && !g.pvp && g.o.floor && typeof FLOORS !== 'undefined' ? FLOORS[g.o.n] : null; return !!(F && F.id === g.o.leader && (F.region === 'Kanto' || (F.region === 'Johto' && typeof EST !== 'undefined' && EST[F.id]))); };      // ¿es un combate de la Historia de Kanto, o de un líder de Johto con su estadio nuevo?
 function campoLineas(){                                             // la zona de fuera se oscurece un poco y el campo lleva sus líneas bien marcadas: borde oscuro, línea central y círculo
   const B = farBox(), cx = W / 2, cy = (B.y0 + B.y1) / 2, w = B.x1 - B.x0, big = 2000;
   ctx.save();
@@ -620,7 +658,7 @@ function draw(){
   const FARV = !PRV && farOn();                    // cámara lejana (Historia de Kanto): el campo se dibuja más pequeño
   if(g.zk > .01 && g.zoomAt && !PRV){ const z = 1 + FEEL.zoom * g.zk, zp = FARV ? farW2S(g.zoomAt.x, g.zoomAt.y) : [g.zoomAt.x, g.zoomAt.y]; ctx.translate(zp[0], zp[1]); ctx.scale(z, z); ctx.translate(-zp[0], -zp[1]); }
   if(PRV){ W = PR.SW; prBack(); W = WW; prCam(); }   // estadio de fondo y «cámara» que coloca el campo sobre su suelo
-  else if(FARV && estEnt()){ const E = estOf(); if(E){ estDraw(E); estFans(E); } else { ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H); } }      // estadio con imagen propia (mientras carga: fondo oscuro, nunca el estadio antiguo)
+  else if(FARV && estEnt()){ const E = estOf(); if(E){ estDraw(E); if(E.anim === 'azul') estAzulFx(E); if(typeof estVida === 'function') estVida(E, g.o.leader); estFans(E); } else { ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H); } }      // estadio con imagen propia (mientras carga: fondo oscuro, nunca el estadio antiguo)
   else arena();
   if(FARV){ ctx.translate(W / 2, FAR.cy); ctx.scale(FAR.z, FAR.z); ctx.translate(-W / 2, -FAR.cy); }      // a partir de aquí todo el campo va reducido
   if(FARV){ if(!estEnt()){ campoLineas(); campoDeco(); } miniDraw(); }      // líneas del campo, decoración de fuera y los dos entrenadores      // Historia de Kanto: líneas del campo y los dos entrenadores

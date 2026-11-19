@@ -10,7 +10,7 @@
      quién llegó antes y se emparejan de dos en dos (1º con 2º, 3º con 4º...). El primero de cada pareja (host) manda «found» al otro; este contesta «ok»
      y los dos salen de la cola y empiezan el combate online de siempre (js/pvp.js) con match.ranked = true. Si el otro no contesta en 6 s, se vuelve a intentar.
      Solo se emparejan jugadores con la misma versión del combate (PVP_VER).
-   - Pantalla #rankv sobre la ilustración assets/fondos/clasificatoria.webp (sala de combate con 3 pedestales y una consola): tus Pokémon van sobre los pedestales
+   - Pantalla #rankv sobre la ilustración assets/fondos/clasificatoria.webp (sala de combate con una consola de 6 huecos): tus Pokémon van sobre los pedestales
      y el botón BUSCAR CONTRINCANTE sobre la consola (rkFit los coloca según dónde quede la imagen, RK_BG). Izquierda: tu rango y estadísticas.
      Derecha: escalera de rangos y tabla de los mejores. Abajo: Hitos de Temporada (RK_HITOS: premios al ganar 5, 10 y 20 combates).
      Al buscar sale el radar y al encontrar rival el cartel VS, en un panel de cristal en el centro.
@@ -36,7 +36,8 @@ const rkMMSS = ms => { const s = Math.floor(ms / 1000); return String(Math.floor
 const rkEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 
 // ---- Fondo de la sala (assets/fondos/clasificatoria.webp) y sitios de la imagen donde se colocan las cosas (fracciones del ancho y del alto de la imagen) ----
-const RK_BG = {w:3200, h:1519, ped:[[.395, .5], [.505, .479], [.615, .5]], pedW:.107, ring:[.51, .589], con:[.5075, .714, .415, .079], hit:[.5, .9]};
+const RK_BG = {w:3200, h:1519, ped:[[.3575, .545], [.409, .495], [.4745, .47], [.547, .47], [.6125, .495], [.6625, .545]], pedW:.072,      // 6 huecos de la consola (de izquierda a derecha)
+   ring:[.51, .589], con:[.5075, .714, .415, .079], hit:[.5, .9]};
 const RK_HITOS = [{n:5, bp:1000, t:'1000 BP'}, {n:10, tk:10, t:'10 tickets'}, {n:20, tl:3, t:'3 tickets legendarios'}];     // Hitos de Temporada: premios al ganar 5, 10 y 20 combates (una vez)
 const RK_ICON = {                                                                                                              // iconitos (SVG) de las estadísticas
   w:'<svg viewBox="0 0 24 24"><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z" fill="currentColor"/></svg>',
@@ -111,12 +112,13 @@ function rkCanPlay(){
   if(team.length !== TEAM_SIZE) return ['team', `Necesitas un equipo de ${TEAM_SIZE} Pokémon.`];
   return null;
 }
-// El escenario: tus 3 Pokémon sobre los pedestales, el selector de equipo junto al aro central, el botón grande en la consola y los Hitos de Temporada
+// El escenario: tus 6 Pokémon sobre los huecos de la consola, el selector de equipo junto al aro central, el botón grande en la consola y los Hitos de Temporada
 function rkRenderStage(){
   const st = $('rkStage'), idle = rk.phase === 'idle', bad = rkCanPlay(), r = rkData();
   st.classList.toggle('dim', !idle);
-  const order = [1, 0, 2];                                                                                  // el nº 1 (líder) va en el pedestal del centro
-  st.innerHTML = order.map((ti, pi) => { const d = team[ti];
+  const RK_SLOT = [4, 2, 0, 1, 3, 5];                                                                      // qué Pokémon del equipo va en cada hueco (de izquierda a derecha): el nº 1 (líder) y el nº 2 en los dos del centro
+  const RK_DRAW = [2, 3, 1, 4, 0, 5];                                                                      // orden de dibujo: primero los del fondo, para que los de delante queden encima
+  st.innerHTML = RK_DRAW.map(pi => { const ti = RK_SLOT[pi], d = team[ti];
       if(!d) return `<div class="rk-ped empty" data-at="ped:${pi}"><span>Hueco ${ti + 1}</span></div>`;
       const m = mon(d); return `<div class="rk-ped${ti === 0 ? ' lead' : ''}" data-at="ped:${pi}" style="--c1:${TC[m.types[0]]}"><canvas width="200" height="200" data-d="${d}"></canvas><b class="plate">${rkEsc(m.name)}</b></div>`; }).join('') +
     (idle ? `<div class="rk-ringrow" data-at="ring:0"><div class="half l"><button class="rk-link" data-act="team">Equipo Pokémon <i>▾</i></button></div><i class="rk-ring" style="--p:${Math.round((rkNext(r.pts) ? (r.pts - rkTier(r.pts).min) / (rkNext(r.pts).min - rkTier(r.pts).min) : 1) * 100)}" title="Progreso hacia el siguiente rango"><i></i></i><div class="half r"><label class="rk-link gold">Equipo <select id="rkTeamSel"></select></label></div></div>
