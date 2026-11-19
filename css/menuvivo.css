@@ -1,0 +1,114 @@
+/* ===================== MENÚ PRINCIPAL CON VIDA (js/menuvivo.js) =====================
+   La escena animada va detrás, y los paneles del menú (js/mainmenu.js) toman el estilo de la imagen: azul noche, borde dorado y sombra. */
+#menvC{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;display:none}
+#main.mvivo{background:transparent}
+#main.mvivo::before,#main.mvivo::after{display:none}
+#main.mvivo #mm2{--oro:#e0ae45;--oro2:#ffe08a;--pn:linear-gradient(180deg,rgba(31,46,104,.94),rgba(14,22,58,.94));--bd:0 0 0 2px #0a1030,inset 0 0 0 2px #0a1030,inset 0 2px 0 3px rgba(255,255,255,.06),0 6px 16px rgba(0,0,0,.45)}
+/* paneles */
+#main.mvivo .m2-me,#main.mvivo .m2-ic button,#main.mvivo .m2-cur > span,#main.mvivo .m2-hero,#main.mvivo .m2-t,#main.mvivo .m2-news,#main.mvivo .m2-link{
+  background:var(--pn);border:3px solid var(--oro);border-radius:8px;box-shadow:var(--bd)}
+#main.mvivo .m2-hero{background:linear-gradient(90deg,rgba(14,22,58,.55),rgba(14,22,58,.96) 42%),var(--map) center/cover;border-width:3px}
+#main.mvivo .m2-hero.tw{background:linear-gradient(90deg,rgba(60,26,6,.75),rgba(14,22,58,.96) 55%)}
+#main.mvivo .m2-ic button{color:#ffe7a8;width:46px;height:46px}
+#main.mvivo .m2-ic button:hover,#main.mvivo .m2-t:hover,#main.mvivo .m2-news:hover,#main.mvivo .m2-link:hover,#main.mvivo .m2-me:hover{border-color:var(--oro2);box-shadow:var(--bd),0 0 18px rgba(255,214,110,.45)}
+#main.mvivo .m2-cur > span{box-shadow:var(--bd);padding:8px 14px}
+#main.mvivo .m2-me img.av{border:3px solid var(--oro);border-radius:6px}
+/* textos */
+#main.mvivo .m2-me b,#main.mvivo .m2-t b,#main.mvivo .m2-hero h2,#main.mvivo .m2-cur > span > span{color:#fff;text-shadow:2px 2px 0 #000}
+#main.mvivo .m2-t b{font-size:13px}
+#main.mvivo .m2-hero .k,#main.mvivo .m2-sec{color:var(--oro2);text-shadow:1px 1px 0 #000}
+#main.mvivo .m2-sec{font-size:9px}
+#main.mvivo .m2-hero h2::before{content:'\265B  ';color:var(--oro2)}
+#main.mvivo .m2-t small,#main.mvivo .m2-hero p{color:#d6def5}
+#main.mvivo .m2-t .st{color:var(--oro2)}
+#main.mvivo .m2-t.lock .st{color:#ffb070}
+#main.mvivo .m2-t .pb,#main.mvivo .m2-hero .bar{background:#0a1030;border:1px solid #2c3a78}
+#main.mvivo .m2-t .pb i,#main.mvivo .m2-hero .bar i{background:linear-gradient(90deg,#ffcc33,#ffe680)}
+/* botón de combatir: el botón dorado grande */
+#main.mvivo .m2-go{padding:13px 26px;font-size:13px;border-radius:8px;background:linear-gradient(180deg,#ffe878,#ffc21a 55%,#f0a000);border:3px solid #fff3b0;color:#2a1a00;
+  box-shadow:0 0 0 2px #6b4a00,0 4px 0 2px #6b4a00,0 0 22px rgba(255,204,51,.5)}
+#main.mvivo .m2-go::before{content:'\25B6  '}
+#main.mvivo .m2-go:hover{filter:brightness(1.08);transform:translateY(-1px)}
+/* colección: como la barra de abajo de la imagen (icono grande arriba y el nombre debajo) */
+#main.mvivo .m2-col .m2-t{align-items:center;text-align:center;padding:8px 8px 9px;gap:4px}
+#main.mvivo .m2-col .m2-t .h{flex-direction:column;gap:4px}
+#main.mvivo .m2-col .m2-t img.hd{width:44px;height:44px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.5))}
+#main.mvivo .m2-col .m2-t b{font-size:11px}
+#main.mvivo .m2-col .m2-t .st{margin-top:0}
+#main.mvivo .m2-col .m2-t .pb{width:80%}
+/* noticias */
+#main.mvivo .m2-news .h{color:var(--oro2);font-size:10px}
+#main.mvivo .m2-news .h > span::before{content:'\1F4E3  '}
+#main.mvivo .m2-foot{color:#c9d3f0;text-shadow:1px 1px 0 #000}
+#main.mvivo .m2-col .m2-t img.hd{width:36px;height:36px}
+#main.mvivo .m2-col .m2-t{padding:6px 6px 7px;gap:2px}
+@media (max-height:760px){
+  #main.mvivo .m2-col .m2-t img.hd{width:30px;height:30px}
+  #main.mvivo .m2-col .m2-t b{font-size:10px}
+  #main.mvivo .m2-t{min-height:58px}
+  #main.mvivo .m2-hero{padding:8px 14px}
+  #main.mvivo .m2-go{padding:10px 20px}
+}
+#main.mvivo .m2-brand p{color:#ffe7a8;text-shadow:1px 1px 0 #000,0 0 6px #000}
+
+/* ===================== BOTONES COMO LOS DE LA IMAGEN ===================== */
+/* marco dorado doble: borde dorado, línea oscura por dentro y un filo dorado fino; rombos dorados en los lados */
+#main.mvivo .m2-t,#main.mvivo .m2-hero,#main.mvivo .m2-me,#main.mvivo .m2-news{
+  border:3px solid #d9a23c;border-radius:6px;
+  box-shadow:0 0 0 2px #2a1a05,inset 0 0 0 2px #0b1236,inset 0 0 0 3px rgba(255,214,120,.35),0 6px 14px rgba(0,0,0,.5)}
+#main.mvivo .m2-sec{display:none}
+/* --- cuadros de JUGAR: icono grande a la izquierda, título, texto de dos líneas y flechas doradas abajo --- */
+#main.mvivo .m2-play{gap:10px}
+#main.mvivo .m2-play .m2-t{display:grid;grid-template-columns:62px 1fr;grid-auto-rows:min-content;column-gap:10px;row-gap:5px;align-content:center;
+  padding:12px 14px 20px 12px;min-height:96px;background:linear-gradient(180deg,rgba(28,42,98,.95),rgba(12,20,56,.95))}
+#main.mvivo .m2-play .m2-t .h{display:contents}
+#main.mvivo .m2-play .m2-t .h img{grid-column:1;grid-row:1 / span 3;width:58px;height:58px;align-self:center;object-fit:contain;filter:drop-shadow(0 3px 0 rgba(0,0,0,.55))}
+#main.mvivo .m2-play .m2-t > *:not(.h):not(.big){grid-column:2}
+#main.mvivo .m2-play .m2-t b{grid-column:2;font-size:13px;align-self:end}
+#main.mvivo .m2-play .m2-t small{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:8px;line-height:1.6;color:#dfe6fb}
+#main.mvivo .m2-play .m2-t .st{margin-top:0;font-size:8px}
+#main.mvivo .m2-play .m2-t .pb{width:90%;margin-top:0}
+#main.mvivo .m2-play .m2-t .big{right:12px;bottom:18px;width:40px;height:40px}
+#main.mvivo .m2-play .m2-t::before,#main.mvivo .m2-play .m2-t::after{content:'\203A';position:absolute;bottom:2px;font-size:16px;line-height:1;color:#ffcc33;text-shadow:1px 1px 0 #000}
+#main.mvivo .m2-play .m2-t::before{left:10px}
+#main.mvivo .m2-play .m2-t::after{right:10px}
+#main.mvivo .m2-play .m2-t:hover::after{transform:translateX(3px)}
+/* --- tarjeta del líder: barra de progreso en una píldora y el botón dorado grande a lo ancho --- */
+#main.mvivo .m2-hero{background:linear-gradient(90deg,rgba(14,22,58,.35),rgba(14,22,58,.97) 34%),var(--map) center/cover}
+#main.mvivo .m2-hero .bar{display:none}
+#main.mvivo .m2-hero .row{display:flex;flex-wrap:wrap;gap:8px}
+#main.mvivo .m2-hero .row small{order:-1;flex:1 1 100%;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:#0a1030;border:1px solid #2c3a78;color:#fff;font-size:9px}
+#main.mvivo .m2-hero .row small::before{content:'';width:14px;height:14px;border-radius:50%;flex:none;border:2px solid #111;
+  background:linear-gradient(180deg,#ff3b3b 0 45%,#111 45% 55%,#fff 55%)}
+#main.mvivo .m2-go{flex:1 1 auto;position:relative;padding:12px 26px;font-size:13px;letter-spacing:.04em;border-radius:4px;
+  background:linear-gradient(180deg,#fff19a,#ffd23a 45%,#f2a90c);border:3px solid #8a5b00;color:#2a1a00;
+  box-shadow:inset 0 0 0 2px #fff3b0,0 4px 0 #5e3d00,0 0 22px rgba(255,204,51,.45)}
+#main.mvivo .m2-go::after{content:'';position:absolute;right:-9px;top:50%;width:12px;height:12px;transform:translateY(-50%) rotate(45deg);background:#ffd23a;border:3px solid #8a5b00}
+#main.mvivo .m2-go{margin-left:6px!important;margin-right:6px!important}
+#main.mvivo .m2-hero .m2-link{flex:none}
+/* --- COLECCIÓN: la barra de abajo, icono grande que sobresale por arriba y el nombre con flecha --- */
+#main.mvivo .m2-col{position:relative;padding:22px 10px 8px;margin-top:4px;gap:8px;border-radius:8px;
+  background:linear-gradient(180deg,rgba(10,16,46,0),rgba(10,16,46,.75) 30%)}
+#main.mvivo .m2-col .m2-t{overflow:visible;justify-content:flex-end;min-height:62px;padding:30px 4px 7px;background:linear-gradient(180deg,rgba(28,42,98,.96),rgba(12,20,56,.96))}
+#main.mvivo .m2-col .m2-t .h{position:static}
+#main.mvivo .m2-col .m2-t img.hd{position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:50px;height:50px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.6))}
+#main.mvivo .m2-col .m2-t:hover img.hd{transform:translateX(-50%) translateY(-3px)}
+#main.mvivo .m2-col .m2-t b{font-size:11px}
+#main.mvivo .m2-col .m2-t b::after{content:' \203A';color:#ffcc33}
+#main.mvivo .m2-col .m2-t .st{font-size:7px;color:#c9d3f0}
+#main.mvivo .m2-col .m2-t .pb{display:none}
+@media (max-height:760px){
+  #main.mvivo .m2-play .m2-t{min-height:76px;grid-template-columns:48px 1fr;padding:9px 12px 17px 10px}
+  #main.mvivo .m2-play .m2-t .h img{width:44px;height:44px}
+  #main.mvivo .m2-play .m2-t small{-webkit-line-clamp:1}
+  #main.mvivo .m2-col{padding-top:18px}
+  #main.mvivo .m2-col .m2-t{padding-top:24px;min-height:54px}
+  #main.mvivo .m2-col .m2-t img.hd{width:40px;height:40px;top:-18px}
+  #main.mvivo .m2-hero .row small{padding:4px 10px}
+  #main.mvivo .m2-go{padding:9px 20px}
+}
+#main.mvivo .m2-col{grid-template-columns:repeat(5,minmax(0,1fr));padding-left:4px;padding-right:4px}
+#main.mvivo .m2-col .m2-t{min-width:0}
+#main.mvivo .m2-col .m2-t b{font-size:10px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip}
+#main.mvivo .m2-play .m2-t{min-width:0}
+#main.mvivo .m2-play .m2-t .st{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:6px}
