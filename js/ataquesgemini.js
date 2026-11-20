@@ -3,11 +3,7 @@
    ATAQUES CON DIBUJO DE GEMINI, MONTADOS A MANO (assets/objetos/ataques/)
    - Pulso Umbrío: un RAYO de oscuridad que sale de la boca y llega hasta donde va el ataque (pulso_umbrio.png, 5 figuras:
      crece, rayo entero, se deshace en humo al acabar).
-   - Brecha Negra (como Darkrai en el anime):
-       1) bajo el que lo lanza se abre una MANCHA de sombra (brecha_mancha.png, 6 figuras),
-       2) de ella salen TENTÁCULOS de sombra que avanzan ondulando hasta el rival (brecha_tentaculos.png, 9 figuras),
-       3) al alcanzarlo lo encierra una ESFERA negra con pinchos que luego revienta (brecha_esfera.png, 6 figuras);
-       al acabar, los tentáculos se recogen y la mancha se cierra.
+   - Brecha Negra (como Darkrai en el vídeo): mancha, brazos con mano, esfera, Z y rotura (piezas en ataques/brecha/, ver BN).
    - Aerochorro: rayo de aire con anillos (aerochorro.png, 6 figuras). Listo para cuando algún Pokémon tenga el ataque.
    Si una imagen no carga, se ve el dibujo de antes. AG.on = false lo quita todo.
    ===================================================================== */
@@ -20,7 +16,7 @@ const AG = {
   oscuro: .32,                                                                     // [AJUSTE] cuánto se oscurece el campo con Brecha Negra (0 = nada)
   img: {}
 };
-[['pulso', 'pulso_umbrio', 6], ['aero', 'aerochorro', 6], ['mancha', 'brecha_mancha', 6], ['tent', 'brecha_tentaculos', 6], ['esfera', 'brecha_esfera', 6], ['luz', 'pantalla_luz', 6], ['ga', 'golpe_aereo', 6]].forEach(([k, f, n]) => {
+[['pulso', 'pulso_umbrio', 6], ['aero', 'aerochorro', 6], ['luz', 'pantalla_luz', 6], ['ga', 'golpe_aereo', 6]].forEach(([k, f, n]) => {
   const i = new Image(), o = AG.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=2';
 });
 const agOk = k => AG.on && AG.img[k] && AG.img[k].ok;
@@ -59,60 +55,140 @@ function agBeamMove(name, k, cfg){
   delete FXR.trail[name];                                                          // sin la estela de chispas de antes: el rayo ya llega hasta el origen
 }
 
-// ---------------- Brecha Negra ----------------
-const AG_BRECHA = [], AG_POST = [];                                              // AG_POST: lo que se dibuja después del brillo                                                              // {f, s, t0, end, hx, hy}
-function agBrechaStart(f, s){ if(!agOk('mancha') || !agOk('tent')) return; AG_BRECHA.push({f, s, t0: g.t, end: 0, hx: s.x, hy: s.y}); }
-function agTentacles(x0, y0, x1, y1, T, alpha){
-  const S = AG.img.tent, L = Math.hypot(x1 - x0, y1 - y0), a = Math.atan2(y1 - y0, x1 - x0), tw = T * S.fw / S.fh;
-  if(L < 4) return; const fr = Math.floor(g.t * AG.brecha.fps) % S.n;
-  const pinta = sombra => { ctx.save(); ctx.imageSmoothingEnabled = false;
-    if(sombra){ ctx.globalAlpha = alpha * AG.sombra.a; ctx.filter = 'brightness(0)'; ctx.translate(x0, y0 + AG.sombra.drop * .7); ctx.scale(1, .55); } else { ctx.globalAlpha = alpha; ctx.translate(x0, y0); }
-    ctx.rotate(a); if(Math.cos(a) < 0) ctx.scale(1, -1); ctx.beginPath(); ctx.rect(0, -T, L, T * 2); ctx.clip();
-    for(let d = 0, i = 0; d < L; d += tw - 2, i++) agFrame(ctx, 'tent', (fr + i * 3) % S.n, d, -T / 2, tw, T);        // en trozos (no estirado), así no se deforman las ondas
-    ctx.restore(); };
-  pinta(true); pinta(false);
+// ---------------- Brecha Negra (piezas de Gemini en assets/objetos/ataques/brecha/bn_*.png) ----------------
+//  1) bajo Darkrai se abre la MANCHA   2) de ella salen dos BRAZOS de sombra con la MANO abierta en la punta
+//  3) al llegar, la mano se cierra y la ESFERA se cierra sobre el rival (se le ve dentro) y le salen las Z
+//  4) los brazos lo sujetan mientras duerme y el campo se oscurece   5) la esfera se rompe, los brazos se recogen y la mancha se cierra
+const BN = {
+  mancha: 150,                 // [AJUSTE] ancho de la mancha (px)
+  brazo: 78,                   // [AJUSTE] alto del dibujo del brazo (px; el antebrazo es ~80 % de esto)
+  mano: 1.0,                   // [AJUSTE] tamaño de la mano (× grosor del brazo)
+  esfera: 1.6, min: 86, max: 170,   // [AJUSTE] tamaño de la esfera (× alto del rival), mínimo y máximo (px)
+  dura: 2.4,                   // [AJUSTE] lo que dura atrapado (s)
+  flujo: 75,                   // [AJUSTE] lo rápido que corre la sombra por los brazos
+  onda: .10,                   // [AJUSTE] cuánto ondulan los brazos
+  curva: [.30, -.10],          // [AJUSTE] curva de cada brazo (+ = hacia arriba)
+  img: {}
+};
+[['mancha', 6], ['mano', 4], ['esfera', 13], ['zzz', 4]].forEach(([k, n]) => {
+  const i = new Image(), o = BN.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/brecha/bn_' + k + '.png?v=1';
+});
+function bnNegro(S){                                                            // copia en negro de la tira (para la sombra, sin ctx.filter, que es lento)
+  if(S.negro || !S.ok) return S.negro; const c = document.createElement('canvas'); c.width = S.i.width; c.height = S.i.height;
+  const x = c.getContext('2d'); x.drawImage(S.i, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height); return S.negro = c;
 }
+const bnOk = () => AG.on && ['mancha', 'mano', 'esfera'].every(k => BN.img[k].ok);
+const bnFr = (k, fr, x, y, w, h) => { const S = BN.img[k]; ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, x, y, w, h); };
+const bnD = b => Math.min(BN.max, Math.max(BN.min, (b.foot - b.top) * BN.esfera));
+const bnH = (i, j) => { const x = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return x - Math.floor(x); };     // "azar" fijo (no toca Math.random: no afecta al online)
+
+function bnCurve(x0, y0, x1, y1, bend){                     // curva del brazo (con su largo acumulado en cada punto)
+  const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1; let nx = -dy / L, ny = dx / L; if(ny > 0){ nx = -nx; ny = -ny; }
+  const cx = (x0 + x1) / 2 + nx * bend * L, cy = (y0 + y1) / 2 + ny * bend * L, P = []; let acc = 0, px = x0, py = y0;
+  for(let i = 0; i <= 40; i++){ const t = i / 40, u = 1 - t, x = u * u * x0 + 2 * u * t * cx + t * t * x1, y = u * u * y0 + 2 * u * t * cy + t * t * y1; acc += Math.hypot(x - px, y - py); P.push([x, y, acc]); px = x; py = y; }
+  return P;
+}
+function bnAt(P, s){
+  for(let i = 1; i < P.length; i++) if(P[i][2] >= s || i === P.length - 1){
+    const a = P[i - 1], b = P[i], k = b[2] > a[2] ? Math.max(0, Math.min(1, (s - a[2]) / (b[2] - a[2]))) : 0;
+    return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, Math.atan2(b[1] - a[1], b[0] - a[0])];
+  }
+}
+// Un brazo: el MISMO dibujo de la mano de Gemini (bn_mano.png). Su antebrazo se alarga a lo largo de la curva en rodajas finas
+// y en la punta va su mano tal cual, así brazo y mano son una sola pieza y no se nota ninguna unión.
+const BN_MANO = {desde: 18, muneca: 125, der: [265, 232, 246, 209]};               // columnas del dibujo: inicio del antebrazo, muñeca y fin de la mano en cada figura
+function bnArm(P, k, T, hand, alpha, sombra, seed, flip){
+  const L = P[P.length - 1][2] * k, M = BN.img.mano; if(L < 4 || !M.ok) return;
+  if(sombra){                                                                   // la sombra: una sola mancha lisa en el suelo (sin rodajas, así no salen rayas)
+    const up = [], dn = []; for(let s = 0; s <= L; s += 6){ const [x, y, a] = bnAt(P, s), r = T * .5 * Math.min(1, .6 + s / 100) * (s > L - 12 ? .6 : 1), nx = -Math.sin(a), ny = Math.cos(a); up.push([x + nx * r, y + ny * r]); dn.push([x - nx * r, y - ny * r]); }
+    ctx.save(); ctx.fillStyle = `rgba(10,0,20,${alpha.toFixed(3)})`; ctx.beginPath(); [...up, ...dn.reverse()].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); return;
+  }
+  const IMG = M.i, sc = T / M.fh, fr = hand < 0 ? 0 : hand, x0 = fr * M.fw, st = 3;
+  const de = BN_MANO.desde, mu = BN_MANO.muneca, der = BN_MANO.der[fr];
+  const hl = Math.min(L * .55, (der - mu) * sc), La = L - hl;                   // lo que mide la mano · lo que mide el antebrazo
+  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = alpha;
+  const onda = s => sombra ? 0 : Math.sin(s * .04 - g.t * 6 + seed) * T * BN.onda * Math.min(1, s / 50, Math.max(0, La - s) / 50);
+  for(let s = 0; s < La; s += st){
+    const [x, y, a] = bnAt(P, s), w = onda(s), nx = -Math.sin(a), ny = Math.cos(a);
+    const u = de + (mu - de) * s / La, sw = Math.max(1, (mu - de) * st / La), ta = Math.min(1, .6 + s / 100);    // más fino donde sale de la mancha
+    ctx.save(); ctx.translate(x + nx * w, y + ny * w); ctx.rotate(a); if(flip) ctx.scale(1, -1);
+    ctx.drawImage(IMG, x0 + u, 0, sw, M.fh, -.5, -T * ta / 2, st + (sombra ? .6 : 1.2), T * ta); ctx.restore();
+  }
+  const [x, y] = bnAt(P, La), [x2, y2] = bnAt(P, L), a = Math.atan2(y2 - y, x2 - x);      // la mano, pegada a su propio antebrazo
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a); if(flip) ctx.scale(1, -1);
+  ctx.drawImage(IMG, x0 + mu, 0, der - mu, M.fh, -.6, -T / 2, hl + .6, T); ctx.restore();
+  ctx.restore();
+}
+const BN_ROTURA = [];                                                            // esferas rompiéndose: {cx, foot, D, t0}
+function bnSphere(cx, foot, D, a, rompe){
+  const S = BN.img.esfera, h = D * S.fh / S.fw, y0 = foot + h * .06 - h;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  if(a < rompe){
+    const fr = a < .24 ? Math.floor(a / .08) : a < .54 ? 3 + Math.min(2, Math.floor((a - .24) / .1)) : 6 + Math.floor((a - .54) * 8) % 7;
+    const s = a < .24 ? 1.3 - .3 * a / .24 : 1;                                // el anillo se cierra sobre el rival
+    bnFr('esfera', fr, cx - D * s / 2, y0 + h * (1 - s), D * s, h * s);
+    const Z = BN.img.zzz;
+    if(Z.ok && a > .6){ const zw = D * .5, zh = zw * Z.fh / Z.fw; ctx.globalAlpha = Math.min(1, (a - .6) / .2, (rompe - a) / .2);
+      bnFr('zzz', Math.floor((a - .6) * 3.2) % 4, cx + D * .22, y0 - zh * .55, zw, zh); }
+  } else {                                                                     // se rompe en pedazos
+    const u = Math.min(1, (a - rompe) / .45), tt = u * .45, N = 4, fw = S.fw / N, fh = S.fh / N, pw = D / N, ph = h / N;
+    for(let i = 0; i < N; i++) for(let j = 0; j < N; j++){
+      const ox = (i + .5) / N - .5, oy = (j + .5) / N - .55, r = Math.hypot(ox, oy) || .1, v = 260 + bnH(i, j) * 180;
+      const x = cx + ox * D + ox / r * v * tt, y = y0 + (j + .5) * ph + oy / r * v * tt + 420 * tt * tt;
+      ctx.save(); ctx.globalAlpha = 1 - u; ctx.translate(x, y); ctx.rotate((bnH(j, i) - .5) * 7 * u);
+      ctx.drawImage(S.i, 12 * S.fw + i * fw, j * fh, fw, fh, -pw / 2, -ph / 2, pw, ph); ctx.restore();
+    }
+    ctx.globalAlpha = (1 - u) * .8; ctx.strokeStyle = '#b48cff'; ctx.lineWidth = 4 * (1 - u) + 1;    // el golpe de la rotura
+    ctx.beginPath(); ctx.ellipse(cx, y0 + h * .45, D * (.5 + u * .5), D * (.5 + u * .5), 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+const AG_BRECHA = [], AG_POST = [];                                              // AG_POST: lo que se dibuja después del brillo
+function agBrechaStart(f, s){ if(!bnOk()) return; AG_BRECHA.push({f, s, t0: g.t, end: 0, hx: s.x, hy: s.y, ends: null}); }
 function agBrechaDraw(suelo){
+  if(!suelo) for(let i = BN_ROTURA.length - 1; i >= 0; i--){ const R = BN_ROTURA[i], u = g.t - R.t0; if(u > .5 || u < 0){ BN_ROTURA.splice(i, 1); continue; } bnSphere(R.cx, R.foot, R.D, 1 + u, 1); }
   for(let i = AG_BRECHA.length - 1; i >= 0; i--){
     const B = AG_BRECHA[i], f = B.f, alive = g.shots.includes(B.s) && B.s.life > 0;
-    const agarra = B.T && !B.T.dead && g.t - B.hitT < AG.brecha.dura - .25;      // ha atrapado al rival: los brazos lo sujetan mientras dura la esfera
-    if(alive){ B.hx = B.s.x; B.hy = B.s.y; }
-    else if(agarra){ const b = typeof bodyOf === 'function' ? bodyOf(B.T) : {top: B.T.y - 40, foot: B.T.y + 20}; B.hx = B.T.x; B.hy = (b.top + b.foot) / 2; B.end = 0; }
+    const T = B.T && !B.T.dead ? B.T : null, held = T && g.t - B.hitT < BN.dura - .3;
+    if(alive && !B.T){ B.hx = B.s.x; B.hy = B.s.y; }
+    else if(held) B.end = 0;
     else if(!B.end) B.end = g.t;
-    const out = B.end ? g.t - B.end : 0, E = .35;                                  // al acabar: se recogen en E segundos
-    if(B.end && out > E + .3 || f.dead){ if(!suelo) AG_BRECHA.splice(i, 1); continue; }
+    const out = B.end ? g.t - B.end : 0, E = .4;                                 // al acabar: los brazos se recogen en E s y la mancha se cierra
+    if(B.end && out > E + .35 || f.dead){ if(!suelo) AG_BRECHA.splice(i, 1); continue; }
+    const [px, py] = agFoot(f), a = g.t - B.t0, dir = Math.sign(B.hx - px) || 1, mx = px + dir * 16, my = py - 2;
+    if(held){ const b = typeof bodyOf === 'function' ? bodyOf(T) : {top: T.y - 40, foot: T.y + 20}, R = bnD(b) / 2, cy = b.foot - R * 1.05;
+      B.ends = [[T.x - dir * R * .42, cy - R * .38, b.foot], [T.x - dir * R * .36, cy + R * .34, b.foot]]; }
+    else if(!B.end || !B.ends) B.ends = [[B.hx, B.hy - 8, B.hy + 46], [B.hx, B.hy + 8, B.hy + 46]];
+    const k = B.end ? Math.max(0, 1 - out / E) : 1, flip = dir < 0;
     if(suelo){
-      const [px, py] = agFoot(f), a = g.t - B.t0, M = AG.brecha.mancha;          // 1) la mancha bajo el que lo lanza
-      const mf = B.end ? (out > E ? 5 : 3 + (Math.floor(g.t * 6) % 2)) : a < .3 ? Math.min(2, Math.floor(a / .1)) : 3 + (Math.floor(g.t * 6) % 2);
-      ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = B.end && out > E ? Math.max(0, 1 - (out - E) / .3) : .95;
-      agFrame(ctx, 'mancha', mf, px - M / 2, py - M * .32, M, M * .64); ctx.restore();
+      const Mw = BN.mancha, Mh = Mw * BN.img.mancha.fh / BN.img.mancha.fw;
+      const cierra = B.end && out > E * .6, s = cierra ? Math.max(0, 1 - (out - E * .6) / .45) : Math.min(1, a / .15);
+      const fr = cierra ? 5 : a < .15 ? 0 : 1 + Math.floor(g.t * 7) % 4;
+      ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .96;
+      bnFr('mancha', fr, mx - Mw * s / 2, my - Mh * .62 * s, Mw * s, Mh * s); ctx.restore();
+      B.ends.forEach((e, j) => bnArm(bnCurve(mx, my, e[0], e[2], 0), k, BN.brazo * .4, 0, AG.sombra.a, true, j * 2.1, flip));     // sombra de los brazos en el suelo
       continue; }
-    const [px, py] = agFoot(f);
-    const [mx, my] = [px, py - 6], k = B.end ? Math.max(0, 1 - out / E) : 1;      // 2) los tentáculos, de la mancha a la cabeza del ataque
-    if(k > 0) agTentacles(mx, my, mx + (B.hx - mx) * k, my + (B.hy - my) * k, AG.brecha.tent, .95);
+    const hand = held ? Math.min(3, 1 + Math.floor((g.t - B.hitT) / .06)) : 0;
+    B.ends.forEach((e, j) => bnArm(bnCurve(mx, my - 6, e[0], e[1], BN.curva[j]), k, BN.brazo * (j ? .85 : 1), hand, .97, false, j * 2.1, flip));
   }
 }
 function agBrechaFlight(){
   const o = FXR.flight['Brecha Negra'];
-  const w = function(s, a, an){
-    if(!agOk('esfera') || !agOk('tent')) return o && (o.draw || o).apply(this, arguments);
-    ctx.save(); ctx.imageSmoothingEnabled = false; const T = 26; agFrame(ctx, 'esfera', 0, s.x - T / 2, s.y - T / 2, T, T); ctx.restore();      // la punta: una bolita negra
-  };
+  const w = function(s, a, an){ if(!bnOk()) return o && (o.draw || o).apply(this, arguments); };      // la punta del ataque son las manos
   if(o) Object.assign(w, o); delete w.draw; FXR.flight['Brecha Negra'] = w; delete FXR.trail['Brecha Negra'];
   const oi = FXR.impact['Brecha Negra'];
-  const wi = function(e, a){                                                       // 3) la esfera encierra al rival y luego revienta
-    if(!agOk('esfera')) return oi && (oi.draw || oi).apply(this, arguments);
+  const wi = function(e, a){
+    if(!bnOk()) return oi && (oi.draw || oi).apply(this, arguments);
     if(!e.agB){ e.agB = 1; const B = AG_BRECHA.find(B => !B.T && (!e.T || B.f !== e.T)); if(B){ B.T = e.T; B.hitT = g.t - a; B.end = 0; } }      // los brazos se quedan agarrando a este rival
     const T = e.T && !e.T.dead ? e.T : null, b = T && typeof bodyOf === 'function' ? bodyOf(T) : {top: e.y - 40, foot: e.y + 20};
-    const cx = T ? T.x : e.x, cy = (b.top + b.foot) / 2, D = Math.min(150, Math.max(70, (b.foot - b.top) * AG.brecha.esfera)), dura = AG.brecha.dura;
-    const fr = a < .3 ? Math.min(2, Math.floor(a / .1)) : a < dura - .25 ? 3 + (Math.floor(g.t * AG.brecha.fps / 2) % 2) : 5;
-    const s = a < .3 ? .4 + .6 * a / .3 : fr === 5 ? 1 + (a - (dura - .25)) * 1.2 : 1;
-    AG_POST.push(() => { ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = fr === 5 ? Math.max(0, 1 - (a - (dura - .25)) / .25) : .96;
-      agFrame(ctx, 'esfera', fr, cx - D * s / 2, cy - D * s / 2, D * s, D * s); ctx.restore(); });
-    if(a < .02 && typeof fx !== 'undefined') fx.shake = Math.max(fx.shake, 5);
+    const cx = T ? T.x : e.x, D = bnD(b), rompe = BN.dura - .3;
+    if(a < rompe) AG_POST.push(() => bnSphere(cx, b.foot, D, a, rompe));
+    else if(!e.bnR){ e.bnR = 1; BN_ROTURA.push({cx, foot: b.foot, D, t0: g.t - (a - rompe)}); }
+    if(typeof fx !== 'undefined' && (a < .02 || Math.abs(a - rompe) < .02)) fx.shake = Math.max(fx.shake, 5);
   };
   if(oi) Object.assign(wi, oi); delete wi.draw; FXR.impact['Brecha Negra'] = wi;
-  FXC['Brecha Negra'] = Object.assign({}, FXC['Brecha Negra'] || {}, {idur: AG.brecha.dura});
+  FXC['Brecha Negra'] = Object.assign({}, FXC['Brecha Negra'] || {}, {idur: BN.dura});
 }
 
 // ---------------- Enganches ----------------
@@ -127,7 +203,7 @@ if(AG.on && typeof FXR !== 'undefined'){
       const kp = [...g.p, ...g.e].some(f => f && f.burst && f.burst.hb && f.burst.nm === 'Pulso Umbrío') ? .55 : 0;
       const k = Math.max(kp, AG_BRECHA.reduce((m, B) => Math.max(m, B.end ? Math.max(0, 1 - (g.t - B.end) / .4) : Math.min(1, (g.t - B.t0) / .25)), 0));      // el campo se oscurece mientras dura (como en el vídeo)
       if(k > 0 && AG.oscuro){ ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(14,4,30,${(AG.oscuro * k).toFixed(3)})`; ctx.fillRect(0, 0, cv.width, cv.height); ctx.restore(); }
-      agBrechaDraw(false); AG_POST.forEach(fn => fn()); agLuzDraw(); agGaDraw(); } }catch(e){}
+      AG_POST.forEach(fn => fn()); agBrechaDraw(false); agLuzDraw(); agGaDraw(); } }catch(e){}
     AG_POST.length = 0; return r; }; }
   if(typeof fxDraw === 'function'){ const o = fxDraw; fxDraw = function(){
     if(g && AG.on){

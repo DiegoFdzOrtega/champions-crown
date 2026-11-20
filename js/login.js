@@ -35,6 +35,8 @@ async function lgGoogle(){
   const {error} = await cloud.sb.auth.signInWithOAuth({provider: 'google', options: {redirectTo: CLOUD_HOME()}});   // te lleva a la página de Google
   if(error){ lg.busy = false; lg.err = cloudErr(error); lgRender(); }
 }
+// OJO: lgRun vuelve a dibujar la pantalla (para desactivar los botones) ANTES de llamar a fn, y eso crea las casillas de nuevo, vacías.
+// Por eso lo que haya escrito el jugador se lee SIEMPRE antes de llamar a lgRun.
 async function lgRun(fn){ lg.busy = true; lg.err = ''; lg.info = ''; lgRender(); let r = ''; try{ r = await fn(); }catch(e){ r = cloudErr(e); } lg.busy = false; return r; }
 
 // ---- Qué se enseña según el estado de la cuenta ----
@@ -92,7 +94,7 @@ function lgRender(force){
     el.innerHTML = `<h2>Elige tu nombre de jugador</h2>
       <p class="warn lg-new">Has entrado con ${via} como <b>${em}</b>, y esa cuenta todavía <b>no tiene jugador</b>. Si ya tenías uno, seguramente lo creaste de otra forma (con email o con otro Google): pulsa «Usar otra cuenta» abajo y entra como la primera vez.</p>
       <p class="help">Si es tu primera vez, elige el nombre con el que te verán tus rivales y tus amigos. Tiene que ser único.</p>
-      <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="24" placeholder="3-16 letras, números o _" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><small id="lgNameOk" class="help"></small></label>
+      <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="24" value="${lgEsc(lg.name || '')}" placeholder="3-16 letras, números o _" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><small id="lgNameOk" class="help"></small></label>
       <button type="submit" class="main lg-big"${dis}>Empezar</button></form>${msg}
       <p class="help lg-why">¿Ya tenías cuenta con email? Pulsa «Usar otra cuenta», entra con tu email y en <b>Cuenta</b> pulsa «Vincular mi cuenta de Google».</p>
       <button id="lgOut" class="linkbtn">Usar otra cuenta</button>`;
@@ -109,15 +111,17 @@ function lgRender(force){
     if(r && !cloud.user){ lg.err = /correo/.test(r) && /creada/.test(r) ? '' : r; lg.info = /creada/.test(r) ? r : ''; lgRender(); return; }
     if(r) lg.err = r;
     lg.mode = 'wait'; lgRender(); };
-  if(by('lgForgot')) by('lgForgot').onclick = async () => { const r = await lgRun(() => cloudResetMail(by('lgMail').value)); lg.err = r; lg.info = r ? '' : (typeof cloudUi !== 'undefined' && cloudUi.info) || 'Te hemos mandado un correo.'; lgRender(); };
+  if(by('lgForgot')) by('lgForgot').onclick = async () => { const m = by('lgMail').value; lg.email = m; const r = await lgRun(() => cloudResetMail(m)); lg.err = r; lg.info = r ? '' : (typeof cloudUi !== 'undefined' && cloudUi.info) || 'Te hemos mandado un correo.'; lgRender(); };
   if(by('lgName')) by('lgName').oninput = e => { const v = e.target.value, c = cloudCleanName(v), o = by('lgNameOk');      // te enseña cómo quedará el nombre
     if(o) o.textContent = !v ? '' : c.length < 3 ? 'Mínimo 3 letras o números.' : c !== v ? `Se guardará como: ${c}` : '✓ Nombre válido'; };
   if(by('lgRecForm')) by('lgRecForm').onsubmit = async e => { e.preventDefault();
-    const r = await lgRun(() => cloudRecoverPass(by('lgP1').value, by('lgP2').value));
+    const p1 = by('lgP1').value, p2 = by('lgP2').value;
+    const r = await lgRun(() => cloudRecoverPass(p1, p2));
     if(r){ lg.err = r; lgRender(true); return; }
     lg.info = 'Contraseña cambiada.'; lgRender(true); };
   if(by('lgNameForm')) by('lgNameForm').onsubmit = async e => { e.preventDefault();
-    const r = await lgRun(() => cloudSetName(by('lgName').value));
+    const n = by('lgName').value; lg.name = n;                                     // se lee antes: lgRun redibuja y la casilla sale vacía
+    const r = await lgRun(() => cloudSetName(n));
     if(r){ lg.err = r; lgRender(); return; }
     await lgRun(async () => { await cloudSync(); if(typeof cloudGifts === 'function') await cloudGifts(); return ''; });
     lgClose(); };
