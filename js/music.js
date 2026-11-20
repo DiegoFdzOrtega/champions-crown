@@ -492,28 +492,51 @@ const Music = (() => {
     meteoro: [{n:1, ft:'bandpass', f:3200, to:450, q:1.5, at:0, d:.24, v:.55}, {f:900, to:200, at:0, d:.24, w:'sine', v:.12}],             // silbido al caer
     skid:    [{n:1, ft:'bandpass', f:1100, to:280, q:1.2, at:0, d:.38, v:.5}, {f:140, to:60, x:1, at:0, d:.2, w:'sine', v:.55}]                // ¡derribado!: se arrastra por el suelo
   });
+  // ---- CANAL DE EFECTOS (20-11-2026): todos los efectos pasan por aquí para sonar más «de juego» ----
+  //  · compresor: los golpes suenan más gordos y los muy fuertes no revientan
+  //  · eco de estadio (reverb generada, sin archivos): un poco de cola para que no suene «seco»
+  //  · estéreo: si se sabe dónde pasa (Music.sfxAt(x), js/sonido2.js), suena a la izquierda o a la derecha
+  //  · variación: cada vez sale un pelín más agudo o más grave, para que 10 golpes seguidos no suenen idénticos (sin Math.random: no afecta al online)
+  const SFXBUS = {comp: null, wet: .2, var: .07, pan: .6};                         // [AJUSTE] cuánto eco · cuánta variación de tono · cuánto se abre a los lados
+  const SFX_FIJO = /^(click|logro|win|lose|mega|canto|buff|v_ready|recall|sendout)$/;  // efectos de menú y melodías: siempre igual, sin variar el tono
+  let sfxN = 0, sfxPosX = null, sfxPosT = 0, sfxMid = 0;
+  function sfxBus(){
+    if(SFXBUS.comp) return SFXBUS.comp;
+    const c = ctx.createDynamicsCompressor(); c.threshold.value = -18; c.knee.value = 12; c.ratio.value = 4; c.attack.value = .003; c.release.value = .18;
+    const mk = ctx.createGain(); mk.gain.value = 1.35; c.connect(mk); mk.connect(analyser);
+    const L = Math.floor(ctx.sampleRate * 1.1), ir = ctx.createBuffer(2, L, ctx.sampleRate); let a = 987654321;
+    for(let ch = 0; ch < 2; ch++){ const d = ir.getChannelData(ch); for(let i = 0; i < L; i++){ a ^= a << 13; a ^= a >>> 17; a ^= a << 5; d[i] = (((a >>> 0) / 4294967296) * 2 - 1) * Math.pow(1 - i / L, 3.2) * (i < 220 ? i / 220 : 1); } }
+    const cv = ctx.createConvolver(); cv.buffer = ir; const send = ctx.createGain(); send.gain.value = SFXBUS.wet; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
+    send.connect(hp); hp.connect(cv); cv.connect(c);
+    SFXBUS.comp = c; SFXBUS.send = send; return c;
+  }
+  function sfxAt(x, mid){ sfxPosX = x; sfxMid = mid || 0; sfxPosT = performance.now(); }
   const sfxLast = {};                                                                // anti-saturación: el mismo efecto no suena dos veces en menos de 45 ms (ráfagas de varios golpes)
   function sfx(name, k){                                                           // k (opcional, 0-1): lo bajito que suena (los ataques del rival de la Historia suenan más suaves)
     const notes = SFX[name]; if(!notes || !unlocked || !ensureCtx()) return;
     const lvl = sfxVol() * (k === undefined ? 1 : k); if(lvl <= 0) return;
     if(ctx.state === 'suspended') ctx.resume().catch(() => {});
-    const t0 = ctx.currentTime + .005;
+    const t0 = ctx.currentTime + .005, bus = sfxBus();
+    const vr = SFX_FIJO.test(name) ? 1 : 1 + (((++sfxN * .6180339887) % 1) - .5) * 2 * SFXBUS.var;      // variación de tono de esta vez
+    let out = bus;
+    if(sfxPosX != null && performance.now() - sfxPosT < 60 && ctx.createStereoPanner){ const p = ctx.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, (sfxPosX - sfxMid) / 420)) * SFXBUS.pan; p.connect(bus); out = p; }
+    const vin = ctx.createGain(); vin.connect(out); vin.connect(SFXBUS.send);
     const now = ctx.currentTime; if(sfxLast[name] && now - sfxLast[name] < .045) return; sfxLast[name] = now;
     notes.forEach(n => {
       const g = ctx.createGain(), a = t0 + n.at, e = a + n.d; let src;
       if(n.n){                                                                       // ruido filtrado (golpes, crujidos, 'fiu')
         getNoise();
         src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
-        const fl = ctx.createBiquadFilter(); fl.type = n.ft || 'lowpass'; fl.Q.value = n.q || 1; fl.frequency.setValueAtTime(n.f, a);
-        if(n.to) fl.frequency.exponentialRampToValueAtTime(n.to, e);
+        const fl = ctx.createBiquadFilter(); fl.type = n.ft || 'lowpass'; fl.Q.value = n.q || 1; fl.frequency.setValueAtTime(n.f * vr, a);
+        if(n.to) fl.frequency.exponentialRampToValueAtTime(n.to * vr, e);
         src.connect(fl); fl.connect(g);
       }else{
-        src = ctx.createOscillator(); src.type = n.w; src.frequency.setValueAtTime(n.f, a);
-        if(n.to) n.x ? src.frequency.exponentialRampToValueAtTime(n.to, e) : src.frequency.linearRampToValueAtTime(n.to, e);
+        src = ctx.createOscillator(); src.type = n.w; src.frequency.setValueAtTime(n.f * vr, a);
+        if(n.to) n.x ? src.frequency.exponentialRampToValueAtTime(n.to * vr, e) : src.frequency.linearRampToValueAtTime(n.to * vr, e);
         src.connect(g);
       }
       g.gain.setValueAtTime(.0001, a); g.gain.linearRampToValueAtTime(n.v * lvl, a + (n.n || n.x ? .004 : .01)); g.gain.exponentialRampToValueAtTime(.0001, e);
-      g.connect(analyser); src.start(a); src.stop(e + .05);
+      g.connect(vin); src.start(a); src.stop(e + .05);
     });
   }
   function setMute(m){ save.mute = !!m; persist(); applyVol(); }
@@ -530,6 +553,6 @@ const Music = (() => {
     if(want) play(want);
   }
   ['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, unlock, {passive: true}));
-  return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx, addSfx: o => Object.assign(SFX, o)};      // addSfx: otros archivos añaden sus efectos (js/gachasonido.js)
+  return {play, stop, battle, win, scene, setVolume, setMenuVolume, setBattleVolume, setSfxVolume, setMute, toggleMute, duck, probe, status, level, unlock, sfx, sfxAt, addSfx: o => Object.assign(SFX, o)};      // addSfx: otros archivos añaden sus efectos (js/gachasonido.js)
 })();
 const Sfx = {play: (name, k) => Music.sfx(name, k)};

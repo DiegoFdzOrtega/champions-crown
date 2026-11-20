@@ -199,7 +199,7 @@ BUFFK.scheme = (f, b, t, p) => {                                         // Maqu
   const y = b.top - 12; Poly([[f.x - 12, y - 2], [f.x - 4, y + 2], [f.x - 4, y + 5], [f.x - 12, y + 3]], '#ff3a5a'); Poly([[f.x + 12, y - 2], [f.x + 4, y + 2], [f.x + 4, y + 5], [f.x + 12, y + 3]], '#ff3a5a'); };
 BUFFK.iron = (f, b, t, p) => {                                           // Defensa Férrea: placas metálicas brillantes
   const cy = (b.top + b.foot) / 2; for(let i = 0; i < 6; i++){ const th = spin(t, i, 6, 1.5), x = f.x + Math.cos(th) * (b.hw + 10), y = cy + Math.sin(th) * (b.foot - b.top) / 2.6; PolyO([[x, y - 8], [x + 6, y], [x, y + 8], [x - 6, y]], '#b3bfcf', '#2a3340'); Poly([[x - 1, y - 5], [x + 2, y - 1], [x - 1, y + 1], [x - 3, y - 2]], '#ffffff'); }
-  const u = (t * 1.3) % 1; Poly([[f.x - b.hw + u * b.hw * 2 - 2, b.top], [f.x - b.hw + u * b.hw * 2 + 4, b.top], [f.x - b.hw + u * b.hw * 2 + 1, b.foot], [f.x - b.hw + u * b.hw * 2 - 5, b.foot]], '#ffffff'); };
+  };      // (quitada la raya blanca que cruzaba el cuerpo: en los Pokémon altos, como Onix, se veía como un rectángulo)
 BUFFK.fieldMist = (f, b, t, p) => {                                      // Campo Neblinoso: neblina rosa en el suelo
   ctx.globalAlpha *= .2; D(f.x, b.foot - 4, 34, '#ffd6f4'); D(f.x, b.foot - 4, 24, '#ffe9fa'); ctx.globalAlpha /= .2; Rg(f.x, b.foot, 40, '#ff9ee0', 14, 2);
   for(let i = 0; i < 8; i++){ const u = (t * .5 + i * .125) % 1; Spark(f.x + (HH(i, 1) - .5) * 80, b.foot - u * 40, 2, i % 2 ? '#ffffff' : '#ff9ee0'); } };

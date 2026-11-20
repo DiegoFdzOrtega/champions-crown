@@ -120,3 +120,7 @@ function aeMarcasDraw(){
     ctx.save(); ctx.globalAlpha = .9 * Math.min(1, (1 - u) * 3, (g.t - M.t0) / .1); ctx.imageSmoothingEnabled = false; ctx.drawImage(S.i, M.x - M.w / 2, M.y - h / 2, M.w, h); ctx.restore(); }
 }
 if(typeof fxhdGround === 'function'){ const o = fxhdGround; fxhdGround = function(){ const r = o.apply(this, arguments); try{ if(g){ aeMarcasDraw(); aeRocaAviso(); } }catch(e){} return r; }; }
+
+// ---------------- EQUILIBRIO: Vuelo y Excavar (saltos del clic) ----------------
+// [AJUSTE] segundos de espera hasta poder repetirlos (los demás saltos siguen con JUMP.cd = 4 s, js/combat.js)
+if(typeof JUMP_MOVE !== 'undefined'){ if(JUMP_MOVE.Vuelo) JUMP_MOVE.Vuelo.cd = 5.5; if(JUMP_MOVE.Excavar) JUMP_MOVE.Excavar.cd = 5.5; }

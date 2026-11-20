@@ -51,6 +51,7 @@ if(typeof nvWindFx === 'function'){
 
 // ---- Ataques de boca: la bola nace en la boca y va creciendo (sustituye a la bola de color de js/fxvideo.js, v5ChgTop) ----
 const cargaSpr = f => { const w = f && f.wind; if(!w || CARGA.propias.includes(w.nm) || CARGA.cuerpo.test(w.nm || '')) return null; const S = CARGA.img[w.type]; return S && S.ok ? S : null; };
+const cargaCuerpo = f => { const w = f && f.wind; if(!w || CARGA.propias.includes(w.nm) || !CARGA.cuerpo.test(w.nm || '')) return false; const S = CARGA.img[w.type]; return !!(S && S.ok); };
 function cargaBoca(f, S){
   const w = f.wind, k = cgK(w), ready = w.hold ? w.c >= FEEL.wind : k > .3;
   if(ready && !f.cgR){ f.cgR = 1; if(w.hold && typeof Sfx !== 'undefined') Sfx.play('v_ready', .8); }
@@ -61,10 +62,10 @@ function cargaBoca(f, S){
 if(typeof v5ChgTop === 'function'){
   const oldTop = v5ChgTop;
   v5ChgTop = function(){
-    const L = g ? [...g.p, ...g.e].filter(f => f && f.wind && !f.dead && !f.ghost && cargaSpr(f)) : [];
+    const L = g ? [...g.p, ...g.e].filter(f => f && f.wind && !f.dead && !f.ghost && (cargaSpr(f) || cargaCuerpo(f) || CARGA.propias.includes(f.wind.nm))) : [];
     L.forEach(f => { f.ghost = true; });                                                         // la bola de siempre no se dibuja para estos
     try{ oldTop.apply(this, arguments); } finally { L.forEach(f => { f.ghost = false; }); }
-    L.forEach(f => { try{ cargaBoca(f, cargaSpr(f)); }catch(e){} });
+    L.forEach(f => { try{ const S = cargaSpr(f); if(S) cargaBoca(f, S); }catch(e){} });                // los de cuerpo ya llevan su bola alrededor (nvWindFx): sin la bola vieja en la boca
     if(g) [...g.p, ...g.e].forEach(f => { if(f && !f.wind) f.cgR = 0; });
   };
 }

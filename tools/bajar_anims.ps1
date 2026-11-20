@@ -1,4 +1,4 @@
-# =====================================================================
+﻿# =====================================================================
 #  Champions Crown - baja ANIMACIONES EXTRA de los Pokemon de PMD Sprite Repository
 #  (https://sprites.pmdcollab.org - github.com/PMDCollab/SpriteCollab) para darles mas vida en combate (js/anims.js).
 #  Para cada carpeta assets\pokemon\<numero>\ lee su AnimData.xml y baja las animaciones de $quiero que tenga,
@@ -14,6 +14,8 @@ Add-Type -AssemblyName System.Net.Http
 $root  = Split-Path -Parent $PSScriptRoot
 $poke  = Join-Path $root 'assets\pokemon'
 $quiero = 'Hop','Sleep','Pose','Strike','Swing','Kick','Double','Head','Rotate','Tumble','Pain','Cringe','DeepBreath','LookUp','Nod','Sit','Float','Twirl','Ricochet','Emit','Withdraw','RearUp','LeapForth','HitGround','Wake','LostBalance','Trip'
+# 3a tanda (20-11-2026): las que aun no teniamos. Si un Pokemon no tiene alguna (o el nombre no existe en su AnimData.xml), simplemente se salta.
+$quiero += 'Sink','TumbleBack','Dance','Appeal','Shock','Laying','EventSleep','Eat','Pull','Shake','Bump','Gas','Special0','Special1','Special2','Special3','Special4','Special5','Special6','Special7'
 $base  = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/sprite'
 $http  = New-Object System.Net.Http.HttpClient
 $http.Timeout = [TimeSpan]::FromSeconds(30)
