@@ -63,7 +63,7 @@ function hb6Start(f, nm, ang, dmg, type, mine, vk){
 }
 if(typeof windFire === 'function'){ const o = windFire; windFire = function(f){                    // ataques fuertes (E): al acabar la carga sale el rayo
   const w = f.wind;
-  if(!V6.hb || !w || !BEAMX[w.nm] || BEAMX[w.nm].corto || g.pvp) return o.apply(this, arguments);
+  if(!V6.hb || !w || !BEAMX[w.nm] || BEAMX[w.nm].corto) return o.apply(this, arguments);      // (también online: el rayo sale igual en los dos ordenadores)
   f.wind = null; f.dir = dirOf(w.ang);
   const wp = w.hold ? clamp((w.c - FEEL.wind) / (FEEL.windMax - FEEL.wind), 0, 1) : 0;
   if(typeof Sfx !== 'undefined') Sfx.play('strong', w.vk);
@@ -91,7 +91,7 @@ if(typeof burstTick === 'function'){ const o = burstTick; burstTick = function(f
 if(typeof use === 'function'){ const o = use; use = function(f, i, ang){
   if(f && f.burst && f.burst.hb && i > 0) return;
   const nm = f && f.m && f.m.mv ? f.m.mv[i - 1] : null, K = nm && BEAMX[nm];
-  if(!(V6.hb && i === 2 && K && K.corto && !g.pvp)) return o.apply(this, arguments);
+  if(!(V6.hb && i === 2 && K && K.corto)) return o.apply(this, arguments);
   const n0 = g.shots.length, r = o.apply(this, arguments);                                          // Rayo Hielo (disparo normal): en vez del proyectil, un rayo corto que también se mueve
   const nw = g.shots.slice(n0).filter(s => s.o === f);
   if(typeof fx !== 'undefined' && fx.list) for(let k = fx.list.length - 1; k >= 0; k--){ const e = fx.list[k]; if(e.kind === 'stream' && e.fol === f && e.name === nm) fx.list.splice(k, 1); }   // fuera el chorro viejo (salía del cuerpo)
@@ -157,7 +157,7 @@ if(typeof hit === 'function'){ const o = hit; hit = function(T, dmg, type, A, cl
   const hp0 = T ? T.hp : 0, np = g && g.pops ? g.pops.length : 0, r = o.apply(this, arguments);
   try{
     const d = T ? hp0 - T.hp : 0, nw = g.pops.slice(np).map(p => p.txt);
-    if(V6.num && d > 0 && !g.pvp){                                                                // número de daño (se suma si llegan golpes seguidos)
+    if(V6.num && d > 0){                                                                // número de daño (se suma si llegan golpes seguidos)
       const cr = nw.includes('¡CRÍTICO!'), sup = nw.includes('¡Muy eficaz!'), poco = nw.includes('Poco eficaz'), P = T.v6n;
       const c = cr ? '#ffe04a' : sup ? '#ffa23a' : poco ? '#c8c8d0' : '#ffffff';
       if(P && g.pops.includes(P.p) && g.t - P.t0 < .4){ P.d += d; P.p.txt = String(Math.max(1, Math.round(P.d))); P.p.t = 1; P.t0 = g.t; if(cr || sup) P.p.c = c; P.p.s = Math.min(18, 12 + P.d / 25); }

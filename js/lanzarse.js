@@ -11,7 +11,7 @@ const LG = {on: true, min: 85, max: 300, maxIA: 230, vel: 1500, para: 52, tmax: 
 const lgMove = f => { try{ const nm = mvName(f, 1); return nm && LG.re.test(nm) && !JUMP_MOVE[nm] && !SPIN_MOVE[nm] && !/ataque r[aá]pido|velocidad extrema|tumba rocas/i.test(nm) ? nm : null; }catch(e){ return null; } };
 const lgCost = f => typeof enCost === 'function' ? enCost(f, 1) : MV[1].en;
 function lgCan(f, T){
-  if(!LG.on || !g || g.pvp || !f || !T || f.dead || T.dead || T.ghost || f.ghost) return false;
+  if(!LG.on || !g || !f || !T || f.dead || T.dead || T.ghost || f.ghost) return false;
   if(f.wind || f.jump || f.ride || f.burst || f.boca || f.quick || f.v13l || f.draco || (typeof cant === 'function' && cant(f))) return false;
   if(f.cd[1] > 0 || f.en < lgCost(f) || !lgMove(f)) return false;
   const d = Math.hypot(T.x - f.x, T.y - f.y), mx = (typeof feelFoe === 'function' && feelFoe(f)) ? LG.maxIA : LG.max;

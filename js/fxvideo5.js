@@ -31,11 +31,11 @@ function v9Marca(x, y, kind, sc){                                               
 }
 if(typeof hit === 'function'){ const o = hit; hit = function(T, dmg, type, A, close, big){
   const r = o.apply(this, arguments);
-  try{ if(big && T && T.m && g && !g.pvp && !g.v9noMark){ const k = type === 'fuego' ? 'quemadura' : (type === 'tierra' || type === 'roca' || type === 'lucha') ? 'crater' : close ? 'grieta' : null;
+  try{ if(big && T && T.m && g && !g.v9noMark){ const k = type === 'fuego' ? 'quemadura' : (type === 'tierra' || type === 'roca' || type === 'lucha') ? 'crater' : close ? 'grieta' : null;
     if(k) v9Marca(T.x + (Math.random() - .5) * 20, v9Foot(T), k, .9); } }catch(e){}
   return r; }; }
 if(typeof quakeStart === 'function'){ const o = quakeStart; quakeStart = function(f){ const r = o.apply(this, arguments);
-  try{ if(f && f.m && !g.pvp){ const y = v9Foot(f); v9Marca(f.x, y, 'grieta', 1.3); v9Marca(f.x - 70, y + 10, 'grieta', .9); v9Marca(f.x + 70, y - 8, 'grieta', .9); } }catch(e){}
+  try{ if(f && f.m){ const y = v9Foot(f); v9Marca(f.x, y, 'grieta', 1.3); v9Marca(f.x - 70, y + 10, 'grieta', .9); v9Marca(f.x + 70, y - 8, 'grieta', .9); } }catch(e){}
   return r; }; }
 function v9MarcasDraw(){
   if(!g || !g.v9m || !v9Ok('su_marca')) return; const im = V9IMG.su_marca;
@@ -64,7 +64,7 @@ function v9PulsoDraw(){
 // ---------------- 4) ROCA AFILADA ----------------
 let V9ra = [], V9sp = [];
 if(typeof stoneStart === 'function'){ const o = stoneStart; stoneStart = function(f, w, wp){
-  if(!V9.roca || !v9Ok('ra_pinchos') || (g && g.pvp)) return o.apply(this, arguments);
+  if(!V9.roca || !v9Ok('ra_pinchos')) return o.apply(this, arguments);
   const full = w.dmg * (1 + (FEEL.windK - 1) * wp);
   f.anQuake = 1; setAct(f, 'Attack', .45); f.dir = dirOf(w.ang);
   if(typeof Sfx !== 'undefined'){ Sfx.play('strong', w.vk); Sfx.play('hit', .6); } fx.shake = Math.max(fx.shake, 6);

@@ -93,7 +93,7 @@ function brPPHit(e, a){
   if(typeof MOVES !== 'undefined' && !MOVES[N]) MOVES[N] = {t: 'roca', s: 2};
   if(typeof SHOT_MOVE !== 'undefined') SHOT_MOVE[N] = 'pesado';                // un solo disparo lento, grande y fuerte (las tres rocas juntas), sea cual sea el tipo del Pokémon
   FXR.cast[N] = (f, s, name, big, ox, oy, ang) => { fxAdd('impact', '_ppCast', {x: f.x, y: f.y, fol: f, dur: .95}); if(typeof Sfx !== 'undefined') Sfx.play('strong', .5); };
-  FXR.shotStart[N] = (f, s, big) => { if(BR.on && !(g && g.pvp)) ppStart(f, s); };   // (online: disparo normal, para no desincronizar)
+  FXR.shotStart[N] = (f, s, big) => { if(BR.on) ppStart(f, s); };   // (online: disparo normal, para no desincronizar)
   FXR.flight[N] = (s, a, an) => brPPFlight(s, a, an);
   FXR.impact[N] = (e, a) => brPPHit(e, a);
   FXC[N] = Object.assign({}, FXC[B], {idur: .85, shake: 2});
@@ -253,7 +253,7 @@ FXR.impact._dracoMet = (e, a) => {                                           // 
   if(b > .25){ const v = (b - .25) / .75; ctx.save(); ctx.globalAlpha = .55 * (1 - v); ctx.fillStyle = '#3a3036'; ctx.beginPath(); ctx.arc(x, y - 6 - 16 * v, (10 + 12 * v) * k, 0, 6.283); ctx.fill(); ctx.restore(); }   // humo
 };
 if(typeof windFire === 'function'){ const o = windFire; windFire = function(f){
-    const w = f.wind; if(BR.on && w && w.nm === 'Cometa Draco' && !(g && g.pvp)){ f.wind = null; f.dir = dirOf(w.ang); return dracoStart(f, w, w.hold ? Math.max(0, Math.min(1, w.c / FEEL.windMax)) : 0); }
+    const w = f.wind; if(BR.on && w && w.nm === 'Cometa Draco'){ f.wind = null; f.dir = dirOf(w.ang); return dracoStart(f, w, w.hold ? Math.max(0, Math.min(1, w.c / FEEL.windMax)) : 0); }
     return o.apply(this, arguments); }; }
 if(typeof feelTick === 'function'){ const o = feelTick; feelTick = function(f, dt){ const r = o.apply(this, arguments); try{ dracoTick(f, dt); }catch(e){} return r; }; }
 

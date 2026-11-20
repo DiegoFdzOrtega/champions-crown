@@ -156,11 +156,11 @@ if(typeof feelTick === 'function'){ const o = feelTick; feelTick = function(f, d
   FXC[N] = Object.assign({}, FXC['Ataque Rápido'] || {});
   g3Learn(N, null, [58, 59, 149, 448, 264, 386, 493, 384, 146, 244, 245, 243, 850, 851, 39, 52, 53, 128, 263, 133, 196, 197, 470, 471, 700, 135, 134, 136]);
   if(typeof quickStart === 'function'){ const o = quickStart; quickStart = function(f, ang, dmg, type, mine, nm){
-      if(G3.on && nm === N && !(g && g.pvp)) return dashStart(f, 've', dmg * 1.3, type, mine, nm, ang, true);
+      if(G3.on && nm === N) return dashStart(f, 've', dmg * 1.3, type, mine, nm, ang, true);
       return o.apply(this, arguments); }; } }
 // Megacuerno: al soltar la E (como Cometa Draco en js/fxbrendan.js)
 if(typeof windFire === 'function'){ const o = windFire; windFire = function(f){
-    const w = f.wind; if(G3.on && w && w.nm === 'Megacuerno' && !(g && g.pvp)){ f.wind = null; f.dir = dirOf(w.ang);
+    const w = f.wind; if(G3.on && w && w.nm === 'Megacuerno'){ f.wind = null; f.dir = dirOf(w.ang);
       const wp = w.hold ? Math.max(0, Math.min(1, w.c / FEEL.windMax)) : 0; return dashStart(f, 'mc', w.dmg * (1 + (FEEL.windK - 1) * wp), w.type, w.mine, w.nm, w.ang, true); }
     return o.apply(this, arguments); }; }
 FXR.impact._veOut = (e, a) => { if(g3('ve_salida')) gmDraw('ve_salida', g3F('ve_salida', a / e.dur), e.x, e.y, .4, e.ang, 1 - a / e.dur, .6, .5); };
