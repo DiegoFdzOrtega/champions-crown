@@ -18,14 +18,14 @@ const V6 = {hb: true, cam: true, cuerpo: true, ve: true, num: true, de: true};
 const CAM6 = {carga: .5, golpe: .6, dur: .22};                                                       // [AJUSTE] acercamiento al cargar (× FEEL.zoom) · en los golpes fuertes · lo que dura el del golpe
 
 // ---------------- 1) RAYOS QUE SE MUEVEN (Hiperrayo, Rayo Solar, Hidrobomba, Foco Resplandor y Rayo Hielo) ----------------
-// Cada rayo: T duración · ancho (medio ancho) · dmg (daño total × el del ataque) · rec (segundos de recarga después; 0 = no) · lento (velocidad andando)
+// Cada rayo: T duración · cd (solo los de clic derecho: recarga en s, contando desde que sale) · ancho (medio ancho) · dmg (daño total × el del ataque) · rec (segundos de recarga después; 0 = no) · lento (velocidad andando)
 //   c = colores [brillo de fuera, borde, medio, centro] · onda = color de las líneas en onda · sp = sprite de Gemini (si está cargado se usa para el cuerpo del rayo)
 const BEAMX = {
   'Hiperrayo':       {T: 1.3, ancho: 28, dmg: 1.25, rec: 1.1, lento: .25, c: ['255,140,40', '#ff7a14', '#ffd24a', '#ffffff'], onda: 'rgba(255,255,255,.9)'},
   'Rayo Solar':      {T: 1.2, ancho: 26, dmg: 1.2,  rec: .8,  lento: .3,  c: ['170,255,90', '#7fd63a', '#f4ff8a', '#ffffff'], onda: 'rgba(255,255,210,.95)', hojas: 1},
   'Hidrobomba':      {T: 1.1, ancho: 24, dmg: 1.15, rec: .7,  lento: .3,  c: ['80,170,255', '#2f7fe0', '#7cc8ff', '#eaf8ff'], onda: 'rgba(255,255,255,.95)', gotas: 1},
   'Foco Resplandor': {T: 1.2, ancho: 24, dmg: 1.2,  rec: .8,  lento: .3,  c: ['220,230,255', '#9aa8c8', '#e8eeff', '#ffffff'], onda: 'rgba(255,255,255,.9)', arco: 1, sp: 'fr_rayo'},
-  'Rayo Hielo':      {T: .6,  ancho: 13, dmg: 1,    rec: 0,   lento: .5,  c: ['150,230,255', '#5fc8f0', '#c8f4ff', '#ffffff'], onda: 'rgba(255,255,255,.95)', hielo: 1, corto: 1}};
+  'Rayo Hielo':      {T: .6,  ancho: 13, dmg: 1,    rec: 0,   cd: 1.8, lento: .5,  c: ['150,230,255', '#5fc8f0', '#c8f4ff', '#ffffff'], onda: 'rgba(255,255,255,.95)', hielo: 1, corto: 1}};
 const HRX = {giro: 1.7, giroTu: 4, largo: 900, tick: .1};   // [AJUSTE] giro de la IA (rad/s) · tu giro · alcance · cada cuánto pega
 // ---- DÓNDE ESTÁ LA BOCA de cada Pokémon (para que los rayos y la bola de carga salgan de ahí y no de la barriga) ----
 // Se mira el dibujo de reposo de ese Pokémon en esa dirección: la cabeza es la parte de arriba; de lado, la boca es el borde de delante de la cabeza.
@@ -96,6 +96,7 @@ if(typeof use === 'function'){ const o = use; use = function(f, i, ang){
   const nw = g.shots.slice(n0).filter(s => s.o === f);
   if(typeof fx !== 'undefined' && fx.list) for(let k = fx.list.length - 1; k >= 0; k--){ const e = fx.list[k]; if(e.kind === 'stream' && e.fol === f && e.name === nm) fx.list.splice(k, 1); }   // fuera el chorro viejo (salía del cuerpo)
   if(nw.length){ const s0 = nw[0]; g.shots = g.shots.filter(s => !nw.includes(s)); hb6Start(f, nm, ang, nw.reduce((q, s) => q + (s.dmg || 0), 0), s0.type, s0.mine); }
+  if(f.burst && f.burst.hb && K.cd) f.cd[2] = Math.max(f.cd[2], K.cd);                              // los rayos de clic derecho tienen más recarga que un disparo (casi no se pueden esquivar)
   else if(f.burst && !f.burst.hb){ const B = f.burst; f.burst = null; hb6Start(f, nm, ang, B.dmg * B.n, B.type, B.mine); }   // (si su disparo era una ristra)
   return r; }; }
 if(typeof move === 'function'){ const o = move; move = function(f){                               // con el rayo saliendo se anda despacio

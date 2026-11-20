@@ -182,7 +182,7 @@ const AG_RAYO = {                                                               
 if(AG.on && typeof BEAMX !== 'undefined'){
   BEAMX['Aerochorro'] = Object.assign({}, BEAMX['Hiperrayo'], {c: ['200,240,255', '#9ee8ff', '#e8fbff', '#ffffff'], onda: 'rgba(255,255,255,.9)'});
   // Pulso Umbrío como el Rayo Hielo: el disparo (clic derecho) es un rayo corto que sale de la boca, se mueve con el ratón y EMPUJA al rival
-  BEAMX['Pulso Umbrío'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .95, ancho: 36, dmg: 1, lento: .45, c: ['150,60,220', '#5a1a9a', '#2a0a4a', '#000000'], onda: 'rgba(200,120,255,.8)', hielo: 0, empuja: 240});
+  BEAMX['Pulso Umbrío'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .95, ancho: 36, dmg: 1, cd: 2.2, lento: .45, c: ['150,60,220', '#5a1a9a', '#2a0a4a', '#000000'], onda: 'rgba(200,120,255,.8)', hielo: 0, empuja: 240});
   if(typeof hb6Tick === 'function'){ const o = hb6Tick; hb6Tick = function(f, dt){ const r = o.apply(this, arguments);
     try{ const b = f.burst; if(b && b.K && b.K.empuja && b.hitOn){ const T = foe(b.mine); if(T && !T.dead){ T.x += Math.cos(b.cur) * b.K.empuja * dt; T.y += Math.sin(b.cur) * b.K.empuja * dt * .7; } } }catch(e){}
     return r; }; }
@@ -242,7 +242,7 @@ function agGaDraw(){
    ===================================================================== */
 const PU = {
   boca: .38, fin: 1.3,                // [AJUSTE] grosor del rayo en la boca y al final (× el grosor base)
-  base: 118,                           // [AJUSTE] grosor base (px)
+  base: 72,                            // [AJUSTE] grosor base (px)
   sale: .14, recoge: .16,              // [AJUSTE] lo que tarda en salir y en recogerse (s)
   corre: 520,                          // [AJUSTE] velocidad a la que corre la energía por el rayo (px/s)
   collar: {cada: 120, vel: 380, fps: 10},
