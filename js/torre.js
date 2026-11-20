@@ -305,10 +305,12 @@ function torreEnd(won){                                                         
 const TORRE_RWN = {bp:() => 'BP', tickets:n => n === 1 ? 'tirada' : 'tiradas', ticketsL:n => n === 1 ? 'legendaria' : 'legendarias', chapa:n => n === 1 ? 'dorada' : 'doradas',
   chapaplata:n => n === 1 ? 'plateada' : 'plateadas', estrella:n => n === 1 ? 'estrella' : 'estrellas', estrella_t:n => n === 1 ? 'estrella rosa' : 'estrellas rosas'};   // (chapas doradas/plateadas, estrellas de Invocación)
 const torreRw = r => Object.entries(r).map(([id, n]) => `${n} ${TORRE_RWN[id] ? TORRE_RWN[id](n) : id}`).join(' · ');
-// Pantalla #torrev sobre la ilustración assets/fondos/torre_dia.webp (de 8:00 a 19:59) o torre_noche.webp (de 20:00 a 7:59).
+// Pantalla #torrev sobre la ilustración assets/fondos/torre_atardecer.webp (de noche además salen estrellas).
 // Los pisos van DENTRO del cristal de la torre (twFit los coloca encima de la imagen): se ven 10 y con las flechas se cambia de tramo.
 // Cada piso enseña a su rival: los vencidos en esta subida y el siguiente, a la vista; los demás, en silueta; los Campeones con corona.
-const TW_BG = {w:2880, h:1607, glass:{x:.436, y:.2195, w:.128, h:.5605}};               // dónde está el cristal de la torre en la imagen (en fracciones)
+// Fondo: assets/fondos/torre_atardecer.webp (2880 × 1367), el mismo de día y de noche.
+const TW_BG = {w:2880, h:1367, glass:{x:.4514, y:.1756, w:.1042, h:.512},              // dónde está el cristal de la torre en la imagen (en fracciones)
+  sky:420, nubes:[60, 250], vuelo:[120, 700], sol:[2392, 367], torreAlto:1367};      // [AJUSTE] cielo (px de la imagen): hasta dónde llega, franja de las nubes, altura de los voladores, dónde está el sol, alto de la torre
 const twNight = () => { const h = new Date().getHours(); return h >= 20 || h < 8; };
 const TW_ICO = {
   boss:'<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>',
@@ -464,7 +466,16 @@ function twRenderTower(){
 // el cielo POR DETRÁS de la torre (se recortan donde está la torre). Se dibuja en coordenadas de la imagen, igual que twFit, y para cuando sales de la pantalla.
 const TW_FLYERS = [142, 334, 277, 249, 250, 144, 145, 146, 169, 384, 468, 227];   // SOLO los que al moverse van volando: Aerodactyl, Altaria, Swellow, Lugia, Ho-Oh, Articuno, Zapdos, Moltres, Crobat, Rayquaza, Togekiss, Skarmory. (Fuera los que su animación es andando: Pidgeot, Staraptor, Braviary, Dragonite, Charizard, Corviknight, Talonflame, Gyarados)
 const TW_FLY_SLOTS = [{dur:30, gap:10, off:3, y:.2, dir:1}, {dur:36, gap:22, off:30, y:.34, dir:-1}, {dur:28, gap:30, off:45, y:.12, dir:1}];   // dur = segundos cruzando · gap = pausa entre uno y otro
-const TW_TOWER_X = [.404, .602];                                                          // franja de la imagen que ocupa la torre (fracciones del ancho)
+const TW_TOWER_X = [.42, .587];                                                            // franja de la imagen que ocupa la torre (fracciones del ancho)
+// Nubes: las mismas del menú principal. [cuál, y, tamaño, velocidad (px/s), salida] en píxeles de la imagen de la torre
+const TW_NUBES = [[1, 40, 1.4, 11, 0], [3, 170, 1.2, 15, .35], [5, 110, 1.1, 19, .62], [2, 20, 1.3, 9, .8], [4, 230, 1.05, 13, .15], [6, 140, 1.05, 17, .5]];
+const TW_NUBE_IMG = {}; [1, 2, 3, 4, 5, 6].forEach(k => { const i = new Image(), o = TW_NUBE_IMG[k] = {i, ok: false}; i.onload = () => { o.ok = true; }; i.src = 'assets/menu/nube' + k + '.webp?v=1'; });
+// Vida del pueblo, como en el menú: luces de las ventanas (assets/fondos/torre_luces0..2.webp, sacadas del propio dibujo), farolas, la cascada del fondo y luciérnagas
+const TW_FAROLAS = [[556, 815], [1160, 838], [1839, 836], [2458, 804]];                   // [AJUSTE] cabeza de las farolas grandes (px de la imagen)
+const TW_CASCADA = [2555, 368, 113, 180];                                                 // [AJUSTE] x, y, ancho y alto de la cascada (px de la imagen)
+const twH = i => { const x = Math.sin(i * 127.1) * 43758.5453; return x - Math.floor(x); };
+const twImg = src => { const i = new Image(), o = {i, ok: false}; i.onload = () => { o.ok = true; }; i.src = src; return o; };
+const TW_VIDA = {luz: [0, 1, 2].map(k => twImg('assets/fondos/torre_luces' + k + '.webp?v=1')), cas: twImg('assets/menu/cascada.webp?v=1'), casM: twImg('assets/fondos/torre_cascada_m.webp?v=1'), cv: null};
 let twFxRaf = 0, twStars = null, twFxLast = 0;
 function twFxLoop(){
   const cv = $('twFx'), root = $('twRoot'), scr = $('torrev');
@@ -476,31 +487,51 @@ function twFxLoop(){
   const c = cv.getContext('2d'), B = TW_BG, s = Math.max(W / B.w, H / B.h), ox = (W - B.w * s) / 2, oy = H - B.h * s, t = performance.now() / 1000, night = root.classList.contains('night');
   c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, W, H);
   c.setTransform(s, 0, 0, s, ox, oy);
-  c.beginPath(); c.rect(0, 0, B.w, B.h); c.rect(B.w * TW_TOWER_X[0], 0, B.w * (TW_TOWER_X[1] - TW_TOWER_X[0]), 760); c.clip('evenodd');       // todo MENOS la torre
-  const SKY = 560;                                                                        // el cielo llega hasta aquí (después empiezan los edificios)
+  c.beginPath(); c.rect(0, 0, B.w, B.h); c.rect(B.w * TW_TOWER_X[0], 0, B.w * (TW_TOWER_X[1] - TW_TOWER_X[0]), B.torreAlto); c.clip('evenodd');       // todo MENOS la torre
+  const SKY = B.sky;                                                                        // el cielo llega hasta aquí (después empiezan los edificios)
   if(night){                                                                              // estrellas que brillan
-    if(!twStars){ let a = 12345; const r = () => (a = (a * 16807) % 2147483647) / 2147483647; twStars = Array.from({length:70}, () => [r() * B.w, r() * (SKY - 230) + 230, r() * 6.28, .6 + r() * 1.4]); }
+    if(!twStars){ let a = 12345; const r = () => (a = (a * 16807) % 2147483647) / 2147483647; twStars = Array.from({length:70}, () => [r() * B.w, r() * (SKY - 20) + 20, r() * 6.28, .6 + r() * 1.4]); }
     c.fillStyle = '#fff';
-    twStars.forEach(([x, y, ph, sp]) => { if(Math.hypot(x - 1940, y - 250) < 200) return; c.globalAlpha = Math.max(0, Math.sin(t * sp + ph)) * .85; c.fillRect(x - 3, y - 3, 6, 6); });
+    twStars.forEach(([x, y, ph, sp]) => { if(Math.hypot(x - B.sol[0], y - B.sol[1]) < 200) return; c.globalAlpha = Math.max(0, Math.sin(t * sp + ph)) * .85; c.fillRect(x - 3, y - 3, 6, 6); });
     const q = (t * .12) % 1;                                                              // estrella fugaz
     if(q < .1){ const k = q / .1, fx = 2300 - k * 520 + Math.floor(t * .12) % 3 * 90, fy = 260 + k * 190; const g = c.createLinearGradient(fx, fy, fx + 160, fy - 70);
       g.addColorStop(0, `rgba(255,255,255,${1 - k})`); g.addColorStop(1, 'rgba(255,255,255,0)'); c.globalAlpha = 1; c.strokeStyle = g; c.lineWidth = 6; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + 160, fy - 70); c.stroke(); }
   }
   c.globalAlpha = 1;
-  for(let i = 0; i < 7; i++){                                                             // nubes suaves que pasan
-    const w = 380 + (i * 97 % 260), sp = 26 + (i * 13 % 22), x = ((t * sp + i * (B.w + 900) / 7) % (B.w + 900)) - 450, y = 300 + (i * 131 % 300);
-    c.fillStyle = night ? 'rgba(170,150,255,.07)' : 'rgba(255,255,255,.55)';
-    for(let k = 0; k < 6; k++){ const r = w * (.10 + .05 * ((k * 5 + i) % 4)), cx = x + (k - 2.5) * w * .18, cy = y - ((k % 3) ? r * .45 : 0); c.beginPath(); c.ellipse(cx, cy, r * 1.25, r * .8, 0, 0, 7); c.fill(); }
-  }
+  TW_NUBES.forEach(([k, y, sc, v, ph]) => {                                               // las nubes del menú (assets/menu/nube1..6.webp) que pasan
+    const o = TW_NUBE_IMG[k]; if(!o.ok) return; const w = o.i.width * sc, h = o.i.height * sc, span = B.w + w + 300;
+    const x = B.w + 150 - ((t * v + ph * span) % span); c.globalAlpha = night ? .45 : .95; c.drawImage(o.i, x, y, w, h); });
+  c.globalAlpha = 1;
   const sc = 2.1 / s;                                                                     // los voladores pasan por detrás de la torre
   TW_FLY_SLOTS.forEach((f, i) => {
     const cyc = f.dur + f.gap, n = Math.floor((t + f.off) / cyc), q = ((t + f.off) % cyc) / f.dur; if(q > 1) return;
-    const dex = TW_FLYERS[(n * 5 + i * 7) % TW_FLYERS.length], x = f.dir > 0 ? -150 + q * (B.w + 300) : B.w + 150 - q * (B.w + 300), y = 250 + f.y * 900 + Math.sin(t * 1.5 + i * 2 + n) * 14;
+    const dex = TW_FLYERS[(n * 5 + i * 7) % TW_FLYERS.length], x = f.dir > 0 ? -150 + q * (B.w + 300) : B.w + 150 - q * (B.w + 300), y = B.vuelo[0] + f.y * B.vuelo[1] + Math.sin(t * 1.5 + i * 2 + n) * 14;
     if('filter' in c) c.filter = night ? 'brightness(.22) saturate(.6)' : 'brightness(.42) saturate(.5)';
     c.globalAlpha = night ? .9 : .75; drawFrame(c, dex, 'Walk', t, f.dir > 0 ? 2 : 6, x, y, sc, 0, false);
   });
   c.filter = 'none'; c.globalAlpha = 1;
+  // la cascada del fondo: el agua animada del menú (assets/menu/cascada.webp) recortada con la forma de la cascada del dibujo
+  { const Sp = TW_VIDA.cas, M = TW_VIDA.casM, [X, Y, w, h] = TW_CASCADA;
+    if(Sp.ok && M.ok){ const K = 2; let o = TW_VIDA.cv; if(!o){ o = TW_VIDA.cv = document.createElement('canvas'); o.width = w * K; o.height = h * K; }
+      const q = o.getContext('2d'), fw = Sp.i.width / 6, fr = Math.floor(t * 6) % 6;
+      q.globalCompositeOperation = 'source-over'; q.clearRect(0, 0, o.width, o.height); q.drawImage(Sp.i, fr * fw, 0, fw, Sp.i.height, 0, -8 * K, o.width, o.height + 16 * K);
+      q.globalCompositeOperation = 'destination-in'; q.drawImage(M.i, 0, 0, o.width, o.height);
+      c.globalAlpha = .85; c.drawImage(o, X, Y, w, h);
+      c.globalCompositeOperation = 'lighter'; twGlow(c, X + w * .55, Y + h - 10, w * .8, 'rgba(230,245,255,A)', .14 + .06 * Math.sin(t * 3)); c.globalCompositeOperation = 'source-over'; } }
+  // luces: ventanas y farolillos (3 capas que laten cada una a su ritmo), las farolas grandes con su halo y algún parpadeo, y el sol
+  c.globalCompositeOperation = 'lighter';
+  TW_VIDA.luz.forEach((o, k) => { if(!o.ok) return; c.globalAlpha = (night ? .55 : .38) + .22 * Math.sin(t * (.9 + k * .45) + k * 2.1); c.drawImage(o.i, 0, 0, B.w, B.h); });
+  c.globalAlpha = 1;
+  TW_FAROLAS.forEach(([X, Y], i) => { const fl = twH(Math.floor(t * 9) + i * 13) < .04 ? .5 : 1; twGlow(c, X, Y, 95, 'rgba(255,200,110,A)', (.45 + .07 * Math.sin(t * 5 + i)) * fl); });
+  twGlow(c, B.sol[0], B.sol[1], 230, 'rgba(255,190,110,A)', .22 + .06 * Math.sin(t * .8));
+  c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  // luciérnagas sobre los árboles y la plaza
+  c.fillStyle = '#fff3a0';
+  for(let i = 0; i < 26; i++){ const u = (t * (.04 + twH(i) * .05) + twH(i + 9)) % 1, X = twH(i + 3) * B.w + Math.sin(t * .7 + i) * 40, Y = 1250 - u * 650 + Math.sin(t * 1.3 + i * 2) * 20;
+    if(X > B.w * TW_TOWER_X[0] && X < B.w * TW_TOWER_X[1]) continue; c.globalAlpha = Math.max(0, Math.sin(t * (2 + twH(i + 5) * 2) + i)) * (night ? .95 : .7) * Math.min(1, u * 5, (1 - u) * 5); c.fillRect(X - 3, Y - 3, 6, 6); }
+  c.globalAlpha = 1;
 }
+function twGlow(c, X, Y, r, col, a){ if(a <= 0) return; const g = c.createRadialGradient(X, Y, 0, X, Y, r); g.addColorStop(0, col.replace('A', Math.min(1, a).toFixed(3))); g.addColorStop(1, col.replace('A', '0')); c.fillStyle = g; c.fillRect(X - r, Y - r, r * 2, r * 2); }
 function twFit(){
   const root = $('twRoot'); if(!root || !root.offsetWidth) return;
   const W = root.offsetWidth, H = root.offsetHeight, B = TW_BG, s = Math.max(W / B.w, H / B.h), iw = B.w * s, ih = B.h * s, ox = (W - iw) / 2, oy = H - ih;   // pegado abajo
