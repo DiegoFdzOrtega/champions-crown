@@ -42,6 +42,7 @@ function lgState(){
   if(lg.mode === 'email' || lg.mode === 'guest') return lg.mode;
   if(!cloud.ready) return Date.now() - lg.t0 > LOGIN_WAIT ? 'offline' : 'wait';
   if(!cloud.ok) return 'offline';
+  if(cloud.user && cloud.recovery) return 'rec';                              // vuelve del enlace «cambiar contraseña» del correo: primero, la contraseña nueva
   if(cloud.user && cloud.needName) return 'name';
   if(cloud.user && cloud.name) return 'in';
   if(cloud.user) return 'wait';                                                // dentro, cargando el perfil
@@ -71,19 +72,27 @@ function lgRender(force){
     const up = lg.up;
     el.innerHTML = `<div class="ctabs"><button class="${up ? '' : 'on'}" data-tab="in">Entrar</button><button class="${up ? 'on' : ''}" data-tab="up">Crear cuenta</button></div>
       <form id="lgForm" autocomplete="on">
-        ${up ? `<label>Nombre de jugador<input id="lgName" type="text" maxlength="16" autocomplete="username" placeholder="3-16 letras, números o _"></label>` : ''}
+        ${up ? `<label>Nombre de jugador<input id="lgName" type="text" maxlength="24" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="3-16 letras, números o _"><small id="lgNameOk" class="help"></small></label>` : ''}
         <label>Email<input id="lgMail" type="email" autocomplete="email" placeholder="tu@correo.com" value="${lgEsc(lg.email)}"></label>
         <label>Contraseña<input id="lgPass" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" placeholder="mínimo 6 caracteres"></label>
         <button type="submit" class="main lg-big"${dis}>${up ? 'Crear cuenta' : 'Entrar'}</button>
       </form>${up ? '' : `<button type="button" id="lgForgot" class="linkbtn"${dis}>¿Has olvidado la contraseña?</button>`}${msg}
       <button id="lgBack" class="linkbtn">← Volver</button>`;
   }
+  else if(s === 'rec'){
+    el.innerHTML = `<h2>Elige tu contraseña nueva</h2>
+      <p class="help">Has entrado con el enlace del correo. Escribe la contraseña nueva dos veces.</p>
+      <form id="lgRecForm" autocomplete="off"><label>Contraseña nueva<input id="lgP1" type="password" autocomplete="new-password" placeholder="mínimo 6 caracteres"></label>
+      <label>Repite la contraseña nueva<input id="lgP2" type="password" autocomplete="new-password"></label>
+      <button type="submit" class="main lg-big"${dis}>Guardar contraseña nueva</button></form>${msg}
+      <button id="lgOut" class="linkbtn">Cancelar y cerrar sesión</button>`;
+  }
   else if(s === 'name'){
     const via = cloudHasGoogle() ? 'Google' : 'email', em = String((cloud.user && cloud.user.email) || '').replace(/[<&>"]/g, '');
     el.innerHTML = `<h2>Elige tu nombre de jugador</h2>
       <p class="warn lg-new">Has entrado con ${via} como <b>${em}</b>, y esa cuenta todavía <b>no tiene jugador</b>. Si ya tenías uno, seguramente lo creaste de otra forma (con email o con otro Google): pulsa «Usar otra cuenta» abajo y entra como la primera vez.</p>
       <p class="help">Si es tu primera vez, elige el nombre con el que te verán tus rivales y tus amigos. Tiene que ser único.</p>
-      <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="16" placeholder="3-16 letras, números o _" autocomplete="off"></label>
+      <form id="lgNameForm"><label>Nombre de jugador<input id="lgName" type="text" maxlength="24" placeholder="3-16 letras, números o _" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"><small id="lgNameOk" class="help"></small></label>
       <button type="submit" class="main lg-big"${dis}>Empezar</button></form>${msg}
       <p class="help lg-why">¿Ya tenías cuenta con email? Pulsa «Usar otra cuenta», entra con tu email y en <b>Cuenta</b> pulsa «Vincular mi cuenta de Google».</p>
       <button id="lgOut" class="linkbtn">Usar otra cuenta</button>`;
@@ -101,6 +110,12 @@ function lgRender(force){
     if(r) lg.err = r;
     lg.mode = 'wait'; lgRender(); };
   if(by('lgForgot')) by('lgForgot').onclick = async () => { const r = await lgRun(() => cloudResetMail(by('lgMail').value)); lg.err = r; lg.info = r ? '' : (typeof cloudUi !== 'undefined' && cloudUi.info) || 'Te hemos mandado un correo.'; lgRender(); };
+  if(by('lgName')) by('lgName').oninput = e => { const v = e.target.value, c = cloudCleanName(v), o = by('lgNameOk');      // te enseña cómo quedará el nombre
+    if(o) o.textContent = !v ? '' : c.length < 3 ? 'Mínimo 3 letras o números.' : c !== v ? `Se guardará como: ${c}` : '✓ Nombre válido'; };
+  if(by('lgRecForm')) by('lgRecForm').onsubmit = async e => { e.preventDefault();
+    const r = await lgRun(() => cloudRecoverPass(by('lgP1').value, by('lgP2').value));
+    if(r){ lg.err = r; lgRender(true); return; }
+    lg.info = 'Contraseña cambiada.'; lgRender(true); };
   if(by('lgNameForm')) by('lgNameForm').onsubmit = async e => { e.preventDefault();
     const r = await lgRun(() => cloudSetName(by('lgName').value));
     if(r){ lg.err = r; lgRender(); return; }

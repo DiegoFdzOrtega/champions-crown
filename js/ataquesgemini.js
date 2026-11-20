@@ -177,13 +177,12 @@ function agBeamTile(k, fr, L, W, A){
 // ---- Aerochorro como el Hiperrayo: rayo continuo que sale de la boca durante un rato y se gira con el ratón (js/fxvideo2.js, BEAMX),
 //      pero dibujado con el sprite de Gemini (crece, rayo entero con los anillos, al final se deshace en viento) ----
 const AG_RAYO = {                                                                   // rayos continuos con dibujo: nombre → [imagen, grosor (px)]
-  'Aerochorro':   ['aero', 84],
-  'Pulso Umbrío': ['pulso', 64]
+  'Aerochorro':   ['aero', 84]
 };
 if(AG.on && typeof BEAMX !== 'undefined'){
   BEAMX['Aerochorro'] = Object.assign({}, BEAMX['Hiperrayo'], {c: ['200,240,255', '#9ee8ff', '#e8fbff', '#ffffff'], onda: 'rgba(255,255,255,.9)'});
   // Pulso Umbrío como el Rayo Hielo: el disparo (clic derecho) es un rayo corto que sale de la boca, se mueve con el ratón y EMPUJA al rival
-  BEAMX['Pulso Umbrío'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .75, ancho: 20, dmg: 1, lento: .45, c: ['150,60,220', '#5a1a9a', '#2a0a4a', '#000000'], onda: 'rgba(200,120,255,.8)', hielo: 0, empuja: 240});
+  BEAMX['Pulso Umbrío'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .95, ancho: 36, dmg: 1, lento: .45, c: ['150,60,220', '#5a1a9a', '#2a0a4a', '#000000'], onda: 'rgba(200,120,255,.8)', hielo: 0, empuja: 240});
   if(typeof hb6Tick === 'function'){ const o = hb6Tick; hb6Tick = function(f, dt){ const r = o.apply(this, arguments);
     try{ const b = f.burst; if(b && b.K && b.K.empuja && b.hitOn){ const T = foe(b.mine); if(T && !T.dead){ T.x += Math.cos(b.cur) * b.K.empuja * dt; T.y += Math.sin(b.cur) * b.K.empuja * dt * .7; } } }catch(e){}
     return r; }; }
@@ -230,3 +229,97 @@ function agGaDraw(){
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = .55 * (1 - u); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
   ctx.globalAlpha = u > .75 ? (1 - u) / .25 : 1; ctx.imageSmoothingEnabled = true; agFrame(ctx, 'ga', fr, 0, 0, w, h); ctx.restore();
 }
+
+/* =====================================================================
+   PULSO UMBRÍO COMO EN EL VÍDEO (piezas de Gemini en assets/objetos/ataques/pu_*.png):
+   1) en la boca nace un ORBE con espiral rosa (pu_orbe, 8 figuras: 4 crece, 4 gira) y se queda ahí mientras dura;
+   2) sale disparado el RAYO: el cuerpo es una textura que se repite sin cortes (pu_cuerpo) y la energía corre hacia delante;
+      el rayo se ENSANCHA a lo lejos (estrecho en la boca, gordo al final), como en el vídeo;
+   3) COLLARES DE PINCHOS (pu_collar, 4 figuras) que avanzan por el rayo;
+   4) donde golpea, una EXPLOSIÓN (pu_impacto, 6 figuras) que se repite mientras le da;
+   5) debajo, la SOMBRA del rayo en el suelo; al acabar, el rayo se RECOGE hacia la boca, la sombra se desvanece
+      y queda una QUEMADURA en el suelo (pu_marca) unos segundos. El campo se oscurece mientras dura.
+   ===================================================================== */
+const PU = {
+  boca: .38, fin: 1.3,                // [AJUSTE] grosor del rayo en la boca y al final (× el grosor base)
+  base: 118,                           // [AJUSTE] grosor base (px)
+  sale: .14, recoge: .16,              // [AJUSTE] lo que tarda en salir y en recogerse (s)
+  corre: 520,                          // [AJUSTE] velocidad a la que corre la energía por el rayo (px/s)
+  collar: {cada: 120, vel: 380, fps: 10},
+  orbe: 1.15,                          // [AJUSTE] tamaño del orbe (× grosor en la boca... sobre el grosor base)
+  sombra: {drop: 52, a: .5},
+  marca: {dura: 3, alto: 54},          // [AJUSTE] lo que dura la quemadura (s) y su alto (px)
+  img: {}
+};
+[['cuerpo', 'pu_cuerpo', 1], ['collar', 'pu_collar', 4], ['orbe', 'pu_orbe', 8], ['imp', 'pu_impacto', 6], ['marca', 'pu_marca', 1]].forEach(([k, f, n]) => {
+  const i = new Image(), o = PU.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=1';
+});
+const puOk = () => AG.on && ['cuerpo', 'collar', 'orbe', 'imp'].every(k => PU.img[k].ok);
+const PU_RESTOS = [];                  // sombras que se desvanecen y quemaduras: {x0, y0, a, L, t0, tipo}
+const puW = (x, L) => PU.base * (PU.boca + (PU.fin - PU.boca) * Math.min(1, x / Math.max(1, L)));
+function puCuerpo(L, Lmax, t){         // en el sistema del rayo (x a lo largo); el ancho crece con la distancia
+  const S = PU.img.cuerpo, seg = 6, off = (t * PU.corre) % 1e6;
+  for(let x = 0; x < L; x += seg){
+    const w = Math.min(seg, L - x), h = puW(x + w / 2, Lmax), k = h / S.fh;      // escala de la textura en este trozo
+    let sx = ((x - off) / k) % S.fw; if(sx < 0) sx += S.fw; let sw = w / k, dx = x;
+    while(sw > 0.01){ const take = Math.min(sw, S.fw - sx); ctx.drawImage(S.i, sx, 0, take, S.fh, dx, -h / 2, take * k + .6, h); dx += take * k; sw -= take; sx = 0; }
+  }
+}
+function puPoly(b, L, Lmax, drop){     // contorno del rayo en el mundo (para la sombra)
+  const c = Math.cos(b.cur), s = Math.sin(b.cur), P = [], Q = [];
+  for(let x = 0; x <= L; x += Math.max(8, L / 20)){ const h = puW(x, Lmax) / 2, cx = b.x0 + c * x, cy = b.y0 + s * x + drop; P.push([cx - s * h, cy + c * h * .5]); Q.push([cx + s * h, cy - c * h * .5]); }
+  return P.concat(Q.reverse());
+}
+function puShadow(poly, a){ if(poly.length < 3) return; ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(14,0,26,${a.toFixed(3)})`; ctx.beginPath(); poly.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function puFrame(k, fr, cx, cy, w, h, rot){ const S = PU.img[k]; ctx.save(); ctx.translate(cx, cy); if(rot) ctx.rotate(rot); ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, -w / 2, -h / 2, w, h); ctx.restore(); }
+function puDraw(f){
+  const b = f.burst, K = b.K, t = b.t, T = K.T; let Lmax = Math.max(60, b.len), toca = false;
+  { const E = foe(b.mine); if(E && !E.dead && !E.ghost){                         // el rayo se para en el cuerpo del rival (como en el vídeo), aunque sea grande
+      const bo = typeof bodyOf === 'function' ? bodyOf(E) : {top: E.y - 50, foot: E.y + 20}, cy = (bo.top + bo.foot) / 2, ux = Math.cos(b.cur), uy = Math.sin(b.cur);
+      const px = E.x - b.x0, py = cy - b.y0, u = px * ux + py * uy, v = Math.abs(-px * uy + py * ux), rad = Math.max(26, (bo.foot - bo.top) * .45);
+      if(u > 0 && u < 900 && v < rad + PU.base * PU.fin * .4){ Lmax = Math.max(40, u - rad * .3); toca = true; } } }
+  const salir = Math.min(1, t / PU.sale), rec = t > T - PU.recoge ? Math.max(0, (T - t) / PU.recoge) : 1;
+  const L = Lmax * (1 - Math.pow(1 - salir, 3)) * rec;                         // sale disparado y al final se recoge hacia la boca
+  b.puPoly = puPoly(b, L, Lmax, PU.sombra.drop); b.puL = L;
+  puShadow(b.puPoly, PU.sombra.a);                                              // la sombra en el suelo
+  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalCompositeOperation = 'source-over';
+  ctx.translate(b.x0, b.y0); ctx.rotate(b.cur); if(Math.cos(b.cur) < 0) ctx.scale(1, -1);
+  if(L > 4){
+    puCuerpo(L, Lmax, g.t);                                                     // el cuerpo
+    const C = PU.img.collar, fr = Math.floor(g.t * PU.collar.fps) % C.n, off = (g.t * PU.collar.vel) % PU.collar.cada;
+    for(let x = 40 + off; x < L - 20; x += PU.collar.cada){ const h = puW(x, Lmax) * 1.35; puFrame('collar', fr, x, 0, h * C.fw / C.fh * .62, h); }      // collares que avanzan
+    ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(L, 0, 0, L, 0, puW(L, Lmax));                 // la punta brilla
+    gr.addColorStop(0, 'rgba(230,140,255,.85)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(L - 80, -80, 160, 160); ctx.globalCompositeOperation = 'source-over';
+  }
+  ctx.restore();
+  ctx.save(); ctx.imageSmoothingEnabled = false;                                // el orbe en la boca
+  const O = PU.img.orbe, ofr = t < .16 ? Math.min(3, Math.floor(t / .04)) : 4 + Math.floor(g.t * 14) % 4, od = PU.base * PU.orbe * (t < .16 ? .5 + t / .32 : 1) * (.6 + .4 * rec);
+  ctx.globalAlpha = Math.min(1, rec * 1.5); puFrame('orbe', ofr, b.x0, b.y0, od, od, 0); ctx.restore();
+  if(toca && L > Lmax * .9){                                                // explosión donde golpea
+    const I = PU.img.imp, ifr = Math.floor(g.t * 16) % 3 + (Math.floor(g.t * 3) % 2), d = puW(Lmax, Lmax) * 1.45;
+    ctx.save(); ctx.imageSmoothingEnabled = false; puFrame('imp', ifr, b.x0 + Math.cos(b.cur) * Lmax, b.y0 + Math.sin(b.cur) * Lmax, d, d, 0); ctx.restore();
+    b.puHit = {x: b.x0 + Math.cos(b.cur) * Lmax, y: b.y0 + Math.sin(b.cur) * Lmax, d};
+  }
+  if(t > T - .06 && !b.puEnd){ b.puEnd = 1;                                     // al acabar: la sombra se desvanece, queda la quemadura y el humo del golpe
+    PU_RESTOS.push({tipo: 'sombra', poly: puPoly(b, Lmax, Lmax, PU.sombra.drop), t0: g.t});
+    PU_RESTOS.push({tipo: 'marca', x0: b.x0, y0: b.y0 + PU.sombra.drop, a: b.cur, L: Lmax, t0: g.t});
+    if(b.puHit) PU_RESTOS.push({tipo: 'humo', ...b.puHit, t0: g.t});
+  }
+}
+if(AG.on && typeof hb6Draw === 'function'){ const o = hb6Draw; hb6Draw = function(){
+  if(!g || !puOk()) return o.apply(this, arguments);
+  const L = [...g.p, ...g.e].filter(f => f && f.burst && f.burst.hb && f.burst.nm === 'Pulso Umbrío' && f.burst.x0 != null), B = L.map(f => f.burst);
+  L.forEach(f => { f.burst = null; }); try{ o.apply(this, arguments); } finally { L.forEach((f, i) => { f.burst = B[i]; }); }
+  L.forEach(f => { try{ puDraw(f); }catch(e){} });
+  for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i], u = g.t - R.t0;   // sombras y humo que se van
+    if(R.tipo === 'sombra'){ if(u > .6){ PU_RESTOS.splice(i, 1); continue; } puShadow(R.poly, PU.sombra.a * (1 - u / .6)); }
+    else if(R.tipo === 'humo'){ if(u > .3){ PU_RESTOS.splice(i, 1); continue; } ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1 - u / .3; puFrame('imp', 3 + Math.min(2, Math.floor(u / .1)), R.x, R.y, R.d * 1.1, R.d * 1.1, 0); ctx.restore(); }
+  }
+}; }
+// la quemadura va en el suelo (debajo de los Pokémon)
+if(AG.on && typeof fxhdGround === 'function'){ const o = fxhdGround; fxhdGround = function(){ const r = o.apply(this, arguments);
+  try{ if(g && PU.img.marca.ok) for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i]; if(R.tipo !== 'marca') continue; const u = (g.t - R.t0) / PU.marca.dura;
+    if(u >= 1){ PU_RESTOS.splice(i, 1); continue; }
+    const S = PU.img.marca; ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .85 * Math.min(1, (1 - u) * 3);
+    ctx.translate(R.x0, R.y0); ctx.scale(1, .6); ctx.rotate(R.a); ctx.drawImage(S.i, 0, 0, S.fw, S.fh, 0, -PU.marca.alto / 2, R.L, PU.marca.alto); ctx.restore(); } }catch(e){}
+  return r; }; }

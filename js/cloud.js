@@ -70,9 +70,12 @@ async function cloudAfterLogin(){
 }
 
 const CLOUD_NAME_RE = /^[A-Za-z0-9_]{3,16}$/;
+// Limpia el nombre que escribe el jugador para que valga: quita tildes (á→a, ñ→n), cambia espacios por _ y quita el resto de símbolos.
+// (en el móvil el teclado suele poner tildes, mayúsculas o espacios sin darte cuenta, y el nombre se rechazaba)
+const cloudCleanName = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().replace(/\s+/g, '_').replace(/[^A-Za-z0-9_]/g, '').slice(0, 16);
 async function cloudSetName(name){                                                                 // crea el perfil (nombre único, sin distinguir mayúsculas)
-  name = String(name || '').trim();
-  if(!CLOUD_NAME_RE.test(name)) return 'El nombre debe tener de 3 a 16 caracteres: letras sin tilde, números o _.';
+  name = cloudCleanName(name);
+  if(!CLOUD_NAME_RE.test(name)) return 'El nombre es demasiado corto: necesita al menos 3 letras o números.';
   const {error} = await cloud.sb.from('profiles').insert({id: cloud.user.id, username: name});
   if(error) return error.code === '23505' ? 'Ese nombre ya lo tiene otro jugador. Prueba con otro.' : 'No se pudo guardar el nombre: ' + error.message;
   cloud.name = name; cloud.needName = false; cloudRtStart(); if(typeof refreshHud === 'function') refreshHud(); return '';
@@ -94,8 +97,8 @@ function cloudErr(e){
 }
 
 async function cloudSignUp(email, pass, name){
-  name = String(name || '').trim();
-  if(!CLOUD_NAME_RE.test(name)) return 'El nombre de jugador debe tener de 3 a 16 caracteres: letras sin tilde, números o _.';
+  name = cloudCleanName(name);
+  if(!CLOUD_NAME_RE.test(name)) return 'El nombre de jugador es demasiado corto: necesita al menos 3 letras o números.';
   const {data, error} = await cloud.sb.auth.signUp({email: String(email || '').trim(), password: pass});
   if(error) return cloudErr(error);
   if(!data.session) return '¡Cuenta creada! Te hemos enviado un correo para confirmarla; después pulsa «Entrar».';   // solo si «Confirm email» está activado en Supabase

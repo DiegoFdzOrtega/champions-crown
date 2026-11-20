@@ -26,7 +26,7 @@ function cloudHtml(mode){                                       // mode 'friends
       <p class="help">o con tu email:</p>
       <div class="ctabs"><button class="${up ? '' : 'on'}" data-tab="in">Entrar</button><button class="${up ? 'on' : ''}" data-tab="up">Crear cuenta</button></div>
       <form id="cloudForm" autocomplete="on">
-        ${up ? `<label>Nombre de jugador<input id="cfName" type="text" maxlength="16" autocomplete="username" placeholder="3-16 letras, números o _"></label>` : ''}
+        ${up ? `<label>Nombre de jugador<input id="cfName" type="text" maxlength="24" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" placeholder="3-16 letras, números o _"></label>` : ''}
         <label>Email<input id="cfEmail" type="email" autocomplete="email" placeholder="tu@correo.com" value="${cloudEsc(cloudUi.email || '')}"></label>
         <label>Contraseña<input id="cfPass" type="password" autocomplete="${up ? 'new-password' : 'current-password'}" placeholder="mínimo 6 caracteres"></label>
         <button type="submit" class="main"${dis}>${up ? 'Crear cuenta' : 'Entrar'}</button>
@@ -42,7 +42,7 @@ function cloudHtml(mode){                                       // mode 'friends
   if(cloud.needName){
     return `<h2>Elige tu nombre de jugador</h2>
       <p class="help">Es el nombre con el que tus amigos te buscarán. Tiene que ser único.</p>
-      <form id="cloudNameForm"><label>Nombre de jugador<input id="cfName" type="text" maxlength="16" placeholder="3-16 letras, números o _"></label>
+      <form id="cloudNameForm"><label>Nombre de jugador<input id="cfName" type="text" maxlength="24" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="3-16 letras, números o _"></label>
       <button type="submit" class="main"${dis}>Guardar nombre</button></form>${msg}<button id="cloudOut" class="sec">Cerrar sesión</button>`;
   }
   if(cloud.conflict){
