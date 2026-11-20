@@ -16,7 +16,7 @@ const AG = {
   oscuro: .32,                                                                     // [AJUSTE] cuánto se oscurece el campo con Brecha Negra (0 = nada)
   img: {}
 };
-[['pulso', 'pulso_umbrio', 6], ['aero', 'aerochorro', 6], ['luz', 'pantalla_luz', 6], ['ga', 'golpe_aereo', 6]].forEach(([k, f, n]) => {
+[['pulso', 'pulso_umbrio', 6], ['aero', 'aerochorro', 6], ['ga', 'golpe_aereo', 6]].forEach(([k, f, n]) => {
   const i = new Image(), o = AG.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=2';
 });
 const agOk = k => AG.on && AG.img[k] && AG.img[k].ok;
@@ -259,6 +259,14 @@ if(AG.on && typeof BEAMX !== 'undefined'){
   BEAMX['Aerochorro'] = Object.assign({}, BEAMX['Hiperrayo'], {c: ['200,240,255', '#9ee8ff', '#e8fbff', '#ffffff'], onda: 'rgba(255,255,255,.9)'});
   // Pulso Umbrío como el Rayo Hielo: el disparo (clic derecho) es un rayo corto que sale de la boca, se mueve con el ratón y EMPUJA al rival
   BEAMX['Pulso Umbrío'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .95, ancho: 36, dmg: 1, cd: 2.2, lento: .45, c: ['150,60,220', '#5a1a9a', '#2a0a4a', '#000000'], onda: 'rgba(200,120,255,.8)', hielo: 0, empuja: 240});
+  BEAMX['Psicorrayo'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['255,120,220', '#d048b0', '#ff8fd8', '#ffffff'], onda: 'rgba(255,220,250,.9)', hielo: 0});      // rayo continuo como Rayo Hielo, con las piezas pr_*
+  // Rayo, Tinieblas y Dragoaliento: de disparo a rayo continuo de clic, como Rayo Hielo (sin congelar)
+  BEAMX['Rayo'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .7, ancho: 26, dmg: 1, cd: 1.8, lento: .5, c: ['255,230,80', '#ffd23a', '#fff6a0', '#ffffff'], onda: 'rgba(255,255,220,.9)', hielo: 0});
+  BEAMX['Tinieblas'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['150,60,200', '#6a2a9a', '#c27bff', '#ffffff'], onda: 'rgba(220,150,255,.8)', hielo: 0});
+  BEAMX['Dragoaliento'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['60,220,200', '#1a9a8a', '#7fffe0', '#ffffff'], onda: 'rgba(200,255,245,.9)', hielo: 0});
+  // [AJUSTE] recarga (s) de los rayos de clic: aquí, todos juntos, para equilibrarlos de un vistazo
+  const RAYO_CD = {'Rayo Hielo': 3.2, 'Psicorrayo': 3.2, 'Pulso Dragón': 3.2, 'Rayo': 3.2, 'Tinieblas': 3.2, 'Dragoaliento': 3.2, 'Pulso Umbrío': 3.6};
+  for(const n in RAYO_CD) if(BEAMX[n]) BEAMX[n].cd = RAYO_CD[n];
   if(typeof hb6Tick === 'function'){ const o = hb6Tick; hb6Tick = function(f, dt){ const r = o.apply(this, arguments);
     try{ const b = f.burst; if(b && b.K && b.K.empuja && b.hitOn){ const T = foe(b.mine); if(T && !T.dead){ T.x += Math.cos(b.cur) * b.K.empuja * dt; T.y += Math.sin(b.cur) * b.K.empuja * dt * .7; } } }catch(e){}
     return r; }; }
@@ -278,19 +286,49 @@ if(AG.on && typeof BEAMX !== 'undefined'){
 
 // ---------------- Pantalla de Luz (Latios y Latias, tecla Q): un muro de hexágonos delante del Pokémon mientras dura ----------------
 if(typeof Q_FX !== 'undefined') Q_FX['Pantalla de Luz'] = {def: .6, tx: '¡Pantalla de Luz!'};
+// ---- Pantalla de Luz como en el vídeo: una PARED DE HEXÁGONOS de cristal delante del Pokémon, mirando al rival ----
+// Gemini dibuja un solo hexágono (pl_hex: 3 aparece + 3 brillo) y cómo se rompe (pl_hex_fin, 6); la pared la monta el juego.
+const PLZ = {
+  filas: 5, cols: 3,           // [AJUSTE] tamaño de la pared en hexágonos
+  tam: .8, min: 46, max: 80,   // [AJUSTE] alto de cada hexágono (× alto del Pokémon), mínimo y máximo (px)
+  junto: .62,                  // [AJUSTE] lo juntos que van (menos = se solapan más)
+  lejos: .75,                  // [AJUSTE] a qué distancia del Pokémon se pone la pared (× ancho de la pared)
+  sale: .035,                  // [AJUSTE] cada cuánto aparece el siguiente hexágono (s)
+  fuerte: .7, luego: .5,       // [AJUSTE] segundos que se ve fuerte y opacidad después (medio transparente)
+  img: {}
+};
+[['hex', 'pl_hex', 6], ['fin', 'pl_hex_fin', 6]].forEach(([k, f, n]) => { const i = new Image(), o = PLZ.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=1'; });
+function plzCeldas(){                                                             // posiciones del panal (de abajo arriba)
+  const C = []; for(let r = 0; r < PLZ.filas; r++) for(let c = 0; c < PLZ.cols; c++){ if(c % 2 && r === PLZ.filas - 1) continue; C.push([c - (PLZ.cols - 1) / 2, r, c % 2 ? .5 : 0]); }
+  return C.sort((a, b) => b[1] - a[1] || Math.abs(a[0]) - Math.abs(b[0]));
+}
+const PLZ_CELDAS = plzCeldas();
 function agLuzDraw(){
-  if(!agOk('luz')) return; const S = AG.img.luz;
+  const H = PLZ.img.hex, F = PLZ.img.fin; if(!AG.on || !H.ok) return;
   [...g.p, ...g.e].forEach(f => {
     const on = f && !f.dead && f.buff > 0 && f.qfx === (typeof Q_FX !== 'undefined' && Q_FX['Pantalla de Luz']);
-    if(!on){ if(f && f.agLuz && !f.agLuz.end) f.agLuz.end = g.t; if(f && f.agLuz && f.agLuz.end && g.t - f.agLuz.end > .3) f.agLuz = null; if(!(f && f.agLuz)) return; }
+    if(!on){ if(f && f.agLuz && !f.agLuz.end) f.agLuz.end = g.t; if(f && f.agLuz && f.agLuz.end && g.t - f.agLuz.end > .6) f.agLuz = null; if(!(f && f.agLuz)) return; }
     else if(!f.agLuz || f.agLuz.end) f.agLuz = {t0: g.t};
     const L = f.agLuz, a = g.t - L.t0, end = L.end ? g.t - L.end : -1;
-    const fr = end >= 0 ? 5 : a < .3 ? Math.floor(a / .1) : 3 + (Math.floor(g.t * 6) % 2);
-    const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20}, H2 = Math.max(70, (b.foot - b.top) * 1.25), W2 = H2 * S.fw / S.fh;
-    const D = typeof DIRV !== 'undefined' ? DIRV[f.dir || 0] : [1, 0], cx = f.x + D[0] * 34, cy = (b.top + b.foot) / 2 + D[1] * 14;
-    ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = (end >= 0 ? Math.max(0, 1 - end / .3) : 1) * .82;
-    ctx.translate(cx, cy); if(Math.abs(D[0]) > .5) ctx.scale(.55, 1);                                    // de lado se ve el muro de canto
-    agFrame(ctx, 'luz', fr, -W2 / 2, -H2 / 2, W2, H2); ctx.restore();
+    const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20}, bh = b.foot - b.top;
+    const hh = Math.max(PLZ.min, Math.min(PLZ.max, bh * PLZ.tam)), hw = hh * H.fw / H.fh, dx = hw * PLZ.junto * 1.05, dy = hh * PLZ.junto;
+    let ux, uy; const E = typeof foe === 'function' ? foe(g.p.includes(f)) : null;                    // hacia el rival (si no, hacia donde mira)
+    if(E && !E.dead){ const vx = E.x - f.x, vy = E.y - f.y, d = Math.hypot(vx, vy) || 1; ux = vx / d; uy = vy / d; } else { const D = typeof DIRV !== 'undefined' ? DIRV[f.dir || 0] : [1, 0]; ux = D[0]; uy = D[1]; }
+    const ancho = dx * PLZ.cols, alto = dy * (PLZ.filas - 1) + hh, R = Math.max(bh * .45, ancho * PLZ.lejos);
+    const cx = f.x + ux * R, base = b.foot + uy * R * .5;                           // la pared se apoya en el suelo, delante del Pokémon
+    const op = a < PLZ.fuerte ? 1 : Math.max(PLZ.luego, 1 - (a - PLZ.fuerte) / .3 * (1 - PLZ.luego));
+    ctx.save(); ctx.imageSmoothingEnabled = false;
+    PLZ_CELDAS.forEach(([c, r, o], i) => {
+      const x = cx + c * dx, y = base - hh / 2 - (r + o) * dy - 4;
+      if(end >= 0){                                                                // se rompe: cada hexágono, un poco después del anterior
+        const u = end - i * .02; if(u < 0){ ctx.globalAlpha = op; ctx.drawImage(H.i, 3 * H.fw, 0, H.fw, H.fh, x - hw / 2, y - hh / 2, hw, hh); return; }
+        if(!F.ok) return; const fr = Math.floor(u / .06); if(fr > 5) return; const fw = hh * F.fw / F.fh * 1.05;
+        ctx.globalAlpha = 1; ctx.drawImage(F.i, fr * F.fw, 0, F.fw, F.fh, x - fw / 2, y - hh * 1.05 / 2, fw, hh * 1.05); return; }
+      const u = a - i * PLZ.sale; if(u < 0) return;
+      const fr = u < .15 ? Math.floor(u / .05) : 3 + Math.floor((g.t * 6 + i * .7)) % 3;
+      ctx.globalAlpha = u < .15 ? 1 : op; ctx.drawImage(H.i, fr * H.fw, 0, H.fw, H.fh, x - hw / 2, y - hh / 2, hw, hh);
+    });
+    ctx.restore();
   });
 }
 // ---------------- Golpe Aéreo (Swellow y Taillow, golpe): al acertar, la pantalla se llena de rayas de manga y el tajo ----------------
@@ -321,81 +359,132 @@ const PU = {
   base: 72,                            // [AJUSTE] grosor base (px)
   sale: .14, recoge: .16,              // [AJUSTE] lo que tarda en salir y en recogerse (s)
   corre: 520,                          // [AJUSTE] velocidad a la que corre la energía por el rayo (px/s)
-  collar: {cada: 120, vel: 380, fps: 10},
-  orbe: 1.15,                          // [AJUSTE] tamaño del orbe (× grosor en la boca... sobre el grosor base)
-  sombra: {drop: 52, a: .5},
-  marca: {dura: 3, alto: 54},          // [AJUSTE] lo que dura la quemadura (s) y su alto (px)
+  collar: {cada: 90, vel: 380, fps: 10, tam: 1.55},      // [AJUSTE] collares: cada cuántos px, velocidad y tamaño
+  aura: .2, late: .07, motas: 1,      // [AJUSTE] brillo de alrededor · cuánto late el grosor · cantidad de humo negro que suelta (0 = nada)
+  orbe: 1.4,                          // [AJUSTE] tamaño del orbe (× grosor en la boca... sobre el grosor base)
+  sombra: {drop: 52, a: .42, ancho: .55},     // [AJUSTE] sombra en el suelo: px por debajo, opacidad y ancho (× el del rayo)
+  marca: {dura: 3, alto: 115, entra: .25},   // [AJUSTE] lo que dura la quemadura (s), su alto (px, sin aplastar) y lo que tarda en aparecer
   img: {}
 };
-[['cuerpo', 'pu_cuerpo', 1], ['collar', 'pu_collar', 4], ['orbe', 'pu_orbe', 8], ['imp', 'pu_impacto', 6], ['marca', 'pu_marca', 1]].forEach(([k, f, n]) => {
-  const i = new Image(), o = PU.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=1';
+function rgCarga(P, pre, v){ [['cuerpo', pre + '_cuerpo', 1], ['collar', pre + '_collar', 4], ['orbe', pre + '_orbe', 8], ['imp', pre + '_impacto', 6], ['marca', pre + '_marca', 1]].forEach(([k, f, n]) => {
+  if(k === 'orbe' && P.sinOrbe){ P.img.orbe = {ok: false}; return; }               // sin bola propia: en la boca va la de la carga de la E (js/cargas.js)
+  const i = new Image(), o = P.img[k] = {i, n, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / n; o.fh = i.height; }; i.src = 'assets/objetos/ataques/' + f + '.png?v=' + v;
+}); }
+PU.col = {sombra: '14,0,26', motas: ['#12041e', '#b05cff'], ondas: ['#c27bff', '#2a0a40'], brillo: 'rgba(230,140,255,.85)'};
+rgCarga(PU, 'pu', 1);
+// ---- Psicorrayo: el mismo montaje con sus piezas rosas (pr_*.png) ----
+const RG_PSI = Object.assign({}, PU, {
+  boca: .45, fin: 1.15, base: 62, corre: 640,
+  collar: {cada: 85, vel: 460, fps: 10, tam: 1.5},
+  aura: .25, late: .06, motas: 1, orbe: 1.3,
+  sombra: {drop: 52, a: .3, ancho: .5},
+  marca: {dura: 2.5, alto: 95, entra: .2},
+  col: {sombra: '60,0,50', motas: ['#ffffff', '#ff6fd0'], ondas: ['#ff8fe0', '#7de3ff'], brillo: 'rgba(255,190,240,.9)'},
+  img: {}
 });
-const puOk = () => AG.on && ['cuerpo', 'collar', 'orbe', 'imp'].every(k => PU.img[k].ok);
+rgCarga(RG_PSI, 'pr', 1);
+// ---- Los demás rayos de clic (cada uno con sus 5 piezas de una hoja de Gemini) ----
+const rgNuevo = (pre, o) => { const P = Object.assign({}, PU, {collar: {cada: 85, vel: 440, fps: 10, tam: 1.45}, aura: .22, late: .06, motas: 1, orbe: 1.3,
+  sombra: {drop: 52, a: .3, ancho: .5}, marca: {dura: 2.5, alto: 95, entra: .2}}, o, {img: {}}); rgCarga(P, pre, o.v || 1); return P; };
+const RG_HIELO = rgNuevo('rh', {boca: .5, fin: 1.1, base: 56, corre: 600, col: {sombra: '0,40,70', motas: ['#ffffff', '#9ee8ff'], ondas: ['#c8f4ff', '#5fc8f0'], brillo: 'rgba(210,245,255,.9)'}});
+const RG_DRAGON = rgNuevo('pdr', {boca: .45, fin: 1.15, base: 64, corre: 620, col: {sombra: '30,0,60', motas: ['#ffffff', '#9a7cff'], ondas: ['#b48cff', '#4c6cff'], brillo: 'rgba(200,170,255,.9)'}});
+const RG_TINIEB = rgNuevo('ti', {boca: .45, fin: 1.2, base: 60, corre: 520, col: {sombra: '20,0,30', motas: ['#14051f', '#c27bff'], ondas: ['#d07bff', '#2a0a40'], brillo: 'rgba(220,150,255,.85)'}});
+const RG_DRAGOA = rgNuevo('da', {boca: .45, fin: 1.2, base: 62, corre: 580, col: {sombra: '0,40,35', motas: ['#e8fff8', '#3fe0c8'], ondas: ['#7fffe0', '#1a9a8a'], brillo: 'rgba(180,255,240,.9)'}});
+const RG_RAYO = rgNuevo('ry', {boca: .5, fin: 1.1, base: 54, corre: 760, late: .1, v: 2, marca: {dura: 2.5, alto: 80, entra: .2},      // marca propia: suelo quemado con grietas amarillas (ry_marca)
+  col: {sombra: '40,30,0', motas: ['#ffffff', '#ffe14a'], ondas: ['#fff6a0', '#ffb020'], brillo: 'rgba(255,250,200,.95)'}});
+// ---- Rayos grandes de la E (hoja de Gemini de 4 filas: cuerpo, anillos, impacto, marca; la bola de la boca es la de la carga) ----
+const RG_HIPER = rgNuevo('hr', {sinOrbe: 1, boca: .5, fin: 1.25, base: 92, corre: 700, orbe: .95, collar: {cada: 110, vel: 520, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '60,20,0', motas: ['#fff3c0', '#ff7a14'], ondas: ['#ffd24a', '#ff5a10'], brillo: 'rgba(255,220,150,.95)'}});
+const RG_HIDRO = rgNuevo('hb', {sinOrbe: 1, boca: .5, fin: 1.25, base: 86, corre: 640, orbe: .95, collar: {cada: 110, vel: 480, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '0,30,70', motas: ['#ffffff', '#7cc8ff'], ondas: ['#eaf8ff', '#2f7fe0'], brillo: 'rgba(200,235,255,.9)'}});
+const RG_SOLAR = rgNuevo('rs', {sinOrbe: 1, boca: .5, fin: 1.25, base: 90, corre: 700, orbe: .95, collar: {cada: 110, vel: 520, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '40,40,0', motas: ['#ffffff', '#c8ff5a'], ondas: ['#fff6a0', '#7fd63a'], brillo: 'rgba(255,255,200,.95)'}});
+const RG_FOCO = rgNuevo('fr', {sinOrbe: 1, boca: .5, fin: 1.2, base: 84, corre: 680, orbe: .95, collar: {cada: 110, vel: 500, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '20,30,50', motas: ['#ffffff', '#c8d4f0'], ondas: ['#ffffff', '#9aa8c8'], brillo: 'rgba(235,242,255,.95)'}});
+const RAYOS_G = {'Hiperrayo': RG_HIPER, 'Hidrobomba': RG_HIDRO, 'Rayo Solar': RG_SOLAR, 'Foco Resplandor': RG_FOCO, 'Pulso Umbrío': PU, 'Psicorrayo': RG_PSI, 'Rayo Hielo': RG_HIELO, 'Pulso Dragón': RG_DRAGON, 'Tinieblas': RG_TINIEB, 'Dragoaliento': RG_DRAGOA, 'Rayo': RG_RAYO};   // [AJUSTE] rayos montados con piezas de Gemini: nombre → su configuración
+if(typeof v8PulsoDraw === 'function'){ const o = v8PulsoDraw; v8PulsoDraw = function(){ if(puOk(RG_DRAGON)) return; return o.apply(this, arguments); }; }      // los anillos viejos del Pulso Dragón, fuera (ya van en las piezas nuevas)
+const puOk = P => AG.on && P && ['cuerpo', 'collar', 'imp'].every(k => P.img[k].ok) && (P.sinOrbe || P.img.orbe.ok);
 const PU_RESTOS = [];                  // sombras que se desvanecen y quemaduras: {x0, y0, a, L, t0, tipo}
-const puW = (x, L) => PU.base * (PU.boca + (PU.fin - PU.boca) * Math.min(1, x / Math.max(1, L)));
-function puCuerpo(L, Lmax, t){         // en el sistema del rayo (x a lo largo); el ancho crece con la distancia
-  const S = PU.img.cuerpo, seg = 6, off = (t * PU.corre) % 1e6;
+const puW = (P, x, L) => P.base * (P.boca + (P.fin - P.boca) * Math.min(1, x / Math.max(1, L)));
+function puCuerpo(P, L, Lmax, t){         // en el sistema del rayo (x a lo largo); el ancho crece con la distancia
+  const S = P.img.cuerpo, seg = 6, off = (t * P.corre) % 1e6;
   for(let x = 0; x < L; x += seg){
-    const w = Math.min(seg, L - x), h = puW(x + w / 2, Lmax), k = h / S.fh;      // escala de la textura en este trozo
+    const w = Math.min(seg, L - x), h = puW(P, x + w / 2, Lmax), k = h / S.fh;      // escala de la textura en este trozo
     let sx = ((x - off) / k) % S.fw; if(sx < 0) sx += S.fw; let sw = w / k, dx = x;
     while(sw > 0.01){ const take = Math.min(sw, S.fw - sx); ctx.drawImage(S.i, sx, 0, take, S.fh, dx, -h / 2, take * k + .6, h); dx += take * k; sw -= take; sx = 0; }
   }
 }
-function puPoly(b, L, Lmax, drop){     // contorno del rayo en el mundo (para la sombra)
-  const c = Math.cos(b.cur), s = Math.sin(b.cur), P = [], Q = [];
-  for(let x = 0; x <= L; x += Math.max(8, L / 20)){ const h = puW(x, Lmax) / 2, cx = b.x0 + c * x, cy = b.y0 + s * x + drop; P.push([cx - s * h, cy + c * h * .5]); Q.push([cx + s * h, cy - c * h * .5]); }
-  return P.concat(Q.reverse());
+function puPoly(P, b, L, Lmax, drop){     // contorno del rayo en el mundo (para la sombra)
+  const c = Math.cos(b.cur), s = Math.sin(b.cur), A = [], Q = [];
+  for(let x = 0; x <= L; x += Math.max(8, L / 20)){ const h = puW(P, x, Lmax) / 2 * P.sombra.ancho, cx = b.x0 + c * x, cy = b.y0 + s * x + drop; A.push([cx - s * h, cy + c * h * .5]); Q.push([cx + s * h, cy - c * h * .5]); }
+  return A.concat(Q.reverse());
 }
-function puShadow(poly, a){ if(poly.length < 3) return; ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(14,0,26,${a.toFixed(3)})`; ctx.beginPath(); poly.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); }
-function puFrame(k, fr, cx, cy, w, h, rot){ const S = PU.img[k]; ctx.save(); ctx.translate(cx, cy); if(rot) ctx.rotate(rot); ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, -w / 2, -h / 2, w, h); ctx.restore(); }
-function puDraw(f){
+function puShadow(poly, a, col){ if(poly.length < 3) return; ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(${col || '14,0,26'},${a.toFixed(3)})`; ctx.beginPath(); poly.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function puFrame(P, k, fr, cx, cy, w, h, rot){ const S = P.img[k]; ctx.save(); ctx.translate(cx, cy); if(rot) ctx.rotate(rot); ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, -w / 2, -h / 2, w, h); ctx.restore(); }
+function puDraw(f, P){
   const b = f.burst, K = b.K, t = b.t, T = K.T; let Lmax = Math.max(60, b.len), toca = false;
   { const E = foe(b.mine); if(E && !E.dead && !E.ghost){                         // el rayo se para en el cuerpo del rival (como en el vídeo), aunque sea grande
       const bo = typeof bodyOf === 'function' ? bodyOf(E) : {top: E.y - 50, foot: E.y + 20}, cy = (bo.top + bo.foot) / 2, ux = Math.cos(b.cur), uy = Math.sin(b.cur);
       const px = E.x - b.x0, py = cy - b.y0, u = px * ux + py * uy, v = Math.abs(-px * uy + py * ux), rad = Math.max(26, (bo.foot - bo.top) * .45);
-      if(u > 0 && u < 900 && v < rad + PU.base * PU.fin * .4){ Lmax = Math.max(40, u - rad * .3); toca = true; } } }
-  const salir = Math.min(1, t / PU.sale), rec = t > T - PU.recoge ? Math.max(0, (T - t) / PU.recoge) : 1;
+      if(u > 0 && u < 900 && v < rad + P.base * P.fin * .4){ Lmax = Math.max(40, u - rad * .3); toca = true; } } }
+  const salir = Math.min(1, t / P.sale), rec = t > T - P.recoge ? Math.max(0, (T - t) / P.recoge) : 1;
   const L = Lmax * (1 - Math.pow(1 - salir, 3)) * rec;                         // sale disparado y al final se recoge hacia la boca
-  b.puPoly = puPoly(b, L, Lmax, PU.sombra.drop); b.puL = L;
-  puShadow(b.puPoly, PU.sombra.a);                                              // la sombra en el suelo
+  b.puPoly = puPoly(P, b, L, Lmax, P.sombra.drop); b.puL = L;
+  puShadow(b.puPoly, P.sombra.a, P.col.sombra);                                              // la sombra en el suelo
   ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalCompositeOperation = 'source-over';
   ctx.translate(b.x0, b.y0); ctx.rotate(b.cur); if(Math.cos(b.cur) < 0) ctx.scale(1, -1);
   if(L > 4){
-    puCuerpo(L, Lmax, g.t);                                                     // el cuerpo
-    const C = PU.img.collar, fr = Math.floor(g.t * PU.collar.fps) % C.n, off = (g.t * PU.collar.vel) % PU.collar.cada;
-    for(let x = 40 + off; x < L - 20; x += PU.collar.cada){ const h = puW(x, Lmax) * 1.35; puFrame('collar', fr, x, 0, h * C.fw / C.fh * .62, h); }      // collares que avanzan
-    ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(L, 0, 0, L, 0, puW(L, Lmax));                 // la punta brilla
-    gr.addColorStop(0, 'rgba(230,140,255,.85)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(L - 80, -80, 160, 160); ctx.globalCompositeOperation = 'source-over';
+    const lat = 1 + P.late * Math.sin(g.t * 38);                               // el rayo late
+    if(P.aura){ ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = P.aura; ctx.scale(1, 1.75 * lat); puCuerpo(P, L, Lmax, g.t * .7); ctx.restore(); }      // el brillo morado de alrededor
+    ctx.save(); ctx.scale(1, lat); puCuerpo(P, L, Lmax, g.t); ctx.restore();       // el cuerpo
+    const N = Math.floor(L / 12 * P.motas);                                    // humo negro y chispas moradas que se escapan del rayo (en píxeles, como el resto)
+    for(let i = 0; i < N; i++){
+      const p = (g.t * 2.4 + bnH(i, 7)) % 1, x = (bnH(i, 3) * L + g.t * P.corre * .5) % L, w = puW(P, x, Lmax), sd = bnH(i, 5) < .5 ? -1 : 1;
+      const y = sd * (w * .32 + p * w * .55), z = Math.round(4 + bnH(i, 9) * 6) * (1 - p * .5);
+      ctx.globalAlpha = (1 - p) * .9; ctx.fillStyle = P.col.motas[i % 2]; ctx.fillRect(Math.round(x - p * 30), Math.round(y - z / 2), z, z);
+    }
+    ctx.globalAlpha = 1;
+    const C = P.img.collar, fr = Math.floor(g.t * P.collar.fps) % C.n, off = (g.t * P.collar.vel) % P.collar.cada;
+    for(let x = 40 + off; x < L - 20; x += P.collar.cada){ const h = puW(P, x, Lmax) * P.collar.tam; puFrame(P, 'collar', fr, x, 0, h * C.fw / C.fh * .62, h); }      // collares que avanzan
+    ctx.globalCompositeOperation = 'lighter'; const gr = ctx.createRadialGradient(L, 0, 0, L, 0, puW(P, L, Lmax));                 // la punta brilla
+    gr.addColorStop(0, P.col.brillo); gr.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = gr; ctx.fillRect(L - 80, -80, 160, 160); ctx.globalCompositeOperation = 'source-over';
   }
   ctx.restore();
   ctx.save(); ctx.imageSmoothingEnabled = false;                                // el orbe en la boca
-  const O = PU.img.orbe, ofr = t < .16 ? Math.min(3, Math.floor(t / .04)) : 4 + Math.floor(g.t * 14) % 4, od = PU.base * PU.orbe * (t < .16 ? .5 + t / .32 : 1) * (.6 + .4 * rec);
-  ctx.globalAlpha = Math.min(1, rec * 1.5); puFrame('orbe', ofr, b.x0, b.y0, od, od, 0); ctx.restore();
+  const O = P.img.orbe, ofr = t < .16 ? Math.min(3, Math.floor(t / .04)) : 4 + Math.floor(g.t * 14) % 4, od = P.base * P.orbe * (t < .16 ? .5 + t / .32 : 1) * (.6 + .4 * rec);
+  ctx.globalAlpha = Math.min(1, rec * 1.5);
+  if(O.ok) puFrame(P, 'orbe', ofr, b.x0, b.y0, od, od, 0);
+  else { const C = typeof CARGA !== 'undefined' && CARGA.img[b.type]; if(C && C.ok){ const d = (CARGA.boca.px || od) * (.6 + .4 * rec) * (1 + .05 * Math.sin(g.t * 22)); ctx.drawImage(C.i, 2 * C.fw, 0, C.fw, C.fh, b.x0 - d / 2, b.y0 - d / 2, d, d); } }      // la bola de la carga de la E
+  ctx.restore();
   if(toca && L > Lmax * .9){                                                // explosión donde golpea
-    const I = PU.img.imp, ifr = Math.floor(g.t * 16) % 3 + (Math.floor(g.t * 3) % 2), d = puW(Lmax, Lmax) * 1.45;
-    ctx.save(); ctx.imageSmoothingEnabled = false; puFrame('imp', ifr, b.x0 + Math.cos(b.cur) * Lmax, b.y0 + Math.sin(b.cur) * Lmax, d, d, 0); ctx.restore();
+    const I = P.img.imp, ifr = Math.floor(g.t * 16) % 3 + (Math.floor(g.t * 3) % 2), d = puW(P, Lmax, Lmax) * 1.45;
+    ctx.save(); ctx.imageSmoothingEnabled = false; puFrame(P, 'imp', ifr, b.x0 + Math.cos(b.cur) * Lmax, b.y0 + Math.sin(b.cur) * Lmax, d, d, 0); ctx.restore();
     b.puHit = {x: b.x0 + Math.cos(b.cur) * Lmax, y: b.y0 + Math.sin(b.cur) * Lmax, d};
+    ctx.save(); ctx.lineWidth = 4; for(let k = 0; k < 2; k++){ const u = (g.t * 4 + k * .5) % 1;          // ondas de choque oscuras que salen del golpe
+      ctx.globalAlpha = (1 - u) * .8; ctx.strokeStyle = P.col.ondas[k]; ctx.beginPath(); ctx.ellipse(b.puHit.x, b.puHit.y, d * (.3 + u * .7), d * (.3 + u * .7) * .8, 0, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+    if(!g.pvp && typeof fx !== 'undefined') fx.shake = Math.max(fx.shake || 0, 2.5);
   }
   if(t > T - .06 && !b.puEnd){ b.puEnd = 1;                                     // al acabar: la sombra se desvanece, queda la quemadura y el humo del golpe
-    PU_RESTOS.push({tipo: 'sombra', poly: puPoly(b, Lmax, Lmax, PU.sombra.drop), t0: g.t});
-    PU_RESTOS.push({tipo: 'marca', x0: b.x0, y0: b.y0 + PU.sombra.drop, a: b.cur, L: Lmax, t0: g.t});
-    if(b.puHit) PU_RESTOS.push({tipo: 'humo', ...b.puHit, t0: g.t});
+    PU_RESTOS.push({P, tipo: 'sombra', poly: puPoly(P, b, Lmax, Lmax, P.sombra.drop), t0: g.t});
+    if(P.marca.dura > 0) PU_RESTOS.push({P, tipo: 'marca', x0: b.x0, y0: b.y0 + P.sombra.drop, a: b.cur, L: Lmax, t0: g.t});
+    if(b.puHit) PU_RESTOS.push({P, tipo: 'humo', ...b.puHit, t0: g.t});
   }
 }
 if(AG.on && typeof hb6Draw === 'function'){ const o = hb6Draw; hb6Draw = function(){
-  if(!g || !puOk()) return o.apply(this, arguments);
-  const L = [...g.p, ...g.e].filter(f => f && f.burst && f.burst.hb && f.burst.nm === 'Pulso Umbrío' && f.burst.x0 != null), B = L.map(f => f.burst);
+  if(!g) return o.apply(this, arguments);
+  const L = [...g.p, ...g.e].filter(f => f && f.burst && f.burst.hb && puOk(RAYOS_G[f.burst.nm]) && f.burst.x0 != null), B = L.map(f => f.burst);
   L.forEach(f => { f.burst = null; }); try{ o.apply(this, arguments); } finally { L.forEach((f, i) => { f.burst = B[i]; }); }
-  L.forEach(f => { try{ puDraw(f); }catch(e){} });
-  for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i], u = g.t - R.t0;   // sombras y humo que se van
-    if(R.tipo === 'sombra'){ if(u > .6){ PU_RESTOS.splice(i, 1); continue; } puShadow(R.poly, PU.sombra.a * (1 - u / .6)); }
-    else if(R.tipo === 'humo'){ if(u > .3){ PU_RESTOS.splice(i, 1); continue; } ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1 - u / .3; puFrame('imp', 3 + Math.min(2, Math.floor(u / .1)), R.x, R.y, R.d * 1.1, R.d * 1.1, 0); ctx.restore(); }
+  L.forEach(f => { try{ puDraw(f, RAYOS_G[f.burst.nm]); }catch(e){} });
+  for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i], u = g.t - R.t0, P = R.P;   // sombras y humo que se van
+    if(R.tipo === 'sombra'){ if(u > .6){ PU_RESTOS.splice(i, 1); continue; } puShadow(R.poly, P.sombra.a * (1 - u / .6), P.col.sombra); }
+    else if(R.tipo === 'humo'){ if(u > .3){ PU_RESTOS.splice(i, 1); continue; } ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1 - u / .3; puFrame(P, 'imp', 3 + Math.min(2, Math.floor(u / .1)), R.x, R.y, R.d * 1.1, R.d * 1.1, 0); ctx.restore(); }
   }
 }; }
 // la quemadura va en el suelo (debajo de los Pokémon)
 if(AG.on && typeof fxhdGround === 'function'){ const o = fxhdGround; fxhdGround = function(){ const r = o.apply(this, arguments);
-  try{ if(g && PU.img.marca.ok) for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i]; if(R.tipo !== 'marca') continue; const u = (g.t - R.t0) / PU.marca.dura;
+  try{ if(g) for(let i = PU_RESTOS.length - 1; i >= 0; i--){ const R = PU_RESTOS[i], P = R.P; if(R.tipo !== 'marca' || !P.img.marca.ok) continue; const u = (g.t - R.t0) / P.marca.dura;
     if(u >= 1){ PU_RESTOS.splice(i, 1); continue; }
-    const S = PU.img.marca; ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .85 * Math.min(1, (1 - u) * 3);
-    ctx.translate(R.x0, R.y0); ctx.scale(1, .6); ctx.rotate(R.a); ctx.drawImage(S.i, 0, 0, S.fw, S.fh, 0, -PU.marca.alto / 2, R.L, PU.marca.alto); ctx.restore(); } }catch(e){}
+    // la quemadura con su forma de verdad (sin estirarla): copias seguidas a lo largo del rayo, una sí una no dada la vuelta, que aparecen desde la boca hacia el golpe
+    const S = P.img.marca, h = P.marca.alto, w = h * S.fw / S.fh, paso = w * .7, ve = Math.min(1, (g.t - R.t0) / P.marca.entra);
+    ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .9 * Math.min(1, (1 - u) * 3);
+    ctx.translate(R.x0, R.y0); ctx.scale(1, .55); ctx.rotate(R.a); ctx.beginPath(); ctx.rect(0, -h, R.L * ve + w * .15, h * 2); ctx.clip();
+    for(let x = -w * .15, i = 0; x < R.L * ve; x += paso, i++){ ctx.save(); ctx.translate(x + w / 2, 0); if(i % 2) ctx.scale(-1, 1); const k = i % 3 === 1 ? .82 : 1; ctx.drawImage(S.i, 0, 0, S.fw, S.fh, -w / 2, -h * k / 2, w, h * k); ctx.restore(); }
+    ctx.restore(); } }catch(e){}
   return r; }; }

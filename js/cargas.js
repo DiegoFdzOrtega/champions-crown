@@ -1,24 +1,41 @@
 "use strict";
 /* =====================================================================
-   CARGA DE LOS ATAQUES FUERTES (la E) CON DIBUJO, UNA POR TIPO (sprites de Gemini en assets/objetos/cargas/carga_<tipo>.png)
+   CARGA DE LOS ATAQUES FUERTES (la E) CON DIBUJO, UNA POR TIPO (sprites de Gemini en assets/objetos/cargas/carga2_<tipo>.png)
    Mientras mantienes la E, alrededor del Pokémon se forma un remolino del color de su tipo (6 figuras en una fila):
    las 4 primeras crecen según lo cargado y, cuando el ataque ya está listo, parpadea entre las 2 últimas.
    Todos los ataques E de un mismo tipo usan la misma carga. Los que ya tienen la suya propia la mantienen (CARGA.propias).
    Si falta la imagen de un tipo, se ve la carga de siempre (la dibujada con código).
    ===================================================================== */
 const CARGA = {
-  tipos: ['fuego', 'agua', 'planta', 'electrico', 'hielo', 'lucha', 'veneno', 'tierra', 'volador', 'psiquico', 'bicho', 'roca', 'fantasma', 'siniestro'],   // [AJUSTE] los tipos que ya tienen imagen: añade aquí el nombre cuando llegue una nueva
-  propias: ['Envite Ígneo', 'Rayo Solar'],                                     // ataques con carga propia dibujada (js/embestida.js, js/fxnuevos.js)
-  tam: 1.95,                                                                       // [AJUSTE] tamaño respecto al alto del Pokémon
-  min: 95,                                                                         // [AJUSTE] tamaño mínimo (px), para que en los Pokémon pequeños también se vea
-  alpha: .95,                                                                      // [AJUSTE] opacidad
-  // Ataques que NO salen de la boca (te lanzas con todo el cuerpo o golpeas el suelo): su remolino va alrededor del Pokémon.
-  // Todos los demás salen de la boca: el remolino nace pequeño en la boca y crece hasta que lo lanzas (en lugar de la bola de js/fxvideo.js).
+  // Hoja de Gemini por tipo (assets/objetos/cargas/carga2_<tipo>.png): 3 figuras = chispa, espiral pequeña, espiral con su elemento.
+  tipos: ['normal', 'fuego', 'agua', 'planta', 'electrico', 'hielo', 'lucha', 'veneno', 'tierra', 'volador', 'psiquico', 'bicho', 'roca', 'fantasma', 'dragon', 'siniestro', 'acero', 'hada'],
+  propias: ['Envite Ígneo'],                                                   // ataques con carga propia dibujada (js/embestida.js, js/fxnuevos.js)
+  cuerpoPx: 96,                                                                    // [AJUSTE] ataques de cuerpo: tamaño de la bola alrededor del Pokémon (px)
+  alpha: .97,                                                                      // [AJUSTE] opacidad
   cuerpo: /envite|p[aá]jaro osado|voltio cruel|giga ?impacto|doble filo|placaje|terremoto|magnitud|megacuerno|a[eé]rea|vuelo|bote|golpe cuerpo|cuerpo pesado|carga|embestida|pu[ñn]o|patada|machada|demolici[oó]n|martillo|cabezazo|tajo|garra|colmillo|lanzarse|ida y vuelta|u-turn/i,
-  boca: {min: 14, max: .85, maxPx: 92, giro: 2.2},                               // [AJUSTE] en la boca: tamaño al empezar (px) · al estar listo (× alto del Pokémon, como mucho maxPx) · lo que gira
+  boca: {px: 62},                                                  // [AJUSTE] ataques de boca: tamaño de la bola completa (px), igual para todos
+  pasos: [.22, .55],                                                               // [AJUSTE] cuánto hay que cargar para pasar a la figura 2 y a la 3
+  chispas: 14,                                                                     // [AJUSTE] chispas que se juntan hacia la bola mientras carga
   img: {}
 };
-CARGA.tipos.forEach(t => { const i = new Image(), o = CARGA.img[t] = {i, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / 6; o.fh = i.height; }; i.src = 'assets/objetos/cargas/carga_' + t + '.png?v=2'; });
+CARGA.tipos.forEach(t => { const i = new Image(), o = CARGA.img[t] = {i, ok: false}; i.onload = () => { o.ok = true; o.fw = i.width / 3; o.fh = i.height; }; i.src = 'assets/objetos/cargas/carga2_' + t + '.png?v=1'; });
+const cgK = w => Math.max(0, Math.min(1, w.hold ? (w.c || 0) / (FEEL.wind || 1) : 1 - w.t / w.T));      // 0 → 1 hasta que el ataque está listo
+const cgH = (i, j) => { const x = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return x - Math.floor(x); };
+// La bola: figura según lo cargado, late, chispas del color del tipo que se juntan hacia ella y, al estar lista, destellos.
+function cargaDibuja(S, type, cx, cy, T, k, ready){
+  const fr = k < CARGA.pasos[0] ? 0 : k < CARGA.pasos[1] ? 1 : 2, col = (typeof TC !== 'undefined' && TC[type]) || '#ffffff';
+  const late = 1 + (fr === 2 ? .05 : .03) * Math.sin(g.t * (ready ? 22 : 12)), D = T * (.82 + .18 * k) * late;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  if(k > .05){ const N = Math.round(CARGA.chispas * (ready ? 1.4 : .5 + k)); ctx.fillStyle = col;      // las chispas vienen de fuera hacia el centro
+    for(let i = 0; i < N; i++){ const p = (g.t * (1.3 + cgH(i, 2)) + cgH(i, 1)) % 1, an = cgH(i, 3) * 6.283 + g.t * .6, r = T * (.95 - .55 * p), z = Math.max(2, Math.round(T / 30 * (1 - p * .4)));
+      ctx.globalAlpha = Math.min(1, p * 3) * .9; ctx.fillRect(Math.round(cx + Math.cos(an) * r - z / 2), Math.round(cy + Math.sin(an) * r * .8 - z / 2), z, z); } }
+  ctx.globalAlpha = CARGA.alpha; ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, cx - D / 2, cy - D / 2, D, D);
+  if(ready){                                                                      // lista: brilla y salen anillos de su color
+    ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .25 + .2 * Math.sin(g.t * 22); ctx.drawImage(S.i, 2 * S.fw, 0, S.fw, S.fh, cx - D / 2, cy - D / 2, D, D);
+    ctx.globalCompositeOperation = 'source-over'; const u = (g.t * 2.2) % 1; ctx.globalAlpha = (1 - u) * .8; ctx.strokeStyle = col; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, D * (.35 + u * .45), 0, Math.PI * 2); ctx.stroke(); }
+  ctx.restore();
+}
 
 if(typeof nvWindFx === 'function'){
   const oldCarga = nvWindFx;
@@ -26,27 +43,20 @@ if(typeof nvWindFx === 'function'){
     const S = w && !CARGA.propias.includes(w.nm) ? CARGA.img[w.type] : null;
     if(S && S.ok && !CARGA.cuerpo.test(w.nm || '')) return;                                       // de boca: lo dibuja cargaBoca() (más abajo), encima del Pokémon
     if(!S || !S.ok) return oldCarga.apply(this, arguments);
-    const k = Math.max(0, Math.min(1, w.hold ? (w.c || 0) / (FEEL.wind || 1) : 1 - w.t / w.T));             // 0 → 1 hasta que el ataque está listo
-    const fr = k < 1 ? Math.min(3, Math.floor(k * 4)) : 4 + (Math.floor(g.t * 10) % 2);                    // listo: parpadea entre las dos últimas
-    const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20}, cy = (b.top + b.foot) / 2;
-    const T = Math.max(CARGA.min, (b.foot - b.top) * CARGA.tam);
-    ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = CARGA.alpha;
-    ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, f.x - T / 2, cy - T / 2, T, T);
-    ctx.restore();
+    const k = cgK(w), ready = w.hold ? w.c >= FEEL.wind : k > .3;                                  // de cuerpo: la bola rodea al Pokémon
+    const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20};
+    cargaDibuja(S, w.type, f.x, (b.top + b.foot) / 2, CARGA.cuerpoPx, k, ready);
   };
 }
 
-// ---- Ataques de boca: el remolino nace en la boca y va creciendo (sustituye a la bola de color de js/fxvideo.js, v5ChgTop) ----
+// ---- Ataques de boca: la bola nace en la boca y va creciendo (sustituye a la bola de color de js/fxvideo.js, v5ChgTop) ----
 const cargaSpr = f => { const w = f && f.wind; if(!w || CARGA.propias.includes(w.nm) || CARGA.cuerpo.test(w.nm || '')) return null; const S = CARGA.img[w.type]; return S && S.ok ? S : null; };
 function cargaBoca(f, S){
-  const w = f.wind, k = Math.max(0, Math.min(1, w.hold ? (w.c || 0) / (FEEL.wind || 1) : 1 - w.t / w.T)), ready = w.hold ? w.c >= FEEL.wind : k > .3;
+  const w = f.wind, k = cgK(w), ready = w.hold ? w.c >= FEEL.wind : k > .3;
   if(ready && !f.cgR){ f.cgR = 1; if(w.hold && typeof Sfx !== 'undefined') Sfx.play('v_ready', .8); }
-  const fr = k < 1 ? Math.min(3, Math.floor(k * 4)) : 4 + (Math.floor(g.t * 10) % 2);
-  const a = w.ang || 0, [mx, my] = typeof mouthOf === 'function' ? mouthOf(f) : [f.x, f.y - 16], ox = mx + Math.cos(a) * 10, oy = my + Math.sin(a) * 7;
-  const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20}, big = Math.min(CARGA.boca.maxPx, (b.foot - b.top) * CARGA.boca.max);
-  const e = 1 - Math.pow(1 - k, 2), T = CARGA.boca.min + (big - CARGA.boca.min) * e + (ready ? 3 * Math.sin(g.t * 30) : 0);
-  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = CARGA.alpha; ctx.translate(ox, oy); ctx.rotate(g.t * CARGA.boca.giro);
-  ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, -T / 2, -T / 2, T, T); ctx.restore();
+  const a = w.ang || 0, [mx, my] = typeof mouthOf === 'function' ? mouthOf(f) : [f.x, f.y - 16];
+  const b = typeof bodyOf === 'function' ? bodyOf(f) : {top: f.y - 50, foot: f.y + 20}, T = CARGA.boca.px;      // mismo tamaño en todos los Pokémon (como la Hidrobomba de Lapras)
+  cargaDibuja(S, w.type, mx + Math.cos(a) * T * .3, my + Math.sin(a) * T * .22, T, k, ready);
 }
 if(typeof v5ChgTop === 'function'){
   const oldTop = v5ChgTop;
