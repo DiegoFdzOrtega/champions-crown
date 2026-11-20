@@ -25,12 +25,16 @@ function pzTeamsDraw(){
 function pzExtraDraw(){
   const el = $('pzExtra'); if(!el) return;
   const v = k => save[k] == null ? 70 : save[k];
-  el.innerHTML = `<div class="pz-vol"><label>🎵 Música <input type="range" min="0" max="100" value="${v('volBattle')}" data-v="b"><b>${v('volBattle')}</b></label>
-      <label>🔊 Efectos <input type="range" min="0" max="100" value="${v('volSfx')}" data-v="s"><b>${v('volSfx')}</b></label></div>
+  el.innerHTML = `<div class="pz-vol"><label><i class="nota"></i>Música <span class="pk-sl" style="--p:${v('volBattle')}%"><s></s><input type="range" min="0" max="100" value="${v('volBattle')}" data-v="b"></span><b>${v('volBattle')}</b></label>
+      <label><i class="brillo"></i>Efectos <span class="pk-sl" style="--p:${v('volSfx')}%"><s></s><input type="range" min="0" max="100" value="${v('volSfx')}" data-v="s"></span><b>${v('volSfx')}</b></label></div>
     <div class="pz-keys"><h4>Controles</h4>
       <span><kbd>Clic izq.</kbd>Golpe</span><span><kbd>Clic dcho.</kbd>Disparo</span><span><kbd>Q</kbd>Mejora</span><span><kbd>E</kbd>Fuerte (mantén = más)</span>
       <span><kbd>Espacio</kbd>Carrera</span><span><kbd>1-6</kbd>Cambiar</span><span><kbd>M</kbd>Sonido</span><span><kbd>Esc</kbd>Pausa</span></div>`;
-  el.querySelectorAll('input[type=range]').forEach(r => r.oninput = () => { const n = +r.value; r.nextElementSibling.textContent = n;
+  el.querySelectorAll('input[type=range]').forEach(r => r.oninput = () => { const n = +r.value; r.parentNode.nextElementSibling.textContent = n; r.parentNode.style.setProperty('--p', n + '%');
     if(r.dataset.v === 'b') Music.setBattleVolume(n); else { Music.setSfxVolume(n); if(typeof Sfx !== 'undefined') Sfx.play('swing', .6); } });
 }
-if(typeof pauseBattle === 'function'){ const o = pauseBattle; pauseBattle = function(on){ const r = o.apply(this, arguments); try{ if(on && g && !g.pvp && g.paused){ pzTeamsDraw(); pzExtraDraw(); } }catch(e){ console.warn('pausa', e); } return r; }; }
+if(typeof pauseBattle === 'function'){ const o = pauseBattle; pauseBattle = function(on){ const r = o.apply(this, arguments); try{ if(on && g && !g.pvp && g.paused){ pzTeamsDraw(); pzExtraDraw(); pzMudo(); } }catch(e){ console.warn('pausa', e); } return r; }; }
+// el icono del botón de sonido: altavoz o altavoz tachado (css/pausakit.css)
+function pzMudo(){ const b = $('pMus'); if(b) b.classList.toggle('mudo', !!save.mute); }
+{ const b = document.getElementById('pMus'); if(b) b.addEventListener('click', () => setTimeout(pzMudo, 0)); }
+{ const b = document.getElementById('pGo'); if(b && b.firstChild && b.firstChild.nodeType === 3) b.firstChild.textContent = b.firstChild.textContent.replace('▶', '').trimStart(); }   // el triángulo ya va como icono

@@ -418,6 +418,7 @@ function psiDraw(T){                                            // Psíquico: el
   }
   ctx.restore();
 }
+const WIND_CARRIL = false;                                       // [AJUSTE] true = vuelve a pintar en el suelo el carril recto del ataque fuerte mientras se carga
 function windDraw(){
   for(const f of [g.p[g.pi], g.e[g.ei]]){
     if(f.ctr > 0 && !f.dead && !f.ghost){ ctx.save(); ctx.globalAlpha = .55 + .4 * Math.sin(g.t * 22); ctx.strokeStyle = '#7fe3ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(f.x, f.y + 22, 34, 13, 0, 0, 6.3); ctx.stroke(); ctx.restore(); }      // contraataque listo: aro azul a sus pies
@@ -430,6 +431,7 @@ function windDraw(){
     if(typeof nvWindFx === 'function') nvWindFx(f, w);                              // carga propia de algunos ataques fuertes (la bola de luz del Rayo Solar: js/fxnuevos.js)
     const k = w.hold ? clamp(w.c / FEEL.windMax, 0, 1) : clamp(1 - w.t / w.T, 0, 1), col = TC[w.type] || '#ffffff', len = 640, hw = 24, fijo = feelFoe(f) && w.t <= w.T * FEEL.windLock;
     chgFxDraw(f, k, w.hold ? w.c >= FEEL.wind : k > .3);                                                                                  // ataque fuerte cargándose: mismo efecto que el golpe cargado
+    if(!WIND_CARRIL) continue;                                                   // el carril recto del suelo, quitado (se ve la carga de la boca)
     ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(w.ang);
     const gr = ctx.createLinearGradient(0, 0, len, 0); gr.addColorStop(0, col); gr.addColorStop(1, col + '00');
     ctx.fillStyle = gr; ctx.globalAlpha = .14 + .16 * k; ctx.fillRect(18, -hw, len, hw * 2);                 // el carril entero

@@ -263,7 +263,7 @@ if(AG.on && typeof BEAMX !== 'undefined'){
   // Rayo, Tinieblas y Dragoaliento: de disparo a rayo continuo de clic, como Rayo Hielo (sin congelar)
   BEAMX['Rayo'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .7, ancho: 26, dmg: 1, cd: 1.8, lento: .5, c: ['255,230,80', '#ffd23a', '#fff6a0', '#ffffff'], onda: 'rgba(255,255,220,.9)', hielo: 0});
   BEAMX['Tinieblas'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['150,60,200', '#6a2a9a', '#c27bff', '#ffffff'], onda: 'rgba(220,150,255,.8)', hielo: 0});
-  BEAMX['Dragoaliento'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['60,220,200', '#1a9a8a', '#7fffe0', '#ffffff'], onda: 'rgba(200,255,245,.9)', hielo: 0});
+  BEAMX['Dragoaliento'] = Object.assign({}, BEAMX['Rayo Hielo'], {T: .8, ancho: 30, dmg: 1, cd: 1.8, lento: .5, c: ['150,110,255', '#6a4cff', '#b48cff', '#ffffff'], onda: 'rgba(210,190,255,.9)', hielo: 0});      // morado, con las piezas del dragón (pdr_*)
   // [AJUSTE] recarga (s) de los rayos de clic: aquí, todos juntos, para equilibrarlos de un vistazo
   const RAYO_CD = {'Rayo Hielo': 3.2, 'Psicorrayo': 3.2, 'Pulso Dragón': 3.2, 'Rayo': 3.2, 'Tinieblas': 3.2, 'Dragoaliento': 3.2, 'Pulso Umbrío': 3.6};
   for(const n in RAYO_CD) if(BEAMX[n]) BEAMX[n].cd = RAYO_CD[n];
@@ -386,7 +386,7 @@ rgCarga(RG_PSI, 'pr', 1);
 // ---- Los demás rayos de clic (cada uno con sus 5 piezas de una hoja de Gemini) ----
 const rgNuevo = (pre, o) => { const P = Object.assign({}, PU, {collar: {cada: 85, vel: 440, fps: 10, tam: 1.45}, aura: .22, late: .06, motas: 1, orbe: 1.3,
   sombra: {drop: 52, a: .3, ancho: .5}, marca: {dura: 2.5, alto: 95, entra: .2}}, o, {img: {}}); rgCarga(P, pre, o.v || 1); return P; };
-const RG_HIELO = rgNuevo('rh', {boca: .5, fin: 1.1, base: 56, corre: 600, col: {sombra: '0,40,70', motas: ['#ffffff', '#9ee8ff'], ondas: ['#c8f4ff', '#5fc8f0'], brillo: 'rgba(210,245,255,.9)'}});
+const RG_HIELO = rgNuevo('rh', {v: 2, marca: {dura: 3, alto: 120, entra: .25, sueltas: 1}, boca: .5, fin: 1.1, base: 56, corre: 600, col: {sombra: '0,40,70', motas: ['#ffffff', '#9ee8ff'], ondas: ['#c8f4ff', '#5fc8f0'], brillo: 'rgba(210,245,255,.9)'}});
 const RG_DRAGON = rgNuevo('pdr', {boca: .45, fin: 1.15, base: 64, corre: 620, col: {sombra: '30,0,60', motas: ['#ffffff', '#9a7cff'], ondas: ['#b48cff', '#4c6cff'], brillo: 'rgba(200,170,255,.9)'}});
 const RG_TINIEB = rgNuevo('ti', {boca: .45, fin: 1.2, base: 60, corre: 520, col: {sombra: '20,0,30', motas: ['#14051f', '#c27bff'], ondas: ['#d07bff', '#2a0a40'], brillo: 'rgba(220,150,255,.85)'}});
 const RG_DRAGOA = rgNuevo('da', {boca: .45, fin: 1.2, base: 62, corre: 580, col: {sombra: '0,40,35', motas: ['#e8fff8', '#3fe0c8'], ondas: ['#7fffe0', '#1a9a8a'], brillo: 'rgba(180,255,240,.9)'}});
@@ -397,7 +397,7 @@ const RG_HIPER = rgNuevo('hr', {sinOrbe: 1, boca: .5, fin: 1.25, base: 92, corre
 const RG_HIDRO = rgNuevo('hb', {sinOrbe: 1, boca: .5, fin: 1.25, base: 86, corre: 640, orbe: .95, collar: {cada: 110, vel: 480, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '0,30,70', motas: ['#ffffff', '#7cc8ff'], ondas: ['#eaf8ff', '#2f7fe0'], brillo: 'rgba(200,235,255,.9)'}});
 const RG_SOLAR = rgNuevo('rs', {sinOrbe: 1, boca: .5, fin: 1.25, base: 90, corre: 700, orbe: .95, collar: {cada: 110, vel: 520, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '40,40,0', motas: ['#ffffff', '#c8ff5a'], ondas: ['#fff6a0', '#7fd63a'], brillo: 'rgba(255,255,200,.95)'}});
 const RG_FOCO = rgNuevo('fr', {sinOrbe: 1, boca: .5, fin: 1.2, base: 84, corre: 680, orbe: .95, collar: {cada: 110, vel: 500, fps: 10, tam: 1.4}, marca: {dura: 3, alto: 110, entra: .25}, col: {sombra: '20,30,50', motas: ['#ffffff', '#c8d4f0'], ondas: ['#ffffff', '#9aa8c8'], brillo: 'rgba(235,242,255,.95)'}});
-const RAYOS_G = {'Hiperrayo': RG_HIPER, 'Hidrobomba': RG_HIDRO, 'Rayo Solar': RG_SOLAR, 'Foco Resplandor': RG_FOCO, 'Pulso Umbrío': PU, 'Psicorrayo': RG_PSI, 'Rayo Hielo': RG_HIELO, 'Pulso Dragón': RG_DRAGON, 'Tinieblas': RG_TINIEB, 'Dragoaliento': RG_DRAGOA, 'Rayo': RG_RAYO};   // [AJUSTE] rayos montados con piezas de Gemini: nombre → su configuración
+const RAYOS_G = {'Hiperrayo': RG_HIPER, 'Hidrobomba': RG_HIDRO, 'Rayo Solar': RG_SOLAR, 'Foco Resplandor': RG_FOCO, 'Pulso Umbrío': PU, 'Psicorrayo': RG_PSI, 'Rayo Hielo': RG_HIELO, 'Pulso Dragón': RG_DRAGON, 'Tinieblas': RG_TINIEB, 'Dragoaliento': RG_DRAGON, 'Rayo': RG_RAYO};   // [AJUSTE] rayos montados con piezas de Gemini: nombre → su configuración
 if(typeof v8PulsoDraw === 'function'){ const o = v8PulsoDraw; v8PulsoDraw = function(){ if(puOk(RG_DRAGON)) return; return o.apply(this, arguments); }; }      // los anillos viejos del Pulso Dragón, fuera (ya van en las piezas nuevas)
 const puOk = P => AG.on && P && ['cuerpo', 'collar', 'imp'].every(k => P.img[k].ok) && (P.sinOrbe || P.img.orbe.ok);
 const PU_RESTOS = [];                  // sombras que se desvanecen y quemaduras: {x0, y0, a, L, t0, tipo}
@@ -483,6 +483,12 @@ if(AG.on && typeof fxhdGround === 'function'){ const o = fxhdGround; fxhdGround 
     if(u >= 1){ PU_RESTOS.splice(i, 1); continue; }
     // la quemadura con su forma de verdad (sin estirarla): copias seguidas a lo largo del rayo, una sí una no dada la vuelta, que aparecen desde la boca hacia el golpe
     const S = P.img.marca, h = P.marca.alto, w = h * S.fw / S.fh, paso = w * .7, ve = Math.min(1, (g.t - R.t0) / P.marca.entra);
+    if(P.marca.sueltas){                                                          // manchas sueltas de pie (Rayo Hielo: grupos de pinchitos de hielo), sin aplastar ni girar
+      ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.min(1, (1 - u) * 3); const c = Math.cos(R.a), sn = Math.sin(R.a);
+      for(let x = w * .3, i = 0; x < R.L * ve; x += w * (.75 + bnH(i, 4) * .6), i++){ const k = .55 + bnH(i, 2) * .5, off = (bnH(i, 6) - .5) * h * .9;
+        const X = R.x0 + c * x - sn * off * .5, Y = R.y0 + sn * x * .55 + c * off * .5; ctx.save(); ctx.translate(X, Y); if(i % 2) ctx.scale(-1, 1);
+        ctx.drawImage(S.i, 0, 0, S.fw, S.fh, -w * k / 2, -h * k * .7, w * k, h * k); ctx.restore(); }
+      ctx.restore(); continue; }
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .9 * Math.min(1, (1 - u) * 3);
     ctx.translate(R.x0, R.y0); ctx.scale(1, .55); ctx.rotate(R.a); ctx.beginPath(); ctx.rect(0, -h, R.L * ve + w * .15, h * 2); ctx.clip();
     for(let x = -w * .15, i = 0; x < R.L * ve; x += paso, i++){ ctx.save(); ctx.translate(x + w / 2, 0); if(i % 2) ctx.scale(-1, 1); const k = i % 3 === 1 ? .82 : 1; ctx.drawImage(S.i, 0, 0, S.fw, S.fh, -w / 2, -h * k / 2, w, h * k); ctx.restore(); }

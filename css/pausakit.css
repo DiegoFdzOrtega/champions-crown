@@ -1,0 +1,95 @@
+/* =====================================================================
+   MENÚ DE PAUSA CON EL KIT DE GEMINI (assets/menu/pausa/*.webp): marcos azul marino con borde dorado, botones dorado/azul/rojo,
+   iconos dorados y, detrás, el propio combate difuminado. Los marcos se estiran con border-image (las esquinas no se deforman).
+   El contenido lo pone js/modes.js (pauseBattle) y js/pausa2.js; aquí solo va el aspecto.
+   ===================================================================== */
+#pause{--pk:'Pixelify Sans','Press Start 2P',system-ui,sans-serif;--oro:#ffcc33;font-family:var(--pk);
+  background:#0b0f2a8c!important;-webkit-backdrop-filter:blur(7px) brightness(.8);backdrop-filter:blur(7px) brightness(.8)}      /* detrás se ve el combate, difuminado */
+#pause .inner{width:min(82rem,96vw);max-width:none}
+#pause .pz-card{max-width:none!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+#pause button,#pause h1,#pause h3,#pause h4,#pause b,#pause small,#pause span,#pause label,#pause p{font-family:var(--pk)}
+
+/* título con alas y subtítulo */
+#pause h1{display:block;width:min(26rem,90%);margin:0 auto -.3rem;padding:2.1rem 0 1.3rem;font-size:3rem;line-height:1;color:var(--oro);letter-spacing:.06em;
+  text-shadow:0 .2rem 0 #8a5a00,0 0 1rem #ffcc3355;border:solid transparent;border-width:2.6rem 5.6rem 1rem;
+  border-image:url(../assets/menu/pausa/banner.webp?v=1) 70 210 40 210 fill / 2.6rem 5.6rem 1rem;margin-top:.2rem;box-sizing:border-box;padding:.4rem 0}
+#pause .pz-sub{display:block;width:min(30rem,92%);margin:0 auto 1rem!important;padding:.35rem 1rem;color:#d6e4ff!important;font-size:1rem!important;letter-spacing:.06em;
+  border:solid transparent;border-width:.8rem 1.6rem;border-image:url(../assets/menu/pausa/sub.webp?v=1) 25 50 fill / .8rem 1.6rem;box-sizing:border-box}
+
+/* las 3 tarjetas de arriba */
+#pause .pz-stats{gap:1rem;margin:0 0 1rem!important}
+#pause .pz-stats span{position:relative;display:grid!important;grid-template-columns:2.6rem 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;column-gap:.7rem;
+  padding:.5rem 1rem!important;background:none!important;border:solid transparent!important;border-width:1rem 1.4rem!important;border-radius:0!important;
+  border-image:url(../assets/menu/pausa/stat.webp?v=1) 40 60 fill / 1rem 1.4rem!important;color:#d6e4ff;font-size:1rem}
+#pause .pz-stats span::before{content:'';grid-row:1/3;width:2.6rem;height:2.6rem;background:center/contain no-repeat;image-rendering:pixelated}
+#pause .pz-stats span:nth-child(1)::before{background-image:url(../assets/menu/pausa/ic_reloj.webp?v=1)}
+#pause .pz-stats span:nth-child(2)::before{background-image:url(../assets/menu/pausa/ic_ball.webp?v=1)}
+#pause .pz-stats span:nth-child(3)::before{background-image:url(../assets/menu/pausa/ic_trofeo.webp?v=1)}
+#pause .pz-stats b{font-size:1.6rem!important;color:#fff!important;letter-spacing:.04em}
+
+/* columnas: tu equipo · rival · botones */
+#pause .pz-cols{grid-template-columns:2fr 1fr!important;gap:1rem!important;align-items:start}
+#pause .pz-teams{gap:1rem!important}
+#pause .pz-side{background:none!important;border:solid transparent!important;border-width:.45rem 1.1rem 1rem!important;border-radius:0!important;padding:0 .2rem .4rem!important;gap:.5rem!important;
+  border-image:url(../assets/menu/pausa/panel.webp?v=1) 100 50 50 fill / 2.6rem 1.1rem 1rem!important;min-height:30rem}
+#pause .pz-side h3{margin:0 0 1rem!important;height:1.7rem;padding-left:2rem;position:relative;font-size:1.3rem!important;color:var(--oro)!important;letter-spacing:.04em;align-items:center}
+#pause .pz-side h3::before{content:'';position:absolute;left:0;top:50%;width:1.6rem;height:1.6rem;transform:translateY(-50%);background:url(../assets/menu/pausa/ic_ball.webp?v=1) center/contain no-repeat}
+#pause .pz-side h3 small{color:#fff!important;font-size:1em!important}
+#pause .pz-m{padding:.2rem .5rem!important;min-height:3.6rem;background:none!important;border:solid transparent!important;border-width:.7rem .9rem!important;border-radius:0!important;
+  border-image:url(../assets/menu/pausa/row.webp?v=1) 30 40 fill / .7rem .9rem!important}
+#pause .pz-m.cur{border-image:url(../assets/menu/pausa/rowsel.webp?v=1) 32 42 fill / .7rem .9rem!important;filter:drop-shadow(0 0 .5rem #ffcc3366)}
+#pause .pz-sp{width:3rem!important;height:3rem!important;background:none!important;border:0!important;font-size:1.4rem;color:#6d82b8}
+#pause .pz-mi b{font-size:1.05rem!important;color:#fff}
+#pause .pz-mi em{font-size:.7em!important}
+#pause .pz-hp{height:.55rem!important;background:#1a2547!important;border:1px solid #0a1022;border-radius:.2rem!important}
+#pause .pz-ti{width:1.6rem!important;height:1.6rem!important}
+
+/* botones */
+#pause .pz-right{gap:.8rem!important}
+#pause .pz-btns{gap:.6rem!important}
+#pause .pz-btns button{display:flex;align-items:center;justify-content:center;gap:.7rem;padding:.35rem .8rem!important;min-height:3.6rem;font-size:1.25rem!important;color:#fff;
+  background:none!important;border:solid transparent!important;border-width:1rem 1.2rem!important;border-radius:0!important;box-shadow:none!important;text-shadow:0 .12rem 0 #0008;
+  border-image:url(../assets/menu/pausa/bt_azul.webp?v=1) 38 50 fill / 1rem 1.2rem!important;transition:transform .12s}
+#pause .pz-btns button:hover,#pause .pz-btns button:focus-visible{border-image-source:url(../assets/menu/pausa/bt_azul_h.webp?v=1)!important;filter:none!important;transform:translateY(-2px)}
+#pause .pz-btns button.main{color:#3a2400;text-shadow:0 .1rem 0 #fff6;border-image-source:url(../assets/menu/pausa/bt_oro.webp?v=1)!important;font-size:1.45rem!important}
+#pause .pz-btns button.main:hover,#pause .pz-btns button.main:focus-visible{border-image-source:url(../assets/menu/pausa/bt_oro_h.webp?v=1)!important}
+#pause .pz-btns button.pz-out{color:#fff;border-image-source:url(../assets/menu/pausa/bt_rojo.webp?v=1)!important}
+#pause .pz-btns button.pz-out:hover,#pause .pz-btns button.pz-out:focus-visible{border-image-source:url(../assets/menu/pausa/bt_rojo_h.webp?v=1)!important;box-shadow:none!important}
+#pause .pz-btns button::before{content:'';width:1.8rem;height:1.8rem;flex:none;background:center/contain no-repeat}
+#pause #pGo::before{background-image:url(../assets/menu/pausa/ic_play.webp?v=1);filter:brightness(.25)}
+#pause #pRe::before{background-image:url(../assets/menu/pausa/ic_reinicio.webp?v=1)}
+#pause #pMus::before{background-image:url(../assets/menu/pausa/ic_sonido.webp?v=1)}
+#pause #pMus.mudo::before{background-image:url(../assets/menu/pausa/ic_mudo.webp?v=1)}
+#pause #pOut::before{background-image:url(../assets/menu/pausa/ic_salir.webp?v=1)}
+#pause #pAsk button::before{display:none}
+#pause .pz-btns button small{padding:.1em .45em!important;border-radius:.3em;background:#3a2400!important;color:var(--oro)!important;font-size:.7em!important;margin-left:auto!important}
+#pause #pAskT{font-size:1rem;color:#ffd6cf;text-align:center}
+
+/* volumen */
+#pause .pz-vol,#pause .pz-keys{background:none!important;border:solid transparent!important;border-width:1rem 1.2rem!important;border-radius:0!important;padding:.2rem .3rem!important;
+  border-image:url(../assets/menu/pausa/stat.webp?v=1) 40 60 fill / 1rem 1.2rem!important}
+#pause .pz-vol{gap:.8rem!important}
+#pause .pz-vol label{grid-template-columns:1.6rem 5.8rem 1fr 2.4rem!important;font-size:.95rem!important;color:#fff!important}
+#pause .pz-vol label i{width:1.6rem;height:1.6rem;background:center/contain no-repeat}
+#pause .pz-vol label i.nota{background-image:url(../assets/menu/pausa/ic_nota.webp?v=1)}
+#pause .pz-vol label i.brillo{background-image:url(../assets/menu/pausa/ic_brillo.webp?v=1)}
+#pause .pz-vol b{font-size:1.25rem;color:var(--oro)!important}
+#pause .pk-sl{position:relative;display:block;height:1.1rem;border:solid transparent;border-width:.5rem .6rem;
+  border-image:url(../assets/menu/pausa/sl_vacio.webp?v=1) 30 40 fill / .5rem .6rem;box-sizing:border-box}
+#pause .pk-sl s{position:absolute;left:-.6rem;top:-.5rem;bottom:-.5rem;width:calc(var(--p) + .6rem);min-width:1.2rem;border:solid transparent;border-width:.5rem .6rem;box-sizing:border-box;
+  border-image:url(../assets/menu/pausa/sl_lleno.webp?v=1) 30 40 fill / .5rem .6rem;pointer-events:none}
+#pause .pk-sl input{position:absolute;inset:-.9rem -.8rem;width:calc(100% + 1.6rem);height:calc(100% + 1.8rem);margin:0;background:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+#pause .pk-sl input::-webkit-slider-runnable-track{background:none;height:100%}
+#pause .pk-sl input::-moz-range-track{background:none}
+#pause .pk-sl input::-webkit-slider-thumb{-webkit-appearance:none;width:1.7rem;height:1.7rem;margin-top:.15rem;border:0;background:url(../assets/menu/pausa/sl_knob.webp?v=1) center/contain no-repeat}
+#pause .pk-sl input::-moz-range-thumb{width:1.7rem;height:1.7rem;border:0;background:url(../assets/menu/pausa/sl_knob.webp?v=1) center/contain no-repeat}
+
+/* controles */
+#pause .pz-keys{gap:.45rem .6rem!important;font-size:.8rem!important;color:#d6e4ff}
+#pause .pz-keys h4{font-size:1.1rem!important;color:var(--oro)!important;letter-spacing:.04em;text-transform:uppercase}
+#pause .pz-keys span{display:flex;align-items:center;gap:.45rem}
+#pause .pz-keys kbd{margin:0!important;padding:.15em .55em!important;min-width:1.6em;text-align:center;font-family:var(--pk);font-size:.95em;color:#fff;background:none!important;
+  border:solid transparent!important;border-width:.4rem .45rem!important;border-radius:0!important;border-image:url(../assets/menu/pausa/tecla.webp?v=1) 28 32 fill / .4rem .45rem!important}
+
+@media (max-width:1000px){#pause .pz-cols{grid-template-columns:1fr!important}#pause .pz-side{min-height:0}#pause h1{font-size:2.2rem}}
+#pause .pz-sp{transform:scale(1.35)}
