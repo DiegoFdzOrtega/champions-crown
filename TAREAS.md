@@ -1,0 +1,106 @@
+# TAREAS — Champions Crown (juego JavaScript)
+
+> Lista de trabajo para Claude cuando trabaja **solo** (sin preguntar). Léela junto a `CLAUDE.md`.
+> **Cómo se usa:**
+> - Claude coge la primera tarea de «Por hacer» que no dependa de Diego, la hace, la prueba y la pasa a «Hecho» con fecha y el commit sugerido.
+> - Lo que necesita una decisión, una imagen o una prueba de Diego va a «Esperando a Diego». Claude **no lo adivina**.
+> - Diego, al volver: lee «Hecho», prueba el juego y haz los commits que se indican (o uno solo con todo).
+> - Cada tarea tiene que dejar el juego funcionando. Si algo sale mal, se deja como estaba y se apunta por qué.
+
+---
+
+## Reglas para trabajar solo
+1. Solo cambios **pequeños y comprobables**, de uno en uno. Nada de reescribir sistemas enteros.
+2. No tocar lo que Diego no ha pedido. Si algo se puede mejorar pero no está en la lista, se apunta en «Ideas», no se hace.
+3. Si una tarea cambia cálculos del combate → subir `PVP_VER` en `pvp.js` y decirlo.
+4. Subir el `?v=` en `index.html` de cada archivo cambiado.
+5. Probar con el juego de verdad (Playwright, capturas) antes de dar algo por hecho.
+6. Al acabar cada tarea: actualizar este archivo y, si cambia algo de la estructura, `CLAUDE.md`.
+
+---
+
+## Por hacer (Claude puede solo), por prioridad
+Diego (21-11-2026, 18:37): «hay que mejorar todos los efectos; analiza el vídeo https://www.youtube.com/watch?v=rC6l3vFy_9I (Gary vs Paul, Pokémon Battlegrounds) las veces que haga falta; parecido, no igual; sin las olas raras; sigue sin pedirme nada». Lo que se ve en el vídeo y falta aquí:
+1. ~~Garras como en el vídeo~~ (HECHO en código, `js/garrasbg.js`; se podría mejorar con imágenes) (Garra Metal, Garra Dragón, Garra Umbría, Arañazo, Tijera X): tres arcos curvos dorados/blancos, impacto en forma de estrella, cuadraditos brillantes que saltan y sombra oscura redonda en el suelo bajo el que recibe.
+2. ~~Corte blanco que sigue al brazo~~ (HECHO, `js/corte.js`) en todos los golpes a melé (como Scizor: un arco blanco fino y rayitas blancas), además de la imagen de cada ataque.
+3. ~~Viñeta de cómic al usar la E~~ (HECHO) (en el vídeo sale al atacar fuerte): fondo claro con líneas negras que salen del centro, la silueta negra del Pokémon y el nombre en letras grandes, muy rápida (≈0,4 s). Que se pueda apagar.
+4. ~~Números de daño como en el vídeo~~ (HECHO): blancos, grandes, con borde negro grueso (ahora son naranjas y pequeños).
+5. ~~Marcas de garras y golpes en el suelo~~ (HECHO: tres rayas oscuras donde se pega a melé, `js/corte.js`) que se quedan un rato (en el vídeo quedan rayas oscuras donde se pegó).
+6. **Revisar todos los ataques uno a uno** comparando con el vídeo (tamaño, que no tapen al Pokémon, colores menos chillones) y quitar lo que se vea «raro» (olas, rectángulos, cortes rectos).
+7. **Ascuas con fondo azul**, ~~estadio de prueba~~ (Diego, 22:02: «déjalo, no es prioridad») : con Gemini a partir de las 20:50.
+
+## Ataques a melé con Gemini (Diego dijo «haz todos los que falten», 21-11-2026)
+**Hechos** (21-11-2026, `js/melee2.js` + `assets/objetos/ataques/m/`): Placaje, Puño Fuego, Puño Trueno, Puño Hielo, Puño Bala, Acua Cola, Látigo Cepa, Golpe Roca, Tijera X, Carantoña y Cabezazo (este con ChatGPT, porque Gemini llegó a su límite diario).
+**Cómo añadir uno nuevo:** generar la hoja (prompt de abajo), recortar con `gem/corta.py` (detecta fondo verde o magenta), guardar en `assets/objetos/ataques/m/<pre>_<fila>.png`, añadir `'Nombre': 'pre'` a `M2_ATAQUES` en `js/melee2.js`, `python tools/png_a_webp.py`, subir `?v=` de `melee2.js` y `carga.js`. Tamaños en `M2.tam`. Para ataques verdes usar fondo magenta (#FF00FF). Upscayl no hizo falta.
+
+## Proyectiles con imágenes (Diego, 21-11-2026: «a las 15:45 vuelve a Gemini y mejora los proyectiles»)
+**Hechos** (`js/proy2.js` + `assets/objetos/ataques/p/`): Ascuas, Pistola Agua, Tajo Aéreo, Confusión, Pin Misil, Disparo Lodo, Viento Feérico (Gemini) y Zumbido, Shuriken de Agua, Voz Cautivadora (ChatGPT, porque Gemini volvió a llegar a su límite; se reinicia a las 20:42).
+Cada hoja: salida (boca) · bala · estela · golpe · marca. Para añadir uno: `p2Alta('Nombre', 'pre', esChorro, escala)` al final de `js/proy2.js`.
+**No se tocan** (ya tienen un dibujo especial hecho a mano): Lanzallamas (chorro que sigue saliendo al moverte) y Nieve Polvo.
+**Recorte:** `gem/corta.py` admite fondo verde, magenta o **azul** (el mejor para fuego). Ajustes de color: `CALIDO=1` (fuego, tierra), `ROSA=1` (rosa/morado), `AMARILLO=1` (amarillo con fondo magenta).
+**Ideas para seguir:** rehacer Ascuas con fondo azul (sale con un halo algo verdoso); hojas para los ataques fuertes (E) que aún son solo código: Psíquico, Vendaval, Pájaro Osado.
+
+**Plantilla de prompt** (cambiar NOMBRE y las 5 filas):
+> Create an image: sprite sheet for a 2D top-down Pokémon-style action game, melee attack effect "NOMBRE". Pure flat chroma-key green background (#00FF00) everywhere. No text, no labels, no numbers, no grid lines, no creature, no hand or arm: only the effect. 5 horizontal rows, each row has 6 frames from left to right, evenly spaced with empty green space between them. Row 1: … Row 2: … Row 3: … Row 4: … Row 5: … Style: vibrant Pokémon anime move effect, clean cel-shaded shapes, bright glow.
+
+| Ataque (prefijo) | Fila 1 (carga en el puño/cuerpo) | Fila 2 (estela del golpe, hacia la derecha) | Fila 3 (impacto) | Fila 4 (partículas) | Fila 5 (marca en el suelo, vista desde arriba) |
+|---|---|---|---|---|---|
+| Puño Fuego (`pf`) | swirling ball of orange-red flames that grows | comet of fire with speed lines | star-shaped fire burst, white-hot center | embers and sparks flying out | round scorch mark fading |
+| Puño Trueno (`pt`) | crackling ball of yellow electricity that grows | yellow lightning streak with zig-zag bolts | electric star burst with white center and bolts | small electric sparks and zig-zags | burnt cracked mark with small sparks |
+| Puño Hielo (`ph`) | cold light-blue aura with frost crystals that grows | icy streak with snowflakes and frost trail | burst of ice shards and white frost | small ice crystals and snowflakes | frozen ice patch with cracks |
+| Puño Bala (`pb`) | metallic silver glint that grows | very fast silver bullet streak with white speed lines | sharp metallic star impact with white flash | small silver sparks and metal flecks | small round dent mark |
+| Placaje (`pl`) | white speed aura | white dust shockwave arc | round white impact ring with dust | dust puffs and small pebbles | dusty skid mark |
+| Acua Cola (`ac`) | swirling water ring | curved arc of water like a tail swipe, with droplets | big water splash burst | water droplets flying out | wet puddle mark |
+| Látigo Cepa (`lc`) | green leaves swirling | long curved green vine whip arc | green leafy impact burst | small leaves flying | scratched ground mark with leaves |
+| Golpe Roca (`gr`) | brown earth aura with small stones | brown rock-hard punch streak | rock shattering into chunks with dust | flying rock chunks and pebbles | cracked crater mark |
+| Tijera X (`tx`) | two glowing green blades | big X-shaped green slash | X-shaped green impact flash | small green sparkles | X-shaped scratch mark |
+| Carantoña (`ca`) | pink sparkles and small hearts | pink swirly bash streak with stars and hearts | pink star burst with hearts | little hearts and sparkles | pink sparkly mark |
+| Cabezazo (`cb`) | white-yellow aura | head-butt dash streak with speed lines | big round shockwave impact | dust and small stars | round dent mark with cracks |
+
+## Ataques que faltan con imágenes (recuento del 21-11-2026, 22:46: 129 ataques en total)
+- **48 con imágenes nuevas de Gemini** (proyectiles, melé, rayos, bolas, Espada Santa, Brecha Negra…).
+- **24 ataques solo con código, sin imágenes** (hacer con Gemini, por este orden): Lanzallamas, Mordisco, Ataque Rápido, Burbuja, Rayo Burbuja, Giro Fuego, Bomba Imán, Doble Filo, Golpe Cuerpo, A Bocajarro, Torbellino, Vendaval, Tormenta de Arena, Triataque, Nieve Polvo, Drenadoras, Hierba Lazo, Vuelo, Excavar, Onda Trueno, Tóxico, Fuego Fatuo, Rayo Confuso, Hipnosis.
+- **35 con imágenes antiguas** (`assets/fx`, de antes de Gemini; rehacer comparando con el vídeo): Arañazo, Colmillo Ígneo, Envite Ígneo, Hidropulso, Hoja Afilada, Colmillo Rayo, Impactrueno, Trueno, Colmillo Hielo, Esfera Aural, Puya Nociva, Picotazo Veneno, Bomba Lodo, Terremoto, Ataque Ala, Tornado, Pájaro Osado, Cabezazo Zen, Psíquico, Megacuerno, Tumba Rocas, Lanzarrocas, Lengüetazo, Garra Umbría, Puño Sombra, Garra Dragón, Cometa Draco, Pulso Noche, Garra Metal, Surf, Somnífero, Poder Pasado, Psicocorte, Velocidad Extrema, Canto.
+- **22 de apoyo o estado** (Danza Espada, Agilidad, Refugio, Día Soleado, Danza Lluvia, Danza Dragón, Paz Mental, Maquinación, Pulimento, Amnesia, Defensa Férrea…): con código basta (brillo o aura); no hace falta Gemini.
+- Para saber qué imágenes usa cada ataque: `js/precarga.js` (mapa `PRECARGA`).
+
+## Esperando a Diego
+- **Estadio estilo Battlegrounds**: Diego (21-11): «de momento vamos bien con lo que tenemos». Se hace una VERSIÓN DE PRUEBA (programada para las 20:50) solo en el Campo de entrenamiento, sin quitar el actual.
+- **Limpieza de archivos (21-11, 22:55)**: `limpiar.bat` en la raíz MUEVE (no borra) unos 440 MB: copias PNG de ataques que ya tienen WebP (`assets/fx`, `objetos/ataques`, `objetos/cargas`), imágenes de ataques viejas sin uso (`da_*`, `brecha_*` sueltas, `pantalla_luz`, `vt2_marca`, `cargas/carga_*`), `l_*.webp`, `js/game.js` y `js/fxhd5.js` → `_papelera/`; originales de Gemini (`menu/nuevo/*.png`) y de los estadios (`fondos/estadios/**/*.png`, `Designer.png`, `clasificatoria.png`, el upscayl) → `material/originales/`. Las dos carpetas están en `.gitignore`. HECHO a las 23:01 (lo ejecutó Claude): 428 archivos movidos. Falta: que Diego pruebe el juego y borre `_papelera`.
+- **Siguiente limpieza (la que de verdad aligera el juego)**: `index.html` carga 156 archivos JS y muchos son capas de efectos viejos que otra capa nueva tapa (`fxhd*`, `fxvideo*`, `fxgemini*`…). Plan: ver qué efectos ya no se ven nunca, quitar ese código y juntar todos los JS en uno solo al publicar (menos peticiones al abrir, sobre todo en móvil).
+- **Proyecto Godot (`Tower battle`)**: en pausa. Diego (21-11): si todo va bien con JavaScript, seguimos así.
+- **Hosting**: Diego quiere algo mejor que GitHub Pages. Propuesta: Cloudflare Pages (ver «Hecho»). Falta que Diego cree la cuenta y conecte el repositorio.
+
+## Hecho
+- 21-11-2026 (22:00) — **Ascuas rehecha** con fondo azul en Gemini: ya sin halo verdoso (`assets/objetos/ataques/p/as_*`, `js/proy2.js` v=2). Commit: `Ascuas sin halo verde`
+- 21-11-2026 (21:30) — **Pantallas Historia y Liga con el aspecto nuevo** (maquetas de Diego `assets/menu/nuevo/ref_*.png`): fondo del castillo, placa del título con alas, marcos dorados sin rombos, iconos de Gemini, tarjetas de región con las ilustraciones nuevas (bloqueadas en gris con candado), «Continúa aquí» con la región a la derecha, recuadro del rival con el castillo detrás y el balcón de su región, recompensa en cuadrícula, botón amarillo. Solo aspecto: `css/historia2.css` + `js/historia2.js` (envuelve `buildRegions` y `ligaRender`); `H2.on = false` vuelve al de antes. Imágenes recortadas en `assets/menu/nuevo/` (`r_*`, `l_*`, `i_*`, `titulo`, `fondo_castillo`, en WebP). Probado en PC y móvil. Commit: `Pantallas Historia y Liga con el diseño nuevo`
+  - Hecho (22:00): balcón nítido de cada región detrás del rival (`b_*.webp`, de `balcones.png`) y panorámica de las 9 regiones en «Continúa aquí» (`c_*.webp`, de `cont_1..5.png`).
+  - Hecho (22:25): letra limpia y gruesa como la maqueta (sin la pixelada) en Historia y Liga; tarjetas de región ocupando todo el ancho; en la Liga la placa del título y los contadores caben en una fila (antes se cortaba «Campeón»). «Tu equipo» enseña el retrato del HUD (`caras/Normal.png`), los iconos de tipo y el icono del objeto (`h2Equipo` en `js/historia2.js`).
+  - Hecho (22:35): placa del título en 3 trozos (alas y Poké Ball sin deformar, solo se alarga el centro); el balcón llena todo el retrato del rival; «Su equipo» del rival con las caras del HUD.
+  - Hecho (22:45): marcos dorados de la maqueta (Gemini `assets/menu/nuevo/marcos.png` → `marco.webp` sin muesca + `marco_ntop/nbot.webp` la muesca aparte). Se dibujan en una capa `<i class="h2marco">` encima de cada panel (`h2Marcos` en `js/historia2.js`), en 3 tamaños: grande, mediano (`m`, tarjetas de región) y pequeño (`s`, botones y contadores).
+- 21-11-2026 (19:10) — Diego: **viñeta de cómic apagada** (no le gustó; `VIN.on = false` en `js/vineta.js`). **Quitadas las marcas largas de los rayos** en el suelo (se veían como rectángulos) y sombra del rayo difuminada (`js/ataquesgemini.js`). **Espada Santa**: ahora alza la espada y la descarga en arco contra el suelo delante. **Carga como en el vídeo** (`js/cargavid.js`): sin remolino en la boca; aros dorados que se cierran en el suelo y fogonazo con rayos al soltar. **Menú**: marcos sin rombos, sin flechas y sin «+» (imágenes `assets/menu/ui/*2.webp`, `css/menukit.css`). Commit: `Carga y menú como en Battlegrounds, Espada Santa en arco, sin rectángulos`
+- 21-11-2026 — **Garras estilo Battlegrounds** (`js/garrasbg.js`): tres arcos con borde oscuro del color de cada garra (Garra Metal dorada, Garra Dragón morada...), estrella de impacto, cuadraditos y sombra en el suelo. Ojo: ya existía `js/garras.js` (las de Gemini), no se ha tocado. Commit: `Garras estilo Battlegrounds`
+- 21-11-2026 — **Corte blanco en los golpes a melé** (`js/corte.js`): arco blanco fino que barre hacia el rival y rayitas, como Scizor en el vídeo. Commit: `Corte blanco en los golpes a melé`
+- 21-11-2026 — **Viñeta de cómic al usar la E** (`js/vineta.js`): franja clara con líneas negras, silueta negra del Pokémon y el nombre del ataque en grande, 0,6 s; como mucho una cada 5 s. `VIN.on = false` la apaga. Commit: `Viñeta de cómic al usar la E`
+- 21-11-2026 — **Números de daño como en Battlegrounds** (`js/numeros.js`): blancos, grandes, borde negro grueso, saltito al salir. Commit: `Números de daño blancos con borde negro`
+- 21-11-2026 — **Relieve de los Pokémon** (`js/relieve.js`): contorno oscuro alrededor de cada sprite y un poco de luz arriba y sombra abajo, como en Battlegrounds. Se prepara una vez por hoja al cargarla (no gasta más al dibujar). Commit: `Relieve en los sprites de los Pokémon`
+- 21-11-2026 — **Rayas de velocidad** (`js/movimiento.js`): tres rayas oscuras detrás del Pokémon cuando va rápido (carrera, embestidas, al salir despedido). Commit: `Rayas de velocidad al moverse rápido`
+- 21-11-2026 — **Arreglado el rectángulo azul** que salía en el suelo con Hidrobomba (contra Brock): la marca del suelo se cortaba con un rectángulo; ahora se difumina en los bordes y en las puntas (`js/ataquesgemini.js`).
+- 21-11-2026 — **Espada Santa rehecha** como dijo Diego: saca la espada delante, la clava en el suelo y sale un retumbido (grieta de luz) en línea recta; si el rival está pegado, le da con la espada.
+- 21-11-2026 — **Espada Santa** (ataque E nuevo, tipo lucha, `js/espadasanta.js`): una espada gigante de luz aparece encima del rival, le sigue, se para y cae clavándose (aviso en el suelo, estelas, destello, chispas y plumas de luz, grietas brillantes; se queda clavada y se deshace en luz). Se esquiva apartándose a tiempo. La llevan Gallade, Cobalion, Terrakion, Virizion y Keldeo. Hoja de ChatGPT en `assets/objetos/ataques/e/es_*`. PVP_VER 35. Commit: `Ataque nuevo: Espada Santa`
+- 21-11-2026 — **Hidrobomba de Blastoise por los dos cañones** (`js/blastoise.js`): dos chorros paralelos desde los cañones (solo dibujo; el golpe se calcula igual). Commit: `Hidrobomba de Blastoise por los dos cañones`
+- 21-11-2026 — **10 proyectiles con imágenes** (`js/proy2.js`): Ascuas, Pistola Agua, Tajo Aéreo, Confusión, Pin Misil, Disparo Lodo, Viento Feérico, Zumbido, Shuriken de Agua y Voz Cautivadora. Destello en la boca, proyectil, estela, impacto y marca en el suelo. Probados en combate. Commit: `Proyectiles con imágenes: 10 ataques a distancia`
+- 21-11-2026 — **El juego abre mucho más ligero** (`js/carga.js`): las imágenes de los ataques (~10 MB) ya no se descargan al abrir, sino al empezar el primer combate (en PC, solas a los 5 s). En el móvil, al abrir se bajan 6,6 MB en vez de 20 MB (235 archivos en vez de 508). Probado en PC y móvil: los efectos salen igual. Commit: `Carga más rápida: las imágenes de ataques se descargan al empezar el combate`
+- 21-11-2026 — **Cabezazo** con imagen (ChatGPT). Commit: `Cabezazo con imagen`
+- 21-11-2026 — **Ataques a melé con imágenes de Gemini** (`js/melee2.js`): carga en el puño, estela, impacto, chispas y marca en el suelo para 10 ataques. Archivos: `js/melee2.js`, `js/carga.js`, `index.html`, `tools/png_a_webp.py`, `assets/objetos/ataques/m/`. Commit: `Ataques a melé con imágenes de Gemini (puños, Placaje, Acua Cola, Látigo Cepa, Golpe Roca, Tijera X, Carantoña)`
+- 21-11-2026 — **Escombros que saltan** (`js/escombros.js`): piedras que vuelan, botan y se quedan un momento al aterrizar el Terremoto y con golpes a melé muy fuertes. (Las marcas grandes del suelo ya duraban todo el combate: `js/fxsuelo.js`.) Commit: `Escombros que saltan con Terremoto y golpes fuertes`
+- 21-11-2026 — **Cartel con el nombre del ataque** (`js/cartel.js`): al usar la E o la Q sale «¡Hidrobomba!» bajo el panel de vida de su lado, con el borde del color del tipo. Commit: `Cartel con el nombre del ataque al usar la E o la Q`
+- 21-11-2026 — **Ya no se descargan las imágenes `da_*`** al abrir (RG_DRAGOA no se usaba). Archivos: `js/ataquesgemini.js`, `index.html`.
+- 21-11-2026 — **Animaciones nuevas conectadas** (`js/anims3.js`): Sink al meterse con Excavar, TumbleBack con golpes muy fuertes (≥20 % de la vida de golpe), Shock paralizado, Laying/EventSleep dormido (si no tiene Sleep), Dance con las danzas, Appeal tras megaevolucionar y al ganar (si no tiene Pose). Muchas de esas hojas solo traen una fila (de frente) y se copian a las 8 direcciones, así que se ven siempre de frente. Probado con Pikachu.
+  Commit: `Animaciones nuevas: hundirse con Excavar, golpe fuerte, paralizado, dormido, danzas y Appeal; ya no se cargan las imágenes de Dragoaliento viejo`
+- 21-11-2026 — **Optimización de carga**: imágenes de efectos en WebP (48 MB → 13 MB), estadios cargados solo al usarlos. Commit: `Optimización: imágenes de efectos en WebP (48 MB a 13 MB) y estadios cargados solo al usarlos`.
+- 21-11-2026 — Terremoto con salto, carga nueva sin bola vieja en ataques de cuerpo, animaciones Special.
+
+## Ideas (no hacer sin que Diego lo pida)
+- Juntar los ~140 `.js` en uno solo al publicar (cargaría antes, pero cambia cómo trabajas).
+- Reducir el tamaño de las hojas de Gemini más grandes (algunas miden casi 3000 px de ancho).

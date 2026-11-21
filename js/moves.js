@@ -38,7 +38,7 @@ const EXTRA_MOVES = {
   'Burbuja':['agua',2], 'Rayo Burbuja':['agua',2], 'Torbellino':['agua',1], 'Vuelo':['volador',1],                 // nuevos (16-11-2026): dibujos en js/fxnuevos.js
   // Ataques de estado (hueco 3): no los tiene nadie de serie, solo se aprenden con MT (ver js/status.js)
   'Onda Trueno':['electrico',3], 'Tóxico':['veneno',3], 'Fuego Fatuo':['fuego',3], 'Somnífero':['planta',3], 'Brecha Negra':['siniestro',3], 'Rayo Confuso':['fantasma',3], 'Hipnosis':['psiquico',3],
-  'A Bocajarro':['lucha',4],                                        // nuevo (16-11-2026): embestida y ráfaga de golpes (BOCA en js/combat.js)
+  'A Bocajarro':['lucha',4], 'Espada Santa':['lucha',4],     // Espada Santa: nueva (21-11-2026), js/espadasanta.js                                        // nuevo (16-11-2026): embestida y ráfaga de golpes (BOCA en js/combat.js)
   'Drenadoras':['planta',3],
   'Aerochorro':['volador',4],
   'Pantalla de Luz':['psiquico',3], 'Golpe Aéreo':['volador',1],          // nuevos (19-11-2026): dibujos en js/ataquesgemini.js                                        // nuevo (19-11-2026): ataque propio de Lugia, rayo de aire (dibujo en js/ataquesgemini.js)
@@ -57,6 +57,7 @@ Object.entries(EXTRA_MOVES).forEach(([n, [t, s]]) => MOVES[n] = MOVES[n] || {t, 
 const PUNCHES = new Set(['Vendaval', 'Puño Fuego', 'Puño Hielo', 'Puño Trueno', 'Puño Bala', 'Puño Sombra', 'Shuriken de Agua']);
 // Ataque propio de un Pokémon concreto: {nº Pokédex: {hueco: ataque}}. Greninja (siniestro) lleva el Shuriken de Agua, que es de agua.
 const SIGNATURE = {658: {2:'Shuriken de Agua'},
+  475: {4:'Espada Santa'}, 638: {4:'Espada Santa'}, 639: {4:'Espada Santa'}, 640: {4:'Espada Santa'}, 647: {4:'Espada Santa'},   // Gallade, Cobalion, Terrakion, Virizion y Keldeo: Espada Santa
   249: {4:'Aerochorro'},
   380: {3:'Pantalla de Luz'}, 381: {3:'Pantalla de Luz'},           // Latias y Latios traen Pantalla de Luz
   276: {1:'Golpe Aéreo'}, 277: {1:'Golpe Aéreo'},                   // Taillow y Swellow traen Golpe Aéreo                                            // Lugia trae Aerochorro (su ataque propio)
@@ -75,5 +76,6 @@ DEX.forEach(m => {
   const t1 = m.types[0], t2 = m.types[1] || t1, pick = (t, s, k) => { const l = MOVESET[t][s].filter(n => !PUNCHES.has(n) || learnHas(n, m.dex)); return l[(m.dex + k) % l.length]; };
   m.mv = [pick(t1, 1, 0), pick(t2, 2, 1), pick(t1, 3, 0), pick(t1, 4, 2)];
   Object.entries(SIGNATURE[m.dex] || {}).forEach(([s, n]) => m.mv[s - 1] = n);
-  if(m.mv[3] === 'Aerochorro') m.mt = [m.types[0], m.types[1] || m.types[0], 'volador'];      // Aerochorro es de tipo volador (el hueco 4 si no usaría el primer tipo del Pokémon)
+  if(m.mv[3] === 'Aerochorro') m.mt = [m.types[0], m.types[1] || m.types[0], 'volador'];
+  if(m.mv[3] === 'Espada Santa') m.mt = [m.types[0], m.types[1] || m.types[0], 'lucha'];      // Espada Santa es de tipo lucha      // Aerochorro es de tipo volador (el hueco 4 si no usaría el primer tipo del Pokémon)
 });

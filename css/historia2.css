@@ -1,0 +1,265 @@
+/* =====================================================================
+   PANTALLAS «HISTORIA» Y «LIGA» CON EL ASPECTO NUEVO (21-11-2026) — ver js/historia2.js
+   Marco dorado (como en las maquetas, sin rombos): borde dorado grueso, contorno oscuro por fuera y una línea oscura por dentro.
+   ===================================================================== */
+body.h2on{--h2oro:#f7c62b;--h2oro2:#ffe27a;--h2osc:#2a1600;--h2azul:#0c1a3c;--h2azul2:#13244f;--h2txt:#eaf0ff;--h2gris:#9fb3dc}
+body.h2on #regions,body.h2on #tower{font-family:'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif}
+body.h2on #regions:not(.hide),body.h2on #tower:not(.hide){background:var(--h2fondo) center/cover no-repeat fixed!important}
+body.h2on #regions::before,body.h2on #tower::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(10,8,30,.25),rgba(10,8,30,.05) 70%);pointer-events:none;z-index:0}
+body.h2on #regions .inner,body.h2on #tower .inner{position:relative;z-index:1;background:none!important;border:0!important;box-shadow:none!important}
+body.h2on #regions .inner.wide{max-width:1240px}
+body.h2on #tower.lgmode .inner.wide{max-width:1300px}
+
+/* --- marco dorado común --- */
+body.h2on .h2f,body.h2on #rSum,body.h2on .rfeat,body.h2on .rcard,body.h2on .h2bot,body.h2on #lgNew .lg-hero,body.h2on #lgNew .lg-road,body.h2on #tower .stteam,
+body.h2on #lgNew .lg-prog span,body.h2on #rMode .sm-b,body.h2on #btnBack1,body.h2on #btnBack2,body.h2on #lgNew .lg-rw,body.h2on #tower .stteam .card{
+  border:3px solid var(--h2oro)!important;border-radius:12px!important;
+  box-shadow:0 0 0 2px var(--h2osc),inset 0 0 0 2px rgba(60,30,0,.55),inset 0 2px 0 3px rgba(255,236,150,.12),0 5px 0 rgba(0,0,0,.35)!important}
+body.h2on .h2ic{width:1.5em;height:1.5em;image-rendering:auto;vertical-align:middle;flex:none}
+body.h2on .h2ic.big{width:2.2em;height:2.2em}
+
+/* --- botón volver --- */
+body.h2on #btnBack1,body.h2on #btnBack2{display:inline-flex;align-items:center;gap:.5em;margin:0 0 .4rem!important;padding:.45rem 1rem!important;background:var(--h2azul)!important;color:#fff!important;font:700 1.61rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif!important}
+body.h2on #btnBack1:hover,body.h2on #btnBack2:hover{background:var(--h2azul2)!important;transform:translateY(-1px)}
+
+/* --- placa del título con alas --- */
+body.h2on .h2tit{position:relative;display:flex;align-items:center;gap:1.2em;height:84px;aspect-ratio:1087/197;max-width:100%;background:var(--h2titulo) center/100% 100% no-repeat;padding:0 13% 0 24%;box-sizing:border-box;margin:0;flex:none;filter:drop-shadow(0 5px 0 rgba(0,0,0,.35))}
+body.h2on .h2tit-t{font:700 3.22rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#ffd23a;text-shadow:3px 3px 0 #3a2000,-1px -1px 0 #3a2000,1px -1px 0 #3a2000,-1px 1px 0 #3a2000;white-space:nowrap;line-height:1}
+body.h2on .h2tit-m{display:inline-flex;align-items:center;gap:.35em;font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;white-space:nowrap}
+body.h2on .h2tit-m .h2ic{width:1.4em;height:1.4em}
+
+/* =================== HISTORIA =================== */
+body.h2on #regions .rhead{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0 0 .9rem}
+body.h2on #rMode{margin:0}
+body.h2on #rMode .sm-note{display:none}
+body.h2on #rMode .sm-seg{gap:.7rem}
+body.h2on #rMode .sm-b{min-width:0;padding:.45rem 1.1rem .45rem .7rem;background:var(--h2azul)!important;column-gap:.6rem;font-family:'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif}
+body.h2on #rMode .sm-b i{font-size:1rem}
+body.h2on #rMode .sm-b .h2ic{width:2.4rem;height:2.4rem}
+body.h2on #rMode .sm-b b{font-size:1.25rem;color:#fff;font-weight:600}
+body.h2on #rMode .sm-b small{font-size:.85rem;color:#8fd0ff}
+body.h2on #rMode .sm-b.on{background:linear-gradient(180deg,#1d2f63,#0f1d45)!important;outline:2px solid #fff3;outline-offset:2px}
+body.h2on #rMode .sm-b:not(.on){opacity:.85}
+body.h2on #rMode .sm-b:nth-child(2) small{color:#ffcf6a}
+
+/* resumen */
+body.h2on #rSum{display:flex;align-items:center;gap:1.4rem;padding:.55rem 1.2rem;margin:0 0 .9rem;background:var(--h2azul)!important}
+body.h2on #rSum .rs-big{display:flex;align-items:center;gap:.6rem;font:700 1.82rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;white-space:nowrap}
+body.h2on #rSum .rs-big b{font:inherit;color:#fff}
+body.h2on #rSum .rs-bar{flex:1;height:14px;border-radius:8px;background:#0a1330;border:2px solid #050a1c;overflow:hidden}
+body.h2on #rSum .rs-bar i{display:block;height:100%;background:linear-gradient(180deg,#ffe680,#f5b800);border-radius:6px;box-shadow:inset 0 -3px 0 #c88a00}
+body.h2on #rSum>span{font:700 1.61rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;white-space:nowrap}
+
+/* continúa aquí */
+body.h2on .rfeat{position:relative;overflow:hidden;min-height:150px;margin:0 0 .9rem;background:var(--h2azul)!important;isolation:isolate}
+body.h2on .rfeat::before{content:"";position:absolute;inset:0 0 0 18%;z-index:-2;background:var(--h2map) center/cover no-repeat}
+body.h2on .rfeat::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,var(--h2azul) 0%,var(--h2azul) 20%,rgba(12,26,60,.7) 34%,rgba(12,26,60,0) 52%)}
+body.h2on .rfeat .rf-in{display:block;padding:1rem 1.4rem;background:none}
+body.h2on .rfeat .rf-in>div:first-child{max-width:46%}
+body.h2on .rfeat .rf-tag{display:inline-block;padding:.3rem .9rem;border-radius:8px;background:linear-gradient(180deg,#ffe680,#f5b800);border:2px solid #3a2000;color:#2a1600;font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;letter-spacing:.02em}
+body.h2on .rfeat h2{margin:.5rem 0 .2rem;font:700 3.36rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;text-shadow:3px 3px 0 #000}
+body.h2on .rfeat p{margin:0 0 .9rem;font:600 1.54rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;text-shadow:2px 2px 0 #000}
+body.h2on .rfeat p b{color:#fff}
+body.h2on .rfeat .mdls{display:none}
+body.h2on .rfeat .rf-go{margin:0!important;width:12rem;padding:.4rem 0!important;font-size:1.5rem!important;line-height:1;border-radius:10px!important;background:linear-gradient(180deg,#ffe680,#f5b800)!important;border:3px solid #3a2000!important;color:#1b1000!important;box-shadow:inset 0 -4px 0 #c88a00,0 4px 0 rgba(0,0,0,.4)!important}
+body.h2on .rfeat .rf-go:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* tarjetas de región */
+body.h2on #rgrid.rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin:0 0 .9rem}
+body.h2on .rcard{padding:0!important;height:auto;aspect-ratio:3.3/1;width:100%;min-height:0;background:#0b1530!important;isolation:isolate;overflow:hidden}
+body.h2on .rcard::before{background:var(--h2map,var(--map)) center/cover no-repeat!important;filter:none!important}
+body.h2on .rcard::after{background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(4,8,20,.75) 100%)!important}
+body.h2on .rcard.lock::before{filter:grayscale(1) brightness(.62)!important}
+body.h2on .rcard.lock{opacity:1}
+body.h2on .rcard.open:hover{transform:translateY(-2px)}
+body.h2on .rcard small{left:.55rem;right:auto;top:.5rem;width:1.9rem;height:1.9rem;display:flex;align-items:center;justify-content:center;border-radius:7px;background:#0b1430;border:2px solid #000;color:#fff;font:700 1.54rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;text-shadow:none}
+body.h2on .rcard .rbadge{position:absolute;top:.45rem;right:.55rem;padding:.18rem .6rem;border-radius:8px;font:700 1.19rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;letter-spacing:.02em;border:2px solid #2a1600}
+body.h2on .rcard .rbadge.done{background:linear-gradient(180deg,#ffe680,#f5b800);color:#1b1000}
+body.h2on .rcard .rbadge.now{background:linear-gradient(180deg,#52d1ff,#1a8fe0);color:#04122a;border-color:#041a3a}
+body.h2on .rcard .rinfo{position:absolute;left:.7rem;bottom:.35rem;right:.7rem}
+body.h2on .rcard h3{margin:0!important;font:700 2.45rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif!important;color:#fff;text-shadow:2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000!important}
+body.h2on .rcard .rbar{display:none}
+body.h2on .rcard .rlock{position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);font-size:0;width:3.4rem;height:3.4rem;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(0,0,0,.45)}
+body.h2on .rcard .rlock .h2ic{width:2.4rem;height:2.4rem}
+body.h2on .rcard.now{border-color:#7fd8ff!important}
+
+/* barra de abajo */
+body.h2on #rTower{display:none}
+body.h2on .h2bot{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1.2rem;padding:.6rem 1.2rem;background:var(--h2azul)!important;font:600 1.61rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on .h2bot small{font-size:1.3rem;color:var(--h2gris)}
+
+/* =================== LIGA =================== */
+body.h2on #lgNew .lg{font-family:'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px}
+body.h2on #lgNew .lg-top{gap:.7rem 1rem;margin-bottom:.9rem;align-items:center;flex-wrap:wrap}
+body.h2on #lgNew .lg-top .h2tit{height:92px}
+body.h2on #lgNew .lg-prog{gap:.7rem;flex-wrap:wrap;margin-left:auto}
+body.h2on #lgNew .lg-prog span{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:12px!important;background:var(--h2azul)!important;font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on #lgNew .lg-prog span b{color:#fff}
+body.h2on #lgNew .lg-prog .gold{color:#ffd23a}
+
+body.h2on #lgNew .lg-hero{grid-template-columns:270px 1fr 300px;background:#0c1838!important;isolation:isolate}
+body.h2on #lgNew .lg-hero::before{content:"";position:absolute;inset:0;z-index:-2;background:var(--h2fondo) 60% 18%/cover no-repeat}
+body.h2on #lgNew .lg-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(8,14,40,0) 0,rgba(8,14,40,0) 270px,rgba(8,14,40,.72) 300px,rgba(8,14,40,.45) 62%,rgba(8,14,40,.25) 100%)}
+body.h2on #lgNew .lg-por{height:300px;background:var(--h2por) 50% 100%/cover no-repeat;border-right:3px solid var(--h2oro);box-shadow:inset -2px 0 0 #2a1600}
+body.h2on #lgNew .lg-por::after{display:none}
+body.h2on #lgNew .lg-por img{width:250px;height:250px;margin-bottom:6px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.55))}
+body.h2on #lgNew .lg-info{padding:20px 12px 16px 22px;gap:10px}
+body.h2on #lgNew .lg-kind{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;border-radius:10px;background:var(--h2azul);border:3px solid var(--h2oro);box-shadow:0 0 0 2px var(--h2osc);font:700 1.54rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;letter-spacing:.04em;text-transform:uppercase}
+body.h2on #lgNew .lg-kind b{color:#46f06a}
+body.h2on #lgNew .lg-name{font:700 5.04rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;text-shadow:4px 4px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000}
+body.h2on #lgNew .lg-sub{font:700 1.54rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff;gap:.6rem}
+body.h2on #lgNew .lg-sub .tb{padding:.2rem .8rem;border-radius:8px;font:700 1.4rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#1b1000;background:linear-gradient(180deg,#ffe680,#f5b800)!important;border:2px solid #3a2000}
+body.h2on #lgNew .lg-sub>span:not(.tb)::before{content:"· "}
+body.h2on #lgNew .lg-quote{font:600 1.47rem/1.45 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;font-style:normal;color:#fff;background:rgba(10,20,50,.85);border:2px solid #3b6fc4;border-radius:8px;padding:.6rem .9rem;max-width:470px;margin:0}
+body.h2on #lgNew .lg-rt small{font:700 1.33rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#4fd0ff;letter-spacing:.06em}
+body.h2on #lgNew .lg-balls{gap:.55rem}
+body.h2on #lgNew .lg-balls canvas,body.h2on #lgNew .lg-balls i{width:46px;height:46px;border-radius:7px;background:rgba(10,20,50,.9);border:2px solid #3b6fc4}
+body.h2on #lgNew .lg-side{padding:18px 18px 18px 6px}
+body.h2on #lgNew .lg-rw{background:var(--h2azul)!important;padding:.7rem .8rem}
+body.h2on #lgNew .lg-rw small{font:700 1.33rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#4fd0ff;letter-spacing:.04em;text-transform:uppercase}
+body.h2on #lgNew .lg-rw div{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
+body.h2on #lgNew .lg-rw .rwm{justify-content:flex-start;padding:.3rem .6rem;border-radius:7px;background:#0a1330;border:2px solid #24407a;font:700 1.61rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif}
+body.h2on #lgNew .lg-go,body.h2on #lgNew .lg-go.rep{padding:.75rem .5rem!important;font:700 2.17rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif!important;border-radius:12px!important;background:linear-gradient(180deg,#ffe680,#f5b800)!important;border:3px solid var(--h2osc)!important;color:#1b1000!important;box-shadow:inset 0 -5px 0 #c88a00,0 0 0 2px var(--h2oro),0 5px 0 rgba(0,0,0,.4)!important}
+body.h2on #lgNew .lg-go b{font-weight:700;margin-right:.3em}
+
+/* camino de la liga */
+body.h2on #lgNew .lg-road{margin-top:.9rem;background:var(--h2azul)!important;padding:.7rem 1rem 1rem}
+body.h2on #lgNew .lg-road h3,body.h2on #tower .stt-h h2{display:flex;align-items:center;gap:.55rem;margin:0 0 .7rem;font:700 1.75rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#4fd0ff;letter-spacing:.06em;text-transform:uppercase}
+body.h2on .h2deco{display:block;flex:0 1 26rem;height:4px;margin-left:.6rem;border-radius:4px;background:#bfe7ff;box-shadow:0 0 0 1px #0a1a3a;position:relative}
+body.h2on .h2deco::before,body.h2on .h2deco::after{content:"";position:absolute;top:50%;width:9px;height:9px;border-radius:50%;background:#0c1a3c;border:2px solid #bfe7ff;transform:translate(-50%,-50%)}
+body.h2on .h2deco::before{left:0}body.h2on .h2deco::after{left:100%}
+body.h2on #lgNew .lg-n small{font:700 1.33rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on #lgNew .lg-n .md{width:62px;height:62px;border:3px solid var(--h2oro);box-shadow:0 0 0 2px var(--h2osc);background:radial-gradient(circle,#26365e,#0a1330)}
+body.h2on #lgNew .lg-n.am .md{border-radius:10px;width:64px;height:64px;border-color:#b07cff}
+body.h2on #lgNew .lg-n.ch .md{width:84px;height:84px;border-radius:12px;border-color:var(--h2oro2);box-shadow:0 0 0 2px var(--h2osc),0 0 22px #ffd23a88}
+body.h2on #lgNew .lg-n.ch .crown{top:-22px}
+body.h2on #lgNew .lg-n.ch .crown .h2ic{width:30px;height:30px}
+body.h2on #lgNew .lg-n.lock .md{border-color:#4a5a80}
+body.h2on #lgNew .lg-n .ck{background:#46f06a;border:2px solid #0a2a12}
+body.h2on #lgNew .lg-sep{height:3px;background:#bfe7ff;opacity:.9;margin-bottom:34px}
+body.h2on #lgNew .lg-sep.off{background:#4a5a80}
+
+/* tu equipo */
+body.h2on #tower .stteam{margin-top:.9rem;padding:.7rem 1rem 1rem;background:var(--h2azul)!important}
+body.h2on #tower .stt-h{margin-bottom:.4rem}
+body.h2on #tower .stt-h h2{margin:0;flex:1}
+body.h2on #tower .tsel{font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on #tower .tsel select{font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;background:#0a1330;color:#fff;border:2px solid #3b6fc4;border-radius:8px;padding:.3rem .6rem}
+body.h2on #btnTeam{display:inline-flex;align-items:center;gap:.45rem;font:700 1.47rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif!important;background:#0a1330!important;border:2px solid #3b6fc4!important;border-radius:8px!important}
+body.h2on #tower .stteam #teamBar{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+body.h2on #tower .stteam .card{width:auto;padding:.55rem .9rem;background:linear-gradient(180deg,#13244f,#0c1a3c)!important;font:700 1.26rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on #tower .stteam .card b{font:700 1.82rem 'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif;color:#fff}
+body.h2on #tower .stteam .card .tt{color:#cfe0ff}
+body.h2on #tower .stteam .card .ti{font-size:.85rem;color:#ffd23a}
+
+/* =================== MÓVIL (pantalla pequeña) =================== */
+@media (max-width:1000px){
+  body.h2on .h2tit{height:58px}
+  body.h2on .h2tit-t{font-size:1.6rem}
+  body.h2on #lgNew .lg-top{flex-wrap:wrap}
+  body.h2on #lgNew .lg-top .h2tit{height:64px}
+  body.h2on #lgNew .lg-prog{margin-left:0}
+  body.h2on #lgNew .lg-hero{grid-template-columns:190px 1fr 220px}
+  body.h2on #lgNew .lg-hero::after{background:linear-gradient(90deg,rgba(8,14,40,0) 0,rgba(8,14,40,0) 190px,rgba(8,14,40,.75) 210px,rgba(8,14,40,.5) 100%)}
+  body.h2on #lgNew .lg-por{height:250px}
+  body.h2on #lgNew .lg-por img{width:180px;height:180px}
+  body.h2on #lgNew .lg-name{font-size:2.4rem}
+  body.h2on .rcard h3{font-size:1.3rem!important}
+  body.h2on .rfeat .rf-in>div:first-child{max-width:60%}
+}
+@media (max-width:700px){
+  body.h2on #rgrid.rgrid,body.h2on #tower .stteam #teamBar{grid-template-columns:repeat(2,1fr)}
+  body.h2on #lgNew .lg-hero{grid-template-columns:1fr}
+  body.h2on #lgNew .lg-por{display:none}
+}
+/* pantallas medianas (móvil en horizontal: el juego pinta la página a unos 1200 px y la encoge) */
+@media (max-width:1350px){
+  body.h2on #lgNew .lg-top .h2tit{height:78px}
+  body.h2on #lgNew .lg-prog span{padding:.4rem .7rem}
+}
+
+/* «Continúa aquí» con panorámica: la imagen ocupa todo el ancho (su tercio izquierdo es cielo y mar, ahí va el texto) */
+body.h2on .rfeat.h2pano::before{inset:0;background-position:50% 60%}
+body.h2on .rfeat.h2pano::after{background:linear-gradient(90deg,rgba(12,26,60,.75) 0%,rgba(12,26,60,.45) 30%,rgba(12,26,60,0) 48%)}
+
+/* Liga: la placa del título y los contadores en la misma fila, sin salirse por la derecha (22-11: se cortaba «Campeón») */
+body.h2on #lgNew .lg-top{flex-wrap:nowrap;justify-content:space-between}
+body.h2on #lgNew .lg-top .h2tit{height:78px;aspect-ratio:auto;width:min(58%,700px);flex:0 1 auto;padding:0 10% 0 19%;gap:.8em;justify-content:center}
+body.h2on #lgNew .lg-top .h2tit-t{font-size:clamp(1.4rem,2vw,2.5rem)}
+body.h2on #lgNew .lg-top .h2tit-m{font-size:clamp(.9rem,1.1vw,1.3rem)}
+body.h2on #lgNew .lg-prog{flex:0 1 auto;flex-wrap:nowrap;gap:.5rem;min-width:0}
+body.h2on #lgNew .lg-prog span{font-size:clamp(1rem,1.15vw,1.4rem);padding:.4rem .7rem;white-space:nowrap}
+@media (max-width:700px){
+  body.h2on #lgNew .lg-top{flex-wrap:wrap}
+  body.h2on #lgNew .lg-top .h2tit{width:100%;height:60px}
+  body.h2on #lgNew .lg-prog{flex-wrap:wrap}
+}
+
+/* letra limpia y gruesa como en la maqueta (sin la letra pixelada) en todo lo de Historia y Liga */
+body.h2on #regions,body.h2on #regions *:not(.h2ic),body.h2on #lgNew,body.h2on #lgNew *:not(.h2ic),body.h2on #tower .stt-h,body.h2on #tower .stt-h *{font-family:'Segoe UI','Nunito',Roboto,'Helvetica Neue',Arial,sans-serif!important}
+body.h2on .h2tit-t{font-weight:800!important}
+
+/* Tu equipo: retrato del HUD a la izquierda, nombre y los iconos de tipo, y el icono del objeto a la derecha */
+body.h2on #tower .stteam .card.h2eq{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:.8rem;row-gap:.25rem;align-items:center}
+body.h2on .card.h2eq .h2cara,body.h2on .card.h2eq canvas{grid-row:1/3;width:56px;height:56px;image-rendering:pixelated;border-radius:10px;border:2px solid #f2b51c;background:#0a0f24;box-sizing:border-box}
+body.h2on .card.h2eq b{grid-column:2;align-self:end;line-height:1}
+body.h2on .card.h2eq .tt{grid-column:2;display:flex;gap:.35rem;align-self:start}
+body.h2on .card.h2eq .h2tipo{width:26px;height:26px}
+body.h2on .card.h2eq .ti{grid-column:3;grid-row:1/3;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#0a0f24;border:2px solid #3a5aa8}
+body.h2on .card.h2eq .h2obj{width:32px;height:32px;image-rendering:pixelated;object-fit:contain}
+body.h2on .card.h2eq .h2sinobj{width:14px;height:2px;background:#3a5aa8;border-radius:2px}
+
+/* Placa del título en 3 trozos (22-11): las alas y la Poké Ball no se deforman; solo se alarga la barra azul del centro
+   (titulo.webp mide 1087x197: izquierda 0-300 = ala + Poké Ball · derecha 900-1087 = ala) */
+body.h2on .h2tit,body.h2on #lgNew .lg-top .h2tit{--th:84px;height:var(--th);aspect-ratio:auto;width:auto;max-width:100%;flex:0 1 auto;background:none;
+  border:0 solid transparent;border-image-source:var(--h2titulo);border-image-slice:0 187 0 300 fill;border-image-width:0 calc(var(--th) * .95) 0 calc(var(--th) * 1.523);border-image-repeat:stretch;
+  padding:0 calc(var(--th) * 1.15) 0 calc(var(--th) * 1.62);justify-content:flex-start;gap:.9em}
+body.h2on .h2tit-t{font-size:calc(var(--th) * .4)}
+body.h2on #lgNew .lg-top .h2tit-t{font-size:calc(var(--th) * .38)}
+body.h2on #lgNew .lg-top .h2tit-m{font-size:calc(var(--th) * .19)}
+body.h2on #lgNew .lg-top .h2tit{--th:80px}
+@media (max-width:1000px){ body.h2on .h2tit,body.h2on #lgNew .lg-top .h2tit{--th:62px} }
+
+/* Retrato del rival: el balcón llena todo el recuadro (antes se quedaba corto por abajo) */
+body.h2on #lgNew .lg-por{height:auto;min-height:300px;align-self:stretch;background-size:cover;background-position:50% 100%}
+/* Su equipo: caras del HUD */
+body.h2on #lgNew .lg-balls .h2cara{width:46px;height:46px;border-radius:7px;background:rgba(10,20,50,.9);border:2px solid #3b6fc4;image-rendering:pixelated;box-sizing:border-box}
+
+/* =================== MARCOS DE LA MAQUETA (assets/menu/nuevo/marcos.png de Gemini, 22-11) ===================
+   marco.webp = el marco sin la muesca del centro (las esquinas no se deforman, los lados se estiran)
+   marco_ntop / marco_nbot = la muesca dorada del centro de arriba y de abajo (va aparte para que no se estire)
+   Se dibuja en una capa <i class="h2marco"> encima de cada panel (js/historia2.js, h2Marcos), así queda por encima de las imágenes. */
+body.h2on #rSum,body.h2on .rfeat,body.h2on .rcard,body.h2on .h2bot,body.h2on #lgNew .lg-hero,body.h2on #lgNew .lg-road,body.h2on #tower .stteam,body.h2on .h2f,
+body.h2on #lgNew .lg-prog span,body.h2on #rMode .sm-b,body.h2on #btnBack1,body.h2on #btnBack2,body.h2on #lgNew .lg-rw,body.h2on #tower .stteam .card{
+  border:0!important;border-radius:8px!important;box-shadow:0 5px 0 rgba(0,0,0,.35)!important;position:relative}
+body.h2on .h2marco{position:absolute;inset:0;z-index:6;pointer-events:none;border:0 solid transparent;border-image:var(--h2marco) 30 / 15px stretch;font-style:normal}
+body.h2on .h2marco::before,body.h2on .h2marco::after{content:"";position:absolute;left:50%;transform:translateX(-50%);width:17px;height:18px;background:var(--h2nt) center/100% 100% no-repeat}
+body.h2on .h2marco::before{top:0}
+body.h2on .h2marco::after{bottom:0;background-image:var(--h2nb)}
+body.h2on .h2marco.m{border-image-width:12px}
+body.h2on .h2marco.m::before,body.h2on .h2marco.m::after{width:14px;height:15px}
+body.h2on .h2marco.s{border-image-width:10px}
+body.h2on .h2marco.s::before,body.h2on .h2marco.s::after{width:12px;height:13px}
+/* los botones pequeños no llevan muesca (queda recargado) */
+body.h2on .h2marco.s.sin::before,body.h2on .h2marco.s.sin::after{display:none}
+/* marco más grueso (como la maqueta) y el contenido separado del borde */
+body.h2on .h2marco{border-image-width:19px}
+body.h2on .h2marco::before,body.h2on .h2marco::after{width:21px;height:22px}
+body.h2on .h2marco.m{border-image-width:16px}
+body.h2on .h2marco.m::before,body.h2on .h2marco.m::after{width:18px;height:19px}
+body.h2on .h2marco.s{border-image-width:12px}
+body.h2on .h2marco.s::before,body.h2on .h2marco.s::after{width:14px;height:15px}
+body.h2on .rcard small{left:13px;top:11px}
+body.h2on .rcard .rbadge{right:13px;top:11px}
+body.h2on .rcard .rinfo{left:14px;right:14px;bottom:9px}
+body.h2on .h2bot{padding:.85rem 1.7rem}
+body.h2on #rSum{padding-left:1.4rem!important;padding-right:1.6rem!important}
+body.h2on .rfeat .rf-in{padding-left:1.6rem!important}
+body.h2on #tower .stteam{padding:1rem 1.4rem 1.3rem}
+body.h2on #lgNew .lg-road{padding-left:1.4rem;padding-right:1.4rem}
+body.h2on #tower .stteam .card.h2eq{padding:.6rem 1.1rem .6rem .95rem}
+/* botones Fácil / Difícil: sin el contorno de antes (ya llevan marco) y con sitio para el texto de abajo */
+body.h2on #rMode .sm-b{padding:.6rem 1.3rem .65rem .85rem;outline:0!important}
+body.h2on #rMode .sm-b.on{box-shadow:0 0 0 2px rgba(255,210,58,.35),0 5px 0 rgba(0,0,0,.35)!important}
+h2-marco.h2marco{display:block}
+body.h2on #rMode .sm-seg{background:none!important;box-shadow:none!important;border:0!important;padding:0!important}

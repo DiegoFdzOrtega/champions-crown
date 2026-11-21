@@ -14,6 +14,7 @@ function floorFight(n){                          // n = 0 es el primer líder
   };
   const estPropio = typeof EST !== 'undefined' && EST[who.id] && EST[who.id].nuevo;   // ¿este líder tiene ya su estadio nuevo dibujado? (js/render.js, EST con nuevo: true)
   if(typeof TE_NEW !== 'undefined' && TE_NEW && !estPropio) o.estRegion = true;   // todas las regiones (Kanto incluida): estadio grande con público (js/torreestadio.js) · menos los líderes con estadio propio nuevo
+  if(estPropio) try{ estLoad(EST[who.id]); }catch(e){}                                    // pide ya su estadio: se descarga mientras sale el panel VS
   if(!team.length){ startBattle(o); return; }                                              // (startBattle avisa de que el equipo está vacío)
   const kind = {lider:'Líder', alto:'Alto Mando', campeon:'Campeón'}[F.kind] || '', reg = String(F.region || '').split(' / ').pop();
   vsIntro({name:who.leader, id:who.id, enemies:F.teams, label:[reg, kind].filter(Boolean).join(' · ').toUpperCase(), music:o, go:() => startBattle(o)});   // panel VS y, al terminar, empieza el combate

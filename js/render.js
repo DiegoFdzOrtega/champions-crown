@@ -169,7 +169,7 @@ const EST = {                                                       // imágenes
   j_lance:  {src: 'assets/fondos/estadios/Johto/lance.webp', w: 1024, h: 572, court: [85, 192, 938, 459], trap: [195, 828, 85, 938], nuevo: true}      // Campeón: salón dorado de Lance
 };
 function estLoad(E){ if(!E.img){ E.img = new Image(); E.img.onload = () => { E.ok = true; }; E.img.src = E.src + '?v=19'; } }
-Object.values(EST).forEach(estLoad);                                // se cargan al abrir el juego: al entrar al combate ya están listas
+// (antes se cargaban TODOS al abrir el juego: ~7 MB. Ahora cada uno se pide al empezar su combate, en startBattle (js/state.js), y estOf() lo pide si aún no está)
 const estEnt = () => (g && g.o && EST[g.o.leader]) || null;          // el estadio de este combate (aunque su imagen aún no haya cargado)
 function estOf(){ const E = estEnt(); if(!E) return null; estLoad(E); return E.ok ? E : null; }
 // LÍDERES VENCIDOS EN LA GRADA (Historia de Kanto): los que ya has derrotado antes que este vienen a verte (Brock en el de Misty; Brock y Misty en el de Surge...).

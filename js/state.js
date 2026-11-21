@@ -134,6 +134,7 @@ function enemyMon(e){
 }
 
 function startBattle(o, again){
+  try{ if(o && typeof EST !== 'undefined' && EST[o.leader]) estLoad(EST[o.leader]); }catch(e){}                    // pide ya la imagen del estadio de este combate (js/render.js)
   if(!team.length){ toast('Tu equipo está vacío: añade Pokémon en Equipo Pokémon.'); return; }                // por seguridad (los botones de combate ya se desactivan si no está completo)                                                              // again = true al reiniciar el combate (no vuelve a contar el uso de tus Pokémon)
   if(!again){ team.forEach(id => save.used[id] = (save.used[id] || 0) + 1); persist(); }                 // para ordenar por "más usados"
   const p = team.map(id => { const b = combatBoost(id), f = mk(playerMon(id), b.hm, b.dm, save.equip[id], useShiny(id)); f.spdm = b.spdm; f.defm = b.defm; f.ab = abilityOf(id); megaSetup(f, 'p'); return f; }),   // IVs, EVs, naturaleza, ataques de MT y habilidad

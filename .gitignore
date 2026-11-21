@@ -31,3 +31,8 @@ assets/fondos/torre/*.png
 
 # Música original de Galar sin comprimir (la que usa el juego es la de assets/musica/Galar/ con nombre en español)
 assets/musica/Galar/SwSh*
+
+# Limpieza (limpiar.bat): lo que sobra va a _papelera y los originales grandes a material/originales
+_papelera/
+material/originales/
+limpiar_log.txt

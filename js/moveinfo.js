@@ -14,7 +14,7 @@ const MOVE_DESC = {
   'Carantoña':'Un abrazo muy cariñoso... pero con más fuerza de la que parece.', 'Colmillo Hielo':'Muerde con unos colmillos helados.',
   'Golpe Roca':'Un puñetazo tan duro que parte las rocas.', 'Arañazo':'Rasga al rival con unas garras afiladas.',
   'Ataque Rápido':'Un salto rapidísimo hacia el rival: si está cerca va directo a por él.', 'Cabezazo':'Embiste con la cabeza con todas sus fuerzas.',
-  'A Bocajarro':'Se lanza hacia donde apuntas y, si alcanza al rival, le suelta una ráfaga de golpes; el último lo manda lejos. Después baja la guardia: recibe más daño unos segundos.',
+  'Espada Santa':'Una espada gigante de luz aparece encima del rival y cae clavándose en el suelo. Se puede esquivar si te apartas antes de que caiga.', 'A Bocajarro':'Se lanza hacia donde apuntas y, si alcanza al rival, le suelta una ráfaga de golpes; el último lo manda lejos. Después baja la guardia: recibe más daño unos segundos.',
   'Golpe Cuerpo':'Salta fuera de la pantalla y cae con todo su peso donde tú lo lleves: golpea en círculo y en el aire no le pueden dar.', 'Vuelo':'Alza el vuelo, se mueve rápido por el aire sin que le puedan dar y cae en picado donde tú lo lleves.', 'Placaje':'Se lanza contra el rival con todo su cuerpo.',
   'Látigo Cepa':'Azota con unas lianas largas y finas.', 'Cabezazo Zen':'Embiste con la cabeza envuelta en energía psíquica.',
   'Tumba Rocas':'Lanza tres rocas en abanico, de corto alcance. Hacen daño y dejan al rival lento un rato.', 'Mordisco':'Muerde con unos colmillos afilados y malvados.',

@@ -3,21 +3,21 @@
    border-image-width (lo que va tras la /) es lo que mide el marco en pantalla; el borde de verdad sigue siendo fino, así no cambia el tamaño de nada. */
 #main.mkit .m2-me,#main.mkit .m2-ic button,#main.mkit .m2-cur > span,#main.mkit .m2-hero,#main.mkit .m2-t,#main.mkit .m2-news,#main.mkit .m2-link,#main.mkit .m2-go,#main.mkit .m2-daily{
   border-style:solid!important;border-width:3px!important;border-color:transparent!important;border-radius:10px;box-shadow:none!important;filter:drop-shadow(0 5px 6px rgba(0,0,0,.45));background-clip:padding-box}
-#main.mkit .m2-play .m2-t{background:none!important;border-image:url('../assets/menu/ui/boton.webp?v=1') 64 60 60 60 fill / 30px 28px 28px 28px stretch}
+#main.mkit .m2-play .m2-t{background:none!important;border-image:url('../assets/menu/ui/boton2.webp?v=1') 64 60 60 60 fill / 30px 28px 28px 28px stretch}
 #main.mkit .m2-play .m2-t::before,#main.mkit .m2-play .m2-t::after{display:none}
 #main.mkit .m2-play .m2-t{padding:16px 16px 20px 14px}
-#main.mkit .m2-hero{border-image:url('../assets/menu/ui/panel.webp?v=1') 64 48 48 48 / 30px 22px 22px 22px stretch;
+#main.mkit .m2-hero{border-image:url('../assets/menu/ui/panel2.webp?v=1') 64 48 48 48 / 30px 22px 22px 22px stretch;
   background:linear-gradient(90deg,rgba(9,24,60,.2),#0b1f4a 30%,#0a1d45) ,var(--map) left center/40% auto no-repeat!important;padding:16px 18px!important}
 #main.mkit .m2-col .m2-t,#main.mkit .m2-ic button,#main.mkit .m2-link{background:none!important;border-image:url('../assets/menu/ui/cuadro.webp?v=1') 34 fill / 16px stretch}
-#main.mkit .m2-me{background:none!important;border-image:url('../assets/menu/ui/barra.webp?v=1') 34 64 34 64 fill / 16px 28px 16px 28px stretch;padding:8px 26px 8px 14px}
-#main.mkit .m2-cur > span{background:none!important;border-image:url('../assets/menu/ui/moneda.webp?v=1') 30 104 30 30 fill / 14px 48px 14px 14px stretch;padding:8px 54px 8px 14px!important;cursor:pointer}
-#main.mkit .m2-news{background:none!important;border-image:url('../assets/menu/ui/noticias.webp?v=1') 64 48 48 48 fill / 30px 22px 22px 22px stretch;padding:12px 18px 16px!important}
-#main.mkit .m2-go,#main.mkit .m2-daily{background:none!important;border-image:url('../assets/menu/ui/oro.webp?v=1') 46 90 46 90 fill / 20px 40px 20px 40px stretch}
+#main.mkit .m2-me{background:none!important;border-image:url('../assets/menu/ui/barra2.webp?v=1') 34 64 34 64 fill / 16px 28px 16px 28px stretch;padding:8px 26px 8px 14px}
+#main.mkit .m2-cur > span{background:none!important;border-image:url('../assets/menu/ui/moneda2.webp?v=1') 30 104 30 30 fill / 14px 48px 14px 14px stretch;padding:8px 18px 8px 14px!important;cursor:pointer}
+#main.mkit .m2-news{background:none!important;border-image:url('../assets/menu/ui/noticias2.webp?v=1') 64 48 48 48 fill / 30px 22px 22px 22px stretch;padding:12px 18px 16px!important}
+#main.mkit .m2-go,#main.mkit .m2-daily{background:none!important;border-image:url('../assets/menu/ui/oro2.webp?v=1') 46 90 46 90 fill / 20px 40px 20px 40px stretch}
 #main.mkit .m2-go{padding:14px 44px!important;color:#3a2200!important;text-shadow:0 1px 0 rgba(255,255,255,.5)}
 #main.mkit .m2-go::after{display:none}
 #main.mkit .m2-daily{padding:12px 40px!important}
 /* la barra de abajo (Colección) dentro de su marco con rombos */
-#main.mkit .m2-col{background:none;border:3px solid transparent;border-image:url('../assets/menu/ui/barra.webp?v=1') 34 64 34 64 fill / 16px 30px 16px 30px stretch;padding:26px 30px 10px!important;margin-top:18px}
+#main.mkit .m2-col{background:none;border:3px solid transparent;border-image:url('../assets/menu/ui/barra2.webp?v=1') 34 64 34 64 fill / 16px 30px 16px 30px stretch;padding:26px 30px 10px!important;margin-top:18px}
 #main.mkit .m2-col .m2-t{filter:none}
 /* iconos */
 #main.mkit .m2-ic button img.mk{width:28px;height:28px;object-fit:contain;image-rendering:auto}

@@ -389,7 +389,7 @@ const rgNuevo = (pre, o) => { const P = Object.assign({}, PU, {collar: {cada: 85
 const RG_HIELO = rgNuevo('rh', {v: 2, marca: {dura: 3, alto: 120, entra: .25, sueltas: 1}, boca: .5, fin: 1.1, base: 56, corre: 600, col: {sombra: '0,40,70', motas: ['#ffffff', '#9ee8ff'], ondas: ['#c8f4ff', '#5fc8f0'], brillo: 'rgba(210,245,255,.9)'}});
 const RG_DRAGON = rgNuevo('pdr', {boca: .45, fin: 1.15, base: 64, corre: 620, col: {sombra: '30,0,60', motas: ['#ffffff', '#9a7cff'], ondas: ['#b48cff', '#4c6cff'], brillo: 'rgba(200,170,255,.9)'}});
 const RG_TINIEB = rgNuevo('ti', {boca: .45, fin: 1.2, base: 60, corre: 520, col: {sombra: '20,0,30', motas: ['#14051f', '#c27bff'], ondas: ['#d07bff', '#2a0a40'], brillo: 'rgba(220,150,255,.85)'}});
-const RG_DRAGOA = rgNuevo('da', {boca: .45, fin: 1.2, base: 62, corre: 580, col: {sombra: '0,40,35', motas: ['#e8fff8', '#3fe0c8'], ondas: ['#7fffe0', '#1a9a8a'], brillo: 'rgba(180,255,240,.9)'}});
+// (RG_DRAGOA ya no se crea: Dragoaliento usa las imágenes de Pulso Dragón, RG_DRAGON. Así no se descargan las da_* al abrir el juego)
 const RG_RAYO = rgNuevo('ry', {boca: .5, fin: 1.1, base: 54, corre: 760, late: .1, v: 2, marca: {dura: 2.5, alto: 80, entra: .2},      // marca propia: suelo quemado con grietas amarillas (ry_marca)
   col: {sombra: '40,30,0', motas: ['#ffffff', '#ffe14a'], ondas: ['#fff6a0', '#ffb020'], brillo: 'rgba(255,250,200,.95)'}});
 // ---- Rayos grandes de la E (hoja de Gemini de 4 filas: cuerpo, anillos, impacto, marca; la bola de la boca es la de la carga) ----
@@ -415,7 +415,8 @@ function puPoly(P, b, L, Lmax, drop){     // contorno del rayo en el mundo (para
   for(let x = 0; x <= L; x += Math.max(8, L / 20)){ const h = puW(P, x, Lmax) / 2 * P.sombra.ancho, cx = b.x0 + c * x, cy = b.y0 + s * x + drop; A.push([cx - s * h, cy + c * h * .5]); Q.push([cx + s * h, cy - c * h * .5]); }
   return A.concat(Q.reverse());
 }
-function puShadow(poly, a, col){ if(poly.length < 3) return; ctx.save(); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(${col || '14,0,26'},${a.toFixed(3)})`; ctx.beginPath(); poly.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); }
+function puShadow(poly, a, col){ if(poly.length < 3) return; ctx.save(); if(!(typeof LOWFX !== 'undefined' && LOWFX)) ctx.filter = 'blur(6px)'; a *= .7;   // (21-11) sombra difuminada: con bordes duros parecía un rectángulo
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = `rgba(${col || '14,0,26'},${a.toFixed(3)})`; ctx.beginPath(); poly.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore(); }
 function puFrame(P, k, fr, cx, cy, w, h, rot){ const S = P.img[k]; ctx.save(); ctx.translate(cx, cy); if(rot) ctx.rotate(rot); ctx.drawImage(S.i, fr * S.fw, 0, S.fw, S.fh, -w / 2, -h / 2, w, h); ctx.restore(); }
 function puDraw(f, P){
   const b = f.burst, K = b.K, t = b.t, T = K.T; let Lmax = Math.max(60, b.len), toca = false;
@@ -450,7 +451,7 @@ function puDraw(f, P){
   const O = P.img.orbe, ofr = t < .16 ? Math.min(3, Math.floor(t / .04)) : 4 + Math.floor(g.t * 14) % 4, od = P.base * P.orbe * (t < .16 ? .5 + t / .32 : 1) * (.6 + .4 * rec);
   ctx.globalAlpha = Math.min(1, rec * 1.5);
   if(O.ok) puFrame(P, 'orbe', ofr, b.x0, b.y0, od, od, 0);
-  else { const C = typeof CARGA !== 'undefined' && CARGA.img[b.type]; if(C && C.ok){ const d = (CARGA.boca.px || od) * (.6 + .4 * rec) * (1 + .05 * Math.sin(g.t * 22)); ctx.drawImage(C.i, 2 * C.fw, 0, C.fw, C.fh, b.x0 - d / 2, b.y0 - d / 2, d, d); } }      // la bola de la carga de la E
+  else if(!(typeof CV !== 'undefined' && CV.on)){ const C = typeof CARGA !== 'undefined' && CARGA.img[b.type];  /* 21-11: sin el remolino en la boca, como en el vídeo */ if(C && C.ok){ const d = (CARGA.boca.px || od) * (.6 + .4 * rec) * (1 + .05 * Math.sin(g.t * 22)); ctx.drawImage(C.i, 2 * C.fw, 0, C.fw, C.fh, b.x0 - d / 2, b.y0 - d / 2, d, d); } }      // la bola de la carga de la E
   ctx.restore();
   if(toca && L > Lmax * .9){                                                // explosión donde golpea
     const I = P.img.imp, ifr = Math.floor(g.t * 16) % 3 + (Math.floor(g.t * 3) % 2), d = puW(P, Lmax, Lmax) * 1.45;
@@ -489,8 +490,21 @@ if(AG.on && typeof fxhdGround === 'function'){ const o = fxhdGround; fxhdGround 
         const X = R.x0 + c * x - sn * off * .5, Y = R.y0 + sn * x * .55 + c * off * .5; ctx.save(); ctx.translate(X, Y); if(i % 2) ctx.scale(-1, 1);
         ctx.drawImage(S.i, 0, 0, S.fw, S.fh, -w * k / 2, -h * k * .7, w * k, h * k); ctx.restore(); }
       ctx.restore(); continue; }
+    // (21-11-2026) se pinta aparte y se le difuminan los bordes y las puntas: antes se cortaba con un rectángulo y se veían los bordes rectos
+    const LL = Math.max(8, Math.round(R.L * ve + w * .15)), HH2 = Math.round(h * 2);
+    if(!R.cv || R.cvL !== LL){ const C = R.cv || (R.cv = document.createElement('canvas')); C.width = LL; C.height = HH2; R.cvL = LL;
+      const x2 = C.getContext('2d'); x2.imageSmoothingEnabled = false; x2.clearRect(0, 0, LL, HH2);
+      for(let x = -w * .15, i = 0; x < LL; x += paso, i++){ x2.save(); x2.translate(x + w / 2, h); if(i % 2) x2.scale(-1, 1); const k = i % 3 === 1 ? .82 : 1; x2.drawImage(S.i, 0, 0, S.fw, S.fh, -w / 2, -h * k / 2, w, h * k); x2.restore(); }
+      x2.globalCompositeOperation = 'destination-in';
+      const fin = Math.min(LL * .45, Math.max(90, LL * .22)), gx = x2.createLinearGradient(0, 0, LL, 0);
+      gx.addColorStop(0, 'rgba(0,0,0,.15)'); gx.addColorStop(Math.min(.3, 50 / LL), 'rgba(0,0,0,1)'); gx.addColorStop(Math.max(.31, 1 - fin / LL), 'rgba(0,0,0,1)'); gx.addColorStop(1, 'rgba(0,0,0,0)');
+      x2.fillStyle = gx; x2.fillRect(0, 0, LL, HH2);
+      const gy = x2.createLinearGradient(0, h * .5, 0, h * 1.5); gy.addColorStop(0, 'rgba(0,0,0,0)'); gy.addColorStop(.28, 'rgba(0,0,0,1)'); gy.addColorStop(.72, 'rgba(0,0,0,1)'); gy.addColorStop(1, 'rgba(0,0,0,0)');
+      x2.fillStyle = gy; x2.fillRect(0, 0, LL, HH2); }
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = .9 * Math.min(1, (1 - u) * 3);
-    ctx.translate(R.x0, R.y0); ctx.scale(1, .55); ctx.rotate(R.a); ctx.beginPath(); ctx.rect(0, -h, R.L * ve + w * .15, h * 2); ctx.clip();
-    for(let x = -w * .15, i = 0; x < R.L * ve; x += paso, i++){ ctx.save(); ctx.translate(x + w / 2, 0); if(i % 2) ctx.scale(-1, 1); const k = i % 3 === 1 ? .82 : 1; ctx.drawImage(S.i, 0, 0, S.fw, S.fh, -w / 2, -h * k / 2, w, h * k); ctx.restore(); }
-    ctx.restore(); } }catch(e){}
+    ctx.translate(R.x0, R.y0); ctx.scale(1, .55); ctx.rotate(R.a); ctx.drawImage(R.cv, 0, -h); ctx.restore(); } }catch(e){}
   return r; }; }
+
+// (21-11-2026) Diego: «siguen saliendo los rectángulos». Las marcas largas que dejaban los rayos grandes en el suelo (agua, quemadura...) se veían como
+// un rectángulo: se quitan. Queda el cráter/las grietas del golpe. (Rayo Hielo sigue con sus pinchitos sueltos.)
+try{ Object.values(RAYOS_G).forEach(P => { if(P && P.marca && !P.marca.sueltas) P.marca.dura = 0; }); }catch(e){}
