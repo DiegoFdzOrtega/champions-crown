@@ -105,4 +105,12 @@ p2Alta('Triataque', 'tr', false, 1.55);
 p2Alta('Fuego Fatuo', 'ff', false, 1.75);
 p2Alta('Onda Trueno', 'ot', false, 1.9);
 p2Alta('Tóxico', 'to', false, 1.7);
+p2Alta('Hidropulso', 'hpu', false, 1.3);      // (22-11-2026) anillos de agua, como en los juegos (antes: bola)
 p2Conecta();
+// Hidropulso: detrás del anillo van 3 anillos más, cada vez más pequeños y suaves (ondas seguidas hacia el rival)
+{ const o = FXR.flight['Hidropulso']; if(o){ const w = function(s, a, an){ const r = o.apply(this, arguments);
+    if(!p2Ok('hpu')) return r;
+    const sp = Math.hypot(s.vx, s.vy) || 1, ux = s.vx / sp, uy = s.vy / sp, fr = Math.floor(a * P2.fps) % 6, big = (s.big ? 1.35 : 1) * 1.3, gap = P2.tam.bala * big * .7;
+    const dist = Math.hypot(s.x - (s.p2x === undefined ? s.x : s.p2x), s.y - (s.p2y === undefined ? s.y : s.p2y));
+    for(let k = 1; k <= 3; k++){ if(dist < gap * k) break; p2Dib('hpu', 'bala', (fr + k * 2) % 6, s.x - ux * gap * k, s.y - uy * gap * k, P2.tam.bala * big * (1 - k * .16), 0, .8 - k * .2); }
+    return r; }; Object.assign(w, o); FXR.flight['Hidropulso'] = w; } }

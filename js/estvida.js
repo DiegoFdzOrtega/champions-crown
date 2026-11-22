@@ -11,6 +11,7 @@
    - Blanca: confeti rosa y el emblema que late.                       - Morti: velas que titilan, fuegos fatuos y niebla morada.
    - Aníbal: la cascada cae y brilla, y salpica.                       - Yasmina: luces de las vigas que parpadean y un reflejo que recorre el suelo de acero.
    - Fredo: nieve, cristales que brillan y frío en la puerta.          - Débora: braseros, brasas que suben y grietas de lava que laten.
+   HOENN: Petra, Marcial, Erico, Candela, Norman, Alana, Vito y Leti, Galano y el Alto Mando (Sixto, Fátima, Nívea, Dracón).
    Todas las posiciones están medidas sobre la imagen a 1024x572. VIDA.on = false lo apaga todo; VIDA.k = intensidad general.
    ===================================================================== */
 const VIDA = {on: true, k: 1};
@@ -285,6 +286,120 @@ const VIDA_FX = {
     ctx.globalCompositeOperation = 'source-over';
     vBrillos(S, 18, [[0, 40, 140, 540], [884, 40, 1024, 540], [300, 470, 724, 560]], '#fff4c0', {s: 5, per: 1.4});
     vMotas(S, 24, [0, 0, 1024, 572], {vy: -6, sw: 12, col: ['#ffe58a', '#ffd040', '#ffffff'], a: .7, s: 2, tw: 1});
+  },
+  // ---------------- HOENN ----------------
+  petra(S){                                                                                                 // antorchas que titilan y polvo de roca
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[100, 122], [45, 190], [918, 118], [968, 182]], 42, 'rgba(255,140,40,A)', .4, 3.4);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 22, [0, 60, 1024, 560], {vy: -5, vx: 3, sw: 10, col: ['#e8d8c8', '#c8b8a8'], a: .45, s: 2});
+  },
+  marcial(S){                                                                                               // lámparas y polvo de entrenamiento
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[55, 92], [968, 92]], 46, 'rgba(255,230,170,A)', .35, 1.2);
+    vGlow(S, 512, 75, 70, 'rgba(140,150,255,A)', .12 + .06 * Math.sin(S.t * 1.4));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 24, [0, 60, 1024, 560], {vy: -6, vx: 4, sw: 12, col: ['#f0e6d0', '#d6c9a8'], a: .45, s: 2});
+  },
+  erico(S){                                                                                                 // arcos entre las bobinas, puntas que brillan e interruptores de rayo que se encienden
+    ctx.globalCompositeOperation = 'lighter';
+    [[178, 165], [112, 195], [157, 195], [48, 330], [92, 330], [848, 165], [867, 195], [910, 195], [930, 330], [975, 330]].forEach((p, i) => vGlow(S, p[0], p[1], 22, 'rgba(120,240,255,A)', .3 + .25 * Math.max(0, Math.sin(S.t * 5 + i * 2.3))));
+    [[110, 295], [905, 295], [135, 440], [875, 440]].forEach((p, i) => vGlow(S, p[0], p[1], 26, 'rgba(255,230,60,A)', .18 + .22 * Math.max(0, Math.sin(S.t * 2.2 + i * 1.6))));
+    ctx.globalCompositeOperation = 'source-over';
+    vRayos(S, [100, 180, 190, 225], 3, '#9ff6ff'); vRayos(S, [40, 320, 110, 355], 2, '#9ff6ff');
+    vRayos(S, [835, 180, 925, 225], 3, '#9ff6ff'); vRayos(S, [915, 320, 985, 355], 2, '#9ff6ff');
+    vBrillos(S, 10, [[30, 150, 200, 380], [825, 150, 995, 380]], '#e0fbff', {s: 3, per: 1, a: .8});
+  },
+  candela(S){                                                                                               // vapor que sale de los respiraderos, lámparas y calor
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[50, 98], [970, 98]], 46, 'rgba(255,140,40,A)', .4, 2.6);
+    ctx.globalCompositeOperation = 'source-over';
+    [[145, 222], [85, 350], [135, 450], [878, 222], [940, 350], [885, 450]].forEach((p, j) => {
+      vGlow(S, p[0], p[1] - 40, 40, 'rgba(255,255,255,A)', .1 + .06 * Math.sin(S.t * 1.8 + j));
+      vMotas(S, 7, [p[0] - 18, p[1] - 90, p[0] + 18, p[1]], {vy: -26, sw: 8, swf: 1.6, col: ['#ffffff', '#f2e6e6'], a: .5, s: 5, seed: 60 + j * 9});
+    });
+    vMotas(S, 18, [0, 100, 1024, 572], {vy: -14, sw: 10, col: ['#ffb347', '#ff7a1a'], a: .6, s: 2, tw: 1});
+  },
+  norman(S){                                                                                                // farolillos de papel y motas de polvo en la luz
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[52, 100], [968, 100], [410, 12], [615, 12]], 40, 'rgba(255,210,140,A)', .38, 1.4);
+    vLuces(S, [[512, 20]], 200, 'rgba(255,230,190,A)', .07, .5);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 26, [100, 40, 924, 520], {vy: 5, vx: 2, sw: 10, col: ['#fff1d6', '#ffe0b0'], a: .5, s: 2, tw: 1});
+  },
+  alana(S){                                                                                                 // rachas de viento, plumas y luz del cielo
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[512, 20]], 220, 'rgba(220,245,255,A)', .1, .4);
+    vLuces(S, [[55, 92], [968, 92], [592, 18]], 26, 'rgba(200,240,255,A)', .35, 1.2);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.save(); ctx.fillStyle = '#ffffff';
+    for(let i = 0; i < 6; i++){ const per = 3 + vH(i) * 3, fr = vMod(S.t / per + vH(i + 4), 1), y = 160 + vH(i * 9 + Math.floor(S.t / per + vH(i + 4))) * 300, x = -120 + fr * 1270, L = 60 + vH(i + 2) * 70;
+      ctx.globalAlpha = .22 * Math.sin(Math.PI * fr) * VIDA.k; ctx.fillRect(x * S.sx, y * S.sy, L * S.sx, Math.max(1, S.sy)); }
+    ctx.restore();
+    vMotas(S, 12, [0, 60, 1024, 560], {vy: 10, vx: 26, sw: 14, swf: 1.4, col: ['#ffffff', '#e6f6ff'], a: .8, s: 5, f: 'pet', seed: 8});
+  },
+  vitoleti(S){                                                                                              // teletransportes que laten, baldosas de colores y el corazón
+    ctx.globalCompositeOperation = 'lighter';
+    [[120, 285], [895, 285], [140, 452], [882, 452]].forEach((p, i) => vGlow(S, p[0], p[1], 40, 'rgba(150,230,255,A)', .25 + .2 * Math.sin(S.t * 2.4 + i * 1.6)));
+    [[160, 233, '255,120,220'], [865, 233, '255,170,80'], [93, 363, '255,120,200'], [928, 363, '90,255,160']].forEach((p, i) => vGlow(S, p[0], p[1], 24, 'rgba(' + p[2] + ',A)', .2 + .15 * Math.sin(S.t * 3 + i)));
+    vGlow(S, 512, 72, 40, 'rgba(255,120,180,A)', .25 + .15 * Math.sin(S.t * 3));
+    vLuces(S, [[55, 100], [968, 100]], 30, 'rgba(220,235,255,A)', .3, 1.2);
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 14, [[100, 180, 925, 420]], '#ffd6f5', {s: 3, per: 1.5, a: .7});
+    vMotas(S, 16, [0, 60, 1024, 560], {vy: -8, sw: 12, col: ['#ffd6f5', '#c8f4ff', '#ffffff'], a: .5, s: 2, tw: 1});
+  },
+  galano(S){                                                                                                // las cascadas caen y salpican, y el hielo brilla
+    [[90, 215, 108, 290], [918, 215, 938, 290]].forEach((Z, j) => {
+      vMotas(S, 10, Z, {vy: 90, sw: 2, col: ['#ffffff', '#bfeaff'], a: .7, s: 2, seed: 20 + j * 7});
+      vMotas(S, 6, [Z[0] - 14, Z[3] - 12, Z[2] + 14, Z[3] + 6], {vy: -14, sw: 6, col: ['#ffffff', '#d8f4ff'], a: .6, s: 2, seed: 50 + j * 7, tw: 1});
+    });
+    ctx.globalCompositeOperation = 'lighter';
+    vGlow(S, 512, 15, 30, 'rgba(120,200,255,A)', .3 + .15 * Math.sin(S.t * 2));
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 22, [[130, 175, 910, 410], [20, 340, 80, 390], [940, 380, 1005, 430], [160, 150, 205, 195], [830, 165, 875, 205]], '#ffffff', {s: 4, per: 1.5, a: .85});
+  },
+  sixto(S){                                                                                                 // luces ámbar que laten, la vidriera brilla y motas oscuras
+    ctx.globalCompositeOperation = 'lighter';
+    const L = []; [50, 100, 150, 200, 250].forEach(y => { L.push([55, y + 15]); L.push([968, y + 15]); });
+    vLuces(S, L, 14, 'rgba(255,180,70,A)', .5, 2);
+    vLuces(S, [[447, 100], [576, 100]], 26, 'rgba(255,170,60,A)', .4, 2.6);
+    vGlow(S, 512, 25, 70, 'rgba(255,150,200,A)', .14 + .08 * Math.sin(S.t * 1.3));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 20, [0, 60, 1024, 560], {vy: -5, vx: 3, sw: 10, col: ['#ffcf80', '#a0784a'], a: .45, s: 2, tw: 1});
+  },
+  fatima(S){                                                                                                // velas de fuego morado, niebla y fuegos fatuos
+    vNiebla(S, 8, [0, 380, 1024, 572], 'rgba(150,90,220,A)', .14);
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[68, 95], [68, 215], [165, 92], [446, 98], [576, 98], [845, 92], [955, 95], [955, 215]], 26, 'rgba(190,120,255,A)', .5, 3.2);
+    vGlow(S, 512, 25, 70, 'rgba(255,160,230,A)', .12 + .06 * Math.sin(S.t * 1.2));
+    [[260, 140], [770, 140], [60, 420], [965, 420]].forEach((p, i) => vGlow(S, p[0] + Math.sin(S.t * .8 + i) * 20, p[1] + Math.sin(S.t * 1.3 + i) * 8, 22, 'rgba(200,150,255,A)', .3 + .15 * Math.sin(S.t * 2 + i)));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 18, [0, 100, 1024, 560], {vy: -8, sw: 14, col: ['#d8b8ff', '#a77cff'], a: .5, s: 2, tw: 1});
+  },
+  nivea(S){                                                                                                 // nieve que cae, cristales que brillan y lámparas frías
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[75, 210], [948, 210], [445, 98], [578, 98]], 26, 'rgba(190,235,255,A)', .4, 1.4);
+    vGlow(S, 512, 25, 70, 'rgba(170,220,255,A)', .14 + .06 * Math.sin(S.t * 1.2));
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 24, [[95, 195, 930, 412], [60, 280, 100, 320], [730, 485, 770, 530], [960, 420, 1005, 450]], '#ffffff', {s: 4, per: 1.4, a: .9});
+    vMotas(S, 40, [0, 0, 1024, 572], {vy: 22, vx: 6, sw: 14, swf: 1, col: ['#ffffff', '#e6f6ff'], a: .8, s: 3});
+  },
+  dracon(S){                                                                                                // braseros y antorchas, brasas que suben y el borde rojo que late
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[447, 150], [576, 150]], 50, 'rgba(255,120,30,A)', .5, 3.6);
+    vLuces(S, [[85, 58], [75, 205], [935, 58], [948, 205], [420, 10], [603, 10], [447, 100], [576, 100]], 30, 'rgba(255,140,40,A)', .4, 3.2);
+    vGlow(S, 512, 25, 70, 'rgba(255,60,40,A)', .14 + .08 * Math.sin(S.t * 1.4));
+    ctx.globalCompositeOperation = 'source-over';
+    [[447, 150], [576, 150]].forEach((p, j) => vMotas(S, 8, [p[0] - 16, p[1] - 60, p[0] + 16, p[1] - 4], {vy: -30, sw: 6, col: ['#ffb347', '#ff7a1a', '#ffe08a'], a: .9, s: 3, seed: 70 + j * 5, tw: 1}));
+    vMotas(S, 26, [0, 60, 1024, 572], {vy: -18, sw: 12, swf: 1.6, col: ['#ffb347', '#ff7a1a', '#ffe08a'], a: .7, s: 2, tw: 1});
+  },
+  plubio(S){                                                                                                // salón de mármol: lámparas doradas, la vidriera brilla y destellos en el suelo
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[88, 62], [75, 210], [935, 62], [948, 210], [420, 12], [603, 12], [447, 105], [576, 105], [447, 155], [576, 155]], 30, 'rgba(255,215,120,A)', .38, 1.4);
+    vGlow(S, 512, 30, 80, 'rgba(120,170,255,A)', .16 + .08 * Math.sin(S.t * 1.3));
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 20, [[90, 192, 935, 418], [0, 130, 60, 400], [964, 130, 1024, 400]], '#ffffff', {s: 4, per: 1.5, a: .85});
+    vMotas(S, 22, [0, 0, 1024, 572], {vy: -6, sw: 12, col: ['#ffe58a', '#ffffff', '#cfe0ff'], a: .6, s: 2, tw: 1});
   }
 };
 function estVida(E, id){

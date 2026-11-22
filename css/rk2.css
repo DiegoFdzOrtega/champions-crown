@@ -20,3 +20,9 @@ html.rk2on .rk-go:not(:disabled):hover{filter:brightness(1.08)}
 html.rk2on .rk-ringrow{background:url(../assets/menu/rk/pill.webp?v=1) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
 html.rk2on .rk-rung.cur{border:.55em solid transparent!important;border-image:url(../assets/menu/rk/fila.webp?v=1) 40 fill / .55em stretch!important;background:none!important;box-shadow:none!important}
 html.rk2on .rk-hitos .hp{background:url(../assets/menu/rk/barra.webp?v=1) center/100% 100% no-repeat;border:0}
+/* Pokémon encima del pedestal (js/rk2.js mide dónde acaban los pies: --pie) */
+html.rk2on .rk-ped:not(.empty){transform:translate(-50%,-100%)!important}
+html.rk2on .rk-ped:not(.empty) canvas{margin-bottom:calc(var(--pie,0) * var(--ped) * -.88);position:relative;z-index:1}
+html.rk2on .rk-ped.lead:not(.empty) canvas{margin-bottom:calc(var(--pie,0) * var(--ped) * -1.02)}
+html.rk2on .rk-ped:not(.empty) .plate{position:absolute;left:50%;top:calc(100% + var(--pedh) * .78);transform:translateX(-50%) perspective(200px) rotateX(18deg);margin:0;white-space:nowrap;z-index:2}
+html.rk2on .rk-ped:not(.empty)::after{content:'';position:absolute;left:50%;bottom:calc(var(--pedh) * -.12);width:62%;height:calc(var(--pedh) * .42);transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.55),rgba(0,0,0,0) 70%);z-index:0}

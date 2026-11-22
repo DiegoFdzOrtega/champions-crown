@@ -52,7 +52,7 @@ const LIGA_INFO = {
   fatima:   {q:'Mis fantasmas tienen ganas de jugar contigo... para siempre.'},
   nivea:    {q:'El hielo es bonito y frío, igual que un combate perfecto.'},
   dracon:   {q:'¡Los dragones y yo somos uno! ¡Ruge conmigo!'},
-  plubio:   {q:'Me gustan las piedras raras. Y los entrenadores raros como tú.'},
+  plubio:   {q:'Un combate debe ser bello y elegante, como el agua. Muéstrame tu estilo.'},
   // ---- Sinnoh ----
   roco:     {medal:'Lignito',    q:'Las piedras de esta ciudad son duras. Mis Pokémon, más.'},
   gardenia: {medal:'Bosque',     q:'¡Las plantas crecen fuertes con mucho cariño! Te enseñaré cómo.'},
@@ -186,5 +186,32 @@ function ligaRender(){
   $('lgNew').querySelectorAll('canvas[data-d]').forEach(c => paintSprite(c, +c.dataset.d, {sc:2, fit:56}));
   if(rw) Object.entries(rw).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id] || id; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('lgRw').appendChild(c); });
   $('lgGo').onclick = () => floorFight(gi);
-  $('lgNew').querySelector('.lg-path').onclick = e => { const b = e.target.closest('.lg-n'); if(!b || b.disabled) return; liga.sel = +b.dataset.gi; ligaRender(); };
+  $('lgNew').querySelector('.lg-path').onclick = e => { const b = e.target.closest('.lg-n'); if(!b || b.disabled || b.classList.contains('sel')) return; ligaSwap(+b.dataset.gi); };      // pulsar el que ya está elegido no vuelve a pintar todo (si no, con muchos clics seguidos parpadeaba)
+}
+
+// Doble clic seguido en las medallas: sin seleccionar texto ni el recuadro azul del navegador
+{ const st = document.createElement('style'); st.textContent = '#lgNew .lg-path, #lgNew .lg-n{user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}#lgNew .lg-n:focus{outline:none}'; document.head.appendChild(st); }
+
+// Al cambiar de rival en el Camino de la Liga: se prepara la pantalla nueva escondida y solo se cambia cuando
+// el retrato y las medallas ya han cargado (antes se veía vacía un instante: retrato en blanco, iconos saliendo).
+let ligaBusy = 0;
+function ligaSwap(gi){
+  document.querySelectorAll('.lgSwap').forEach(n => n.remove());          // había otro cambio a medias: se cancela
+  const old = $('lgNew'); if(!old){ liga.sel = gi; ligaRender(); return; }
+  const tok = ++ligaBusy, sl = (old.querySelector('.lg-path') || {}).scrollLeft || 0;
+  liga.sel = gi;
+  const nb = document.createElement('div'); nb.id = 'lgNew'; nb.className = 'lgSwap';      // mismo id (así le llegan los estilos de #lgNew)
+  nb.style.cssText = `position:absolute;left:-99999px;top:0;width:${old.offsetWidth}px;visibility:hidden;pointer-events:none`;
+  old.before(nb);                                                       // va antes para que $('lgNew'), $('lgPor'), $('lgGo')… encuentren los nuevos
+  ligaRender();
+  const p = nb.querySelector('.lg-path'); if(p) p.scrollLeft = sl;
+  const t0 = performance.now();
+  const listo = () => [...nb.querySelectorAll('img')].every(im => (im.complete && im.naturalWidth > 0) || im.style.visibility === 'hidden' || !im.getAttribute('src'));
+  const fin = () => {
+    if(tok !== ligaBusy || !nb.isConnected) return;                       // otro clic más reciente ya lo ha cancelado
+    if(!listo() && performance.now() - t0 < 600){ setTimeout(fin, 25); return; }
+    nb.style.cssText = ''; nb.className = ''; old.remove();
+    const q = nb.querySelector('.lg-path'); if(q) q.scrollLeft = sl;
+  };
+  fin();
 }

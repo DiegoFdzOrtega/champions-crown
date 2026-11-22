@@ -25,7 +25,8 @@ const AE_BOLAS = {
   'Llamarada':    {pre: 'll2', tam: 78, golpe: 150, marca: 120},
   'Onda Certera': {pre: 'oc2', bola: 'oc2_bola', estela: null, tam: 46, golpe: 140, marca: 110, gira: 1},
   'Fuerza Lunar': {pre: 'fl2', tam: 56, golpe: 130, marca: 110},
-  'Lanzamugre':   {pre: 'lm2', tam: 58, golpe: 140, marca: 110, gira: 1}
+  'Lanzamugre':   {pre: 'lm2', tam: 58, golpe: 140, marca: 110, gira: 1},
+  'Psíquico':     {pre: 'ps2', tam: 64, golpe: 150, marca: 120, rueda: 1}      // (22-11-2026) bola psíquica nueva (Gemini)
 };
 Object.entries(AE_BOLAS).forEach(([nm, C]) => {
   C.bola = C.bola || C.pre + '_bola'; if(C.estela !== null) C.estela = C.pre + '_estela'; C.gol = C.pre + '_golpe'; C.mar = C.pre + '_marca';
