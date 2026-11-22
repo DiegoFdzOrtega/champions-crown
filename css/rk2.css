@@ -1,0 +1,22 @@
+/* Clasificatoria con el fondo nuevo y los marcos de Gemini (js/rk2.js). Solo cuenta con html.rk2on */
+html.rk2on #rankv .rk{background:linear-gradient(90deg,rgba(4,8,20,.35),rgba(4,8,20,0) 20%,rgba(4,8,20,0) 80%,rgba(4,8,20,.35)),url(../assets/fondos/clasificatoria2.webp?v=1) var(--bgp,center)/var(--bgs,cover) no-repeat,#070c1f}
+html.rk2on #rankv canvas.rkv,html.rk2on #rankv .rkv{display:none}
+/* paneles: el marco dorado con diamantes (9 trozos: las esquinas no se deforman) */
+html.rk2on .rk-panel,html.rk2on .rk-card,html.rk2on .rk-stats{border:1.3em solid transparent!important;border-image:url(../assets/menu/rk/panel.webp?v=1) 66 fill / 1.3em stretch!important;background:none!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;padding:.1em .2em!important}
+html.rk2on .rk-hitos{border:1.3em solid transparent!important;border-image:url(../assets/menu/rk/panelw.webp?v=1) 66 fill / 1.3em stretch!important;background:none!important;border-radius:0!important;box-shadow:none!important;padding:0 .4em .1em!important}
+html.rk2on .rk-panel h3,html.rk2on .rk-hitos h3{font:700 1.25em "Segoe UI",system-ui,sans-serif!important;color:#fff;text-shadow:0 .1em 0 #000}
+/* cartel del título con alas y Poké Ball */
+html.rk2on .rk-banner{background:url(../assets/menu/rk/titulo.webp?v=1) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  top:.15em!important;width:28em;aspect-ratio:830/243;padding:0!important;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:1.9em!important}
+html.rk2on .rk-banner h1{font-size:1.75em!important;line-height:1!important;white-space:nowrap;overflow:visible!important;max-width:none!important}
+html.rk2on .rk-banner span{margin-top:.2em!important;font-size:1.05em!important}
+html.rk2on .rk-banner::before,html.rk2on .rk-banner::after{display:none!important}
+/* botón grande dorado con flechas */
+html.rk2on .rk-go{background:url(../assets/menu/rk/boton.webp?v=1) center/100% 100% no-repeat!important;border:0!important;border-radius:0!important;box-shadow:none!important;color:#3b1d00!important;text-shadow:0 .06em 0 rgba(255,235,170,.8)!important;padding:.55em 2.6em!important;width:70%!important}
+html.rk2on .rk-go .spark{display:none}
+html.rk2on .rk-go:disabled{filter:grayscale(.7) brightness(.8)}
+html.rk2on .rk-go:not(:disabled):hover{filter:brightness(1.08)}
+/* barra del equipo (sobre la Poké Ball del suelo) y fila de tu rango */
+html.rk2on .rk-ringrow{background:url(../assets/menu/rk/pill.webp?v=1) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
+html.rk2on .rk-rung.cur{border:.55em solid transparent!important;border-image:url(../assets/menu/rk/fila.webp?v=1) 40 fill / .55em stretch!important;background:none!important;box-shadow:none!important}
+html.rk2on .rk-hitos .hp{background:url(../assets/menu/rk/barra.webp?v=1) center/100% 100% no-repeat;border:0}

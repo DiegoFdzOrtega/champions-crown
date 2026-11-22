@@ -16,9 +16,10 @@ const P2 = {on: true, marca: 2.4, fps: 14, tam: {salida: 56, bala: 46, estela: 9
 const P2_ATAQUES = {};
 const P2_FILAS = ['salida', 'bala', 'estela', 'golpe', 'marca'];
 const P2_IMG = {};
+const P2_VER = {as: 2};                                                      // versión de las imágenes de cada ataque (subir si se rehacen)
 function p2Alta(nombre, pre, chorro, escala){
   P2_ATAQUES[nombre] = {pre, chorro: !!chorro, esc: escala || 1};
-  P2_FILAS.forEach(fl => { const im = new Image(); im.onload = () => { im.ok = true; im.fw = im.width / 6; }; im.src = `assets/objetos/ataques/p/${pre}_${fl}.png?v=${pre === "as" ? 2 : 1}`; P2_IMG[pre + '_' + fl] = im; });
+  P2_FILAS.forEach(fl => { const im = new Image(); im.onload = () => { im.ok = true; im.fw = im.width / 6; }; im.src = `assets/objetos/ataques/p/${pre}_${fl}.png?v=${P2_VER[pre] || 1}`; P2_IMG[pre + '_' + fl] = im; });
 }
 const p2Ok = pre => P2.on && P2_FILAS.every(fl => P2_IMG[pre + '_' + fl].ok);
 
@@ -95,4 +96,13 @@ p2Alta('Viento Feérico', 'vf', false, 1.4);
 p2Alta('Zumbido', 'zb', false, 1.2);
 p2Alta('Shuriken de Agua', 'sa', false, 1.2);
 p2Alta('Voz Cautivadora', 'vc', false, 1.3);
+// (22-11-2026) los que faltaban (Gemini)
+p2Alta('Burbuja', 'bu', false, 1.45);
+p2Alta('Rayo Burbuja', 'rb', false, 1.35);
+p2Alta('Giro Fuego', 'gf', false, 1.55);
+p2Alta('Bomba Imán', 'bi', false, 1.5);
+p2Alta('Triataque', 'tr', false, 1.55);
+p2Alta('Fuego Fatuo', 'ff', false, 1.75);
+p2Alta('Onda Trueno', 'ot', false, 1.9);
+p2Alta('Tóxico', 'to', false, 1.7);
 p2Conecta();

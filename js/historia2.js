@@ -18,7 +18,7 @@ const h2Ic = (n, cls) => `<img class="h2ic${cls ? ' ' + cls : ''}" src="${H2.dir
 const h2Url = f => `url("${new URL(H2.dir + f, document.baseURI).href}")`;
 if(H2.on){
   document.body.classList.add('h2on');
-  document.documentElement.style.setProperty('--h2fondo', h2Url('fondo_castillo.webp?v=1'));
+  document.documentElement.style.setProperty('--h2fondo', h2Url('fondo_noche.webp?v=1'));
   document.documentElement.style.setProperty('--h2titulo', h2Url('titulo.webp?v=1'));
   document.documentElement.style.setProperty('--h2marco', h2Url('marco.webp?v=1'));
   document.documentElement.style.setProperty('--h2nt', h2Url('marco_ntop.webp?v=1'));

@@ -110,6 +110,11 @@ const LEGENDARY = new Set([144,145,146,150,151, 243,244,245,249,250,251, 377,378
   480,481,482,483,484,485,486,487,488,489,490,491,492,493, 494,638,639,640,641,642,643,644,645,646,647,648,649,
   716,717,718,719,720,721, 772,773,785,786,787,788,789,790,791,792,793,794,795,796,797,798,799,800,801,802,803,804,805,806,807,808,809,
   888,889,890,891,892,893,894,895,896,897,898, 1001,1002,1003,1004,1007,1008,1009,1010,1014,1015,1016,1017,1020,1021,1022,1023,1024,1025]);
+// SOLO_INCURSION: los legendarios y míticos de verdad YA NO SALEN en el Gachapon (ni en la tirada variocolor). Se consiguen ganando las INCURSIONES semanales.
+// Quien ya los tenía se los queda. Los pseudolegendarios (los de abajo) SÍ siguen en el Gachapon como rareza Legendaria (pity y x10 especial).
+// También dejan de contar para el logro «Pokédex de <región>» (el que da el Amuleto Arcoíris): ver gachaSize aquí y ownedGacha en economy.js.
+const SOLO_INCURSION = new Set(LEGENDARY);
+const gachaSize = (a, b) => { let n = 0; for(let d = a; d <= b; d++) if(!hidden(d) && !SOLO_INCURSION.has(d)) n++; return n; };   // Pokémon de un rango que salen en el Gachapon
 // Pseudolegendarios (los 10 de 600 puntos base): cuentan como Legendarios
 [149,248,373,376,445,635,706,784,887,998].forEach(d => LEGENDARY.add(d));
 // Épicos: evoluciones finales de los iniciales y todo lo que pase de 580 puntos base

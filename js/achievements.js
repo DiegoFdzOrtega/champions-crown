@@ -176,7 +176,7 @@ const ACH_METRICS = {
   tower_king:    () => save.stats.rey || 0,                                                                // tronos de la Torre conseguidos
   ranked_w:      () => save.ranked ? save.ranked.w : 0,                                                    // victorias en la Clasificatoria
   ranked_best:   () => save.ranked ? save.ranked.best : 0,                                                 // mejores puntos de Clasificatoria
-  dex_region:    d => ownedIn(d.region)                                                                // Pokémon que tienes de esa región (sin contar los que aún no tienen sprite)
+  dex_region:    d => ownedGacha(d.region)                                                             // Pokémon que tienes de esa región (sin contar los que aún no tienen sprite)
 };
 
 // ---- Registro y consulta ----
@@ -187,9 +187,9 @@ function registerAchievement(def){
 }
 ACHIEVEMENT_DATA.forEach(registerAchievement);
 // Un logro «Pokédex de <región>» por cada región del Gachapon: te da BP, tickets y el AMULETO ARCOÍRIS de esa región. El objetivo es el nº de Pokémon de la región que
-// ya tienen sprite (regionSize, data.js): al añadir sprites nuevos el objetivo sube solo.
-REGIONS_DEX.filter(r => regionSize(r.a, r.b) > 0).forEach(r => registerAchievement({id:'dex_' + r.n.toLowerCase(), cat:'coleccion', name:'Pokédex de ' + r.n,
-  desc:`Consigue todos los Pokémon de ${r.n}. Te dan su Amuleto Arcoíris: más shiny en el Gachapon de ${r.n}.`, icon:'dex', metric:'dex_region', region:r.n, goal:regionSize(r.a, r.b),
+// ya tienen sprite y salen en el Gachapon (gachaSize, data.js: sin los legendarios de las Incursiones): al añadir sprites nuevos el objetivo sube solo.
+REGIONS_DEX.filter(r => gachaSize(r.a, r.b) > 0).forEach(r => registerAchievement({id:'dex_' + r.n.toLowerCase(), cat:'coleccion', name:'Pokédex de ' + r.n,
+  desc:`Consigue todos los Pokémon del Gachapon de ${r.n} (los legendarios no cuentan). Te dan su Amuleto Arcoíris: más shiny en el Gachapon de ${r.n}.`, icon:'dex', metric:'dex_region', region:r.n, goal:gachaSize(r.a, r.b),
   reward:{bp:1500, tickets:10, charm:r.n, title:'Pokédex de ' + r.n}}));
 // (Antes había un logro por personaje: «consigue estos 3 Pokémon shiny». Ya no existen: los personajes ahora salen de la Invocación. Quien ya los había conseguido los conserva.)
 const trainerUnlocked = id => { const a = save.ach['tr_' + id]; return !!(a && (a.done || a.date)); };      // personajes antiguos: solo los que ya habías completado

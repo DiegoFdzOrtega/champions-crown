@@ -37,12 +37,13 @@ function openGacha(){
 }
 
 function renderGacha(){
-  const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = regionSize(a, b), col = REG_COL[reg];
+  const reg = save.gachaRegion, [a, b] = REGION_DEX[reg], total = gachaSize(a, b), col = REG_COL[reg];   // solo los que salen aquí (sin los legendarios de las Incursiones)
+  const shG = save.shiny.filter(d => d >= a && d <= b && enGacha(d)).length;
   $('gachav').style.setProperty('--c', col);
   const ci = (k, e) => CUR_IMG ? `<img class="gcimg" src="${CUR_SRC[k]}" alt="">` : e;                     // iconos nuevos (menu.js)
   $('gcTop').innerHTML = `<i class="gchip">${ci('ticket', '🎟')} <b>${save.tickets}</b> tickets</i><i class="gchip sp">${ci('ticket_l', '🌟')} <b>${save.ticketsL}</b> especiales</i>${save.ticketsS ? `<i class="gchip sv">${ci('ticket_s', '✨')} <b>${save.ticketsS}</b> variocolor</i>` : ''}<i class="gchip">${ci('bp', '🪙')} <b>${save.bp}</b> PB</i>`;
   $('gcTabs').innerHTML = REGIONS_DEX.map(r =>
-    `<button class="tab${r.n === reg ? ' on' : ''}" style="--rc:${REG_COL[r.n]}" data-r="${r.n}">${r.n} <small>${ownedIn(r.n)}/${regionSize(r.a, r.b)}</small></button>`).join('');
+    `<button class="tab${r.n === reg ? ' on' : ''}" style="--rc:${REG_COL[r.n]}" data-r="${r.n}">${r.n} <small>${ownedGacha(r.n)}/${gachaSize(r.a, r.b)}</small></button>`).join('');
 
   // Destacados del banner: primero legendarias, luego épicas (máx. 6)
   const feat = [...pool(reg, 'legendary'), ...pool(reg, 'epic')].slice(0, 6);
@@ -60,7 +61,7 @@ function renderGacha(){
         <i class="gm-floor"></i><span class="gm-tag">¡Tócala!</span></div>
       <div class="bn-main">
         <div class="bn-h"><h2>${BANNERS[reg]}</h2>
-          <div class="cnt"><span><b>${ownedIn(reg)}</b> de ${total}</span><span class="shn">⭐ ${shinyIn(reg)} shiny</span></div></div>
+          <div class="cnt"><span><b>${ownedGacha(reg)}</b> de ${total}</span><span class="shn">⭐ ${shG} shiny</span></div></div>
         <p class="bn-sub">Destacados del banner</p>
         <div class="feat">${feat.map((d, i) => `<div class="fc${DEX[d-1].rar === 'legendary' ? ' lg' : ''}${own(d) ? ' got' : ''}" style="--c:${RAR[DEX[d-1].rar].col};--i:${i}"><canvas data-d="${d}" width="128" height="128"></canvas>
           <i>${RAR[DEX[d-1].rar].ic} ${esc(DEX[d-1].name)}</i></div>`).join('') || '<p>Sin destacados en esta región.</p>'}</div>
@@ -81,14 +82,15 @@ function renderGacha(){
   $('gcRight').style.setProperty('--c', col);
   $('gcRight').innerHTML = `<h3>Probabilidades</h3>
     <table class="ptbl"><tr><th>Rareza</th><th>Prob.</th><th>Tienes</th></tr>${RARITIES.map(row).join('')}
-      <tr style="--c:#fff"><td>⭐ Shiny</td><td class="pc">${(shinyRate(reg) * 100).toFixed(0)}%${save.charms[reg] ? ' 🌈' : ''}</td><td>${shinyIn(reg)}/${total}</td></tr></table>
+      <tr style="--c:#fff"><td>⭐ Shiny</td><td class="pc">${(shinyRate(reg) * 100).toFixed(0)}%${save.charms[reg] ? ' 🌈' : ''}</td><td>${shG}/${total}</td></tr></table>
     <h3>Reglas</h3>
     <ul class="rules">
+      <li>🔮 Los <b>legendarios y míticos</b> ya no salen en el Gachapon: se consiguen ganando las <b>Incursiones</b> semanales. Los pseudolegendarios (Dragonite, Tyranitar…) sí salen.</li>
       <li>La tirada <b>x10 especial</b> garantiza una <b>Legendaria</b>.</li>
       <li><b>Pity:</b> a las ${PITY_MAX} tiradas sin legendaria, la siguiente lo es (se cuenta por región).</li>
       <li>El <b>shiny</b> puede salir con cualquier rareza.</li>
       <li>✨ <b>Tirada variocolor:</b> gasta 1 <b>ticket variocolor</b> y te da un <b>shiny que aún no tengas</b> de ${reg}. Ese ticket <b>solo</b> se consigue al sacar un <b>shiny repetido</b> (tienes <b>${save.ticketsS}</b>).</li>
-      <li>${save.charms[reg] ? `🌈 Tienes el <b>Amuleto Arcoíris de ${reg}</b>: shiny al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.` : `🌈 Completa la Pokédex de ${reg} y ganarás su <b>Amuleto Arcoíris</b>: el shiny sube del ${(SHINY_RATE * 100).toFixed(0)}% al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.`}</li>
+      <li>${save.charms[reg] ? `🌈 Tienes el <b>Amuleto Arcoíris de ${reg}</b>: shiny al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.` : `🌈 Consigue todos los Pokémon del Gachapon de ${reg} (sin contar legendarios) y ganarás su <b>Amuleto Arcoíris</b>: el shiny sube del ${(SHINY_RATE * 100).toFixed(0)}% al ${(CHARM_RATE * 100).toFixed(0)}% en esta región.`}</li>
       <li>Los <b>repetidos</b> te dan monedas (PB): ${RARITIES.map(r => r.ic + ' ' + DUP_BP[r.id]).join(' · ')}.</li>
       <li>Los tickets se consiguen <b>jugando</b>: la primera vez que vences a cada líder te dan uno. También puedes comprarlos en la tienda.</li>
     </ul>`;

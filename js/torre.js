@@ -464,18 +464,25 @@ function twRenderTower(){
 // ---- VIDA EN EL CIELO DE LA TORRE ----
 // Una capa (canvas #twFx) entre la ilustración y los paneles: nubes que pasan, estrellas que brillan (de noche) y Pokémon voladores que cruzan
 // el cielo POR DETRÁS de la torre (se recortan donde está la torre). Se dibuja en coordenadas de la imagen, igual que twFit, y para cuando sales de la pantalla.
-const TW_FLYERS = [142, 334, 277, 249, 250, 144, 145, 146, 169, 384, 468, 227];   // SOLO los que al moverse van volando: Aerodactyl, Altaria, Swellow, Lugia, Ho-Oh, Articuno, Zapdos, Moltres, Crobat, Rayquaza, Togekiss, Skarmory. (Fuera los que su animación es andando: Pidgeot, Staraptor, Braviary, Dragonite, Charizard, Corviknight, Talonflame, Gyarados)
+const TW_FLYERS = [142, 334, 249, 250, 144, 145, 146, 169, 384, 468, 227];   // SOLO los que al moverse van volando: Aerodactyl, Altaria, Lugia, Ho-Oh, Articuno, Zapdos, Moltres, Crobat, Rayquaza, Togekiss, Skarmory. (Fuera los que su animación es andando: Pidgeot, Staraptor, Braviary, Dragonite, Charizard, Corviknight, Talonflame, Gyarados)
 const TW_FLY_SLOTS = [{dur:30, gap:10, off:3, y:.2, dir:1}, {dur:36, gap:22, off:30, y:.34, dir:-1}, {dur:28, gap:30, off:45, y:.12, dir:1}];   // dur = segundos cruzando · gap = pausa entre uno y otro
 const TW_TOWER_X = [.42, .587];                                                            // franja de la imagen que ocupa la torre (fracciones del ancho)
 // Nubes: las mismas del menú principal. [cuál, y, tamaño, velocidad (px/s), salida] en píxeles de la imagen de la torre
 const TW_NUBES = [[1, 40, 1.4, 11, 0], [3, 170, 1.2, 15, .35], [5, 110, 1.1, 19, .62], [2, 20, 1.3, 9, .8], [4, 230, 1.05, 13, .15], [6, 140, 1.05, 17, .5]];
-const TW_NUBE_IMG = {}; [1, 2, 3, 4, 5, 6].forEach(k => { const i = new Image(), o = TW_NUBE_IMG[k] = {i, ok: false}; i.onload = () => { o.ok = true; }; i.src = 'assets/menu/nube' + k + '.webp?v=1'; });
+const TW_NUBE_IMG = {}; [1, 2, 3, 4, 5, 6].forEach(k => { const i = new Image(), o = TW_NUBE_IMG[k] = {i, ok: false};
+  i.onload = () => {      // (22-11) las nubes vienen cortadas en recto por abajo y se veía una raya en el cielo: se difumina el borde de abajo
+    try{ const c = document.createElement('canvas'); c.width = i.width; c.height = i.height; const x = c.getContext('2d'); x.drawImage(i, 0, 0);
+      x.globalCompositeOperation = 'destination-in'; const gr = x.createLinearGradient(0, 0, 0, i.height);
+      gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.12, '#000'); gr.addColorStop(.55, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(0, 0, i.width, i.height);
+      o.i = c; }catch(e){}
+    o.ok = true; };
+  i.src = 'assets/menu/nube' + k + '.webp?v=1'; });
 // Vida del pueblo, como en el menú: luces de las ventanas (assets/fondos/torre_luces0..2.webp, sacadas del propio dibujo), farolas, la cascada del fondo y luciérnagas
 const TW_FAROLAS = [[556, 815], [1160, 838], [1839, 836], [2458, 804]];                   // [AJUSTE] cabeza de las farolas grandes (px de la imagen)
 const TW_CASCADA = [2555, 368, 113, 180];                                                 // [AJUSTE] x, y, ancho y alto de la cascada (px de la imagen)
 const twH = i => { const x = Math.sin(i * 127.1) * 43758.5453; return x - Math.floor(x); };
 const twImg = src => { const i = new Image(), o = {i, ok: false}; i.onload = () => { o.ok = true; }; i.src = src; return o; };
-const TW_VIDA = {luz: [0, 1, 2].map(k => twImg('assets/fondos/torre_luces' + k + '.webp?v=1')), cas: twImg('assets/menu/cascada.webp?v=1'), casM: twImg('assets/fondos/torre_cascada_m.webp?v=1'), cv: null};
+const TW_VIDA = {luz: [0, 1, 2].map(k => twImg('assets/fondos/torre_luces' + k + '.webp?v=2')), cas: twImg('assets/menu/cascada.webp?v=1'), casM: twImg('assets/fondos/torre_cascada_m.webp?v=1'), cv: null};
 let twFxRaf = 0, twStars = null, twFxLast = 0;
 function twFxLoop(){
   const cv = $('twFx'), root = $('twRoot'), scr = $('torrev');
@@ -506,8 +513,8 @@ function twFxLoop(){
   TW_FLY_SLOTS.forEach((f, i) => {
     const cyc = f.dur + f.gap, n = Math.floor((t + f.off) / cyc), q = ((t + f.off) % cyc) / f.dur; if(q > 1) return;
     const dex = TW_FLYERS[(n * 5 + i * 7) % TW_FLYERS.length], x = f.dir > 0 ? -150 + q * (B.w + 300) : B.w + 150 - q * (B.w + 300), y = B.vuelo[0] + f.y * B.vuelo[1] + Math.sin(t * 1.5 + i * 2 + n) * 14;
-    if('filter' in c) c.filter = night ? 'brightness(.22) saturate(.6)' : 'brightness(.42) saturate(.5)';
-    c.globalAlpha = night ? .9 : .75; drawFrame(c, dex, 'Walk', t, f.dir > 0 ? 2 : 6, x, y, sc, 0, false);
+    if('filter' in c) c.filter = night ? 'brightness(.62) saturate(.75)' : 'brightness(.8) saturate(.8)';   // (22-11) antes .22/.42: de noche parecían una mancha negra
+    c.globalAlpha = night ? .85 : .8; drawFrame(c, dex, 'Walk', t, f.dir > 0 ? 2 : 6, x, y, sc, 0, false);
   });
   c.filter = 'none'; c.globalAlpha = 1;
   // la cascada del fondo: el agua animada del menú (assets/menu/cascada.webp) recortada con la forma de la cascada del dibujo

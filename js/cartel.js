@@ -5,7 +5,7 @@
    con el borde del color del tipo. Entra deslizándose, se queda un momento y se va.
    Solo dibujo: no cambia nada del combate. CARTEL.on = false lo apaga.
    ===================================================================== */
-const CARTEL = {on: true, dura: 1.6, teclas: [3, 4], y: .145, x: .012, tam: 12};   // [AJUSTE] segundos · qué ataques (3 = Q, 4 = E) · posición (fracción de la pantalla) · tamaño de letra
+const CARTEL = {on: true, dura: 1.6, teclas: [3, 4], y: .215, x: .012, tam: 12};   // [AJUSTE] segundos · qué ataques (3 = Q, 4 = E) · posición (fracción de la pantalla) · tamaño de letra
 
 if(typeof use === 'function'){ const o = use; use = function(f, i){
   const cd0 = f && f.cd ? f.cd[i] : 0, r = o.apply(this, arguments);

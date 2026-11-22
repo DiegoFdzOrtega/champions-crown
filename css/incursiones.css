@@ -1,0 +1,97 @@
+/* =====================================================================
+   INCURSIONES (js/incursiones.js · openInc). Todo va bajo #incv / .inc, con el mismo estilo que la Torre Batalla (marcos dorados, paneles azul marino).
+   --lc = color del legendario de la semana.
+   ===================================================================== */
+#incv:not(.hide){display:flex}
+#incv{font:700 clamp(9px,1.4vh,16px)/1.35 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#eef2ff;text-align:left;overflow:hidden;background:#07061a}
+.inc{--gold:#d8b25a;--navy:rgba(13,20,46,.92);--lc:#8a5cff;position:relative;width:100%;height:100%;display:flex;flex-direction:column;gap:.8em;padding:.8em 1.2em 1em;overflow:auto;
+  background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--lc) 30%,transparent),transparent 60%),linear-gradient(180deg,#0e0a2a,#05040f)}
+.inc h1,.inc h2,.inc h3{margin:0;font-weight:900}
+.inc button{margin:0;font:inherit;cursor:pointer}
+.inc-btn{padding:.5em 1em;border-radius:.7em;border:2px solid var(--gold);background:var(--navy);color:#fff;box-shadow:0 .2em .6em #0006}
+.inc-btn:hover{border-color:#ffe08a;background:#1b2a5e}
+/* cabecera */
+.inc-top{display:flex;align-items:center;gap:1em;position:relative;min-height:3.6em}
+.inc-ban{position:absolute;left:50%;top:0;transform:translateX(-50%);text-align:center;padding:.35em 2.2em .45em;border-radius:.6em;background:linear-gradient(180deg,#2a1e5e,#120c34);
+  border:3px solid var(--gold);box-shadow:0 0 0 2px #6a4e14,0 .4em 1.2em #000a}
+.inc-ban::before,.inc-ban::after{content:'';position:absolute;top:50%;width:1.2em;height:1.2em;transform:translateY(-50%) rotate(45deg);background:var(--gold);box-shadow:0 0 0 2px #6a4e14}
+.inc-ban::before{left:-.75em}.inc-ban::after{right:-.75em}
+.inc-ban h1{font:900 2em/1 "Arial Black","Segoe UI Black","Segoe UI",sans-serif!important;color:#ffe6a0;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;text-shadow:0 .1em 0 #7a5410,0 0 .5em #ffcc3366}
+.inc-ban p{margin:.25em 0 0;font-size:.8em;color:#c9c0ef}.inc-ban p b{color:#ffe08a}
+.inc-left{margin-left:auto;display:flex;flex-direction:column;align-items:center;padding:.35em 1.1em;border-radius:.8em;border:2px solid var(--gold);background:var(--navy)}
+.inc-left b{font-size:1.6em;color:#ffe08a;line-height:1}.inc-left small{font-size:.72em;color:#c7d1ee;text-transform:uppercase}
+/* el legendario */
+.inc-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(16em,24em) minmax(0,1fr);align-items:center;min-height:16em;border-radius:1em;overflow:hidden;
+  border:3px solid var(--gold);box-shadow:0 0 0 2px #6a4e14,0 .5em 1.6em #000b,inset 0 0 3em color-mix(in srgb,var(--lc) 40%,transparent)}
+.inc-map{position:absolute;inset:0;background:center/cover no-repeat;filter:brightness(1.25) saturate(1.1)}
+.inc-map .fog{position:absolute;inset:0;background:linear-gradient(90deg,#05040fee 0%,#05040f88 32%,#05040f22 55%,#05040f99 100%)}
+.inc-boss{position:relative;grid-column:2;width:100%;aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 0 1.2em var(--lc))}
+.inc-info{position:relative;grid-column:1;grid-row:1;padding:1em 1.4em;display:flex;flex-direction:column;gap:.35em}
+.inc-info .k{font-size:.78em;color:#c9b4ff;text-transform:uppercase;letter-spacing:.08em}
+.inc-info h2{font:900 3.2em/1 "Arial Black","Segoe UI Black","Segoe UI",sans-serif;color:#fff;text-shadow:0 .08em 0 #2a1458,0 0 .6em var(--lc)}
+.inc-info .lug{margin:0;color:#ffe08a}
+.inc-info .fr{margin:.2em 0;color:#d5cdf5;font-style:italic;font-weight:600;max-width:26em}
+.inc-chips{display:flex;flex-wrap:wrap;gap:.4em;margin-top:.3em}
+.inc-chips span{padding:.25em .7em;border-radius:1em;background:#ffffff14;border:1px solid #ffffff30;font-size:.8em}
+.inc-chips .got{background:#1e5a34;border-color:#4ccf6a;color:#c8ffd8}
+/* columnas */
+.inc-cols{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:.8em;min-height:0}
+.inc-box{padding:.7em .9em;border-radius:.9em;background:var(--navy);border:2px solid var(--gold);box-shadow:0 .3em 1em #0007,inset 0 0 0 1px #ffffff10}
+.inc-box h3{font-size:1.05em;color:#fff;text-align:center;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.55em}
+.inc-box h3 small{color:#ffe08a;margin-left:.4em}
+.inc-box ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:.4em;font-size:.88em;color:#d5def7;font-weight:600}
+.inc-box p{margin:.3em 0;font-size:.88em;color:#d5def7;font-weight:600}
+.inc-box b{color:#fff}.inc-box b.r{color:#ff6a8a}
+.inc-box .sm,.inc-go .sm{font-size:.75em;color:#9fb0dc}
+.inc-prob{display:flex;flex-direction:column;gap:.3em;margin:.5em 0}
+.inc-prob span{padding:.35em .6em;border-radius:.5em;background:#1a2550;border:1px solid #33457e;font-size:.82em}
+.inc-prob b{color:#ffe08a}
+/* tus 3 Pokémon */
+.inc-mons{display:grid;grid-template-columns:repeat(3,1fr);gap:.4em}
+.inc-mon{position:relative;display:flex;flex-direction:column;align-items:center;gap:.1em;padding:.3em .2em .35em;border-radius:.6em;color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c1) 30%,#1a2448),#121a3a);border:2px solid #33406e;opacity:.72}
+.inc-mon canvas{width:56%;aspect-ratio:1;image-rendering:pixelated}
+.inc-mon b{font-size:.78em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.inc-mon:hover{opacity:1;border-color:#8fa4e0}
+.inc-mon.on{opacity:1;border-color:#ffd45a;box-shadow:0 0 .9em #ffcc3366}
+.inc-mon .n{position:absolute;top:-.5em;right:-.35em;width:1.5em;height:1.5em;display:flex;align-items:center;justify-content:center;border-radius:50%;background:#ffd45a;color:#5a3a00;font-style:normal;box-shadow:0 0 .5em #ffcc33}
+.inc-tr{display:flex;gap:.5em;margin-top:.6em}
+.inc-tr .tw-sel{flex:1;display:flex}
+.inc-tr select{flex:1;min-width:0;font:inherit;padding:.45em .6em;border-radius:.6em;background:#1a2550;color:#fff;border:2px solid #4a5d9a}
+/* botón */
+.inc-go{display:flex;flex-direction:column;align-items:center;gap:.4em;margin-top:auto}
+.inc-go .warn{margin:0;padding:.45em .7em;border-radius:.6em;background:rgba(70,10,24,.92);border:1px solid #ff4d6d;color:#ffd0d8;font-size:.82em}
+.inc-start{display:flex;flex-direction:column;align-items:center;gap:.1em;min-width:18em;padding:.5em 1.6em .6em;border-radius:2em;border:3px solid #e4d4ff;color:#fff;
+  background:linear-gradient(180deg,#9a6aff,#5a2ad0);box-shadow:0 .3em 0 #2a1070,0 0 1.6em color-mix(in srgb,var(--lc) 70%,transparent);animation:incPulse 2.2s ease-in-out infinite}
+.inc-start span{font:900 2em/1.05 "Arial Black","Segoe UI Black","Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:.03em;text-shadow:0 .08em 0 #2a0a60}
+.inc-start small{font-size:.8em;opacity:.9}
+.inc-start:hover{transform:translateY(-2px)}
+.inc-start:disabled{filter:grayscale(.8) brightness(.6);animation:none;cursor:default;transform:none}
+@keyframes incPulse{50%{box-shadow:0 .3em 0 #2a1070,0 0 2.8em color-mix(in srgb,var(--lc) 90%,transparent)}}
+@media (max-width:1100px){.inc-cols{grid-template-columns:1fr 1fr}.inc-team{grid-column:1/-1}}
+html.phone #incv{font-size:8.5px}
+
+/* tarjeta del menú principal (columna derecha, con el mismo marco que las notas del parche) */
+#mm2 .m2-inc{--lc:#8a5cff}
+#mm2 .m2-inc .h i{background:var(--lc)!important}
+#mm2 .m2-inc .ib{display:flex;align-items:center;gap:12px}
+#mm2 .m2-inc canvas{width:64px;height:64px;image-rendering:pixelated;flex:none;border-radius:10px;background:radial-gradient(circle,color-mix(in srgb,var(--lc) 55%,transparent),transparent 70%);filter:drop-shadow(0 0 6px var(--lc))}
+#mm2 .m2-inc .ib > span{display:flex;flex-direction:column;gap:3px}
+#mm2 .m2-inc .ib b{font-size:15px;color:#fff}
+#mm2 .m2-inc .ib small{font-size:10px;color:#c3d0ee}
+#mm2 .m2-inc .a{color:#d9c8ff}
+#mm2 .m2-inc:hover{filter:brightness(1.12)}
+
+/* captura en el mapa: pregunta y resultado en un panel abajo (el combate se sigue viendo detrás) */
+#incCap{position:fixed;left:0;right:0;bottom:15vh;z-index:60;display:flex;justify-content:center;pointer-events:none;
+  font:700 clamp(10px,1.6vh,18px)/1.35 "Segoe UI","Trebuchet MS",system-ui,sans-serif;color:#eef2ff}
+#incCap:empty{display:none}
+#incCap .cap-res{pointer-events:auto;text-align:center;padding:1em 1.6em;border-radius:1em;background:#0d0a26ee;border:3px solid #d8b25a;box-shadow:0 .5em 1.6em #000b;max-width:40em;animation:incIn .25s ease-out}
+#incCap .cap-res.ok{border-color:#ffd45a;box-shadow:0 0 2em #ffcc3366}
+#incCap .cap-res h2{margin:0 0 .3em;font:900 1.9em/1.1 "Arial Black","Segoe UI Black","Segoe UI",sans-serif;color:#fff}
+#incCap .cap-res.ok h2{color:#ffe6a0}
+#incCap .cap-res p{margin:0 0 .8em;color:#d5def7}#incCap .cap-res p b{color:#ffe08a}
+#incCap .cap-btns{display:flex;gap:.6em;justify-content:center}
+#incCap .cap-btns button{margin:0;font:inherit;cursor:pointer;padding:.5em 1.6em;border-radius:.7em;border:2px solid #d8b25a;background:#121a3a;color:#fff}
+#incCap .cap-btns button.main{background:linear-gradient(180deg,#9a6aff,#5a2ad0);border-color:#e4d4ff}
+@keyframes incIn{from{transform:translateY(20px);opacity:0}}

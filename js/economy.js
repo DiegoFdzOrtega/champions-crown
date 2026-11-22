@@ -34,7 +34,9 @@ const pityOf = reg => save.pity[reg] || 0;
 const ownedIn = reg => { const [a,b] = REGION_DEX[reg]; return save.box.filter(d => d >= a && d <= b && !hidden(d)).length; };
 const shinyIn = reg => { const [a,b] = REGION_DEX[reg]; return save.shiny.filter(d => d >= a && d <= b && !hidden(d)).length; };
 // Pokémon de una región con una rareza concreta (los usa el banner y las tiradas)
-const pool = (reg, rar) => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(DEX[d-1].rar === rar && !hidden(d)) out.push(d); return out; };
+const enGacha = d => !hidden(d) && !SOLO_INCURSION.has(d);                    // ¿sale en el Gachapon? (los legendarios de verdad solo salen en las Incursiones, data.js)
+const ownedGacha = reg => { const [a,b] = REGION_DEX[reg]; return save.box.filter(d => d >= a && d <= b && enGacha(d)).length; };   // los que tienes de los que salen en su Gachapon
+const pool = (reg, rar) => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(DEX[d-1].rar === rar && enGacha(d)) out.push(d); return out; };
 
 // Elige una rareza al azar según GACHA_RATES
 function rollRarity(){
@@ -53,7 +55,7 @@ function rollOne(reg, rar){
 // shiny (tirada VARIOCOLOR) = 1 ticket variocolor (s): 1 tirada que SIEMPRE sale shiny y que aún no tenías. El ticket variocolor solo se gana al sacar un shiny repetido.
 const GACHA_COST = {one:{n:1, l:0, s:0, pulls:1}, ten:{n:10, l:0, s:0, pulls:10}, special:{n:0, l:1, s:0, pulls:10}, shiny:{n:0, l:0, s:1, pulls:1}};
 // Pokémon de la región cuyo shiny aún NO tienes (la tirada variocolor elige entre ellos)
-const shinyLeft = reg => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(!hidden(d) && !save.shiny.includes(d)) out.push(d); return out; };
+const shinyLeft = reg => { const [a,b] = REGION_DEX[reg], out = []; for(let d=a; d<=b; d++) if(enGacha(d) && !save.shiny.includes(d)) out.push(d); return out; };
 const canPull = (mode, reg = save.gachaRegion) => { const c = GACHA_COST[mode]; return save.tickets >= c.n && save.ticketsL >= c.l && save.ticketsS >= c.s && (mode !== 'shiny' || (!!REGION_DEX[reg] && shinyLeft(reg).length > 0)); };
 // Tirada variocolor: la rareza se elige con las probabilidades de siempre, pero solo entre las rarezas que aún tienen algún shiny sin conseguir
 function rollShinyOne(reg){

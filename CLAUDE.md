@@ -80,6 +80,7 @@ tools/                scripts de ayuda (bajar_anims.ps1, gen_learnsets.py…)
 | `torre.js`, `torreestadio.js` | Torre Batalla (pantalla, luces, cascada, nubes; estadio grande) |
 | `music.js`, `sonido2.js` | música y sonidos (compresor, reverb, estéreo con `Music.sfxAt`) |
 | `pausa2.js` | menú de pausa |
+| `incursiones.js` | **Incursiones semanales**: legendario de la semana (`INC_LEGS`, `incLeg`), pantalla `#incv`, combate en un mapa grande (usa el estadio grande de `torreestadio.js` con otra imagen, `o.incursion`), fases del jefe, captura en el mapa. Números en `INC`. Se carga la última |
 | `carga.js` | **se carga el primero**: pide la copia `.webp` de las imágenes grandes en vez del `.png` (lista `CARGA_WEBP`, la escribe `tools/png_a_webp.py`) y **retrasa** las imágenes de ataques (`assets/fx`, `objetos/ataques`, `objetos/cargas`) hasta el primer combate (en PC, a los 5 s); si un código las mira antes, se piden al momento |
 
 ### Cómo está hecho el código (el patrón «envolver»)
@@ -127,19 +128,11 @@ WASD mover · **Espacio** carrera (esquiva) · **clic izquierdo** golpe (mantene
 
 **Optimización (21-11-2026):** imágenes de efectos en WebP (48 MB → 13 MB), estadios cargados solo cuando hacen falta (~7 MB menos al abrir). El código del combate ya era ligero (dibujar ~1,4 ms por fotograma en el PC de Diego, RTX 4060 Ti).
 
+**Incursiones (22-11-2026):** modo de 1 jugador contra Darkrai hecho (`js/incursiones.js`). Los legendarios y míticos ya no salen en el Gachapon (`SOLO_INCURSION`, `data.js`).
+
 **Pendiente:**
 - Puños a melé (Puño Fuego/Trueno/Hielo/Bala): dos diseños de prompt rechazados; Diego tiene que describir lo que quiere o mandar captura.
 - Hidrobomba de Blastoise saliendo de sus **dos cañones** (no hay animación Special; hay que hacerlo a mano).
 - Conectar animaciones nuevas que ya están bajadas: Sink (Excavar), TumbleBack (golpes fuertes), Dance (danzas), Appeal (mega/victoria), Shock (parálisis), Laying/EventSleep (dormido), Eat, Pull, Shake.
 - Imágenes sin usar: `oc2_aro`, `ra2_polvo`, `da_*`. Se pueden borrar los viejos: `carga_*`, `vt2_*`, `brecha_*` antiguos, `bn_brazos`, `pantalla_luz.png`.
 - Indicador de lag en el online.
-
-## 10. Plan: pasar a Godot 4
-Diego ha decidido **dar el salto a un motor**. Plan acordado:
-- **Godot 4** (versión normal, no .NET), lenguaje **GDScript**. Exporta a web (se puede seguir en GitHub Pages / itch.io) y a PC.
-- Proyecto nuevo en la carpeta **`Tower battle`** (al lado de «Torre Batalla»), con su propio `CLAUDE.md`. El juego JS sigue funcionando mientras tanto.
-- **Fase 1 — prototipo:** combate 1 contra 1 en un estadio (estilo Pokémon Battlegrounds): moverse, carrera, golpe, disparo, E con carga, Terremoto con salto, HUD (vida, energía, nombre del ataque, números de daño). Reutilizar sprites PMD, imágenes de Gemini y sonidos.
-- **Fase 2:** 6 Pokémon y cambios, IA, mega, estados, habilidades, menús, Torre.
-- **Fase 3:** online determinista (mismas reglas que §6) y cuentas con Supabase.
-- Claude **no puede ejecutar Godot** en su sesión: escribe el proyecto y Diego lo abre, le da a ejecutar y manda capturas o el error.
-- Al portar, **copiar los números** de `FEEL`, `QUAKE`, `RIDE`, `CARGA`, recargas y daños de los `.js` para que el juego se sienta igual.

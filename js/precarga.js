@@ -11,6 +11,14 @@
    ===================================================================== */
 const PRE = {on: true, cada: .5};
 const PRECARGA = {/*MAPA*/
+  "Tóxico": ["assets/objetos/ataques/p/to_salida.png", "assets/objetos/ataques/p/to_bala.png", "assets/objetos/ataques/p/to_estela.png", "assets/objetos/ataques/p/to_golpe.png", "assets/objetos/ataques/p/to_marca.png"],
+  "Onda Trueno": ["assets/objetos/ataques/p/ot_salida.png", "assets/objetos/ataques/p/ot_bala.png", "assets/objetos/ataques/p/ot_estela.png", "assets/objetos/ataques/p/ot_golpe.png", "assets/objetos/ataques/p/ot_marca.png"],
+  "Fuego Fatuo": ["assets/objetos/ataques/p/ff_salida.png", "assets/objetos/ataques/p/ff_bala.png", "assets/objetos/ataques/p/ff_estela.png", "assets/objetos/ataques/p/ff_golpe.png", "assets/objetos/ataques/p/ff_marca.png"],
+  "Triataque": ["assets/objetos/ataques/p/tr_salida.png", "assets/objetos/ataques/p/tr_bala.png", "assets/objetos/ataques/p/tr_estela.png", "assets/objetos/ataques/p/tr_golpe.png", "assets/objetos/ataques/p/tr_marca.png"],
+  "Bomba Imán": ["assets/objetos/ataques/p/bi_salida.png", "assets/objetos/ataques/p/bi_bala.png", "assets/objetos/ataques/p/bi_estela.png", "assets/objetos/ataques/p/bi_golpe.png", "assets/objetos/ataques/p/bi_marca.png"],
+  "Giro Fuego": ["assets/objetos/ataques/p/gf_salida.png", "assets/objetos/ataques/p/gf_bala.png", "assets/objetos/ataques/p/gf_estela.png", "assets/objetos/ataques/p/gf_golpe.png", "assets/objetos/ataques/p/gf_marca.png"],
+  "Rayo Burbuja": ["assets/objetos/ataques/p/rb_salida.png", "assets/objetos/ataques/p/rb_bala.png", "assets/objetos/ataques/p/rb_estela.png", "assets/objetos/ataques/p/rb_golpe.png", "assets/objetos/ataques/p/rb_marca.png"],
+  "Burbuja": ["assets/objetos/ataques/p/bu_salida.png", "assets/objetos/ataques/p/bu_bala.png", "assets/objetos/ataques/p/bu_estela.png", "assets/objetos/ataques/p/bu_golpe.png", "assets/objetos/ataques/p/bu_marca.png"],
   "Acua Cola": ["assets/fx/lg_estela.png", "assets/objetos/ataques/m/ac_carga.png", "assets/objetos/ataques/m/ac_estela.png", "assets/objetos/ataques/m/ac_golpe.png", "assets/objetos/ataques/m/ac_chispas.png", "assets/objetos/ataques/m/ac_marca.png"],
   "Aerochorro": ["assets/objetos/ataques/aerochorro_cuerpo.png", "assets/objetos/ataques/aerochorro.png"],
   "Arañazo": ["assets/fx/lg_estela.png", "assets/fx/ar_garra.png"],
