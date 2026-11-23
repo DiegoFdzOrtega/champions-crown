@@ -49,7 +49,7 @@ function mmHero(){
   }
   if(towerOpen()){
     const best = (save.tower && save.tower.best) || 0;
-    return `<div class="m2-hero tw"><img class="por tw-art" src="${MM_TOWER}" alt="">
+    return `<div class="m2-hero tw"><img class="por tw-art" src="assets/menu/marcos/torre_retrato.webp?v=1" alt="" onerror="this.onerror=null;this.src='${MM_TOWER}'">
       <div class="m2-hi"><span class="k">Continuar · Torre Batalla</span><h2>${best ? 'Supera el piso ' + best : '¡La Torre te espera!'}</h2>
         <p>Has vencido a todas las Ligas. Sube piso a piso: los rivales son cada vez más fuertes y cada piso da premios.</p>
         <div class="row"><button class="m2-go" data-mm="go" data-k="tower">¡SUBIR!</button><small>Récord: piso ${best}</small></div></div></div>`;

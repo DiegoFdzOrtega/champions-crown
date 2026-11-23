@@ -6,7 +6,7 @@
    Va DESPUÉS de menukit.css y solo cambia los marcos: los textos e iconos siguen siendo los de siempre.
    Para volver a los de antes, quita esta hoja de index.html.
    ===================================================================== */
-#main.mkit .m2-hero{position:relative;border-image:none!important;border-color:transparent!important;background:none!important;padding:12px 26px 10px!important;overflow:visible!important;margin-top:16px!important}
+#main.mkit .m2-hero{position:relative;border-image:none!important;border-color:transparent!important;background:none!important;padding:10px 26px 6px!important;overflow:visible!important;margin-top:30px!important}
 #main.mkit .m2-hero::before{content:'';position:absolute;left:-3px;right:-3px;top:-30px;bottom:-3px;z-index:0;pointer-events:none;
   background:url('../assets/menu/marcos/heroe.webp?v=1') center/100% 100% no-repeat}      /* sube 34 px para que la Poké Ball de arriba quede fuera de la tarjeta */
 #main.mkit .m2-hero>*{position:relative;z-index:1}
@@ -17,7 +17,7 @@
   padding:15px 14px 4px 14px!important}
 #main.mkit .m2-play .m2-t:hover,#main.mkit .m2-play .m2-t:focus-visible{filter:drop-shadow(0 5px 6px rgba(0,0,0,.45)) brightness(1.12)}
 
-#main.mkit .m2-col{margin-top:8px!important;border-image:none!important;border-color:transparent!important;background:none!important}
+#main.mkit .m2-col{margin-top:4px!important;border-image:none!important;border-color:transparent!important;background:none!important}
 #main.mkit .m2-col .m2-t{background:none!important;border-image:url('../assets/menu/marcos/casilla.webp?v=1') 32 fill / 14px stretch!important}
 #main.mkit .m2-col .m2-t:hover,#main.mkit .m2-col .m2-t:focus-visible{filter:brightness(1.15)}
 
@@ -35,3 +35,5 @@
 #main.mkit .m2-go:hover,#main.mkit .m2-go:focus-visible{background-image:url('../assets/iconos/resultado/boton_oro_on.webp?v=1')!important;background-size:101.4% 121%!important}
 #main.mkit .m2-go::before{display:none!important}
 #main.mkit .m2-play .m2-t img.big{display:none!important}      /* sin el emblema del rango en la tarjeta de Clasificatoria */
+/* Torre Batalla en la tarjeta grande: la torre al atardecer (recorte de assets/fondos/torre_atardecer.webp) llena todo el hueco */
+#main.mkit .m2-hero img.por.tw-art{object-fit:cover!important;object-position:center top!important;padding:0!important;max-width:none!important;max-height:none!important;border-radius:10px;filter:none!important;margin:0!important}
