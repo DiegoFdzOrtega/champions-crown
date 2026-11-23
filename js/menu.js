@@ -88,7 +88,7 @@ function buildMain(){
   refreshHud();
 }
 function enter(k){
-  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>openRanked(), pruebas:openPruebas, friends:openFriends, account:openAccount, bag:openBag, set:openSettings,
+  ({story:goRegions, campo:openCampo, team:openTeam, shop:openShop, dex:openDex, gacha:openGacha, profile:openProfile, ach:openAchievements, rank:()=>teseliaHecha() ? openRanked() : toast('La Clasificatoria se abre al ser Campeón de Teselia.'), pruebas:openPruebas, friends:openFriends, account:openAccount, bag:openBag, set:openSettings,
     tower:()=>towerOpen() ? openTorre() : toast('La Torre Batalla se abre al ser Campeón de Kanto.')})[k]();
 }
 function goMain(){ refreshHud(); show('main'); if(typeof cloudGiftsCheck === 'function') cloudGiftsCheck(); }      // al volver al menú, mira si te han regalado algo (js/gifts.js)
@@ -158,7 +158,7 @@ function buildRegions(){
   };
   const items = [];
   REGIONS.forEach((n,i)=>{
-    const total = floorsOf(n).length, playable = total > 0, prev = REGIONS[i-1];       // jugable = ya tiene combates en FLOORS
+    const total = floorsOf(n).length, playable = total > 0 && !REG_CERRADAS.has(n), prev = REGIONS[i-1];       // jugable = ya tiene combates en FLOORS
     const open = playable && (i === 0 || champOf(prev) || !!PREVIEW[n]);                      // se abre al ser Campeón de la región anterior
     const nL = floorsOf(n).filter(F => F.kind === 'lider').length || 8;                              // nº de líderes de la región (8 en casi todas; Teselia tiene 10)
     const rec = PREVIEW[n] ? 99 : progOf(n), done = open ? Math.min(nL, rec) : 0, elite = open ? Math.max(0, Math.min(4, rec - nL)) : 0;
@@ -204,6 +204,7 @@ function buildRegions(){
 const TYPE_OF_TAG = Object.fromEntries(Object.entries(TYPE_ES).map(([k, v]) => [v, k]));            // 'Roca' → 'roca' (color del líder: TC)
 const tagColor = F => F.kind === 'campeon' ? '#ffcc33' : (TC[TYPE_OF_TAG[F.tag]] || '#8fb3e8');
 function buildStory(){
+  if(REG_CERRADAS.has(save.region)){ save.region = 'Kalos'; persist(); }          // región cerrada (Próximamente): vuelve a la última abierta
   const R = save.region, fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === R);
   const rec = PREVIEW[R] ? 99 : progOf(R);                                // modo ver (data.js): todos los combates abiertos
   const cnt = k => fls.filter(x => x.F.kind === k).length, doneK = k => fls.filter(x => x.F.kind === k && x.F.idx < rec).length;

@@ -16,7 +16,7 @@ const P2 = {on: true, marca: 2.4, fps: 14, tam: {salida: 56, bala: 46, estela: 9
 const P2_ATAQUES = {};
 const P2_FILAS = ['salida', 'bala', 'estela', 'golpe', 'marca'];
 const P2_IMG = {};
-const P2_VER = {as: 2};                                                      // versión de las imágenes de cada ataque (subir si se rehacen)
+const P2_VER = {as: 2, hpu: 2};                                                      // versión de las imágenes de cada ataque (subir si se rehacen)
 function p2Alta(nombre, pre, chorro, escala){
   P2_ATAQUES[nombre] = {pre, chorro: !!chorro, esc: escala || 1};
   P2_FILAS.forEach(fl => { const im = new Image(); im.onload = () => { im.ok = true; im.fw = im.width / 6; }; im.src = `assets/objetos/ataques/p/${pre}_${fl}.png?v=${P2_VER[pre] || 1}`; P2_IMG[pre + '_' + fl] = im; });

@@ -172,6 +172,10 @@ const floorsOf = region => FLOORS.filter(F => F.region === region);             
 /* MODO VER (temporal): las regiones que pongas en true se abren y se ven TODOS sus combates (como si ya los hubieras superado), sin tocar tu progreso.
    Sirve para mirar equipos y estadios. Al ganar en una región en modo ver NO se guarda progreso, EVs, trofeo ni recompensas. Para quitarlo: Sinnoh: false. */
 const PREVIEW = {Sinnoh: false, 'Unova / Teselia': false, Kalos: false, Alola: false};
+// REGIONES CERRADAS (23-11-2026): salen como «Próximamente» y no se pueden jugar. Quien ya las superó conserva sus trofeos (no se borra nada del guardado). Para abrir una, quítala de aquí.
+const REG_CERRADAS = new Set(['Alola', 'Galar', 'Paldea']);
+// Clasificatoria y Megapiedras de la Tienda: se abren al ser Campeón de Teselia (en cualquier dificultad), igual que el Mega-Aro (achievements.js)
+const teseliaHecha = () => typeof champOf === 'function' && (champOf('Unova / Teselia', 'facil') || champOf('Unova / Teselia', 'dificil'));
 // HISTORIA CON DOS AVANCES (js/dificultad.js): cada dificultad ('facil' / 'dificil') tiene su propio progreso y sus propias Ligas superadas.
 // Difícil usa los campos de siempre (save.record, save.prog, save.champ: así las partidas antiguas siguen intactas) y Fácil usa save.easy = {record, prog, champ}.
 // trk(m) devuelve el objeto de la dificultad m (por defecto, la que tienes activa en save.storyMode): trk().record · trk().prog · trk().champ
@@ -184,6 +188,9 @@ const progOf = (region, m) => { const f = (m || save.storyMode) === 'facil', v =
 const progAny = region => Math.max(progOf(region, 'facil'), progOf(region, 'dificil'));              // el mejor de los dos avances      // combates ya superados en esa región (Kanto sigue usando save.record, así no se pierde ninguna partida)
 const setProg = (region, n, m) => { const T = trk(m); if(region === 'Kanto') T.record = n; else T.prog[region] = n; };
 const progTotal = () => REGIONS_PLAYED().reduce((a, r) => a + progOf(r), 0);
+const REG_ABIERTAS = () => REGIONS_PLAYED().filter(r => !REG_CERRADAS.has(r));                           // regiones jugables (sin las de «Próximamente»)
+const progAbierto = () => REG_ABIERTAS().reduce((a, r) => a + Math.min(progOf(r), FLOORS.filter(F => F.region === r).length), 0);
+const floorsAbiertos = () => FLOORS.filter(F => !REG_CERRADAS.has(F.region)).length;
 const REGIONS_PLAYED = () => [...new Set(FLOORS.map(F => F.region))];
 
 // Dificultad. El motor no tiene niveles: el nivel se traduce en multiplicadores de vida (hm), daño (dm) y velocidad,

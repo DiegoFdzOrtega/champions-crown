@@ -1,0 +1,87 @@
+/* =====================================================================
+   PANTALLA DE RESULTADO con los paneles de Gemini (js/resultado.js)
+   Las imágenes están en assets/iconos/resultado/. Todo se coloca en % del panel y los textos
+   en cqw (porcentaje del ancho del panel), así el panel entero escala con la ventana.
+   Medidas de las imágenes: derrota 1213×724 · victoria 1099×744.
+   ===================================================================== */
+#result .inner.cc{position:relative;container-type:inline-size;padding:0;margin:auto;max-width:none;
+  font-family:'Pixelify Sans',system-ui,sans-serif;background:no-repeat center/100% 100%;
+  animation:ccIn .45s cubic-bezier(.2,1.2,.4,1) both}
+#result .inner.cc-lose{width:min(88vw,700px,calc((100vh - 8rem) * 1.675));aspect-ratio:1213/724;background-image:url(../assets/iconos/resultado/derrota_marco.webp)}
+#result .inner.cc-win{width:min(88vw,680px,calc((100vh - 8rem) * 1.477));aspect-ratio:1099/744;background-image:url(../assets/iconos/resultado/victoria_marco.webp)}
+@keyframes ccIn{from{opacity:0;transform:translateY(-1.2rem) scale(.97)}to{opacity:1;transform:none}}
+
+/* retrato del rival dentro del círculo + la placa delante (la misma franja del marco) */
+#result .cc-foto{position:absolute;border-radius:50%;overflow:hidden;z-index:1}
+#result .cc-lose .cc-foto{left:42.62%;top:5.8%;width:14.51%;height:24.31%}
+#result .cc-win .cc-foto{left:42.77%;top:4.57%;width:13.83%;height:20.43%}
+#result .cc-foto .vic-portrait{position:absolute;left:0;right:0;margin:auto;width:100%;height:76%;padding:0;border:0;border-radius:0;
+  background:none;box-shadow:none;object-fit:contain;object-position:center bottom;image-rendering:pixelated;animation:none}
+#result .cc-lose .cc-foto .vic-portrait{bottom:26%;filter:saturate(.75) brightness(.9)}
+#result .cc-win .cc-foto .vic-portrait{bottom:12%;height:82%}
+#result .cc-foto .vic-portrait.sk{display:flex;justify-content:center;align-items:flex-end}
+#result .cc-foto .vic-portrait.sk .skin{height:100%;width:auto}
+#result .cc-placa{position:absolute;left:0;width:100%;z-index:2;background:no-repeat center/100% 100%;pointer-events:none}
+#result .cc-lose .cc-placa{top:23.2%;height:18.23%;background-image:url(../assets/iconos/resultado/derrota_placa.webp)}
+#result .cc-win .cc-placa{top:22.04%;height:16.94%;background-image:url(../assets/iconos/resultado/victoria_placa.webp)}
+#result .cc .vic-banner{display:none}                                 /* «VICTORIA» ya va en la placa */
+
+/* subtítulo encima de la línea */
+#result .cc h1#rTitle{position:absolute;left:50%;transform:translate(-50%,-50%);z-index:3;margin:0;white-space:nowrap;max-width:80%;overflow:hidden;text-overflow:ellipsis;
+  padding:0 1.6cqw;font-size:3.1cqw;font-weight:700;line-height:1.25;color:#fff;text-shadow:0 .25cqw 0 #00000088}
+#result .cc-lose h1#rTitle{top:44.5%;background:#0a2350}
+#result .cc-win h1#rTitle{top:39.8%;color:#ffcc33;background:#05245a}
+#result .cc p#rText{position:absolute;left:10%;width:80%;z-index:3;margin:0;font-size:1.5cqw;line-height:1.3;color:#cfe0ff}
+#result .cc-win p#rText{top:42%}
+#result .cc-lose p#rText{display:none}
+#result .cc p#rText.hide,#result .cc p#rText.cc-hide{display:none}
+
+/* ---------- VICTORIA: tarjetas de recompensa ---------- */
+#result .cc-win .vic-grid{position:absolute;left:7.1%;width:85.9%;top:45.5%;height:30.5%;margin:0;display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:2.2cqw}
+#result .cc-win.cc-grid:not(:has(#rText:not(.hide))) .vic-grid{top:44%;height:32%}
+#result .cc-win .rwc{flex:0 1 auto;width:min(28.5%,calc((100% - (var(--n) - 1) * 2.2cqw) / var(--n)));aspect-ratio:308/248;height:auto;padding:0;gap:0;
+  background:no-repeat center/100% 100%;border:0;border-radius:0;box-shadow:none;display:block;container-type:inline-size}
+#result .cc-win .rwc.cc-t-rosa{background-image:url(../assets/iconos/resultado/tarjeta_rosa.webp)}
+#result .cc-win .rwc.cc-t-oro{background-image:url(../assets/iconos/resultado/tarjeta_oro.webp)}
+#result .cc-win .rwc.cc-t-plata{background-image:url(../assets/iconos/resultado/tarjeta_plata.webp)}
+#result .cc-win .rwc .ico{position:absolute;left:50.6%;top:32%;width:33%;height:auto;aspect-ratio:1;transform:translate(-50%,-50%);background:none;border:0;border-radius:50%}
+#result .cc-win .rwc .ico img,#result .cc-win .rwc .ico canvas{width:100%;height:100%;object-fit:contain}
+#result .cc-win .rwc .num{position:absolute;left:0;right:0;top:56%;text-align:center;font-size:15cqw;font-weight:700;line-height:1;color:var(--c);text-shadow:0 0 3cqw color-mix(in srgb,var(--c) 55%,transparent)}
+#result .cc-win .rwc .lab{position:absolute;left:6%;right:6%;top:74%;text-align:center;font-size:6.4cqw;line-height:1.1;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#result .cc-win .rwc .own{position:absolute;left:0;right:0;top:85%;text-align:center;font-size:5cqw;color:#9fc0f0}
+#result .cc-win .rwc .x2{top:-9%;left:-9%;right:auto;width:52%;aspect-ratio:296/188;padding:0;border-radius:0;box-shadow:none;transform:none;
+  background:url(../assets/iconos/resultado/sello.webp) no-repeat center/contain;font-size:0;color:transparent;z-index:2}
+
+/* ---------- VICTORIA: etiquetas («Siguiente: Misty», EVs, trofeo…) en la barra ---------- */
+#result .cc-win .rchips{position:absolute;left:9%;width:82%;top:77.2%;height:7.6%;margin:0;display:flex;flex-wrap:nowrap;gap:1cqw;justify-content:center;z-index:3}
+#result .cc-win:not(.cc-grid) .rchips{top:52%;height:9%}
+#result .cc-win .rchip{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;padding:0 3cqw;border:0;border-radius:0;
+  background:url(../assets/iconos/resultado/barra.webp) no-repeat center/100% 100%;font-size:1.75cqw;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#result .cc-win .rchip::before{content:'';flex:none;width:.9cqw;height:.9cqw;margin-right:1cqw;border-radius:50%;background:var(--c);box-shadow:0 0 1cqw var(--c)}
+
+/* ---------- DERROTA: resumen y consejo ---------- */
+#result .cc-stats{position:absolute;left:5.94%;width:88.21%;top:48.62%;height:20.44%;display:grid;grid-template-columns:1fr 1fr 1fr;z-index:3}
+#result .cc-stats>div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8cqw;min-width:0}
+#result .cc-stats .cc-lab{font-size:1.9cqw;color:#ffcc33}
+#result .cc-stats .cc-big{font-size:3.6cqw;font-weight:700;color:#fff;line-height:1}
+#result .cc-stats small{font-size:1.45cqw;color:#fff;white-space:nowrap}
+#result .cc-balls{display:flex;gap:.7cqw}
+#result .cc-balls i{width:3cqw;height:3cqw;border-radius:50%;border:.25cqw solid #2c5aa8;box-sizing:border-box}
+#result .cc-balls i.on{border-color:#141414;background:radial-gradient(circle,#fff 0 18%,#141414 19% 30%,transparent 31%),linear-gradient(#e8333b 0 44%,#141414 44% 56%,#f4f4f4 56%)}
+#result .cc-cara{width:4.2cqw;height:4.2cqw;image-rendering:pixelated;border:.2cqw solid #2c5aa8;background:#0a1a3a}
+#result .cc-tip{position:absolute;left:16.5%;width:74.8%;top:71.4%;height:10.1%;display:flex;align-items:center;z-index:3;font-size:1.75cqw;line-height:1.25;color:#fff}
+#result .cc-tip b{color:#ffcc33;font-weight:700}
+
+/* ---------- botones (los dos paneles) ---------- */
+#result .cc #rBtns{position:absolute;display:flex;justify-content:center;align-items:center;gap:2.4cqw;z-index:3;margin:0}
+#result .cc-lose #rBtns{left:7%;width:86%;top:84%;height:12%}
+#result .cc-win #rBtns{left:10%;width:80%;top:86%;height:10.2%}
+#result .cc #rBtns button{flex:0 1 44%;height:100%;margin:0;padding:0 5cqw;border:0;box-shadow:none;outline:none;font-family:inherit;font-size:2.4cqw;font-weight:700;
+  color:#fff;text-shadow:0 .2cqw 0 #0008;background:url(../assets/iconos/resultado/boton_azul.webp) no-repeat center/100% 100%;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:transform .08s}
+#result .cc #rBtns button.main{color:#3a1d00;text-shadow:0 .15cqw 0 #ffffff66;background-image:url(../assets/iconos/resultado/boton_oro.webp)}
+#result .cc #rBtns button:hover,#result .cc #rBtns button:focus-visible{background-image:url(../assets/iconos/resultado/boton_azul_on.webp);background-size:100.5% 103%}
+#result .cc #rBtns button.main:hover,#result .cc #rBtns button.main:focus-visible{background-image:url(../assets/iconos/resultado/boton_oro_on.webp);background-size:101.4% 121%}
+#result .cc #rBtns button:active{transform:scale(.97)}
+
+@media (prefers-reduced-motion:reduce){#result .inner.cc{animation:none}}

@@ -25,7 +25,7 @@ const mmNum = n => Number(n || 0).toLocaleString('es-ES');
 function mmNext(){
   const regs = REGIONS_PLAYED();
   for(let i = 0; i < regs.length; i++){
-    const r = regs[i], open = i === 0 || champOf(regs[i - 1]) || !!PREVIEW[r];
+    const r = regs[i], open = !REG_CERRADAS.has(r) && (i === 0 || champOf(regs[i - 1]) || !!PREVIEW[r]);
     if(!open) return null;
     const fls = FLOORS.map((F, gi) => ({F, gi})).filter(x => x.F.region === r), rec = progOf(r);
     const nx = fls.find(x => x.F.idx >= rec);
@@ -34,7 +34,7 @@ function mmNext(){
   return null;
 }
 function mmHero(){
-  const nx = mmNext(), total = FLOORS.length, done = progTotal();
+  const nx = mmNext(), total = floorsAbiertos(), done = progAbierto();
   if(nx){
     const F = nx.F, reg = String(nx.r).split(' / ').pop(), last = done + 1 >= total;
     const kind = F.kind === 'campeon' ? (/a$/.test(F.tag) ? 'Campeona' : 'Campeón') : F.kind === 'alto' ? (nx.r === 'Galar' ? 'Copa de Campeones ·' : 'Alto Mando') : nx.r === 'Alola' ? 'Capitán' : 'Líder';
@@ -96,8 +96,8 @@ function mmRender(){
       ${mmHero()}
       <div class="m2-sec">Jugar</div>
       <div class="m2-play">
-        ${mmTile('story', '#ffcc33', 'HISTORIA', `${REGIONS_PLAYED().length} regiones · líderes, Alto Mando y Campeón`, `${progTotal()} / ${FLOORS.length} combates`, `<span class="pb"><i style="width:${progTotal() / FLOORS.length * 100}%"></i></span>`)}
-        ${mmTile('rank', played && T ? T.c : '#ffcc33', 'CLASIFICATORIA', 'Combates online por rango', played && T ? `${T.n} · ${r.pts} PC` : logged ? 'Sin clasificar' : 'Necesitas una cuenta', played && T ? `<img class="big" src="${rkImg(T)}" alt="">` : '')}
+        ${mmTile('story', '#ffcc33', 'HISTORIA', `${REG_ABIERTAS().length} regiones · líderes, Alto Mando y Campeón`, `${progAbierto()} / ${floorsAbiertos()} combates`, `<span class="pb"><i style="width:${progAbierto() / floorsAbiertos() * 100}%"></i></span>`)}
+        ${mmTile('rank', played && T ? T.c : '#ffcc33', 'CLASIFICATORIA', 'Combates online por rango', !teseliaHecha() ? '🔒 Sé Campeón de Teselia para abrirla' : played && T ? `${T.n} · ${r.pts} PC` : logged ? 'Sin clasificar' : 'Necesitas una cuenta', played && T ? `<img class="big" src="${rkImg(T)}" alt="">` : '', teseliaHecha() ? '' : 'lock')}
         ${mmTile('campo', '#4ccf6a', 'CAMPO DE ENTRENAMIENTO', 'Entrenadores sin límite: BP, chapas y tiradas', 'Premio en cada victoria')}
         ${mmTile('tower', '#ff9a3a', 'TORRE BATALLA', 'Sube piso a piso: rivales cada vez más fuertes', towerSt, '', lockT ? 'lock' : '')}
       </div>

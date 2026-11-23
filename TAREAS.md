@@ -28,6 +28,9 @@ Diego (21-11-2026, 18:37): «hay que mejorar todos los efectos; analiza el víde
 5. ~~Marcas de garras y golpes en el suelo~~ (HECHO: tres rayas oscuras donde se pega a melé, `js/corte.js`) que se quedan un rato (en el vídeo quedan rayas oscuras donde se pegó).
 6. **Revisar todos los ataques uno a uno** comparando con el vídeo (tamaño, que no tapen al Pokémon, colores menos chillones) y quitar lo que se vea «raro» (olas, rectángulos, cortes rectos).
 7. **Ascuas con fondo azul**, ~~estadio de prueba~~ (Diego, 22:02: «déjalo, no es prioridad») : con Gemini a partir de las 20:50.
+8. **Tutorial** (Diego, 23-11-2026): la primera vez que entras en cada sitio (menú, Equipo, Gachapon, Invocación, Tienda, Pokédex, combate…) te explica qué es cada cosa. Solo una vez por sitio (guardar en `save` cuáles ya se han visto).
+9. ~~**Cerrar Alola, Galar y Paldea**~~ (HECHO 23-11-2026: `REG_CERRADAS` en data.js) (Diego, 23-11-2026): que salgan como «Próximamente» y no se puedan jugar. Quien ya las haya superado conserva sus trofeos.
+10. ~~**Clasificatoria y megaevoluciones bloqueadas hasta ganar Teselia**~~ (HECHO 23-11-2026: `teseliaHecha()` en data.js; la mega ya pedía el Mega-Aro, que se da al ser Campeón de Teselia) (Diego, 23-11-2026): la Clasificatoria se desbloquea al vencer a la Liga de Teselia, y a la vez se desbloquean las megaevoluciones; hasta entonces las megapiedras no salen en la Tienda.
 
 ## Ataques a melé con Gemini (Diego dijo «haz todos los que falten», 21-11-2026)
 **Hechos** (21-11-2026, `js/melee2.js` + `assets/objetos/ataques/m/`): Placaje, Puño Fuego, Puño Trueno, Puño Hielo, Puño Bala, Acua Cola, Látigo Cepa, Golpe Roca, Tijera X, Carantoña y Cabezazo (este con ChatGPT, porque Gemini llegó a su límite diario).

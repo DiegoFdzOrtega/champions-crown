@@ -81,6 +81,7 @@ tools/                scripts de ayuda (bajar_anims.ps1, gen_learnsets.py…)
 | `music.js`, `sonido2.js` | música y sonidos (compresor, reverb, estéreo con `Music.sfxAt`) |
 | `pausa2.js` | menú de pausa |
 | `incursiones.js` | **Incursiones semanales**: legendario de la semana (`INC_LEGS`, `incLeg`), pantalla `#incv`, combate en un mapa grande (usa el estadio grande de `torreestadio.js` con otra imagen, `o.incursion`), fases del jefe, captura en el mapa. Números en `INC`. Se carga la última |
+| `resultado.js` + `css/resultado.css` | **pantalla de victoria/derrota** con los paneles de Gemini (`assets/iconos/resultado/`). No cambia qué se enseña (eso lo ponen `modes.js`, `torre.js`, `campo.js`, `pvp.js`… y `victoria.js`), solo lo coloca en el panel. En la derrota añade «Le quedaban», tiempo, MVP del rival (daño apuntado envolviendo `hit`, aparte en un `WeakMap`: no toca el online) y un consejo de tipos. Va después de `incursiones.js` |
 | `carga.js` | **se carga el primero**: pide la copia `.webp` de las imágenes grandes en vez del `.png` (lista `CARGA_WEBP`, la escribe `tools/png_a_webp.py`) y **retrasa** las imágenes de ataques (`assets/fx`, `objetos/ataques`, `objetos/cargas`) hasta el primer combate (en PC, a los 5 s); si un código las mira antes, se piden al momento |
 
 ### Cómo está hecho el código (el patrón «envolver»)
@@ -129,6 +130,12 @@ WASD mover · **Espacio** carrera (esquiva) · **clic izquierdo** golpe (mantene
 **Optimización (21-11-2026):** imágenes de efectos en WebP (48 MB → 13 MB), estadios cargados solo cuando hacen falta (~7 MB menos al abrir). El código del combate ya era ligero (dibujar ~1,4 ms por fotograma en el PC de Diego, RTX 4060 Ti).
 
 **Incursiones (22-11-2026):** modo de 1 jugador contra Darkrai hecho (`js/incursiones.js`). Los legendarios y míticos ya no salen en el Gachapon (`SOLO_INCURSION`, `data.js`).
+
+**Pantalla de resultado (23-11-2026):** victoria y derrota con paneles de Gemini (`js/resultado.js`). Copia de antes en `_backups/resultado_2026-11-23/`.
+
+**Marcos del menú (23-11-2026):** `css/menumarcos.css` cambia los marcos de la tarjeta «Continuar», las 4 tarjetas de modo y la barra de abajo por los de `assets/menu/marcos/` (hoja de Gemini). Va después de `menukit.css`; quitándola vuelven los de antes.
+
+**Estadios de Sinnoh (23-11-2026):** los 13 (8 líderes, Alto Mando y Cynthia) en `assets/fondos/estadios/Sinnoh/<id>.webp`, medidos en `EST` (render.js) y con vida en `estvida.js`. `miniOn` ya incluye Sinnoh.
 
 **Pendiente:**
 - Puños a melé (Puño Fuego/Trueno/Hielo/Bala): dos diseños de prompt rechazados; Diego tiene que describir lo que quiere o mandar captura.

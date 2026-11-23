@@ -12,6 +12,7 @@
    - Aníbal: la cascada cae y brilla, y salpica.                       - Yasmina: luces de las vigas que parpadean y un reflejo que recorre el suelo de acero.
    - Fredo: nieve, cristales que brillan y frío en la puerta.          - Débora: braseros, brasas que suben y grietas de lava que laten.
    HOENN: Petra, Marcial, Erico, Candela, Norman, Alana, Vito y Leti, Galano y el Alto Mando (Sixto, Fátima, Nívea, Dracón).
+   SINNOH (23-11-2026): Roco, Gardenia, Fantina, Brega, Mananti, Acerón, Inverna, Lectro, el Alto Mando (Alecrán, Gaia, Fausto, Delos) y Cynthia.
    Todas las posiciones están medidas sobre la imagen a 1024x572. VIDA.on = false lo apaga todo; VIDA.k = intensidad general.
    ===================================================================== */
 const VIDA = {on: true, k: 1};
@@ -400,6 +401,97 @@ const VIDA_FX = {
     ctx.globalCompositeOperation = 'source-over';
     vBrillos(S, 20, [[90, 192, 935, 418], [0, 130, 60, 400], [964, 130, 1024, 400]], '#ffffff', {s: 4, per: 1.5, a: .85});
     vMotas(S, 22, [0, 0, 1024, 572], {vy: -6, sw: 12, col: ['#ffe58a', '#ffffff', '#cfe0ff'], a: .6, s: 2, tw: 1});
+  },
+  roco(S){                                                                                                  // faroles de mina que titilan y polvo de carbón
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[160, 128], [855, 128], [85, 232], [935, 232], [58, 322], [965, 322]], 40, 'rgba(255,170,60,A)', .42, 3.2);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 26, [0, 40, 1024, 560], {vy: -5, vx: 3, sw: 10, col: ['#8a8a8a', '#cfc6b8', '#5a5a5a'], a: .45, s: 2});
+  },
+  gardenia(S){                                                                                              // pétalos que caen y luz del sol
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[512, 40]], 220, 'rgba(255,250,200,A)', .08, .5);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 30, [0, 0, 1024, 560], {vy: 18, vx: 8, sw: 16, swf: 1.4, col: ['#ffb6d9', '#f7a8c8', '#c9a8ff', '#ffffff'], a: .75, s: 4, f: 'pet'});
+    vBrillos(S, 10, [[100, 170, 925, 413]], '#fff6c0', {s: 3, per: 2.2, a: .6});
+  },
+  fantina(S){                                                                                               // velas moradas que titilan, ojos de Duskull y niebla
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[212, 172], [162, 230], [115, 245], [92, 368], [72, 440], [810, 178], [860, 228], [912, 248], [930, 365], [952, 440]], 20, 'rgba(200,110,255,A)', .5, 4);
+    [[180, 150], [133, 195], [60, 325], [30, 425], [850, 150], [885, 195], [965, 325], [990, 420]].forEach((p, i) => vGlow(S, p[0], p[1], 16, 'rgba(255,40,60,A)', .15 + .25 * Math.max(0, Math.sin(S.t * 1.6 + i * 1.3))));
+    ctx.globalCompositeOperation = 'source-over';
+    vNiebla(S, 7, [100, 380, 924, 470], 'rgba(150,90,200,A)', .1);
+  },
+  brega(S){                                                                                                 // luz cálida del dojo y polvo de entrenamiento
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[512, 20]], 200, 'rgba(255,230,180,A)', .08, .6);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 24, [80, 60, 944, 520], {vy: -6, vx: 4, sw: 12, col: ['#fff1d6', '#e8d2a8'], a: .45, s: 2, tw: 1});
+  },
+  mananti(S){                                                                                               // destellos en el agua que corre y botones verdes que laten
+    ctx.globalCompositeOperation = 'lighter';
+    [[625, 148], [133, 442], [903, 442]].forEach((p, i) => vGlow(S, p[0], p[1], 22, 'rgba(90,255,120,A)', .15 + .2 * Math.max(0, Math.sin(S.t * 2 + i * 2))));
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 26, [[0, 120, 100, 440], [924, 120, 1024, 440], [100, 150, 924, 195], [60, 420, 964, 470]], '#ffffff', {s: 4, per: 1.1, a: .9});
+    vMotas(S, 14, [0, 140, 1024, 470], {vy: 0, vx: 40, sw: 3, col: ['#ffffff', '#c8f2ff'], a: .5, s: 2, seed: 7});
+  },
+  aceron(S){                                                                                                // plataformas que se encienden y un reflejo que recorre el acero
+    ctx.globalCompositeOperation = 'lighter';
+    [[145, 225], [110, 290], [70, 368], [878, 225], [912, 290], [952, 368]].forEach((p, i) => vGlow(S, p[0], p[1], 34, i === 4 ? 'rgba(255,90,90,A)' : 'rgba(255,235,120,A)', .1 + .22 * Math.max(0, Math.sin(S.t * 1.5 + i * 1.1))));
+    const u = vMod(S.t * .25, 1.6) - .3; vGlow(S, 100 + u * 825, 300, 120, 'rgba(255,255,255,A)', .1);
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 10, [[100, 195, 925, 413]], '#ffffff', {s: 3, per: 1.8, a: .7});
+  },
+  inverna(S){                                                                                               // nieve que cae y cristales de hielo que brillan
+    ctx.globalCompositeOperation = 'lighter';
+    vGlow(S, 512, 40, 110, 'rgba(160,230,255,A)', .14 + .06 * Math.sin(S.t * 1.2));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 40, [0, 0, 1024, 572], {vy: 16, vx: -4, sw: 12, col: ['#ffffff', '#e0f4ff'], a: .8, s: 3});
+    vBrillos(S, 18, [[100, 195, 925, 413], [400, 0, 620, 110]], '#ffffff', {s: 4, per: 1.5, a: .85});
+  },
+  lectro(S){                                                                                                // arcos entre las bobinas, puntas que brillan y botones verdes
+    ctx.globalCompositeOperation = 'lighter';
+    [[173, 122], [254, 122], [334, 122], [157, 152], [132, 192], [78, 284], [46, 338], [680, 122], [760, 122], [840, 122], [866, 152], [891, 192], [943, 284], [975, 338]].forEach((p, i) => vGlow(S, p[0], p[1], 16, 'rgba(255,240,90,A)', .25 + .25 * Math.max(0, Math.sin(S.t * 5 + i * 2.1))));
+    [[398, 138], [615, 138], [120, 285], [903, 285], [138, 443], [885, 443]].forEach((p, i) => vGlow(S, p[0], p[1], 22, 'rgba(90,255,120,A)', .12 + .18 * Math.max(0, Math.sin(S.t * 2 + i * 1.7))));
+    ctx.globalCompositeOperation = 'source-over';
+    vRayos(S, [170, 115, 340, 135], 2, '#9ff6ff'); vRayos(S, [675, 115, 845, 135], 2, '#9ff6ff');
+    vRayos(S, [40, 280, 85, 345], 2, '#9ff6ff'); vRayos(S, [940, 280, 985, 345], 2, '#9ff6ff');
+  },
+  alecran(S){                                                                                               // luciérnagas y hojas que caen en el bosque
+    ctx.globalCompositeOperation = 'lighter';
+    vMotas(S, 26, [0, 60, 1024, 500], {vy: -4, vx: 3, sw: 18, col: ['#ffee88', '#c8ff88'], a: .9, s: 2, tw: 1});
+    vLuces(S, [[30, 500], [185, 543], [835, 543], [988, 543]], 16, 'rgba(255,230,120,A)', .4, 2);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 12, [0, 0, 1024, 560], {vy: 14, vx: 6, sw: 14, col: ['#6aa84f', '#93c47d', '#b9883f'], a: .7, s: 4, f: 'pet', seed: 30});
+  },
+  gaia(S){                                                                                                  // cristales verdes que laten, luces rojas y arena que se levanta
+    ctx.globalCompositeOperation = 'lighter';
+    [[145, 62], [875, 62], [18, 330], [1006, 330]].forEach((p, i) => vGlow(S, p[0], p[1], 48, 'rgba(90,255,140,A)', .22 + .14 * Math.sin(S.t * 1.8 + i * 1.5)));
+    vLuces(S, [[85, 140], [52, 203], [932, 147], [970, 211]], 18, 'rgba(255,60,60,A)', .45, 2.4);
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 22, [0, 150, 1024, 470], {vy: -3, vx: 14, sw: 8, col: ['#e8c890', '#d4b078'], a: .45, s: 2});
+  },
+  fausto(S){                                                                                                // muros de fuego que titilan, brasas que suben y lava que late
+    ctx.globalCompositeOperation = 'lighter';
+    vLuces(S, [[150, 140], [270, 130], [745, 130], [870, 140], [415, 40], [600, 40], [60, 280], [960, 280], [25, 480], [1000, 480]], 70, 'rgba(255,120,30,A)', .3, 3.6);
+    [[100, 260], [920, 260], [60, 470], [960, 470], [400, 165], [620, 165]].forEach((p, i) => vGlow(S, p[0], p[1], 40, 'rgba(255,70,20,A)', .1 + .12 * Math.max(0, Math.sin(S.t * 1.3 + i * 1.7))));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 34, [0, 60, 1024, 572], {vy: -22, sw: 10, col: ['#ffb347', '#ff7a1a', '#ffe066'], a: .75, s: 2, tw: 1});
+  },
+  delos(S){                                                                                                 // esferas de luz que laten, emblemas psíquicos que brillan y motas violetas
+    ctx.globalCompositeOperation = 'lighter';
+    [[143, 165], [875, 165], [22, 352], [1002, 352]].forEach((p, i) => vGlow(S, p[0], p[1], 60, 'rgba(255,255,255,A)', .2 + .1 * Math.sin(S.t * 1.5 + i)));
+    [[418, 25], [603, 25], [60, 205], [960, 208], [283, 178], [511, 178], [741, 178], [87, 290], [930, 290], [145, 481], [878, 481]].forEach((p, i) => vGlow(S, p[0], p[1], 26, 'rgba(255,110,230,A)', .12 + .2 * Math.max(0, Math.sin(S.t * 2.2 + i * .9))));
+    ctx.globalCompositeOperation = 'source-over';
+    vMotas(S, 26, [0, 40, 1024, 560], {vy: -8, sw: 14, col: ['#e6b8ff', '#ff9ef0', '#ffffff'], a: .6, s: 2, tw: 1});
+  },
+  cintia(S){                                                                                                // pedestales con anillos de luz verde, el borde de luz turquesa y destellos
+    ctx.globalCompositeOperation = 'lighter';
+    [[147, 155], [868, 155], [42, 400], [978, 400]].forEach((p, i) => { vGlow(S, p[0], p[1], 40, 'rgba(90,255,150,A)', .2 + .12 * Math.sin(S.t * 2 + i)); vGlow(S, p[0], p[1] - 25 - 10 * vMod(S.t * .8 + i * .25, 1), 30, 'rgba(140,255,180,A)', .12); });
+    const u = vMod(S.t * .3, 1); [[85 + u * 855, 455], [940 - u * 855, 188]].forEach(p => vGlow(S, p[0], p[1], 40, 'rgba(60,240,230,A)', .25));
+    vGlow(S, 512, 55, 80, 'rgba(80,160,255,A)', .12 + .06 * Math.sin(S.t * 1.4));
+    ctx.globalCompositeOperation = 'source-over';
+    vBrillos(S, 14, [[85, 192, 940, 455]], '#ffffff', {s: 4, per: 1.6, a: .8});
   }
 };
 function estVida(E, id){

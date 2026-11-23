@@ -112,13 +112,14 @@ function shopPic(it, cls){
 // Dibuja categorías y estantes (se vuelve a llamar al cambiar de categoría, filtro u orden)
 function drawShop(){
   refreshMtShop();                                                              // todos los MTs a la venta
-  $('shTabs').innerHTML = SHOP_TABS.map(([k,n]) => {
-    const c = k === 'oferta' ? Object.keys(shopDeals()).length : SHOP.filter(it => k === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === k).length;
+  $('shTabs').innerHTML = SHOP_TABS.filter(([k]) => k !== 'mega' || teseliaHecha()).map(([k,n]) => {      // pestaña Mega: solo tras ser Campeón de Teselia
+    const c = k === 'oferta' ? Object.keys(shopDeals()).length : SHOP.filter(it => (it.cat !== 'mega' || teseliaHecha()) && (k === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === k)).length;
     const ic = k === 'ticket' ? CUR_SRC.ticket : SHOP_ICO[k] ? imgOf(SHOP_ICO[k]) : '', hot = k === 'oferta' ? ' hot' : '';
     return `<div class="sa-cat${shopSt.cat === k ? ' on' : ''}${hot}" data-c="${k}" tabindex="0">${ic ? `<img src="${ic}" alt="" onerror="this.style.visibility='hidden'">` : '<i class="ph"></i>'}<span>${n.replace('⚡ ', '')}</span><small>${c}</small></div>`; }).join('');
   const mtTab = shopSt.cat === 'mt', qn = shopSt.q.trim().toLowerCase();
   document.querySelectorAll('.sa-filt .mtf').forEach(l => l.style.display = mtTab ? '' : 'none');          // Hueco y Tipo solo en la pestaña MTs
-  let list = SHOP.filter(it => (shopSt.cat === 'oferta' ? shopPct(it) > 0 : shopSt.cat === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === shopSt.cat)
+  if(shopSt.cat === 'mega' && !teseliaHecha()) shopSt.cat = 'todo';
+  let list = SHOP.filter(it => (it.cat !== 'mega' || teseliaHecha()) && (shopSt.cat === 'oferta' ? shopPct(it) > 0 : shopSt.cat === 'todo' ? it.cat !== 'canje' && it.cat !== 'mt' : it.cat === shopSt.cat)
     && (!qn || it.n.toLowerCase().includes(qn))
     && (!mtTab || ((!shopSt.slot || MOVES[it.mv].s === +shopSt.slot) && (!shopSt.type || MOVES[it.mv].t === shopSt.type))));
   if(shopSt.sort === 'pa') list.sort((a,b) => shopPrice(a) - shopPrice(b)); else if(shopSt.sort === 'pd') list.sort((a,b) => shopPrice(b) - shopPrice(a));
