@@ -314,9 +314,13 @@ function renderCampoHero(){
   box.querySelector('h2').textContent = T.name; const tb = box.querySelector('.tb'); tb.textContent = T.cls; tb.style.background = col;
   box.querySelector('.th').textContent = T.theme;
   const mini = $('cpHM'); mini.title = 'Los Pokémon del entrenador (al pasar el ratón, su objeto)';
-  T.team.forEach(sl => { const m = mon(sl.dex), c = document.createElement('canvas'); c.width = c.height = 64; c.title = `${m.name} · ${ITEMS[sl.item].n}`; mini.appendChild(c); dexThumbs.push({c, m}); });
+  const cara = (m, tit) => { const s = document.createElement('span'); s.className = 'htmi'; s.title = tit;   // la cara del Pokémon (caras/Normal.png); si no tiene, su sprite
+    const im = new Image(); im.alt = ''; im.src = `${CARPETA}/${m.baseDex || m.dex}/caras/Normal.png`;
+    im.onerror = () => { im.remove(); const c = document.createElement('canvas'); c.width = c.height = 64; s.appendChild(c); dexThumbs.push({c, m}); };
+    s.appendChild(im); return s; };
+  T.team.forEach(sl => { const m = mon(sl.dex); if(m) mini.appendChild(cara(m, `${m.name} · ${ITEMS[sl.item].n}`)); });
   Object.entries(rewardOf({kind:'campo', tier:T.tier})).forEach(([id, n]) => { const c = document.createElement('span'); c.className = 'rwm'; c.title = REWARD_NAMES[id]; c.appendChild(rwIcon(id, (RW_LOOK[id] || {}).c || '#ffcc33')); c.append('×' + n); $('cpRw').appendChild(c); });
-  const tm = $('cpTM'); team.forEach(d => { const m = mon(d); if(!m) return; const c = document.createElement('canvas'); c.width = c.height = 64; c.title = m.name; tm.appendChild(c); dexThumbs.push({c, m}); });
+  const tm = $('cpTM'); team.forEach(d => { const m = mon(d); if(m) tm.appendChild(cara(m, m.name)); });
   if(!team.length) tm.innerHTML = '<span class="hte">Sin equipo todavía</span>';
   const go = $('cpGo'); go.disabled = !ready || !open; go.onclick = () => campoFight(T.id);
   $('cmpWarn').textContent = ready ? '' : `Elige ${TEAM_SIZE} Pokémon en EQUIPO POKÉMON para poder combatir.`;

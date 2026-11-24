@@ -1,0 +1,46 @@
+/* =====================================================================
+   CAMPO DE ENTRENAMIENTO con el arte de Gemini (23-11-2026) — imágenes en assets/iconos/campo/
+     campo_fondo.webp ............ fondo de la pantalla (campo con la Poké Ball y los banderines)
+     carta / carta_sel / carta_ok  tarjeta de entrenador: normal · elegida · vencido (391×514)
+     tab / tab_on / tab_lock ..... pestañas de dificultad y marco del panel de la izquierda
+   Solo cambia el aspecto (js/campo.js no se toca). Quitando esta hoja de index.html vuelve el de antes.
+   ===================================================================== */
+#panel:has(.cp2){background:url('../assets/iconos/campo/campo_fondo.webp?v=2') center/cover no-repeat}
+.cp2-top h1,.cp2-sub{text-shadow:0 2px 4px #000,0 0 10px #000c}
+.cp2-sub{color:#fff;font-size:10px}
+
+/* pestañas de dificultad */
+.cp2-tab{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;opacity:1!important;
+  border-image:url('../assets/iconos/campo/tab.webp?v=1') 46 50 fill / 18px 20px stretch!important;padding:14px 38px 14px!important}
+.cp2-tab.on{border-image-source:url('../assets/iconos/campo/tab_on.webp?v=1')!important}
+.cp2-tab.lock{border-image-source:url('../assets/iconos/campo/tab_lock.webp?v=1')!important}
+.cp2-tab.lock b,.cp2-tab.lock small{opacity:.6}
+
+/* panel de la izquierda: el mismo marco liso */
+.cp2-hero{border:0!important;border-radius:0!important;box-shadow:none!important;background:none!important;
+  border-image:url('../assets/iconos/campo/tab.webp?v=1') 46 50 fill / 20px 22px stretch!important;padding:26px 32px!important}
+
+/* tarjetas de entrenador: el retrato arriba y el nombre en la franja de abajo */
+.cp2-grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))!important;align-content:start}
+.cp2-t{aspect-ratio:391/514;height:auto!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:url('../assets/iconos/campo/carta.webp?v=1') center/100% 100% no-repeat!important;display:block!important}
+.cp2-t.sel{background-image:url('../assets/iconos/campo/carta_sel.webp?v=1')!important}
+.cp2-t.done{background-image:url('../assets/iconos/campo/carta_ok.webp?v=1')!important}
+.cp2-t.done.sel{background-image:url('../assets/iconos/campo/carta_sel.webp?v=1')!important}
+.cp2-t:hover{transform:translateY(-3px);filter:brightness(1.12)}
+.cp2-t .im{position:absolute;left:12%;right:12%;top:9%;height:63%;width:auto!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+.cp2-t .im img{width:86%!important;height:86%!important}
+.cp2-t b{position:absolute;left:8%;right:8%;top:78.5%;height:14%;display:flex!important;align-items:center;justify-content:center;text-align:center;font-size:9px!important;line-height:1.1;color:#fff}
+.cp2-t .tg{display:none!important}                                     /* repetía el nombre */
+.cp2-t .md{top:4%!important;right:6%!important}
+.cp2-t .nx{top:-6px!important}
+
+/* «Tu equipo»: 6 casillas iguales que caben siempre, con la cara de cada Pokémon */
+.cp2-hero .hteam{box-sizing:border-box;width:100%}
+.cp2-hero .htm{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cp2-hero .htmi{aspect-ratio:1;display:grid;place-items:center;border-radius:10px;background:#0a1226;border:2px solid #24365e;overflow:hidden;box-sizing:border-box}
+.cp2-hero .htmi img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.cp2-hero .htmi canvas{width:100%!important;height:100%!important;border:0!important;background:none!important}
+.cp2-hero .hteam .cp-team{box-sizing:border-box}
+.cp2-hero .hmini{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.cp2-hero .hmini .htmi{border-color:#5a2a3a}
